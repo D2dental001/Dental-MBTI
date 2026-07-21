@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>덴탈 케어 포털 · 프로토타입</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-init.js"></script>
+<style>
+  :root{
+    --bg: #f6fbfb;
+    --surface: #ffffff;
+    --ink: #17343b;
+    --ink-soft: #5c747c;
+    --teal: #2f97aa;
+    --teal-light: #75c9d7;
+    --teal-pale: #e9f8fb;
+    --blue-pale: #eef7ff;
+    --blush: #ffe3d1;
+    --line: #d9eaef;
+    --shadow: 0 24px 60px rgba(23, 76, 90, 0.14);
+    --radius-xl: 28px;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; height:100%; }
+  body{
+    font-family: "Noto Sans KR", -apple-system, "Apple SD Gothic Neo", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .display{ font-family:"Fraunces", "Noto Sans KR", serif; }
+
+  /* ---------- Ambient dental motif backdrop ---------- */
+  .backdrop{
+    position: fixed; inset:0; z-index:0; overflow:hidden;
+    background:
+      radial-gradient(circle at 14% 18%, rgba(117,201,215,0.20), transparent 40%),
+      radial-gradient(circle at 88% 12%, rgba(255,227,209,0.35), transparent 38%),
+      radial-gradient(circle at 80% 88%, rgba(47,151,170,0.10), transparent 45%),
+      linear-gradient(180deg, #fbfeff 0%, var(--bg) 100%);
+  }
+  .molar{
+    position:absolute; opacity:0.5; filter: drop-shadow(0 10px 24px rgba(47,151,170,0.08));
+    animation: drift 22s ease-in-out infinite;
+  }
+  .molar svg{ width:100%; height:100%; display:block; }
+  .m1{ width:220px; top:8%; left:-40px; animation-delay:0s; }
+  .m2{ width:150px; top:62%; left:4%; animation-delay:-6s; opacity:0.35;}
+  .m3{ width:260px; top:-30px; right:-60px; animation-delay:-3s; }
+  .m4{ width:170px; bottom:6%; right:8%; animation-delay:-10s; opacity:0.4;}
+  .m5{ width:120px; top:38%; right:26%; animation-delay:-14s; opacity:0.3; }
+  @keyframes drift{
+    0%,100%{ transform: translateY(0) rotate(0deg); }
+    50%{ transform: translateY(-18px) rotate(6deg); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .molar{ animation:none; }
+  }
+
+  /* ---------- Stage ---------- */
+  .stage{
+    position:relative; z-index:1;
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding: 32px 20px;
+  }
+
+  .card{
+    width:100%; max-width:440px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(14px);
+    border:1px solid var(--line);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    padding: 40px 36px 32px;
+    transition: transform .5s cubic-bezier(.22,.68,0,1.01), opacity .4s ease;
+  }
+
+  .brand-row{
+    display:flex; align-items:center; gap:14px; margin-bottom: 26px;
+  }
+  .brand-mark{
+    width:52px; height:52px; border-radius:13px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .brand-mark img{ width:100%; height:100%; object-fit:contain; }
+  .brand-name{ font-size:12px; letter-spacing:0.08em; color: var(--ink-soft); text-transform:uppercase; }
+  .brand-name b{
+    display:block; font-size:18px; letter-spacing:-0.01em; font-weight:800; margin-top:2px;
+  }
+  .brand-name b .w-dental{ color:#1c5f8a; }
+  .brand-name b .w-mbti{ color:var(--teal); }
+
+  .eyebrow{ font-size:12.5px; color:var(--teal); font-weight:600; letter-spacing:0.04em; margin-bottom:8px; }
+  h1.title{
+    font-size: 27px; font-weight:600; line-height:1.32; margin:0 0 10px;
+    color: var(--ink);
+  }
+  .subtitle{ font-size:14px; color:var(--ink-soft); line-height:1.6; margin:0 0 26px; }
+
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
+  .field input{
+    width:100%; padding:13px 14px; border-radius: var(--radius-md);
+    border:1.5px solid var(--line); background: #fbfeff;
+    font-size:14.5px; color:var(--ink); font-family:inherit;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .field input:focus{
+    outline:none; border-color: var(--teal); box-shadow: 0 0 0 4px rgba(47,151,170,0.12);
+  }
+
+  .btn{
+    width:100%; padding:14px; border:none; border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--teal), #268297);
+    color:#fff; font-size:15px; font-weight:700; letter-spacing:0.01em;
+    cursor:pointer; margin-top:8px;
+    transition: transform .15s ease, box-shadow .15s ease;
+    box-shadow: 0 12px 24px rgba(47,151,170,0.28);
+  }
+  .btn:hover{ transform: translateY(-1px); box-shadow: 0 16px 30px rgba(47,151,170,0.34); }
+  .btn:active{ transform: translateY(0); }
+  .btn.ghost{
+    background: transparent; color: var(--teal); box-shadow:none;
+    border:1.5px solid var(--line);
+  }
+  .btn.ghost:hover{ background: var(--teal-pale); }
+
+  .error-msg{
+    display:none; font-size:12.5px; color:#c1462f; background:#fdf0ec;
+    border:1px solid #f4cec2; padding:9px 12px; border-radius:10px; margin-top:12px;
+  }
+  .error-msg.show{ display:block; }
+
+  .hint-box{
+    margin-top:20px; padding:12px 14px; border-radius: var(--radius-md);
+    background: var(--blue-pale); border:1px dashed #b9d7ee;
+    font-size:12px; color:var(--ink-soft); line-height:1.6;
+  }
+  .hint-box b{ color:var(--ink); }
+
+  .footnote{ text-align:center; font-size:11.5px; color: #93a7ac; margin-top:22px; }
+
+  /* ---------- Menu page ---------- */
+  .card.menu{ max-width: 560px; }
+  .menu-top{
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:22px;
+  }
+  .clinic-chip{
+    display:flex; align-items:center; gap:10px;
+    background: var(--teal-pale); border:1px solid #cdeaf0;
+    padding:8px 14px 8px 8px; border-radius: 999px;
+  }
+  .clinic-chip .dot{ width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,var(--teal),var(--teal-light)); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px; }
+  .clinic-chip span{ font-size:12.5px; color:var(--ink); font-weight:600; }
+  .clinic-chip small{ display:block; font-size:10.5px; color:var(--ink-soft); font-weight:500; }
+  .logout-link{ font-size:12.5px; color:var(--ink-soft); cursor:pointer; border:none; background:none; text-decoration:underline; font-family:inherit; }
+  .logout-link:hover{ color:var(--teal); }
+
+  .menu-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:6px; }
+  .menu-grid-3{ grid-template-columns:1fr 1fr 1fr; }
+  @media (max-width:480px){ .menu-grid{ grid-template-columns:1fr; } }
+  @media (max-width:640px){ .menu-grid-3{ grid-template-columns:1fr 1fr; } }
+
+  .edit-row{
+    border:1px solid var(--line); border-radius:14px; background:#fbfeff; padding:12px 14px;
+  }
+  .edit-row .edit-row-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; }
+  .edit-row .edit-row-head span{ font-size:13px; font-weight:700; }
+  .edit-row .edit-row-head small{ display:block; font-size:11px; color:var(--ink-soft); font-weight:500; margin-top:2px; }
+  .edit-row .edit-row-toggle{ font-size:12px; color:var(--teal); font-weight:700; flex-shrink:0; }
+  .edit-row-body{ display:none; margin-top:12px; }
+  .edit-row-body.open{ display:block; }
+  .edit-row-body textarea{
+    width:100%; min-height:90px; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line);
+    font-family:inherit; font-size:12.5px; line-height:1.6; resize:vertical;
+  }
+  .edit-row-body .save-row-btn{
+    margin-top:8px; padding:8px 14px; border:none; border-radius:9px; background:var(--teal); color:#fff;
+    font-size:12px; font-weight:700; cursor:pointer;
+  }
+  .menu-tile{
+    display:block; text-decoration:none; color:inherit;
+    border:1.5px solid var(--line); border-radius: var(--radius-lg);
+    padding:22px 18px; background: #fff;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .menu-tile:hover{ transform: translateY(-3px); box-shadow: 0 16px 30px rgba(47,151,170,0.18); border-color: var(--teal-light); }
+  .menu-tile .icon{ width:38px; height:38px; margin-bottom:14px; }
+  .menu-tile h3{ font-size:15.5px; margin:0 0 6px; font-weight:700; }
+  .menu-tile p{ font-size:12px; color:var(--ink-soft); margin:0; line-height:1.55; }
+  .menu-tile .arrow{ margin-top:14px; font-size:12px; color:var(--teal); font-weight:700; }
+
+  .admin-link{
+    margin-top:18px; text-align:center;
+  }
+  .admin-link button{
+    background:none; border:none; font-family:inherit; font-size:12px;
+    color: var(--ink-soft); cursor:pointer; text-decoration:underline;
+  }
+  .admin-link button:hover{ color: var(--teal); }
+
+  /* ---------- Admin mock panel ---------- */
+  .card.admin{ max-width:560px; text-align:left; }
+  .admin-list{ margin-top:18px; display:flex; flex-direction:column; gap:10px; }
+  .acct-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 14px; border:1px solid var(--line); border-radius:14px; background:#fbfeff;
+  }
+  .acct-row .who{ font-size:13px; font-weight:600; }
+  .acct-row .who small{ display:block; font-size:11px; color:var(--ink-soft); font-weight:500; margin-top:2px; }
+  .toggle{
+    position:relative; width:42px; height:24px; border-radius:999px; background:#d9e3e6;
+    cursor:pointer; border:none; flex-shrink:0; transition: background .2s ease;
+  }
+  .toggle::after{
+    content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%;
+    background:#fff; transition: transform .2s ease; box-shadow:0 1px 3px rgba(0,0,0,0.25);
+  }
+  .toggle.on{ background: var(--teal); }
+  .toggle.on::after{ transform: translateX(18px); }
+  .acct-status{ font-size:10.5px; font-weight:700; letter-spacing:0.02em; margin-right:10px; }
+  .acct-status.active{ color:#1c8a4c; }
+  .acct-status.blocked{ color:#c1462f; }
+  .add-acct{ display:flex; gap:8px; margin-top:16px; }
+  .add-acct input{ flex:1; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line); font-size:13px; font-family:inherit; }
+  .add-acct button{ padding:0 16px; border-radius:10px; border:none; background:var(--teal); color:#fff; font-weight:700; font-size:12.5px; cursor:pointer; }
+
+  .iplog-btn{
+    font-size:11px; color:var(--teal); background:none; border:1px solid var(--line);
+    border-radius:8px; padding:5px 9px; cursor:pointer; font-family:inherit; margin-left:8px;
+  }
+  .iplog-btn:hover{ background:var(--teal-pale); }
+  .iplog-panel{ display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); }
+  .iplog-panel.open{ display:block; }
+  .iplog-row{
+    display:flex; justify-content:space-between; gap:10px; font-size:11.5px; color:var(--ink-soft);
+    padding:5px 0;
+  }
+  .iplog-row b{ color:var(--ink); font-weight:700; }
+  .iplog-empty{ font-size:12px; color:var(--ink-soft); padding:4px 0; }
+
+  /* ---------- view switching ---------- */
+  .view{ display:none; }
+  .view.active{ display:block; animation: fadein .45s ease; }
+  @keyframes fadein{ from{ opacity:0; transform: translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+
+  .badge-note{
+    position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:5;
+    background: rgba(23,52,59,0.88); color:#fff; font-size:11.5px; padding:6px 14px;
+    border-radius:999px; letter-spacing:0.02em;
+  }
+</style>
+</head>
+<body>
+
+<div class="backdrop">
+  <div class="molar m1">
+    <svg viewBox="0 0 100 100"><path d="M50 6C28 6 16 20 16 38c0 12 5 16 5 30 0 10 6 20 12 20 8 0 8-16 17-16s9 16 17 16c6 0 12-10 12-20 0-14 5-18 5-30C84 20 72 6 50 6z" fill="#2f97aa" opacity="0.14"/></svg>
+  </div>
+  <div class="molar m2"><svg viewBox="0 0 100 100"><path d="M50 6C28 6 16 20 16 38c0 12 5 16 5 30 0 10 6 20 12 20 8 0 8-16 17-16s9 16 17 16c6 0 12-10 12-20 0-14 5-18 5-30C84 20 72 6 50 6z" fill="#75c9d7" opacity="0.22"/></svg></div>
+  <div class="molar m3"><svg viewBox="0 0 100 100"><path d="M50 6C28 6 16 20 16 38c0 12 5 16 5 30 0 10 6 20 12 20 8 0 8-16 17-16s9 16 17 16c6 0 12-10 12-20 0-14 5-18 5-30C84 20 72 6 50 6z" fill="#ffb08a" opacity="0.16"/></svg></div>
+  <div class="molar m4"><svg viewBox="0 0 100 100"><path d="M50 6C28 6 16 20 16 38c0 12 5 16 5 30 0 10 6 20 12 20 8 0 8-16 17-16s9 16 17 16c6 0 12-10 12-20 0-14 5-18 5-30C84 20 72 6 50 6z" fill="#2f97aa" opacity="0.12"/></svg></div>
+  <div class="molar m5"><svg viewBox="0 0 100 100"><path d="M50 6C28 6 16 20 16 38c0 12 5 16 5 30 0 10 6 20 12 20 8 0 8-16 17-16s9 16 17 16c6 0 12-10 12-20 0-14 5-18 5-30C84 20 72 6 50 6z" fill="#75c9d7" opacity="0.18"/></svg></div>
+</div>
+
+<div class="stage">
+
+  <!-- ============ VIEW 1: LOGIN ============ -->
+  <div class="view active" id="view-login">
+    <div class="card" id="login-card">
+      <div class="brand-row">
+        <div class="brand-mark">
+          <img src="logo-icon.png" alt="DENTAL MBTI 로고" />
+        </div>
+        <div class="brand-name">PATIENT INSIGHT SYSTEM<b><span class="w-dental">DENTAL</span> <span class="w-mbti">MBTI</span></b></div>
+      </div>
+
+      <h1 class="title display">환자의 마음을 읽어주는<br/>DENTAL MBTI</h1>
+      <p class="subtitle">관리자가 발급한 계정으로만 접속할 수 있습니다.<br/>아이디와 비밀번호를 입력해 주세요.</p>
+
+      <div class="field">
+        <label for="login-id">아이디 (이메일)</label>
+        <input id="login-id" type="text" placeholder="clinic@example.com" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label for="login-pw">비밀번호</label>
+        <input id="login-pw" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+
+      <button class="btn" onclick="tryLogin()">로그인</button>
+      <div class="error-msg" id="login-error"></div>
+
+      <div class="hint-box">
+        관리자가 Supabase에서 발급한 이메일과 비밀번호로만 접속할 수 있습니다.<br/>
+        비활성화된 계정이거나 다른 PC에서 이미 로그인 중인 계정은 자동으로 접속이 차단됩니다.
+      </div>
+      <div class="footnote">© DENTAL MBTI · 환자 상담 코칭 시스템</div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW 2: MENU ============ -->
+  <div class="view" id="view-menu">
+    <div class="card menu">
+      <div class="menu-top">
+        <div class="clinic-chip">
+          <div class="dot">치</div>
+          <div><span id="menu-clinic-name">스마일허브 치과</span><small>정상 이용 중 · 세션 1개</small></div>
+        </div>
+        <button class="logout-link" onclick="doLogout()">로그아웃</button>
+      </div>
+
+      <div class="eyebrow">메뉴 선택</div>
+      <h1 class="title display" style="font-size:22px;">오늘은 어떤 작업을<br/>진행할까요?</h1>
+
+      <div class="menu-grid menu-grid-3">
+        <a class="menu-tile" href="치과환자문진표_분석상담코칭시스템.html" target="_blank">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="#e9f8fb"/><path d="M24 14a6 6 0 016 6c0 3-2 4-2 7.5 0 2-1.4 4.5-2.8 4.5-1.8 0-1.8-3.6-3.9-3.6S19.5 32 17.7 32c-1.4 0-2.7-2.5-2.7-4.5 0-3.5-2-4.5-2-7.5a6 6 0 016-6" stroke="#2f97aa" stroke-width="1.8"/></svg></div>
+          <h3>덴탈 MBTI 검사</h3>
+          <p>환자 성향을 분석해 상담 코칭 스크립트까지 자동 제안합니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+        <a class="menu-tile" href="문진표출력.html" target="_blank">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="10" y="8" width="28" height="32" rx="4" fill="#eef7ff"/><path d="M16 16h16M16 22h16M16 28h10" stroke="#2f97aa" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>문진표 작성 · 출력</h3>
+          <p>치과명·로고를 반영한 환자용 문진표를 작성하고 바로 출력합니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+        <a class="menu-tile" href="javascript:void(0)" onclick="showView('view-brand'); loadBrandingIntoForm();">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="8" y="14" width="32" height="22" rx="5" fill="#fff2ea"/><circle cx="24" cy="25" r="6" stroke="#e07a45" stroke-width="1.8"/><path d="M18 14l2-4h8l2 4" stroke="#e07a45" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>치과 브랜드 설정</h3>
+          <p>치과명과 로고를 등록하면 문진표·분석 출력물에 자동 반영됩니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: CLINIC BRAND SETTINGS ============ -->
+  <div class="view" id="view-brand">
+    <div class="card admin">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">치과 계정 · 브랜드 설정</div>
+        <button class="logout-link" onclick="showView('view-menu')">← 메뉴로</button>
+      </div>
+      <h1 class="title display" style="font-size:21px; margin-top:10px;">치과명 · 로고 등록</h1>
+      <p class="subtitle" style="margin-bottom:6px;">여기서 저장한 치과명과 로고는 <b>덴탈 MBTI 분석 결과</b>와 <b>문진표 작성·출력</b> 두 화면 및 인쇄물에 자동으로 반영됩니다. 두 화면에는 더 이상 별도의 이름·로고 입력란이 없습니다.</p>
+
+      <div class="field" style="margin-top:18px;">
+        <label for="brandNameInput">치과명</label>
+        <input id="brandNameInput" type="text" placeholder="예: 스마일허브 치과" />
+      </div>
+      <div class="field">
+        <label for="brandLogoInput">로고 이미지</label>
+        <input id="brandLogoInput" type="file" accept="image/*" style="padding:9px 10px;" />
+      </div>
+
+      <div style="display:flex; align-items:center; gap:12px; margin:16px 0 6px; padding:12px 14px; border:1px dashed var(--line); border-radius:14px; background:#fbfeff;">
+        <div id="brandPreviewLogo" style="width:46px;height:46px;border-radius:12px;background:var(--teal-pale);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+          <span id="brandPreviewFallback" style="font-size:22px;">🦷</span>
+          <img id="brandPreviewImg" style="width:100%;height:100%;object-fit:contain;display:none;" />
+        </div>
+        <div style="font-size:13px; font-weight:700;" id="brandPreviewName">치과명을 입력해 주세요</div>
+      </div>
+
+      <button class="btn" onclick="saveBranding()">저장하기</button>
+      <div class="error-msg" id="brand-saved-msg" style="background:#eefdf7;border-color:#bfe9d3;color:#1c8a4c;">저장되었습니다. 문진표·분석 화면을 열면 바로 반영됩니다.</div>
+      <div class="footnote" style="margin-top:16px;">저장하신 치과명·로고는 서버(Supabase)에 저장되어, 어떤 기기·브라우저에서 접속해도 동일하게 적용됩니다.</div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: ADMIN ROOT MENU ============ -->
+  <div class="view" id="view-admin-menu">
+    <div class="card menu">
+      <div class="menu-top">
+        <div class="clinic-chip">
+          <div class="dot" style="background:linear-gradient(135deg,#5c6b73,#8fa1a8);">관</div>
+          <div><span>시스템 관리자</span><small>admin@portal.com</small></div>
+        </div>
+        <button class="logout-link" onclick="doLogout()">로그아웃</button>
+      </div>
+
+      <div class="eyebrow">관리자 메뉴</div>
+      <h1 class="title display" style="font-size:22px;">거래처와 콘텐츠를<br/>관리합니다</h1>
+
+      <div class="menu-grid">
+        <a class="menu-tile" href="javascript:void(0)" onclick="showView('view-admin'); loadAccountsList();">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><circle cx="18" cy="18" r="7" fill="#e9f8fb"/><path d="M6 40c0-8 6-13 12-13s12 5 12 13" stroke="#2f97aa" stroke-width="1.8"/><circle cx="34" cy="16" r="5" fill="#eef7ff"/><path d="M28 40c0-6 3-10 8-11" stroke="#2f97aa" stroke-width="1.8"/></svg></div>
+          <h3>거래처 계정 관리</h3>
+          <p>치과 계정을 발급하고 사용 허가·차단을 설정합니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+        <a class="menu-tile" href="javascript:void(0)" onclick="showView('view-admin-editor')">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="10" y="8" width="28" height="32" rx="4" fill="#eef7ff"/><path d="M16 16h16M16 22h16M16 28h10" stroke="#2f97aa" stroke-width="1.8" stroke-linecap="round"/><path d="M30 30l6 6-2 2-6-6z" fill="#2f97aa"/></svg></div>
+          <h3>문진표 · 분석결과 수정</h3>
+          <p>문진표 질문과 성향 유형별 분석·상담 스크립트를 수정합니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: ADMIN ACCOUNTS (existing mock) ============ -->
+  <div class="view" id="view-admin">
+    <div class="card admin">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">관리자 전용 · 계정 관리</div>
+        <button class="logout-link" onclick="showView('view-admin-menu')">← 관리자 메뉴로</button>
+      </div>
+      <h1 class="title display" style="font-size:21px; margin-top:10px;">거래처 계정 사용 허가</h1>
+      <p class="subtitle" style="margin-bottom:6px;">토글로 계정을 즉시 활성/비활성 전환합니다. 계정을 비활성화하면 해당 계정은 다음 확인 주기(최대 20초) 안에 자동 로그아웃됩니다. 각 계정의 "IP 이력"을 눌러 최근 접속 기록을 확인할 수 있습니다.</p>
+
+      <div class="admin-list" id="admin-list"></div>
+
+      <div class="hint-box" style="margin-top:16px;">
+        <b>새 거래처 계정 발급</b>은 이 화면이 아니라 <b>Supabase 관리자 페이지</b>에서 진행합니다 (아이디만 아는 사람 아무나 계정을 만들 수 없도록, 계정 발급 권한을 완전히 분리한 것입니다).<br/>
+        Supabase 프로젝트 → Authentication → Users → "Add user"에서 이메일과 임시 비밀번호를 입력하면, 이 목록에 자동으로 나타납니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: ADMIN CONTENT EDITOR ============ -->
+  <div class="view" id="view-admin-editor">
+    <div class="card admin" style="max-width:640px;">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">관리자 전용 · 문진표 / 분석결과 수정 (개념 미리보기)</div>
+        <button class="logout-link" onclick="showView('view-admin-menu')">← 관리자 메뉴로</button>
+      </div>
+      <h1 class="title display" style="font-size:21px; margin-top:10px;">콘텐츠 관리</h1>
+      <p class="subtitle" style="margin-bottom:4px;">여기서 수정하면 모든 치과 계정의 덴탈 MBTI 화면에 동일하게 반영됩니다. (지금은 UI 개념 미리보기이며, 실서비스에서는 저장 시 서버의 문항·분석결과 데이터가 즉시 갱신됩니다.)</p>
+
+      <div style="display:flex; gap:8px; margin:16px 0 10px;">
+        <button class="btn ghost" style="width:auto; flex:1; padding:10px;" id="tabQuestionsBtn" onclick="switchEditorTab('questions')">문진표 질문 (10)</button>
+        <button class="btn ghost" style="width:auto; flex:1; padding:10px;" id="tabTypesBtn" onclick="switchEditorTab('types')">분석 유형 (8)</button>
+      </div>
+
+      <div id="editorQuestions" class="admin-list"></div>
+      <div id="editorTypes" class="admin-list" style="display:none;"></div>
+
+      <div class="error-msg" id="editor-saved-msg" style="background:#eefdf7;border-color:#bfe9d3;color:#1c8a4c;">저장되었습니다.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentRole = null;
+  let guardTimer = null;
+
+  function showView(id){
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  async function tryLogin(){
+    const id = document.getElementById('login-id').value.trim();
+    const pw = document.getElementById('login-pw').value;
+    const err = document.getElementById('login-error');
+    err.classList.remove('show');
+
+    const { error: signInError } = await sb.auth.signInWithPassword({ email: id, password: pw });
+    if (signInError) {
+      err.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
+      err.classList.add('show');
+      return;
+    }
+
+    const profile = await sbGetMyProfile();
+    if (!profile) {
+      err.textContent = "계정 정보를 찾을 수 없습니다. 관리자에게 문의해 주세요.";
+      err.classList.add('show');
+      await sb.auth.signOut();
+      return;
+    }
+    if (!profile.is_active) {
+      err.textContent = "이 계정은 현재 사용이 정지되어 있습니다. 관리자에게 문의해 주세요.";
+      err.classList.add('show');
+      await sb.auth.signOut();
+      return;
+    }
+
+    await sbClaimSession(profile.id);
+    sbLogLoginIp(profile.id);
+    currentRole = profile.role;
+    guardTimer = sbStartGuard('index.html');
+
+    if (profile.role === 'admin') {
+      showView('view-admin-menu');
+    } else {
+      refreshClinicChip(profile);
+      showView('view-menu');
+    }
+  }
+
+  async function doLogout(){
+    if (guardTimer) clearInterval(guardTimer);
+    await sb.auth.signOut();
+    sessionStorage.removeItem('sb_session_id');
+    document.getElementById('login-id').value = "";
+    document.getElementById('login-pw').value = "";
+    currentRole = null;
+    showView('view-login');
+  }
+
+  // If a session already exists (page refresh), resume it automatically instead of forcing re-login
+  async function resumeSessionIfAny(){
+    const profile = await sbGetMyProfile();
+    if (!profile || !profile.is_active) return;
+    // Only resume automatically if this tab already claimed a session (avoids silently
+    // logging back in a browser that still has an old Supabase token after logout elsewhere)
+    if (!sessionStorage.getItem('sb_session_id')) return;
+    currentRole = profile.role;
+    guardTimer = sbStartGuard('index.html');
+    if (profile.role === 'admin') {
+      showView('view-admin-menu');
+    } else {
+      refreshClinicChip(profile);
+      showView('view-menu');
+    }
+  }
+
+  // allow Enter key to submit login
+  document.addEventListener('DOMContentLoaded', () => {
+    ['login-id','login-pw'].forEach(id=>{
+      document.getElementById(id).addEventListener('keydown', e=>{
+        if(e.key === 'Enter') tryLogin();
+      });
+    });
+    wireBrandForm();
+    resumeSessionIfAny();
+  });
+
+  // ---- clinic brand settings (stored in Supabase `accounts` table: clinic_name, logo_url) ----
+  let pendingLogoData = null;
+
+  function refreshClinicChip(profile){
+    document.getElementById('menu-clinic-name').textContent = (profile && profile.clinic_name) || '치과명 미설정';
+  }
+
+  async function loadBrandingIntoForm(){
+    const profile = await sbGetMyProfile();
+    if (!profile) return;
+    document.getElementById('brandNameInput').value = profile.clinic_name || '';
+    updateBrandPreview(profile.clinic_name, profile.logo_url);
+  }
+
+  function wireBrandForm(){
+    document.getElementById('brandLogoInput').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if(!file){ pendingLogoData = null; return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingLogoData = reader.result;
+        updateBrandPreview(document.getElementById('brandNameInput').value, pendingLogoData);
+      };
+      reader.readAsDataURL(file);
+    });
+    document.getElementById('brandNameInput').addEventListener('input', (e) => {
+      updateBrandPreview(e.target.value, pendingLogoData);
+    });
+  }
+
+  function updateBrandPreview(name, logo){
+    document.getElementById('brandPreviewName').textContent = name && name.trim() ? name.trim() : '치과명을 입력해 주세요';
+    const img = document.getElementById('brandPreviewImg');
+    const fallback = document.getElementById('brandPreviewFallback');
+    if(logo){
+      img.src = logo; img.style.display = 'block'; fallback.style.display = 'none';
+    } else {
+      img.style.display = 'none'; fallback.style.display = 'block';
+    }
+  }
+
+  async function saveBranding(){
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    const name = document.getElementById('brandNameInput').value.trim() || 'OO치과';
+    const update = { clinic_name: name };
+    if (pendingLogoData !== null) update.logo_url = pendingLogoData;
+    const { error } = await sb.from('accounts').update(update).eq('id', user.id);
+    if (error) { alert('저장 중 오류가 발생했습니다: ' + error.message); return; }
+    refreshClinicChip({ clinic_name: name });
+    const msg = document.getElementById('brand-saved-msg');
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 2800);
+  }
+
+  // ---- admin content editor (session-only mock) ----
+  const editorQuestions = [
+    { id:'Q1', title:'Q1 [내원 목적]', body:'1) 특정 치아가 아프거나 시림\n2) 전체적인 구강 검진 및 스케일링\n3) 음식을 씹는 데 불편함이 있음\n4) 치아 색상, 모양, 벌어짐 등 보이는 부분이 신경 쓰임' },
+    { id:'Q2', title:'Q2 [과거 경험]', body:'1) 치료 시 발생했던 통증이나 마취에 대한 두려움\n2) 치료 비용에 대한 부담이나 설명 부족\n3) 잦은 내원과 긴 대기시간\n4) 치료 후 모양이나 색상 등 결과에 대한 불만족' },
+    { id:'Q3', title:'Q3 [가치관]', body:'1) 되도록 적은 비용으로 경제적인 치료\n2) 아프지 않고 편안한 무통 치료\n3) 내원 횟수를 최소화하는 빠른 치료 진행\n4) 치료한 티가 나지 않는 자연스럽고 예쁜 결과' },
+    { id:'Q4', title:'Q4 [치료 일정]', body:'1) 1~3개월 이내에 일정이 있어 빠른 마무리를 원함\n2) 6개월 내외로 일정이 있어 계획적인 치료를 원함\n3) 특별한 일정은 없으며, 꼼꼼하고 여유 있는 치료를 원함' },
+    { id:'Q5', title:'Q5 [치료 범위]', body:'1) 당장 아프고 불편한 곳만 최소한으로 치료받고 싶음\n2) 비용/시간이 들더라도 문제 있는 곳은 이번 기회에 다 치료하고 싶음\n3) 의료진이 권장하는 급한 순서대로 나누어 진행하고 싶음' },
+    { id:'Q6', title:'Q6 [상담 선호도]', body:'1) 구강 카메라나 CT 등 사진을 보며 현재 상태를 정확히 설명\n2) 여러 가지 치료 재료의 장단점과 비용을 명확히 비교\n3) 치료 후 어떻게 달라질 수 있는지 비슷한 사례나 전후 사진으로 설명' },
+    { id:'Q7', title:'Q7 [구강 관심도]', body:'1) 내 치아나 미소에 자신감이 있고 활짝 웃는 편이다\n2) 치아 색이나 모양 때문에 가끔 입을 가리거나 신경이 쓰인다\n3) 치아보다는 기능적인 부분만 문제없으면 상관없다' },
+    { id:'Q8', title:'Q8 [재료 선택]', body:'1) 무조건 비용이 가장 저렴한 재료\n2) 비용이 적당하고 가장 대중적으로 많이 쓰는 재료\n3) 비용이 더 들더라도 심미성이 뛰어나고 A/S 보증이 확실한 최고급 재료' },
+    { id:'Q9', title:'Q9 [치과 공포증]', body:'1) 특별히 두렵지 않으며 일반적인 진료를 잘 받음\n2) 마취 주사나 기계 소리가 무서워 긴장을 많이 하는 편임\n3) 과거 트라우마가 있어 극도로 두려움' },
+    { id:'Q10', title:'Q10 [의사결정]', body:'1) 원장님(의료진)이 내 구강 상태에 맞춰 가장 추천하는 방법을 따른다\n2) 가족과 상의하거나 다른 치과와 꼼꼼히 비교해 보고 결정한다\n3) 내가 생각한 예산과 목적에 부합하면 당일 바로 결정한다' },
+  ];
+
+  const editorTypes = [
+    { id:'t1', title:'1. 심미 완벽주의 VIP형', body:'라미네이트 최상위 타겟. 가격할인 언급 절대 금지, 최고급 수입재료·VIP 프라이빗 경험 중심으로 상담.' },
+    { id:'t2', title:'2. 안전 지향 심미형', body:'미적 개선 니즈는 높으나 공포심이 장벽. 무삭제 라미네이트의 안전성과 무통 프로세스를 우선 안내.' },
+    { id:'t3', title:'3. 가성비 심미형', body:'예쁜 결과를 원하나 예산 한계. 앞니 4개 우선 패키지 + 무이자 분납 제안.' },
+    { id:'t4', title:'4. 속전속결 바쁜 현대인형', body:'결과 중심 두괄식 브리핑. 원데이 진료의 시간 절약 강점을 핵심 소구점으로 제시.' },
+    { id:'t5', title:'5. 깐깐한 데이터 분석형', body:'감성 설득 대신 정품 인증·보증기간·임상 경력 등 숫자 기반 신뢰 지표로 설득.' },
+    { id:'t6', title:'6. 최소 치료 방어형', body:'보험 진료 위주로 신뢰를 먼저 쌓고, 손실회피 프레임으로 우선순위 치료를 안내.' },
+    { id:'t7', title:'7. 논리적 검증/의심형', body:'구강카메라·CT 시각자료 필수. mm 단위 수치로 원리원칙적으로 설명.' },
+    { id:'t8', title:'8. 원장 맹신 의존형', body:'실장은 사무 절차만 정리하고, 핵심 결정 멘트는 원장이 체어사이드에서 전달하도록 위임.' },
+  ];
+
+  function buildEditorRows(container, data){
+    container.innerHTML = data.map((item, i) => `
+      <div class="edit-row">
+        <div class="edit-row-head" onclick="toggleEditRow('${container.id}-${i}')">
+          <div><span>${item.title}</span><small>${item.id}</small></div>
+          <span class="edit-row-toggle" id="${container.id}-${i}-arrow">수정 ▾</span>
+        </div>
+        <div class="edit-row-body" id="${container.id}-${i}">
+          <textarea id="${container.id}-${i}-ta">${item.body}</textarea>
+          <button class="save-row-btn" onclick="saveEditRow('${container.id}', ${i})">저장</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function toggleEditRow(key){
+    const body = document.getElementById(key);
+    const arrow = document.getElementById(key + '-arrow');
+    const open = body.classList.toggle('open');
+    arrow.textContent = open ? '접기 ▴' : '수정 ▾';
+  }
+
+  function saveEditRow(containerId, index){
+    const ta = document.getElementById(`${containerId}-${index}-ta`);
+    const data = containerId === 'editorQuestions' ? editorQuestions : editorTypes;
+    data[index].body = ta.value;
+    const msg = document.getElementById('editor-saved-msg');
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 2400);
+  }
+
+  function switchEditorTab(tab){
+    document.getElementById('editorQuestions').style.display = tab === 'questions' ? 'flex' : 'none';
+    document.getElementById('editorTypes').style.display = tab === 'types' ? 'flex' : 'none';
+    document.getElementById('tabQuestionsBtn').style.background = tab === 'questions' ? 'var(--teal-pale)' : 'transparent';
+    document.getElementById('tabTypesBtn').style.background = tab === 'types' ? 'var(--teal-pale)' : 'transparent';
+  }
+
+  buildEditorRows(document.getElementById('editorQuestions'), editorQuestions);
+  buildEditorRows(document.getElementById('editorTypes'), editorTypes);
+  document.getElementById('editorQuestions').style.display = 'flex';
+  document.getElementById('editorQuestions').style.flexDirection = 'column';
+  document.getElementById('editorQuestions').style.gap = '10px';
+  document.getElementById('editorTypes').style.flexDirection = 'column';
+  document.getElementById('editorTypes').style.gap = '10px';
+  switchEditorTab('questions');
+
+  // ---- real account list (Supabase `accounts` table), loaded when the admin opens the screen ----
+  let accountsCache = [];
+
+  async function loadAccountsList(){
+    const list = document.getElementById('admin-list');
+    list.innerHTML = '<div class="footnote">불러오는 중…</div>';
+    const { data, error } = await sb
+      .from('accounts')
+      .select('*')
+      .eq('role', 'clinic')
+      .order('created_at', { ascending: false });
+    if (error) {
+      list.innerHTML = `<div class="footnote">불러오기 실패: ${error.message}</div>`;
+      return;
+    }
+    accountsCache = data || [];
+    renderAccounts();
+  }
+
+  function renderAccounts(){
+    const list = document.getElementById('admin-list');
+    if (accountsCache.length === 0) {
+      list.innerHTML = '<div class="footnote">아직 발급된 거래처 계정이 없습니다.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    accountsCache.forEach((acc) => {
+      const row = document.createElement('div');
+      row.className = 'acct-row';
+      row.style.flexDirection = 'column';
+      row.style.alignItems = 'stretch';
+      row.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div class="who">${acc.clinic_name || '(이름 미설정)'}<small>${acc.email || acc.id}</small></div>
+          <div style="display:flex; align-items:center;">
+            <span class="acct-status ${acc.is_active ? 'active':'blocked'}">${acc.is_active ? '사용중' : '차단됨'}</span>
+            <button class="toggle ${acc.is_active ? 'on':''}" onclick="toggleAccount('${acc.id}', ${!acc.is_active})"></button>
+            <button class="iplog-btn" onclick="toggleIpLog('${acc.id}')">IP 이력</button>
+          </div>
+        </div>
+        <div class="iplog-panel" id="iplog-${acc.id}"></div>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  async function toggleAccount(id, newVal){
+    const { error } = await sb.from('accounts').update({ is_active: newVal }).eq('id', id);
+    if (error) { alert('변경 실패: ' + error.message); return; }
+    await loadAccountsList();
+  }
+
+  async function toggleIpLog(id){
+    const panel = document.getElementById('iplog-' + id);
+    const isOpen = panel.classList.contains('open');
+    // collapse all other panels first
+    document.querySelectorAll('.iplog-panel.open').forEach(p => p.classList.remove('open'));
+    if (isOpen) return; // was open -> just closed it above
+
+    panel.innerHTML = '<div class="iplog-empty">불러오는 중…</div>';
+    panel.classList.add('open');
+    const { data, error } = await sb
+      .from('login_logs')
+      .select('*')
+      .eq('account_id', id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (error) {
+      panel.innerHTML = `<div class="iplog-empty">불러오기 실패: ${error.message}</div>`;
+      return;
+    }
+    if (!data || data.length === 0) {
+      panel.innerHTML = '<div class="iplog-empty">접속 기록이 없습니다.</div>';
+      return;
+    }
+    panel.innerHTML = data.map(log => {
+      const t = new Date(log.created_at).toLocaleString('ko-KR');
+      return `<div class="iplog-row"><b>${log.ip || '알 수 없음'}</b><span>${t}</span></div>`;
+    }).join('');
+  }
+</script>
+
+</body>
+</html>
