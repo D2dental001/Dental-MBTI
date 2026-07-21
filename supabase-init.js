@@ -2,7 +2,7 @@
 // 이 파일 상단 두 줄만 본인 Supabase 프로젝트 값으로 바꾸면 됩니다.
 // Supabase 대시보드 → Project Settings → API 에서 확인할 수 있습니다.
 // =====================================================================
-const SUPABASE_URL = "sb_publishable_esByF7c4c3dR2VU9cKS8fg_xu1ROIZo";
+const SUPABASE_URL = "https://fpkncnlslyojvbscsatl.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_esByF7c4c3dR2VU9cKS8fg_xu1ROIZo";
 // =====================================================================
 
