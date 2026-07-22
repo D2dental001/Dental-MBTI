@@ -480,24 +480,24 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 18px;
+      gap: 14px;
       border-bottom: 2px solid #dbeef2;
-      padding-bottom: 14px;
-      margin-bottom: 18px;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .print-brand {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
       min-width: 0;
     }
 
     .print-logo {
-      width: 68px;
-      height: 68px;
+      width: 44px;
+      height: 44px;
       border: 1px solid #d7e8ee;
-      border-radius: 16px;
+      border-radius: 12px;
       background: #f7fcfd;
       overflow: hidden;
       display: flex;
@@ -515,21 +515,21 @@
     }
     .print-logo.has-logo img { display: block; }
     .print-logo-text {
-      font-size: 28px;
+      font-size: 19px;
       color: #2f97aa;
       line-height: 1;
     }
     .print-logo.has-logo .print-logo-text { display: none; }
 
     .print-brand h2 {
-      margin: 0 0 4px;
-      font-size: 26px;
+      margin: 0 0 2px;
+      font-size: 18px;
       line-height: 1.2;
     }
     .print-brand p, .print-meta, .print-field, .print-option, .print-note {
       color: #44636d;
-      font-size: 13px;
-      line-height: 1.62;
+      font-size: 11.5px;
+      line-height: 1.5;
     }
     .print-brand p { margin: 0; }
     .print-meta {
@@ -539,78 +539,92 @@
 
     .print-section {
       border: 1px solid #d7e8ee;
-      border-radius: 18px;
-      padding: 16px;
-      margin-bottom: 14px;
+      border-radius: 14px;
+      padding: 11px 13px;
+      margin-bottom: 9px;
       break-inside: avoid;
     }
 
     /* The answer list is long enough to span multiple pages — let it flow
        instead of forcing the whole section onto the next page, but keep
-       the heading and each individual question card intact. */
+       each individual question card intact. */
     .print-section-questions {
       break-inside: auto;
     }
-    .print-section-questions h3 {
-      break-after: avoid;
-    }
 
     .print-section h3 {
-      margin: 0 0 10px;
-      font-size: 18px;
+      margin: 0 0 8px;
+      font-size: 15px;
       color: #17343b;
     }
 
     .print-info-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
     }
 
     .print-field {
-      min-height: 42px;
-      padding: 10px 12px;
+      min-height: 34px;
+      padding: 7px 10px;
       border: 1px solid #d7e8ee;
-      border-radius: 14px;
+      border-radius: 11px;
       background: #fbfeff;
     }
 
     .print-field strong {
       display: block;
       color: #17343b;
-      font-size: 12px;
-      margin-bottom: 4px;
+      font-size: 10.5px;
+      margin-bottom: 2px;
       letter-spacing: 0.02em;
     }
 
     .print-question {
       border: 1px solid #d7e8ee;
-      border-radius: 16px;
-      padding: 14px;
-      margin-bottom: 10px;
+      border-radius: 12px;
+      padding: 8px 11px;
+      margin-bottom: 6px;
       break-inside: avoid;
     }
 
+    .print-question-head {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 5px 8px;
+      margin-bottom: 5px;
+    }
+
     .print-question-title {
-      margin: 0 0 8px;
-      font-size: 15px;
+      margin: 0;
+      font-size: 12.5px;
       font-weight: 900;
       color: #17343b;
-      line-height: 1.5;
+      line-height: 1.4;
+      white-space: nowrap;
     }
 
     .print-question-desc {
-      margin: -4px 0 10px;
-      font-size: 12px;
-      color: #6f8890;
-      line-height: 1.5;
+      margin: 0;
+      font-size: 10px;
+      font-weight: 400;
+      color: #7c9298;
+      line-height: 1.4;
     }
 
     .print-options {
       display: grid;
-      gap: 6px;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px 12px;
       margin: 0;
-      padding-left: 18px;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .print-options .print-option {
+      font-size: 10.5px;
+      line-height: 1.45;
     }
 
     .print-option.selected {
@@ -621,15 +635,15 @@
     .print-signature {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 18px;
+      gap: 12px;
+      margin-top: 12px;
     }
 
     .signature-box {
-      min-height: 70px;
+      min-height: 50px;
       border: 1px dashed #bfd8df;
-      border-radius: 16px;
-      padding: 12px;
+      border-radius: 12px;
+      padding: 9px 11px;
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
@@ -637,7 +651,7 @@
     }
 
     .signature-box strong {
-      font-size: 13px;
+      font-size: 11.5px;
       color: #17343b;
     }
 
@@ -1157,8 +1171,10 @@
 
         return `
           <div class="print-question">
-            <p class="print-question-title">${question.title}</p>
-            <p class="print-question-desc">${question.desc}</p>
+            <div class="print-question-head">
+              <p class="print-question-title">${question.title}</p>
+              <p class="print-question-desc">${question.desc}</p>
+            </div>
             <ol class="print-options">${optionsHtml}</ol>
           </div>
         `;
