@@ -645,6 +645,30 @@
       font-style: normal;
     }
 
+    .trauma-flag {
+      background: #fdecea;
+      border: 1.5px solid #e2a09a;
+      color: #8a2c22;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 4px;
+    }
+    .trauma-flag b { display: block; font-size: 13px; margin-bottom: 3px; }
+
+    .print-trauma-flag {
+      background: #fdecea;
+      border: 1.5px solid #e2a09a;
+      color: #8a2c22;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+      line-height: 1.55;
+      margin-bottom: 6px;
+    }
+    .print-trauma-flag b { display: block; font-size: 12px; margin-bottom: 2px; }
+
     .print-guide-block { display: block; margin-top: 4px; }
     .print-guide-summary { font-weight: 800; font-size: 13.5px; color: #15343d; margin: 0 0 10px; }
     .print-guide-block h4 { margin: 10px 0 4px; font-size: 12px; color: #2f97aa; letter-spacing: 0.02em; }
@@ -820,6 +844,7 @@
     .print-script-list li,
     .print-objection-list li,
     .print-caution,
+    .print-trauma-flag,
     .print-guide-summary {
       break-inside: avoid;
     }
@@ -1073,7 +1098,7 @@
             <section class="side-card">
               <h3>입력 진행 현황</h3>
               <div class="status-bar">
-                <span class="status-badge" id="progressBadge">0 / 10</span>
+                <span class="status-badge" id="progressBadge">0 / 15</span>
                 <p class="status-text" id="statusText">아직 분석 전입니다.</p>
               </div>
               <div class="button-group">
@@ -1114,7 +1139,7 @@
               <h3>운영 메모</h3>
               <p>결과는 오직 <strong>검토하기</strong> 버튼을 눌렀을 때만 표시됩니다. 입력 도중에는 어떤 유형도 미리 노출되지 않습니다.</p>
               <ul class="check-list">
-                <li>10문항 전체 텍스트와 선택지를 화면에 그대로 노출</li>
+                <li>15문항 전체 텍스트와 선택지를 화면에 그대로 노출</li>
                 <li>라미네이트 상담 전환율 향상을 위한 유형 분류 우선순위 적용</li>
                 <li>모바일에서도 터치하기 쉬운 큰 선택 영역과 고정 버튼 구성</li>
               </ul>
@@ -1271,6 +1296,59 @@
           '2) 가족과 상의하거나 다른 치과와 꼼꼼히 비교해 보고 결정한다',
           '3) 내가 생각한 예산과 목적에 부합하면 당일 바로 결정한다'
         ]
+      },
+      {
+        id: 'Q11',
+        title: 'Q11 [치료 결과 최우선순위]',
+        desc: '다른 건 다 포기해도 이것 하나만은 꼭 지키고 싶은 것을 선택하세요.',
+        options: [
+          '1) 비용을 최대한 아끼는 것',
+          '2) 자연스럽고 예쁜 심미적 결과',
+          '3) 치료 기간과 방문 횟수를 최소화하는 것',
+          '4) 안전하고 검증된 방법으로 진행하는 것'
+        ]
+      },
+      {
+        id: 'Q12',
+        title: 'Q12 [통증 감내 vs 편안함]',
+        desc: '둘 중 자신에게 더 가까운 쪽을 선택하세요.',
+        options: [
+          '1) 약간 불편하더라도 내원 횟수를 줄이는 편이 낫다',
+          '2) 시간이 더 걸리더라도 편안하고 안전한 방식이 낫다'
+        ]
+      },
+      {
+        id: 'Q13',
+        title: 'Q13 [비급여 치료를 안내받을 때]',
+        desc: '보험이 적용되지 않는 치료(비급여)를 안내받으면, 평소 어떻게 하시는 편인가요?',
+        options: [
+          '1) 왜 필요한지 자료나 설명을 자세히 요청한다',
+          '2) 일단 보험되는 치료만 받고 나중에 생각한다',
+          '3) 원장님이 권하는 방법이면 진행한다',
+          '4) 사진이나 데이터로 확인되면 진행한다'
+        ]
+      },
+      {
+        id: 'Q14',
+        title: 'Q14 [치료 재료 정보 탐색 방식]',
+        desc: '크라운·라미네이트 등 치료 재료를 고를 때 평소 방식에 가장 가까운 것을 선택하세요.',
+        options: [
+          '1) 인터넷에서 가격과 후기를 직접 비교해본다',
+          '2) 원장님 추천을 그대로 따른다',
+          '3) 유명하거나 고급스러운 치과의 사례를 찾아본다',
+          '4) 급한 대로 그 자리에서 바로 정한다'
+        ]
+      },
+      {
+        id: 'Q15',
+        title: 'Q15 [치료 후 정기검진 관리]',
+        desc: '치료가 끝난 뒤 정기검진(스케일링, 정기 체크업)을 어떻게 챙기시나요?',
+        options: [
+          '1) 알림이 없어도 스스로 꼬박꼬박 챙긴다',
+          '2) 아프거나 문제가 생겼을 때만 온다',
+          '3) 비용을 아끼려고 꼭 필요한 것만 최소로 받는다',
+          '4) 치아 색이나 모양이 변한 것 같으면 바로 확인하러 온다'
+        ]
       }
     ];
 
@@ -1284,7 +1362,13 @@
       Q7: { 1: { E: 1 }, 2: { A: 3 }, 3: { C: 2 } },
       Q8: { 1: { C: 3 }, 2: { C: 1, S: 1 }, 3: { A: 3 } },
       Q9: { 1: {}, 2: { S: 2 }, 3: { S: 3 } },
-      Q10: { 1: { S: 3 }, 2: { C: 2 }, 3: { E: 2 } }
+      Q10: { 1: { S: 3 }, 2: { C: 2 }, 3: { E: 2 } },
+      // 신규 문항: 문항 수를 늘려 축 간 점수 해상도를 높이고, 기존에 간접 신호에만 의존하던 부분을 직접 물어본다.
+      Q11: { 1: { C: 4 }, 2: { A: 4 }, 3: { E: 4 }, 4: { S: 4 } },
+      Q12: { 1: { E: 2 }, 2: { S: 2 } },
+      Q13: { 1: { C: 2 }, 2: { C: 2 }, 3: { S: 2 }, 4: { S: 2 } },
+      Q14: { 1: { C: 2 }, 2: { S: 2 }, 3: { A: 2 }, 4: { E: 2 } },
+      Q15: { 1: { S: 3 }, 2: { E: 2 }, 3: { C: 3 }, 4: { A: 3 } }
     };
 
     // 30년 이상 경력의 치과 상담실장 시각으로 작성한 유형별 심층 가이드.
@@ -1536,14 +1620,21 @@
       }
     };
 
-    function buildGuideHTML(guide, mode){
+    function buildGuideHTML(guide, mode, extremeTrauma){
       const blockClass = mode === 'print' ? 'print-guide-block' : 'guide-block';
       const summaryClass = mode === 'print' ? 'print-guide-summary' : 'guide-summary';
       const scriptClass = mode === 'print' ? 'print-script-list' : 'script-list';
       const objClass = mode === 'print' ? 'print-objection-list' : 'objection-list';
       const cautionClass = mode === 'print' ? 'print-caution' : 'guide-caution';
+      const flagClass = mode === 'print' ? 'print-trauma-flag' : 'trauma-flag';
+      // Q9에서 "극도의 트라우마"를 선택한 경우, 어떤 유형으로 분류되든 상관없이
+      // 최우선으로 봐야 할 안전 경고를 유형 안내보다 위에 먼저 보여준다.
+      const traumaBanner = extremeTrauma
+        ? `<div class="${flagClass}"><b>⚠ 트라우마 환자 우선 안내</b>Q9에서 "과거 트라우마로 극도의 두려움"을 선택했습니다. 아래 유형별 전략보다 먼저, 진정 치료(세데이션) 옵션 안내와 평소보다 느린 진행 속도를 우선 적용하세요. 이번 방문에서는 어떤 유형이든 상담·영업적 접근보다 안심시키는 것이 최우선입니다.</div>`
+        : '';
       return `
         <div class="${blockClass}">
+          ${traumaBanner}
           <p class="${summaryClass}">${guide.summary}</p>
           <h4>환자 심리 프로파일</h4>
           <p>${guide.psychology}</p>
@@ -1636,7 +1727,7 @@
 
     function updateProgress() {
       const count = Object.keys(answers).length;
-      progressBadge.textContent = `${count} / 10`;
+      progressBadge.textContent = `${count} / 15`;
       statusText.textContent = count === 10
         ? '모든 문항 입력이 완료되었습니다. 검토하기를 눌러 분석하세요.'
         : `${count}개 문항 입력 완료. 남은 문항을 선택해 주세요.`;
@@ -1699,7 +1790,7 @@
     function updatePrintSheet(result, scores) {
       printMeta.textContent = `상담 시트 출력일시: ${getFormattedNow()}`;
       printType.textContent = result.type;
-      printGuide.innerHTML = buildGuideHTML(result.guide, 'print');
+      printGuide.innerHTML = buildGuideHTML(result.guide, 'print', answers.Q9 === 3);
       printScoreA.textContent = scores.A;
       printScoreC.textContent = scores.C;
       printScoreS.textContent = scores.S;
@@ -1735,6 +1826,11 @@
       let tied = axes.filter(ax => scores[ax] === maxScore);
       if (tied.length === 1) return tied[0];
 
+      // 1차 동점 처리: Q11("결과에서 딱 하나만 고른다면")은 축을 직접 지목하는 가장 강한 신호이므로 최우선으로 본다.
+      const q11Hint = { 1: 'C', 2: 'A', 3: 'E', 4: 'S' }[answers.Q11];
+      if (q11Hint && tied.includes(q11Hint)) return q11Hint;
+
+      // 2차 동점 처리: 의사결정 방식(Q10) 답변이 힌트가 되는 축이면 그쪽을 우선한다
       const q10Hint = { 1: 'S', 2: 'C', 3: 'E' }[answers.Q10];
       if (q10Hint && tied.includes(q10Hint)) return q10Hint;
 
@@ -1760,23 +1856,39 @@
           type = '3. 가성비 심미형';
         }
       } else if (axis === 'C') {
-        // 재료 비교(Q6=2) 또는 비교 후 결정하는 성향(Q10=2) 중 하나만 있어도
-        // "데이터 분석형"으로 판별해, 특정 답 하나에만 의존하던 좁은 문을 넓혔다.
-        if (answers.Q6 === 2 || answers.Q10 === 2) {
+        // Q11에서 "예쁜 심미 결과"를 명시적으로 최우선으로 골랐다면, 전체 점수는 비용(C)이
+        // 앞섰더라도 실제로는 "가성비 심미형"에 더 가깝다 — 축은 하나만 이기지만, 이 경우엔 그
+        // 축의 하위유형 대신 A축에 속한 하이브리드 유형으로 건너간다.
+        if (answers.Q11 === 2) {
+          type = '3. 가성비 심미형';
+        } else if (answers.Q13 === 1) {
+          // "비급여 권유 시 반응"에서 자료·설명을 자세히 요청한다는 것은 분석형의 핵심 행동 그 자체다.
+          type = '5. 깐깐한 데이터 분석형';
+        } else if (answers.Q13 === 2) {
+          // 보험되는 치료만 우선한다는 것은 방어형의 핵심 행동 그 자체다.
+          type = '6. 최소 치료 방어형';
+        } else if (answers.Q5 === 1) {
+          type = '6. 최소 치료 방어형';
+        } else if (answers.Q6 === 2 || answers.Q10 === 2 || answers.Q14 === 1) {
           type = '5. 깐깐한 데이터 분석형';
         } else {
           type = '6. 최소 치료 방어형';
         }
       } else if (axis === 'S') {
-        if (answers.Q6 === 1) {
+        // Q13(비급여 권유 반응)이 가장 직접적인 행동 신호이므로 우선 확인한다.
+        if (answers.Q13 === 4) {
+          type = '7. 논리적 검증/의심형';
+        } else if (answers.Q13 === 3) {
+          type = '8. 원장 맹신 의존형';
+        } else if (answers.Q6 === 1 || answers.Q10 === 2) {
           type = '7. 논리적 검증/의심형';
         } else {
           type = '8. 원장 맹신 의존형';
         }
       } else {
         // 기존에는 E축이 1등이면 무조건 하나의 유형으로만 귀결되어 세분화가 없었다.
-        // 비용 민감도(Q3/Q8)를 기준으로 "속도만 우선"과 "속도+비용 모두 우선"을 구분한다.
-        if (answers.Q3 === 1 || answers.Q8 === 1) {
+        // 비용 민감도(Q3/Q8/Q11)를 기준으로 "속도만 우선"과 "속도+비용 모두 우선"을 구분한다.
+        if (answers.Q3 === 1 || answers.Q8 === 1 || answers.Q11 === 1) {
           type = '4B. 속전속결 가성비형';
         } else {
           type = '4. 속전속결 바쁜 현대인형';
@@ -1804,7 +1916,7 @@
       lastAnalysis = { scores, result };
 
       typeOutput.textContent = result.type;
-      guideOutput.innerHTML = buildGuideHTML(result.guide, 'screen');
+      guideOutput.innerHTML = buildGuideHTML(result.guide, 'screen', answers.Q9 === 3);
       scoreA.textContent = scores.A;
       scoreC.textContent = scores.C;
       scoreS.textContent = scores.S;
@@ -1841,7 +1953,7 @@
       printScoreS.textContent = '0';
       printScoreE.textContent = '0';
       printAnswerList.innerHTML = '';
-      progressBadge.textContent = '0 / 10';
+      progressBadge.textContent = '0 / 15';
       statusText.textContent = '아직 분석 전입니다.';
       hideWarning();
       window.scrollTo({ top: 0, behavior: 'smooth' });

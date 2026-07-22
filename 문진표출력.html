@@ -753,7 +753,7 @@
         <section class="main-col">
           <div class="section-title">
             <h2>환자 문진표 작성</h2>
-            <div class="sub">기본 정보 + 10문항 + 추가 메모</div>
+            <div class="sub">기본 정보 + 15문항 + 추가 메모</div>
           </div>
 
           <div class="survey-sheet">
@@ -805,7 +805,7 @@
               <h3>작성 현황</h3>
               <p>문항 입력 상태를 확인하고 문진표를 인쇄하거나 새 문진표로 초기화할 수 있습니다.</p>
               <div class="status-bar">
-                <span class="status-badge" id="progressBadge">0 / 10</span>
+                <span class="status-badge" id="progressBadge">0 / 15</span>
                 <p class="status-text" id="statusText">아직 문진표 작성 전입니다.</p>
               </div>
               <div class="button-group">
@@ -977,6 +977,59 @@
           '2) 가족과 상의하거나 다른 치과와 꼼꼼히 비교해 보고 결정한다',
           '3) 내가 생각한 예산과 목적에 부합하면 당일 바로 결정한다'
         ]
+      },
+      {
+        id: 'Q11',
+        title: 'Q11 [치료 결과 최우선순위]',
+        desc: '다른 건 다 포기해도 이것 하나만은 꼭 지키고 싶은 것을 선택하세요.',
+        options: [
+          '1) 비용을 최대한 아끼는 것',
+          '2) 자연스럽고 예쁜 심미적 결과',
+          '3) 치료 기간과 방문 횟수를 최소화하는 것',
+          '4) 안전하고 검증된 방법으로 진행하는 것'
+        ]
+      },
+      {
+        id: 'Q12',
+        title: 'Q12 [통증 감내 vs 편안함]',
+        desc: '둘 중 자신에게 더 가까운 쪽을 선택하세요.',
+        options: [
+          '1) 약간 불편하더라도 내원 횟수를 줄이는 편이 낫다',
+          '2) 시간이 더 걸리더라도 편안하고 안전한 방식이 낫다'
+        ]
+      },
+      {
+        id: 'Q13',
+        title: 'Q13 [비급여 치료를 안내받을 때]',
+        desc: '보험이 적용되지 않는 치료(비급여)를 안내받으면, 평소 어떻게 하시는 편인가요?',
+        options: [
+          '1) 왜 필요한지 자료나 설명을 자세히 요청한다',
+          '2) 일단 보험되는 치료만 받고 나중에 생각한다',
+          '3) 원장님이 권하는 방법이면 진행한다',
+          '4) 사진이나 데이터로 확인되면 진행한다'
+        ]
+      },
+      {
+        id: 'Q14',
+        title: 'Q14 [치료 재료 정보 탐색 방식]',
+        desc: '크라운·라미네이트 등 치료 재료를 고를 때 평소 방식에 가장 가까운 것을 선택하세요.',
+        options: [
+          '1) 인터넷에서 가격과 후기를 직접 비교해본다',
+          '2) 원장님 추천을 그대로 따른다',
+          '3) 유명하거나 고급스러운 치과의 사례를 찾아본다',
+          '4) 급한 대로 그 자리에서 바로 정한다'
+        ]
+      },
+      {
+        id: 'Q15',
+        title: 'Q15 [치료 후 정기검진 관리]',
+        desc: '치료가 끝난 뒤 정기검진(스케일링, 정기 체크업)을 어떻게 챙기시나요?',
+        options: [
+          '1) 알림이 없어도 스스로 꼬박꼬박 챙긴다',
+          '2) 아프거나 문제가 생겼을 때만 온다',
+          '3) 비용을 아끼려고 꼭 필요한 것만 최소로 받는다',
+          '4) 치아 색이나 모양이 변한 것 같으면 바로 확인하러 온다'
+        ]
       }
     ];
 
@@ -1045,7 +1098,7 @@
 
     function updateProgress() {
       const count = Object.keys(answers).length;
-      progressBadge.textContent = `${count} / 10`;
+      progressBadge.textContent = `${count} / 15`;
       statusText.textContent = count === 10
         ? '모든 문항이 작성되었습니다. 문진표를 출력할 수 있습니다.'
         : `${count}개 문항 작성 완료. 남은 문항을 이어서 작성해 주세요.`;
@@ -1132,7 +1185,7 @@
       chartNumber.value = '';
       visitDate.value = '';
       patientMemo.value = '';
-      progressBadge.textContent = '0 / 10';
+      progressBadge.textContent = '0 / 15';
       statusText.textContent = '아직 문진표 작성 전입니다.';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
