@@ -965,6 +965,11 @@
       break-inside: avoid;
     }
 
+    /* 요청하신 페이지 구성: 1p 유형/핵심포인트/심리/전략 → 2p 스크립트/반론/주의사항 → 3p 성향점수 */
+    .print-page-break {
+      break-before: page;
+    }
+
     .print-section h3 {
       margin: 0 0 10px;
       font-size: 18px;
@@ -1301,15 +1306,10 @@
           <div class="print-guide" id="printGuide">-</div>
         </div>
 
-        <div class="print-section">
+        <div class="print-section print-page-break">
           <h3>성향 점수 요약</h3>
           <div class="print-score-chart" id="printScoreChart"></div>
           <div class="print-score-list" id="printScoreList"></div>
-        </div>
-
-        <div class="print-section">
-          <h3>문진 응답 기록</h3>
-          <ol class="print-list" id="printAnswerList"></ol>
         </div>
       </section>
     </div>
@@ -1781,6 +1781,7 @@
       const keyPointBox = guide.keyPoint
         ? `<div class="${keyPointClass}"><b>★ 이 상담에서 가장 중요한 한 가지</b>${guide.keyPoint}</div>`
         : '';
+      const part2WrapClass = mode === 'print' ? 'print-page-break' : '';
       return `
         <div class="${blockClass}">
           ${traumaBanner}
@@ -1793,12 +1794,14 @@
             <h4>★ 상담 전략 (핵심 포인트)</h4>
             <ul>${guide.strategy.map(s => `<li>${s}</li>`).join('')}</ul>
           </div>
-          <h4>상황별 실전 상담 스크립트</h4>
-          <ul class="${scriptClass}">${guide.scripts.map(s => `<li><b>${s.label}</b>${s.line}</li>`).join('')}</ul>
-          <h4>자주 나오는 반론과 대응</h4>
-          <ul class="${objClass}">${guide.objections.map(o => `<li><b>Q. ${o.q}</b>A. ${o.a}</li>`).join('')}</ul>
-          <h4>주의사항</h4>
-          <p class="${cautionClass}">${guide.caution}</p>
+          <div class="${part2WrapClass}">
+            <h4>상황별 실전 상담 스크립트</h4>
+            <ul class="${scriptClass}">${guide.scripts.map(s => `<li><b>${s.label}</b>${s.line}</li>`).join('')}</ul>
+            <h4>자주 나오는 반론과 대응</h4>
+            <ul class="${objClass}">${guide.objections.map(o => `<li><b>Q. ${o.q}</b>A. ${o.a}</li>`).join('')}</ul>
+            <h4>주의사항</h4>
+            <p class="${cautionClass}">${guide.caution}</p>
+          </div>
         </div>
       `;
     }
@@ -1825,7 +1828,6 @@
     const printType = document.getElementById('printType');
     const printGuide = document.getElementById('printGuide');
     const printScoreList = document.getElementById('printScoreList');
-    const printAnswerList = document.getElementById('printAnswerList');
 
     let answers = {};
     let uploadedLogoData = '';
@@ -1914,14 +1916,6 @@
       }
     }
 
-    function buildPrintAnswerList() {
-      return questions.map(question => {
-        const answerIndex = answers[question.id];
-        const answerText = answerIndex ? question.options[answerIndex - 1] : '미입력';
-        return `<li><strong>${question.title}</strong> — ${answerText}</li>`;
-      }).join('');
-    }
-
     function getFormattedNow() {
       const now = new Date();
       const yyyy = now.getFullYear();
@@ -1939,7 +1933,6 @@
       printScoreList.innerHTML = buildScoreListHTML(scores, 'print');
       const printChartEl = document.getElementById('printScoreChart');
       if (printChartEl) printChartEl.innerHTML = buildScoreChartSVG(scores);
-      printAnswerList.innerHTML = buildPrintAnswerList();
     }
 
     // 성향 점수를 레이더(다이아몬드) 그래프와, 색으로 구분되는 카드 리스트로 함께 보여준다.
@@ -2178,7 +2171,6 @@
       printType.textContent = '-';
       printGuide.textContent = '-';
       printScoreList.innerHTML = '';
-      printAnswerList.innerHTML = '';
       const scoreChartElReset = document.getElementById('scoreChart');
       if (scoreChartElReset) scoreChartElReset.innerHTML = '';
       const printScoreChartElReset = document.getElementById('printScoreChart');
