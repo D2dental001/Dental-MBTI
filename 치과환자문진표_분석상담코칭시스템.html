@@ -1373,7 +1373,7 @@
         caution: '전체 금액을 먼저 크게 던지지 않습니다. 최소 단위 패키지 금액부터 이야기하고, 범위 확장은 환자가 먼저 원할 때에만 추가로 안내합니다.'
       },
       '4. 속전속결 바쁜 현대인형': {
-        summary: '[스피드 중심] 서론과 배경 설명은 생략하고 결과 중심의 두괄식 브리핑으로 진행합니다. 원데이 진료의 시간 절약 강점을 핵심 소구점으로 삼습니다.',
+        summary: '[스피드 중심, 비용에는 비교적 관대] 서론과 배경 설명은 생략하고 결과 중심의 두괄식 브리핑으로 진행합니다. 원데이 진료의 시간 절약 강점을 핵심 소구점으로 삼습니다. (비용에 민감한 "4B. 속전속결 가성비형"과는 구분됩니다.)',
         psychology: '시간을 돈보다 더 아깝게 여기는 유형입니다. 설명이 길어지면 "이 병원은 비효율적이다"라는 인상을 받고, 반대로 핵심만 빠르게 짚어주면 그 자체로 신뢰를 얻습니다. 필요한 정보만 주어지면 그 자리에서 바로 결정하는 경우가 많아, 의사결정 속도가 매우 빠른 편입니다.',
         signals: [
           '상담 중 시계를 자주 보거나 "얼마나 걸릴까요"를 먼저 묻는다',
@@ -1398,6 +1398,33 @@
           { q: '그렇게 빨리 해도 괜찮은 건가요?', a: '네, 원내 기공소가 있어서 당일 제작이 가능한 케이스만 원데이로 안내드려요. 정밀검사 후 적합하지 않으면 미리 말씀드릴게요.' }
         ],
         caution: '재료 비교표나 배경 설명을 자발적으로 늘어놓지 않습니다. 질문받은 것만 답하고, 곁가지 정보는 최소화합니다.'
+      },
+      '4B. 속전속결 가성비형': {
+        summary: '[스피드 + 가성비 동시 추구] 시간도 아끼고 돈도 아끼고 싶은 실용주의형. 보험 적용 항목과 가장 빠른 최소 처치 위주로 접근합니다.',
+        psychology: '이 환자는 "바쁘다"는 이유로 대충 결정하는 게 아니라, 시간도 돈도 낭비하고 싶지 않다는 이중의 효율 추구 심리를 갖고 있습니다. 프리미엄·원데이 같은 고가 옵션을 "시간 절약"이라는 명목으로 권하면, 오히려 불필요한 지출을 강요받는다는 인상을 받아 반발합니다. "가장 빠르면서 가장 저렴한 선택지"를 최우선으로 찾습니다.',
+        signals: [
+          '"제일 빨리, 제일 싸게 되는 방법이 뭐예요?"를 동시에 묻는다',
+          '프리미엄·원데이 고가 옵션을 제시하면 "그거 말고 보험 되는 걸로는 안 되나요?"라고 되묻는다',
+          '예약 가능 시간과 비용을 항상 같이 확인하며 비교한다',
+          '상담이 길어지면 "그래서 제일 저렴하고 빠른 걸로 해주세요"로 대화를 끊으려 한다'
+        ],
+        strategy: [
+          '가장 먼저 보험 적용 여부와 소요 시간을 함께 묶어서 안내합니다 (예: "보험 적용되고, 오늘 바로 끝나는 방법이 있어요").',
+          '프리미엄·원데이 고가 옵션은 환자가 먼저 묻지 않으면 꺼내지 않습니다.',
+          '여러 옵션을 늘어놓지 않고, "가장 빠르고 저렴한 안" 하나를 먼저 제시한 뒤 필요할 때만 대안을 언급합니다.',
+          '다음 방문 일정도 "가장 빠른 슬롯 + 예상 비용"을 한 문장으로 같이 안내합니다.'
+        ],
+        scripts: [
+          { label: '상담 오프닝', line: '"제일 빠르면서 보험 적용되는 방법부터 말씀드릴게요."' },
+          { label: '니즈 파악', line: '"오늘 처리 가능한 범위 안에서, 비용 부담 없는 쪽으로 먼저 잡아드릴까요?"' },
+          { label: '옵션 제시', line: '"빠른 방법은 두 가지인데, 보험 되는 쪽이 이 정도 비용으로 오늘 바로 가능해요."' },
+          { label: '클로징', line: '"그럼 보험 적용되는 방법으로, 오늘 바로 진행해드릴게요."' }
+        ],
+        objections: [
+          { q: '더 좋은 방법도 있다고 하던데요?', a: '네, 있지만 비용과 시간이 더 들어요. 지금 방법으로도 충분히 개선되니, 나중에 여유 되실 때 다시 안내드릴게요.' },
+          { q: '이 방법으로 오래 가나요?', a: '보험 적용 범위 안에서는 이 방법이 표준이고, 문제 생기면 그때 추가로 안내드릴게요. 우선 부담 없는 선에서 시작하시죠.' }
+        ],
+        caution: '프리미엄 재료나 고가 옵션을 이 유형에게 먼저 권하지 않습니다. 비용 얘기 없이 "좋은 것부터" 설명하면 바로 신뢰를 잃습니다.'
       },
       '5. 깐깐한 데이터 분석형': {
         summary: '[신뢰 지표 제시] 감성적 설득은 통하지 않습니다. 정품 인증, 보증기간, 임상 경력 등 숫자와 근거로 가격의 합리성을 증명합니다.',
@@ -1682,41 +1709,77 @@
 
     function computeScores() {
       const scores = { A: 0, C: 0, S: 0, E: 0 };
+      // 각 축에서 "가장 강한 단일 문항 신호"도 함께 기록해둔다 (동점 발생 시 사용).
+      const maxSingle = { A: 0, C: 0, S: 0, E: 0 };
 
       Object.entries(answers).forEach(([qid, answer]) => {
         const delta = scoringMatrix[qid]?.[answer] || {};
         Object.entries(delta).forEach(([key, value]) => {
           scores[key] += value;
+          if (value > maxSingle[key]) maxSingle[key] = value;
         });
       });
 
+      scores.__maxSingle = maxSingle;
       return scores;
     }
 
-    function detectType(scores) {
-      let type = '4. 속전속결 바쁜 현대인형';
+    // 4개 축(A/C/S/E) 중 점수가 가장 높은 축을 고른다.
+    // 여러 축이 정확히 동점일 때는 코드 순서가 아니라, 아래 순서로 실제 근거를 따져 결정한다:
+    //   1) 의사결정 방식(Q10) 답변이 힌트가 되는 축이면 그쪽을 우선한다
+    //   2) 그래도 안 갈리면, 응답 중 가장 강한 단일 신호(3점짜리 답변 등)를 준 축을 우선한다
+    //   3) 그래도 안 갈리면, 임상적으로 놓쳤을 때 파장이 큰 순서(S > A > C > E)로 정한다
+    function pickDominantAxis(scores) {
+      const axes = ['A', 'C', 'S', 'E'];
+      const maxScore = Math.max(scores.A, scores.C, scores.S, scores.E);
+      let tied = axes.filter(ax => scores[ax] === maxScore);
+      if (tied.length === 1) return tied[0];
 
-      if (scores.A >= scores.C && scores.A >= scores.S && scores.A >= scores.E) {
-        if (answers.Q8 === 3) {
-          type = '1. 심미 완벽주의 VIP형';
-        } else if (answers.Q9 === 2 || answers.Q9 === 3) {
+      const q10Hint = { 1: 'S', 2: 'C', 3: 'E' }[answers.Q10];
+      if (q10Hint && tied.includes(q10Hint)) return q10Hint;
+
+      const maxSingle = scores.__maxSingle || { A: 0, C: 0, S: 0, E: 0 };
+      tied = tied.slice().sort((a, b) => maxSingle[b] - maxSingle[a]);
+      if (maxSingle[tied[0]] > maxSingle[tied[1]]) return tied[0];
+
+      const fallbackOrder = ['S', 'A', 'C', 'E'];
+      return fallbackOrder.find(ax => tied.includes(ax));
+    }
+
+    function detectType(scores) {
+      const axis = pickDominantAxis(scores);
+      let type;
+
+      if (axis === 'A') {
+        // 두려움이 크면(공포/불안) 심미 욕구보다 안전 확인이 먼저이므로 이 조건을 우선 확인한다.
+        if (answers.Q9 === 2 || answers.Q9 === 3) {
           type = '2. 안전 지향 심미형';
+        } else if (answers.Q8 === 3) {
+          type = '1. 심미 완벽주의 VIP형';
         } else {
           type = '3. 가성비 심미형';
         }
-      } else if (scores.C >= scores.A && scores.C >= scores.S && scores.C >= scores.E) {
-        if (answers.Q5 === 1) {
-          type = '6. 최소 치료 방어형';
-        } else if (answers.Q6 === 2) {
+      } else if (axis === 'C') {
+        // 재료 비교(Q6=2) 또는 비교 후 결정하는 성향(Q10=2) 중 하나만 있어도
+        // "데이터 분석형"으로 판별해, 특정 답 하나에만 의존하던 좁은 문을 넓혔다.
+        if (answers.Q6 === 2 || answers.Q10 === 2) {
           type = '5. 깐깐한 데이터 분석형';
         } else {
           type = '6. 최소 치료 방어형';
         }
-      } else if (scores.S >= scores.A && scores.S >= scores.C && scores.S >= scores.E) {
+      } else if (axis === 'S') {
         if (answers.Q6 === 1) {
           type = '7. 논리적 검증/의심형';
         } else {
           type = '8. 원장 맹신 의존형';
+        }
+      } else {
+        // 기존에는 E축이 1등이면 무조건 하나의 유형으로만 귀결되어 세분화가 없었다.
+        // 비용 민감도(Q3/Q8)를 기준으로 "속도만 우선"과 "속도+비용 모두 우선"을 구분한다.
+        if (answers.Q3 === 1 || answers.Q8 === 1) {
+          type = '4B. 속전속결 가성비형';
+        } else {
+          type = '4. 속전속결 바쁜 현대인형';
         }
       }
 
