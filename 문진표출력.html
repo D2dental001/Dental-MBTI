@@ -515,7 +515,7 @@
     }
     .print-logo.has-logo img { display: block; }
     .print-logo-text {
-      font-size: 19px;
+      font-size: 21px;
       color: #2f97aa;
       line-height: 1;
     }
@@ -523,12 +523,12 @@
 
     .print-brand h2 {
       margin: 0 0 2px;
-      font-size: 18px;
+      font-size: 20px;
       line-height: 1.2;
     }
     .print-brand p, .print-meta, .print-field, .print-option, .print-note {
       color: #44636d;
-      font-size: 11.5px;
+      font-size: 13.5px;
       line-height: 1.5;
     }
     .print-brand p { margin: 0; }
@@ -554,7 +554,7 @@
 
     .print-section h3 {
       margin: 0 0 8px;
-      font-size: 15px;
+      font-size: 17px;
       color: #17343b;
     }
 
@@ -575,7 +575,7 @@
     .print-field strong {
       display: block;
       color: #17343b;
-      font-size: 10.5px;
+      font-size: 12.5px;
       margin-bottom: 2px;
       letter-spacing: 0.02em;
     }
@@ -598,7 +598,7 @@
 
     .print-question-title {
       margin: 0;
-      font-size: 12.5px;
+      font-size: 14.5px;
       font-weight: 900;
       color: #17343b;
       line-height: 1.4;
@@ -607,7 +607,7 @@
 
     .print-question-desc {
       margin: 0;
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 400;
       color: #7c9298;
       line-height: 1.4;
@@ -623,7 +623,7 @@
     }
 
     .print-options .print-option {
-      font-size: 10.5px;
+      font-size: 12.5px;
       line-height: 1.45;
     }
 
@@ -634,7 +634,7 @@
 
     .print-signature {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 12px;
       margin-top: 12px;
     }
@@ -651,7 +651,7 @@
     }
 
     .signature-box strong {
-      font-size: 11.5px;
+      font-size: 13.5px;
       color: #17343b;
     }
 
@@ -754,7 +754,7 @@
         <article class="wf-card">
           <div class="wf-step">STEP 2</div>
           <strong>문진표 작성</strong>
-          <span>환자 기본 정보와 10개 선택 문항, 추가 메모를 화면에서 직접 입력합니다.</span>
+          <span>환자 기본 정보와 15개 선택 문항을 화면에서 직접 입력합니다.</span>
         </article>
         <article class="wf-card">
           <div class="wf-step">STEP 3</div>
@@ -767,7 +767,7 @@
         <section class="main-col">
           <div class="section-title">
             <h2>환자 문진표 작성</h2>
-            <div class="sub">기본 정보 + 15문항 + 추가 메모</div>
+            <div class="sub">기본 정보 + 15문항</div>
           </div>
 
           <div class="survey-sheet">
@@ -793,17 +793,6 @@
             </section>
 
             <div id="questionGrid"></div>
-
-            <section class="info-card">
-              <div class="section-title" style="margin-bottom:14px;">
-                <h2 style="font-size:20px;">추가 메모</h2>
-                <div class="sub">특이사항 / 원하는 내용</div>
-              </div>
-              <div class="field-group">
-                <label class="field-label" for="patientMemo">환자 메모</label>
-                <textarea class="textarea-field" id="patientMemo" placeholder="예: 앞니 심미개선 관심 / 마취에 대한 두려움 있음 / 빠른 치료 희망"></textarea>
-              </div>
-            </section>
           </div>
         </section>
 
@@ -832,7 +821,7 @@
               <h3>안내 메모</h3>
               <ul class="check-list">
                 <li>출력 시 체크한 선택지에 자동으로 표시가 반영됩니다.</li>
-                <li>환자 기본 정보와 추가 메모도 함께 출력됩니다.</li>
+                <li>환자 기본 정보도 함께 출력됩니다.</li>
                 <li>브라우저 인쇄창에서 종이 출력 또는 PDF 저장이 가능합니다.</li>
               </ul>
             </section>
@@ -872,15 +861,9 @@
         </section>
 
         <section class="print-section">
-          <h3>추가 메모</h3>
-          <div class="print-note" id="printMemo">-</div>
-        </section>
-
-        <section class="print-section">
           <h3>서명 확인</h3>
           <div class="print-signature">
             <div class="signature-box"><strong>환자 서명</strong><span>________________</span></div>
-            <div class="signature-box"><strong>상담자 확인</strong><span>________________</span></div>
           </div>
         </section>
       </section>
@@ -1061,13 +1044,11 @@
     const patientName = document.getElementById('patientName');
     const chartNumber = document.getElementById('chartNumber');
     const visitDate = document.getElementById('visitDate');
-    const patientMemo = document.getElementById('patientMemo');
     const printMeta = document.getElementById('printMeta');
     const printPatientName = document.getElementById('printPatientName');
     const printChartNumber = document.getElementById('printChartNumber');
     const printVisitDate = document.getElementById('printVisitDate');
     const printQuestions = document.getElementById('printQuestions');
-    const printMemo = document.getElementById('printMemo');
 
     let answers = {};
     let uploadedLogoData = '';
@@ -1188,7 +1169,6 @@
       printChartNumber.textContent = chartNumber.value.trim() || '-';
       printVisitDate.textContent = formatDateDisplay(visitDate.value) || '-';
       printQuestions.innerHTML = buildPrintQuestions();
-      printMemo.textContent = patientMemo.value.trim() || '-';
     }
 
     function resetForm() {
@@ -1200,7 +1180,6 @@
       patientName.value = '';
       chartNumber.value = '';
       visitDate.value = '';
-      patientMemo.value = '';
       progressBadge.textContent = '0 / 15';
       statusText.textContent = '아직 문진표 작성 전입니다.';
       window.scrollTo({ top: 0, behavior: 'smooth' });
