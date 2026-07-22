@@ -719,6 +719,35 @@
     }
     .print-keypoint b { display: block; font-size: 11.5px; font-weight: 800; margin-bottom: 2px; color: #8a6300; }
 
+    .strategy-box {
+      background: linear-gradient(135deg, var(--accent), #e4f6f8);
+      border: 1.5px solid #a9dde6;
+      border-radius: 14px;
+      padding: 4px 15px 13px;
+      margin: 6px 0;
+    }
+    .strategy-box h4 {
+      color: var(--brand) !important;
+      font-size: 13px !important;
+      margin-top: 12px !important;
+    }
+    .strategy-box ul { margin: 0 !important; }
+    .strategy-box li { font-weight: 600; }
+
+    .print-strategy-box {
+      background: #eaf7f9;
+      border: 1.5px solid #a9dde6;
+      border-radius: 12px;
+      padding: 2px 12px 10px;
+      margin: 6px 0 10px;
+    }
+    .print-strategy-box h4 {
+      color: #2f97aa !important;
+      margin-top: 10px !important;
+    }
+    .print-strategy-box ul { margin: 0 !important; }
+    .print-strategy-box li { font-weight: 700 !important; }
+
     .print-guide-block { display: block; margin-top: 4px; }
     .print-guide-summary { font-weight: 800; font-size: 13.5px; color: #15343d; margin: 0 0 10px; }
     .print-guide-block h4 { margin: 10px 0 4px; font-size: 12px; color: #2f97aa; letter-spacing: 0.02em; }
@@ -921,11 +950,7 @@
     .print-section-result {
       break-inside: auto;
     }
-    .print-section-result h3 {
-      break-after: avoid;
-    }
     .print-guide-block h4 {
-      break-after: avoid;
       break-inside: avoid;
     }
     .print-guide-block li,
@@ -935,6 +960,7 @@
     .print-trauma-flag,
     .print-scope-flag,
     .print-keypoint,
+    .print-strategy-box,
     .print-guide-summary {
       break-inside: avoid;
     }
@@ -1270,7 +1296,7 @@
         </div>
 
         <div class="print-section print-section-result">
-          <h3>최종 상담 결과</h3>
+          <h3>유형 분석 결과표</h3>
           <div class="print-type" id="printType">-</div>
           <div class="print-guide" id="printGuide">-</div>
         </div>
@@ -1741,6 +1767,7 @@
       const flagClass = mode === 'print' ? 'print-trauma-flag' : 'trauma-flag';
       const scopeFlagClass = mode === 'print' ? 'print-scope-flag' : 'scope-flag';
       const keyPointClass = mode === 'print' ? 'print-keypoint' : 'guide-keypoint';
+      const strategyBoxClass = mode === 'print' ? 'print-strategy-box' : 'strategy-box';
       // Q9에서 "극도의 트라우마"를 선택한 경우, 어떤 유형으로 분류되든 상관없이
       // 최우선으로 봐야 할 안전 경고를 유형 안내보다 위에 먼저 보여준다.
       const traumaBanner = extremeTrauma
@@ -1762,10 +1789,10 @@
           <p class="${summaryClass}">${guide.summary}</p>
           <h4>환자 심리 프로파일</h4>
           <p>${guide.psychology}</p>
-          <h4>이런 말·행동이 보이면 이 유형입니다</h4>
-          <ul>${guide.signals.map(s => `<li>${s}</li>`).join('')}</ul>
-          <h4>상담 전략</h4>
-          <ul>${guide.strategy.map(s => `<li>${s}</li>`).join('')}</ul>
+          <div class="${strategyBoxClass}">
+            <h4>★ 상담 전략 (핵심 포인트)</h4>
+            <ul>${guide.strategy.map(s => `<li>${s}</li>`).join('')}</ul>
+          </div>
           <h4>상황별 실전 상담 스크립트</h4>
           <ul class="${scriptClass}">${guide.scripts.map(s => `<li><b>${s.label}</b>${s.line}</li>`).join('')}</ul>
           <h4>자주 나오는 반론과 대응</h4>
