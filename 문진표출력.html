@@ -622,6 +622,12 @@
       list-style: none;
     }
 
+    /* 선택지 글자 수가 길어서 2열로 두면 줄바꿈이 생겨 오히려 칸이 늘어나는 문항은
+       1열(한 줄에 하나씩)로 표시한다. */
+    .print-options-single {
+      grid-template-columns: 1fr;
+    }
+
     .print-options .print-option {
       font-size: 12.5px;
       line-height: 1.45;
@@ -919,6 +925,7 @@
         id: 'Q5',
         title: 'Q5 [치료 범위]',
         desc: '선호하는 치료 범위를 선택해 주세요.',
+        singleColumn: true,
         options: [
           '1) 당장 아프고 불편한 곳만 최소한으로 치료받고 싶음',
           '2) 비용/시간이 들더라도 문제 있는 곳은 이번 기회에 다 치료하고 싶음',
@@ -929,6 +936,7 @@
         id: 'Q6',
         title: 'Q6 [상담 선호도]',
         desc: '가장 이해하기 쉬운 설명 방식을 선택해 주세요.',
+        singleColumn: true,
         options: [
           '1) 구강 카메라나 CT 등 사진을 보며 현재 상태를 정확히 설명',
           '2) 여러 가지 치료 재료의 장단점과 비용을 명확히 비교',
@@ -939,6 +947,7 @@
         id: 'Q7',
         title: 'Q7 [구강 관심도]',
         desc: '치아와 미소에 대한 평소 생각을 선택해 주세요.',
+        singleColumn: true,
         options: [
           '1) 내 치아나 미소에 자신감이 있고 활짝 웃는 편이다',
           '2) 치아 색이나 모양 때문에 가끔 입을 가리거나 신경이 쓰인다',
@@ -949,6 +958,7 @@
         id: 'Q8',
         title: 'Q8 [재료 선택]',
         desc: '재료 선택 시 가장 중요한 기준을 선택해 주세요.',
+        singleColumn: true,
         options: [
           '1) 무조건 비용이 가장 저렴한 재료',
           '2) 비용이 적당하고 가장 대중적으로 많이 쓰는 재료',
@@ -969,6 +979,7 @@
         id: 'Q10',
         title: 'Q10 [의사결정]',
         desc: '치료 방법을 결정하는 방식을 선택해 주세요.',
+        singleColumn: true,
         options: [
           '1) 원장님(의료진)이 내 구강 상태에 맞춰 가장 추천하는 방법을 따른다',
           '2) 가족과 상의하거나 다른 치과와 꼼꼼히 비교해 보고 결정한다',
@@ -1149,6 +1160,7 @@
           const isSelected = selected === idx + 1;
           return `<li class="print-option${isSelected ? ' selected' : ''}">${isSelected ? '☑' : '☐'} ${option}</li>`;
         }).join('');
+        const optionsClass = question.singleColumn ? 'print-options print-options-single' : 'print-options';
 
         return `
           <div class="print-question">
@@ -1156,7 +1168,7 @@
               <p class="print-question-title">${question.title}</p>
               <p class="print-question-desc">${question.desc}</p>
             </div>
-            <ol class="print-options">${optionsHtml}</ol>
+            <ol class="${optionsClass}">${optionsHtml}</ol>
           </div>
         `;
       }).join('');
