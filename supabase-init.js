@@ -3,7 +3,7 @@
 // Supabase 대시보드 → Project Settings → API 에서 확인할 수 있습니다.
 // =====================================================================
 const SUPABASE_URL = "https://fpkncnlslyojvbscsatl.supabase.co";
-   const SUPABASE_ANON_KEY = "sb_publishable_esByF7c4c3dR2VU9cKS8fg_xu1ROIZo";
+const SUPABASE_ANON_KEY = "sb_publishable_esByF7c4c3dR2VU9cKS8fg_xu1ROIZo";
 // =====================================================================
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
