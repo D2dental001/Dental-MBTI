@@ -764,33 +764,56 @@
       break-inside: avoid;
     }
 
-    .score-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 12px;
+    .score-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-top: 14px;
     }
 
-    .score-item {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 12px;
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 13px;
+      border-radius: 14px;
+      border: 1.5px solid var(--line);
       background: #fff;
+      transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
     }
 
-    .score-key {
-      display: block;
+    .score-row.dominant {
+      border-color: transparent;
+      box-shadow: 0 8px 20px rgba(31, 88, 104, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .score-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 12px;
-      color: var(--text-soft);
-      margin-bottom: 6px;
-      font-weight: 700;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
     }
 
-    .score-val {
-      font-size: 24px;
-      font-weight: 900;
-      color: var(--brand);
-      line-height: 1;
+    .score-label {
+      flex: 1;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #33535c;
+    }
+
+    .score-pill {
+      font-size: 13px;
+      font-weight: 800;
+      padding: 5px 13px;
+      border-radius: 999px;
+      white-space: nowrap;
     }
 
     .footer-note {
@@ -869,8 +892,7 @@
     .print-meta,
     .print-summary,
     .print-guide,
-    .print-list li,
-    .print-score-item span {
+    .print-list li {
       color: #44636d;
       font-size: 13px;
       line-height: 1.6;
@@ -938,26 +960,54 @@
       white-space: pre-wrap;
     }
 
-    .print-score-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
+    .print-score-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .print-score-row {
+      display: flex;
+      align-items: center;
       gap: 10px;
-    }
-
-    .print-score-item {
+      padding: 7px 10px;
+      border-radius: 10px;
       border: 1px solid #d7e8ee;
-      border-radius: 14px;
-      padding: 12px;
-      text-align: center;
       background: #fbfeff;
+      break-inside: avoid;
     }
 
-    .print-score-item strong {
-      display: block;
-      font-size: 24px;
-      color: #2f97aa;
-      margin-top: 4px;
-      line-height: 1;
+    .print-score-row.dominant {
+      border-color: transparent;
+      box-shadow: 0 4px 10px rgba(31, 88, 104, 0.10);
+    }
+
+    .print-score-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .print-score-label {
+      flex: 1;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #33535c;
+    }
+
+    .print-score-pill {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
     }
 
     .print-list {
@@ -1066,9 +1116,6 @@
         align-items: flex-start;
         flex-direction: column;
       }
-      .score-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
       .button-group {
         position: sticky;
         bottom: 0;
@@ -1100,8 +1147,8 @@
       .status-text,
       .guide-text,
       .option-text { font-size: 13.5px; }
-      .score-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-      .score-val { font-size: 22px; }
+      .score-row { padding: 8px 11px; gap: 10px; }
+      .score-pill { font-size: 12px; padding: 4px 10px; }
     }
   </style>
 </head>
@@ -1196,22 +1243,7 @@
               <h3>숨은 성향 점수</h3>
               <p class="result-hint">A: 심미 / C: 비용 / S: 안전 / E: 효율</p>
               <div class="score-chart" id="scoreChart"></div>
-              <div class="score-grid">
-                <div class="score-item"><span class="score-key">Aesthetic (A)</span><span class="score-val" id="scoreA">0</span></div>
-                <div class="score-item"><span class="score-key">Cost (C)</span><span class="score-val" id="scoreC">0</span></div>
-                <div class="score-item"><span class="score-key">Safety (S)</span><span class="score-val" id="scoreS">0</span></div>
-                <div class="score-item"><span class="score-key">Efficiency (E)</span><span class="score-val" id="scoreE">0</span></div>
-              </div>
-            </section>
-
-            <section class="note-card">
-              <h3>운영 메모</h3>
-              <p>결과는 오직 <strong>검토하기</strong> 버튼을 눌렀을 때만 표시됩니다. 입력 도중에는 어떤 유형도 미리 노출되지 않습니다.</p>
-              <ul class="check-list">
-                <li>15문항 전체 텍스트와 선택지를 화면에 그대로 노출</li>
-                <li>라미네이트 상담 전환율 향상을 위한 유형 분류 우선순위 적용</li>
-                <li>모바일에서도 터치하기 쉬운 큰 선택 영역과 고정 버튼 구성</li>
-              </ul>
+              <div class="score-list" id="scoreList"></div>
             </section>
           </div>
         </aside>
@@ -1246,12 +1278,7 @@
         <div class="print-section">
           <h3>성향 점수 요약</h3>
           <div class="print-score-chart" id="printScoreChart"></div>
-          <div class="print-score-grid">
-            <div class="print-score-item"><span>Aesthetic (A)</span><strong id="printScoreA">0</strong></div>
-            <div class="print-score-item"><span>Cost (C)</span><strong id="printScoreC">0</strong></div>
-            <div class="print-score-item"><span>Safety (S)</span><strong id="printScoreS">0</strong></div>
-            <div class="print-score-item"><span>Efficiency (E)</span><strong id="printScoreE">0</strong></div>
-          </div>
+          <div class="print-score-list" id="printScoreList"></div>
         </div>
 
         <div class="print-section">
@@ -1502,8 +1529,8 @@
         caution: '"별거 아니에요", "다들 그 정도는 참으세요" 같은 말로 두려움을 축소하지 않습니다. 두려움을 인정하고 공감하는 것이 먼저입니다 — "그렇게 느끼실 수 있어요, 최대한 편하게 도와드릴게요"로 시작합니다.'
       },
       '3. 가성비 심미형': {
-        keyPoint: '라미네이트는 최소 4개(스마일라인 기준 이상적으로 6개) 이상이어야 합니다. 개수를 줄이면 오히려 부자연스러워지고 재시술 민원으로 이어진다는 점을 반드시 먼저 설명하세요.',
-        summary: '[라미네이트 유도 타겟] 예뻐지고 싶지만 예산이 한계인 환자군입니다. "치아 1~2개만"이 아니라 "최소 4개(이상적으로 6개) 패키지"와 단계별 이벤트 가격, 장기 무이자 분납을 제안합니다.',
+        keyPoint: '라미네이트는 최소 4개 이상이어야 합니다. 스마일라인 기준으로는 상악 8~10개·하악 6~8개까지가 이상적이며, 심미적 인상은 특히 상악이 좌우합니다. 개수를 줄이면 오히려 부자연스러워지고 재시술 민원으로 이어진다는 점을 반드시 먼저 설명하세요.',
+        summary: '[라미네이트 유도 타겟] 예뻐지고 싶지만 예산이 한계인 환자군입니다. "치아 1~2개만"이 아니라 "최소 4개(이상적으로 상악 8~10개) 패키지"와 단계별 이벤트 가격, 장기 무이자 분납을 제안합니다.',
         psychology: '미적 개선 욕구는 분명하지만, "얼마 나올지 모른다"는 불확실성 자체가 스트레스로 작용해 상담을 피하게 됩니다. 예산이 없는 게 아니라, 예산 범위 안에서 합리적인 선택을 하고 싶어하는 실용적 소비자입니다. 이 유형에게 가장 흔한 실무 리스크는 "일단 눈에 띄는 앞니 1~2개만 해달라"는 요청을 그대로 들어주는 것입니다 — 그 결과 그 치아만 하얗고 커 보여 오히려 부자연스러워지고, 이는 재시술 요구나 민원으로 이어지는 가장 흔한 원인입니다. 또한 이 유형은 "더 싼 곳"과 가격을 직접 비교하며 묻는 경우가 많고, "무삭제"라는 문구를 문자 그대로 받아들여 조금이라도 삭제가 들어가면 배신감을 느끼기도 합니다. 이 세 지점(개수, 가격 비교, 무삭제 오해)을 미리 대비해두는 것이 이 유형 상담의 핵심입니다.',
         signals: [
           '"전체 다 하면 얼마예요?"를 상담 초반에 조심스럽게 묻는다',
@@ -1513,8 +1540,8 @@
           '분납, 할부, 이벤트에 대한 질문이 자연스럽게 나온다'
         ],
         strategy: [
-          '치아 개수를 줄이고 싶어하는 요청이 나오면, 바로 "네 그렇게 해드릴게요"로 응하지 않습니다. 스마일라인(웃을 때 보이는 치아 범위, 보통 6개 내외)과 치아 비율 문제를 먼저 설명합니다.',
-          '특히 앞니(11, 21번)만 벌어짐을 없애려는 요청에는, 그 두 개만 시술하면 크기가 도드라져 "토끼 이빨"처럼 보일 수 있다는 점을 구체적으로 설명합니다. 최소 4개(이상적으로 스마일라인 전체인 6개)를 함께 진행해야 치아 비율이 자연스럽습니다.',
+          '치아 개수를 줄이고 싶어하는 요청이 나오면, 바로 "네 그렇게 해드릴게요"로 응하지 않습니다. 스마일라인(웃을 때 보이는 치아 범위로, 상악은 보통 8~10개·하악은 6~8개가 들어오며, 심미적 인상은 특히 상악이 좌우합니다)과 치아 비율 문제를 먼저 설명합니다.',
+          '특히 앞니(11, 21번)만 벌어짐을 없애려는 요청에는, 그 두 개만 시술하면 크기가 도드라져 "토끼 이빨"처럼 보일 수 있다는 점을 구체적으로 설명합니다. 최소 4개(이상적으로는 상악 스마일라인 기준 8~10개)를 함께 진행해야 치아 비율이 자연스럽습니다.',
           '가격은 단계별 이벤트 패키지(예: 4개 진행 시 2개 추가 등)로 구간을 나눠서 제시하면, 개수가 늘어날수록 개당 비용이 낮아진다는 걸 자연스럽게 납득시킬 수 있습니다.',
           '변심으로 인한 전체 재시술은 비용이 다시 청구된다는 점을 미리 안내해서, "일단 최소한만" 접근이 결과적으로 더 비쌀 수 있다는 것을 이해시킵니다.',
           '"무삭제"를 문자 그대로 기대하고 온 환자에게는, 배열 상태에 따라 일부 미세 조정이 필요할 수 있다는 점을 첫 상담에서부터 미리 설명해 나중에 배신감을 느끼지 않게 합니다.',
@@ -1522,7 +1549,7 @@
         ],
         scripts: [
           { label: '상담 오프닝', line: '"전체를 다 하실 필요는 없어요. 다만 예쁘게 보이려면 최소한으로 필요한 범위가 있어서, 그 부분부터 설명드릴게요."' },
-          { label: '치아 개수 설득 (스마일라인)', line: '"웃으실 때 보이는 스마일라인 안에는 보통 치아가 6개 정도 들어와요. 그 중 일부만 하얗고 예쁘게 하면 오히려 그 부분만 도드라져 보일 수 있어요."' },
+          { label: '치아 개수 설득 (스마일라인)', line: '"웃으실 때 보이는 스마일라인 안에는 위쪽(상악) 기준으로 보통 8~10개, 아래쪽(하악)은 6~8개 정도 치아가 들어와요. 특히 인상을 좌우하는 건 위쪽이라, 그 중 일부만 하얗고 예쁘게 하면 오히려 그 부분만 도드라져 보일 수 있어요."' },
           { label: '치아 개수 설득 (비율)', line: '"앞니 두 개(11, 21번)만 벌어짐을 없애려고 하면, 그 두 개만 커져서 토끼 이빨처럼 보일 수 있어요. 최소 4개는 같이 진행해야 비율이 자연스럽게 나와요."' },
           { label: '단계별 가격 안내', line: '"4개로 진행하시면 이 가격이고, 여기서 2개를 더하시는 이벤트로 진행하시면 개당 단가가 더 낮아져요. 스마일라인 전체로 가실수록 개당 비용은 계속 내려가는 구조예요."' },
           { label: '클로징', line: '"오늘 앞니 4개 라인으로 먼저 예약 잡아드리고, 나머지 스마일라인 확장은 나중에 여유 되실 때 상의드려도 괜찮아요."' }
@@ -1533,7 +1560,7 @@
           { q: '완전 무삭제라고 들었는데 왜 삭제를 조금이라도 하나요?', a: '치아 형태 자체는 삭제 없이 제작할 수 있어요. 다만 치아 배열이 고르지 않은 경우, 가장 튀어나오거나 긴 치아를 기준으로 라인을 잡아야 스마일라인이 예쁘게 나오기 때문에 그 부분만 미세하게 다듬는 거예요. 이 조정 없이는 색깔만 바뀌는 효과에 그칠 수 있어서, 완전 무삭제를 원하시면 그대로 진행해드릴 수 있지만 결과 만족도 차이를 먼저 안내드리는 거예요.' },
           { q: '할부하면 이자가 많이 붙지 않나요?', a: '저희 제휴 카드사 기준으로 12개월 무이자라 실제 추가 부담은 없으세요. 심사 결과에 따라 다를 수 있어 미리 확인해드릴게요.' }
         ],
-        caution: '치아 개수를 줄여달라는 요청에 그대로 응하지 않습니다. 전체 금액을 먼저 크게 던지지도 않되, 최소 4개(스마일라인 기준 6개) 미만으로는 진행하지 않는 이유를 반드시 먼저 설명한 뒤 가격을 안내합니다. 삭제 여부에 대한 안내와 동의는 반드시 서면(동의서)으로 남깁니다.'
+        caution: '치아 개수를 줄여달라는 요청에 그대로 응하지 않습니다. 전체 금액을 먼저 크게 던지지도 않되, 최소 4개(이상적으로 상악 스마일라인 기준 8~10개) 미만으로는 진행하지 않는 이유를 반드시 먼저 설명한 뒤 가격을 안내합니다. 삭제 여부에 대한 안내와 동의는 반드시 서면(동의서)으로 남깁니다.'
       },
       '4. 속전속결 바쁜 현대인형': {
         keyPoint: '설명을 줄이고 결론부터 말하세요. 이 환자에게는 시간이 곧 신뢰입니다.',
@@ -1722,7 +1749,7 @@
       // Q1에서 "치아 색상·모양·벌어짐이 신경 쓰임"을 내원 목적으로 고른 경우,
       // 유형과 무관하게 "치아 개수를 줄여서 진행했다가 부자연스러워지는" 민원 리스크를 항상 상기시킨다.
       const scopeBanner = aestheticScopeRisk
-        ? `<div class="${scopeFlagClass}"><b>💡 심미 치료 개수 안내</b>내원 목적이 치아 색상·모양·벌어짐 개선입니다. 라미네이트 등 심미 치료는 최소 4개(스마일라인 기준 이상적으로 6개) 이상 진행해야 자연스러운 비율이 나옵니다. 특히 앞니(11, 21번) 등 일부 치아만 벌어짐을 없애려는 요청은, 그 치아만 커 보여 부자연스러워지고 재시술 민원으로 이어지기 쉬우니 개수를 줄이기 전에 반드시 이 점을 먼저 설명하세요.</div>`
+        ? `<div class="${scopeFlagClass}"><b>💡 심미 치료 개수 안내</b>내원 목적이 치아 색상·모양·벌어짐 개선입니다. 라미네이트 등 심미 치료는 최소 4개 이상 진행해야 자연스러운 비율이 나오며, 스마일라인 기준으로는 상악 8~10개·하악 6~8개까지가 이상적입니다(심미적 인상은 특히 상악이 좌우합니다). 특히 앞니(11, 21번) 등 일부 치아만 벌어짐을 없애려는 요청은, 그 치아만 커 보여 부자연스러워지고 재시술 민원으로 이어지기 쉬우니 개수를 줄이기 전에 반드시 이 점을 먼저 설명하세요.</div>`
         : '';
       const keyPointBox = guide.keyPoint
         ? `<div class="${keyPointClass}"><b>★ 이 상담에서 가장 중요한 한 가지</b>${guide.keyPoint}</div>`
@@ -1757,10 +1784,7 @@
     const scoreCard = document.getElementById('scoreCard');
     const typeOutput = document.getElementById('typeOutput');
     const guideOutput = document.getElementById('guideOutput');
-    const scoreA = document.getElementById('scoreA');
-    const scoreC = document.getElementById('scoreC');
-    const scoreS = document.getElementById('scoreS');
-    const scoreE = document.getElementById('scoreE');
+    const scoreList = document.getElementById('scoreList');
     const analyzeBtn = document.getElementById('analyzeBtn');
     const pdfBtn = document.getElementById('pdfBtn');
     const resetBtn = document.getElementById('resetBtn');
@@ -1773,10 +1797,7 @@
     const printMeta = document.getElementById('printMeta');
     const printType = document.getElementById('printType');
     const printGuide = document.getElementById('printGuide');
-    const printScoreA = document.getElementById('printScoreA');
-    const printScoreC = document.getElementById('printScoreC');
-    const printScoreS = document.getElementById('printScoreS');
-    const printScoreE = document.getElementById('printScoreE');
+    const printScoreList = document.getElementById('printScoreList');
     const printAnswerList = document.getElementById('printAnswerList');
 
     let answers = {};
@@ -1888,46 +1909,99 @@
       printMeta.textContent = `상담 시트 출력일시: ${getFormattedNow()}`;
       printType.textContent = result.type;
       printGuide.innerHTML = buildGuideHTML(result.guide, 'print', answers.Q9 === 3, answers.Q1 === 4);
-      printScoreA.textContent = scores.A;
-      printScoreC.textContent = scores.C;
-      printScoreS.textContent = scores.S;
-      printScoreE.textContent = scores.E;
+      printScoreList.innerHTML = buildScoreListHTML(scores, 'print');
       const printChartEl = document.getElementById('printScoreChart');
       if (printChartEl) printChartEl.innerHTML = buildScoreChartSVG(scores);
       printAnswerList.innerHTML = buildPrintAnswerList();
     }
 
-    // 성향 점수를 숫자만이 아니라 한눈에 비교할 수 있는 가로 막대 그래프로 보여준다.
+    // 성향 점수를 레이더(다이아몬드) 그래프와, 색으로 구분되는 카드 리스트로 함께 보여준다.
     const AXIS_META = {
-      A: { label: '심미 (A)', color: '#2f97aa' },
-      C: { label: '비용 (C)', color: '#e0a458' },
-      S: { label: '안전 (S)', color: '#6b5fd1' },
-      E: { label: '효율 (E)', color: '#e2694f' }
+      A: { label: '심미 (A)', num: 1, angle: -90, color: '#2f97aa', pillBg: '#e6f4f6', pillText: '#1f6e7c' },
+      C: { label: '비용 (C)', num: 2, angle: 0, color: '#d99a3d', pillBg: '#fbf1e0', pillText: '#96652a' },
+      S: { label: '안전 (S)', num: 3, angle: 90, color: '#7c6bcf', pillBg: '#efeaf9', pillText: '#5847a8' },
+      E: { label: '효율 (E)', num: 4, angle: 180, color: '#e2694f', pillBg: '#fdece7', pillText: '#b8492f' }
     };
     const SCORE_SCALE_MAX = 32; // 15문항 기준 각 축의 이론적 최대치 근사값 — 환자별로 절대 비교가 가능하도록 고정 스케일을 사용한다.
 
     function buildScoreChartSVG(scores) {
-      const barMaxWidth = 250;
-      const rowHeight = 32;
-      const chartTop = 6;
-      const labelWidth = 82;
+      const cx = 150, cy = 148, maxR = 92;
       const axes = ['A', 'C', 'S', 'E'];
+      const toRad = deg => (deg * Math.PI) / 180;
+      const pointAt = (angleDeg, r) => [cx + r * Math.cos(toRad(angleDeg)), cy + r * Math.sin(toRad(angleDeg))];
+
+      const ringLevels = [0.25, 0.5, 0.75, 1];
+      const gridPolys = ringLevels.map(level => {
+        const pts = axes.map(ax => pointAt(AXIS_META[ax].angle, maxR * level).join(',')).join(' ');
+        return `<polygon points="${pts}" fill="none" stroke="#e2ecf0" stroke-width="1" />`;
+      }).join('');
+
+      const axisLines = axes.map(ax => {
+        const [x, y] = pointAt(AXIS_META[ax].angle, maxR);
+        return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#e2ecf0" stroke-width="1" />`;
+      }).join('');
+
       const maxVal = Math.max(scores.A, scores.C, scores.S, scores.E);
-      const rows = axes.map((ax, i) => {
+
+      const dataPts = axes.map(ax => {
+        const v = Math.max(0, Math.min(scores[ax] || 0, SCORE_SCALE_MAX));
+        const r = (v / SCORE_SCALE_MAX) * maxR;
+        return pointAt(AXIS_META[ax].angle, r);
+      });
+      const dataPolyStr = dataPts.map(p => p.join(',')).join(' ');
+
+      const dots = axes.map((ax, i) => {
+        const [x, y] = dataPts[i];
+        const isDominant = scores[ax] === maxVal && maxVal > 0;
+        return `<circle cx="${x}" cy="${y}" r="${isDominant ? 6 : 4.5}" fill="${AXIS_META[ax].color}" stroke="#fff" stroke-width="1.5" />`;
+      }).join('');
+
+      const labelR = maxR + 28;
+      const labels = axes.map(ax => {
+        const meta = AXIS_META[ax];
+        const [x, y] = pointAt(meta.angle, labelR);
+        const isDominant = scores[ax] === maxVal && maxVal > 0;
+        const anchor = meta.angle === 0 ? 'start' : meta.angle === 180 ? 'end' : 'middle';
+        return `<text x="${x}" y="${y + 4}" font-size="13" font-weight="${isDominant ? 800 : 600}" fill="${isDominant ? meta.color : '#5c747c'}" text-anchor="${anchor}">${meta.label}${isDominant ? ' ★' : ''}</text>`;
+      }).join('');
+
+      return `
+        <svg viewBox="0 0 300 296" width="100%" height="240" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="radarFill" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#2f97aa" />
+              <stop offset="100%" stop-color="#7c6bcf" />
+            </linearGradient>
+          </defs>
+          ${gridPolys}
+          ${axisLines}
+          <polygon points="${dataPolyStr}" fill="url(#radarFill)" fill-opacity="0.32" stroke="#2f97aa" stroke-width="2" stroke-linejoin="round" />
+          ${dots}
+          ${labels}
+        </svg>
+      `;
+    }
+
+    // 화면/PDF 양쪽에서 함께 쓰는 성향 점수 카드 리스트 (축별 고유 색상 + 1등 축 강조)
+    function buildScoreListHTML(scores, mode) {
+      const rowClass = mode === 'print' ? 'print-score-row' : 'score-row';
+      const numClass = mode === 'print' ? 'print-score-num' : 'score-num';
+      const labelClass = mode === 'print' ? 'print-score-label' : 'score-label';
+      const pillClass = mode === 'print' ? 'print-score-pill' : 'score-pill';
+      const maxVal = Math.max(scores.A, scores.C, scores.S, scores.E);
+      const axes = ['A', 'C', 'S', 'E'];
+      return axes.map(ax => {
         const meta = AXIS_META[ax];
         const val = scores[ax] || 0;
-        const w = Math.max(3, Math.round((val / SCORE_SCALE_MAX) * barMaxWidth));
-        const y = chartTop + i * rowHeight;
         const isDominant = val === maxVal && maxVal > 0;
         return `
-          <text x="0" y="${y + 14}" font-size="12.5" font-weight="${isDominant ? 800 : 600}" fill="${isDominant ? '#c1462f' : '#33535c'}">${meta.label}${isDominant ? ' ★' : ''}</text>
-          <rect x="${labelWidth}" y="${y}" width="${barMaxWidth}" height="18" rx="6" fill="#eef3f5"></rect>
-          <rect x="${labelWidth}" y="${y}" width="${w}" height="18" rx="6" fill="${meta.color}" opacity="${isDominant ? 1 : 0.65}"></rect>
-          <text x="${labelWidth + barMaxWidth + 8}" y="${y + 14}" font-size="12.5" font-weight="${isDominant ? 800 : 600}" fill="#17343b">${val}</text>
+          <div class="${rowClass}${isDominant ? ' dominant' : ''}">
+            <div class="${numClass}" style="background:${meta.color};">${meta.num}</div>
+            <div class="${labelClass}">${meta.label}${isDominant ? ' ★' : ''}</div>
+            <div class="${pillClass}" style="background:${meta.pillBg}; color:${meta.pillText};">${val}점</div>
+          </div>
         `;
       }).join('');
-      const totalHeight = chartTop + axes.length * rowHeight;
-      return `<svg viewBox="0 0 380 ${totalHeight}" width="100%" height="${totalHeight}" xmlns="http://www.w3.org/2000/svg">${rows}</svg>`;
     }
 
     function computeScores() {
@@ -2049,10 +2123,7 @@
 
       typeOutput.textContent = result.type;
       guideOutput.innerHTML = buildGuideHTML(result.guide, 'screen', answers.Q9 === 3, answers.Q1 === 4);
-      scoreA.textContent = scores.A;
-      scoreC.textContent = scores.C;
-      scoreS.textContent = scores.S;
-      scoreE.textContent = scores.E;
+      scoreList.innerHTML = buildScoreListHTML(scores, 'screen');
       const scoreChartEl = document.getElementById('scoreChart');
       if (scoreChartEl) scoreChartEl.innerHTML = buildScoreChartSVG(scores);
       updatePrintSheet(result, scores);
@@ -2075,17 +2146,11 @@
       scoreCard.style.display = 'none';
       typeOutput.textContent = '-';
       guideOutput.textContent = '-';
-      scoreA.textContent = '0';
-      scoreC.textContent = '0';
-      scoreS.textContent = '0';
-      scoreE.textContent = '0';
+      scoreList.innerHTML = '';
       printMeta.textContent = '출력 전 분석 필요';
       printType.textContent = '-';
       printGuide.textContent = '-';
-      printScoreA.textContent = '0';
-      printScoreC.textContent = '0';
-      printScoreS.textContent = '0';
-      printScoreE.textContent = '0';
+      printScoreList.innerHTML = '';
       printAnswerList.innerHTML = '';
       const scoreChartElReset = document.getElementById('scoreChart');
       if (scoreChartElReset) scoreChartElReset.innerHTML = '';
