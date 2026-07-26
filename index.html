@@ -210,6 +210,46 @@
 
   /* ---------- Admin mock panel ---------- */
   .card.admin{ max-width:560px; text-align:left; }
+  .card.admin.card-wide{ max-width:780px; }
+
+  .inbox-list{ display:flex; flex-direction:column; gap:14px; }
+  .inbox-row{
+    display:flex; align-items:center; justify-content:space-between; gap:18px;
+    border:1.5px solid var(--line); border-radius:18px; padding:20px 22px; background:#fff;
+    transition: box-shadow .15s ease, border-color .15s ease;
+  }
+  .inbox-row:hover{ border-color: var(--teal-light); box-shadow: 0 10px 24px rgba(47,151,170,0.10); }
+  .inbox-row .inbox-name{ font-size:19px; font-weight:800; color:var(--ink); margin-bottom:6px; }
+  .inbox-row .inbox-meta{ font-size:14.5px; color:var(--ink-soft); line-height:1.6; }
+  .inbox-row .inbox-actions{ display:flex; align-items:center; gap:14px; flex-shrink:0; }
+  .inbox-status{
+    font-size:13px; font-weight:800; letter-spacing:0.02em; padding:6px 14px; border-radius:999px;
+  }
+  .inbox-status.new{ background:#fdece7; color:#b8492f; }
+  .inbox-status.done{ background:#eafdf4; color:#1c8a4c; }
+  .inbox-review-btn{
+    padding:12px 22px; border:none; border-radius:12px; background:var(--teal); color:#fff;
+    font-size:15px; font-weight:800; cursor:pointer; white-space:nowrap;
+  }
+  .inbox-review-btn:hover{ background:#268297; }
+  .inbox-empty{ font-size:15px; color:var(--ink-soft); padding:20px 4px; text-align:center; }
+  @media (max-width:600px){
+    .inbox-row{ flex-direction:column; align-items:flex-start; }
+    .inbox-row .inbox-actions{ width:100%; justify-content:space-between; }
+  }
+
+  #qrPrintArea{ display:none; }
+  @media print {
+    @page{ size: A4; margin: 0; }
+    body *{ visibility: hidden; }
+    #qrPrintArea, #qrPrintArea *{ visibility: visible; }
+    #qrPrintArea{
+      display:block;
+      position: absolute; top:0; left:0;
+      width: 105mm; height: 148mm;
+    }
+    #qrPrintArea img{ width:100%; height:100%; object-fit:contain; }
+  }
   .admin-list{ margin-top:18px; display:flex; flex-direction:column; gap:10px; }
   .acct-row{
     display:flex; align-items:center; justify-content:space-between;
@@ -352,15 +392,15 @@
 
   <!-- ============ VIEW: 문진표 보관함 (patient survey inbox) ============ -->
   <div class="view" id="view-inbox">
-    <div class="card admin">
+    <div class="card admin card-wide">
       <div class="menu-top">
         <div class="eyebrow" style="margin:0;">치과 계정 · 문진표 보관함</div>
         <button class="logout-link" onclick="showView('view-menu')">← 메뉴로</button>
       </div>
-      <h1 class="title display" style="font-size:21px; margin-top:10px;">환자가 제출한 문진표</h1>
-      <p class="subtitle" style="margin-bottom:6px;">"치과 브랜드 설정" 메뉴의 QR코드를 환자가 스캔해 작성하면, 이 목록에 자동으로 쌓입니다.</p>
+      <h1 class="title display" style="font-size:23px; margin-top:10px;">환자가 제출한 문진표</h1>
+      <p class="subtitle" style="margin-bottom:6px; font-size:14.5px;">"치과 브랜드 설정" 메뉴의 QR코드를 환자가 스캔해 작성하면, 이 목록에 자동으로 쌓입니다.</p>
 
-      <div class="admin-list" id="inboxList" style="margin-top:16px;"></div>
+      <div class="inbox-list" id="inboxList" style="margin-top:18px;"></div>
     </div>
   </div>
 
@@ -397,18 +437,25 @@
       <div class="footnote" style="margin-top:16px;">저장하신 치과명·로고는 서버(Supabase)에 저장되어, 어떤 기기·브라우저에서 접속해도 동일하게 적용됩니다.</div>
 
       <div style="margin-top:22px; padding-top:18px; border-top:1px dashed var(--line);">
-        <div class="eyebrow" style="margin-bottom:6px;">환자용 문진표 QR코드</div>
-        <p class="subtitle" style="margin-bottom:12px;">데스크에 놓인 태블릿·모니터에 띄워두면, 환자가 스캔해서 바로 문진표를 작성할 수 있습니다. 계정마다 고유한 QR이라 다른 치과와 겹치지 않습니다.</p>
-        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-          <div style="width:160px; height:160px; border:1.5px solid var(--line); border-radius:16px; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;">
-            <img id="clinicQrImg" alt="문진표 QR코드" style="width:100%; height:100%; object-fit:contain;" />
+        <div class="eyebrow" style="margin-bottom:6px;">환자용 문진표 QR 포스터</div>
+        <p class="subtitle" style="margin-bottom:12px;">치과명·안내 문구·QR코드가 하나로 디자인된 포스터입니다. 데스크에 태블릿으로 띄워두거나, 인쇄해서 세워두세요. 계정마다 고유한 QR이라 다른 치과와 겹치지 않습니다.</p>
+        <div style="display:flex; align-items:flex-start; gap:20px; flex-wrap:wrap;">
+          <div style="width:180px; aspect-ratio:1050/1480; border:1.5px solid var(--line); border-radius:14px; background:#fff; overflow:hidden; flex-shrink:0; box-shadow:0 8px 20px rgba(23,76,90,0.10);">
+            <img id="qrPosterPreview" alt="문진표 QR 포스터 미리보기" style="width:100%; height:100%; object-fit:contain;" />
           </div>
-          <div style="flex:1; min-width:160px;">
-            <button class="btn" style="margin-top:0;" onclick="downloadClinicQR()">QR 이미지 다운로드</button>
+          <div style="flex:1; min-width:200px; display:flex; flex-direction:column; gap:10px;">
+            <button class="btn" style="margin-top:0;" onclick="downloadQrPoster()">포스터 이미지 다운로드</button>
+            <button class="btn ghost" style="margin-top:0;" onclick="printQrPoster()">인쇄하기 (A6 · A4 왼쪽 상단)</button>
+            <div class="footnote" style="margin-top:2px;">이미지 크기: 1050×1480px (A6 비율, 고해상도) · 인쇄 시 A4 용지 왼쪽 상단에 A6 크기로 출력됩니다.</div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- 인쇄 전용: A6 포스터를 A4 왼쪽 상단에 배치하기 위한 영역 (평소엔 화면에 보이지 않음) -->
+  <div id="qrPrintArea">
+    <img id="qrPrintImage" alt="문진표 QR 포스터" />
   </div>
 
   <!-- ============ VIEW: ADMIN ROOT MENU ============ -->
@@ -584,7 +631,7 @@
     if (!profile) return;
     document.getElementById('brandNameInput').value = profile.clinic_name || '';
     updateBrandPreview(profile.clinic_name, profile.logo_url);
-    renderClinicQR(profile.id);
+    renderQrPosterPreview();
   }
 
   function wireBrandForm(){
@@ -623,6 +670,7 @@
     const { error } = await sb.from('accounts').update(update).eq('id', user.id);
     if (error) { alert('저장 중 오류가 발생했습니다: ' + error.message); return; }
     refreshClinicChip({ clinic_name: name });
+    renderQrPosterPreview();
     const msg = document.getElementById('brand-saved-msg');
     msg.classList.add('show');
     setTimeout(() => msg.classList.remove('show'), 2800);
@@ -790,7 +838,7 @@
   // ---- 문진표 보관함 (환자가 링크로 제출한 문진표) ----
   async function loadSubmissions(){
     const list = document.getElementById('inboxList');
-    list.innerHTML = '<div class="footnote">불러오는 중…</div>';
+    list.innerHTML = '<div class="inbox-empty">불러오는 중…</div>';
 
     const profile = await sbGetMyProfile();
     if (!profile) return;
@@ -802,24 +850,27 @@
       .order('submitted_at', { ascending: false });
 
     if (error) {
-      list.innerHTML = `<div class="footnote">불러오기 실패: ${error.message}</div>`;
+      list.innerHTML = `<div class="inbox-empty">불러오기 실패: ${error.message}</div>`;
       return;
     }
     if (!data || data.length === 0) {
-      list.innerHTML = '<div class="footnote">아직 제출된 문진표가 없습니다. "치과 브랜드 설정"의 QR코드를 환자에게 스캔하게 해보세요.</div>';
+      list.innerHTML = '<div class="inbox-empty">아직 제출된 문진표가 없습니다.<br/>"치과 브랜드 설정"의 QR코드를 환자에게 스캔하게 해보세요.</div>';
       return;
     }
 
     list.innerHTML = data.map(row => {
       const submitted = new Date(row.submitted_at).toLocaleString('ko-KR');
       const statusLabel = row.status === 'analyzed' ? '검토완료' : '신규';
-      const statusClass = row.status === 'analyzed' ? 'active' : 'blocked';
+      const statusClass = row.status === 'analyzed' ? 'done' : 'new';
       return `
-        <div class="acct-row">
-          <div class="who">${row.patient_name}<small>연락처 ${row.patient_phone || '-'} · 생년월일 ${row.patient_birthdate} · 제출 ${submitted}</small></div>
-          <div style="display:flex; align-items:center;">
-            <span class="acct-status ${statusClass}">${statusLabel}</span>
-            <button class="iplog-btn" onclick="openSubmissionReview(${row.id})">검토결과</button>
+        <div class="inbox-row">
+          <div>
+            <div class="inbox-name">${row.patient_name}</div>
+            <div class="inbox-meta">연락처 ${row.patient_phone || '-'} · 생년월일 ${row.patient_birthdate}<br/>제출 ${submitted}</div>
+          </div>
+          <div class="inbox-actions">
+            <span class="inbox-status ${statusClass}">${statusLabel}</span>
+            <button class="inbox-review-btn" onclick="openSubmissionReview(${row.id})">검토결과</button>
           </div>
         </div>
       `;
@@ -833,39 +884,155 @@
     loadSubmissions();
   }
 
-  // ---- 환자용 문진표 QR코드 (치과 브랜드 설정 화면에서 사용) ----
+  // ---- 환자용 문진표 QR 포스터 (치과 브랜드 설정 화면에서 사용) ----
   function getSurveyLink(clinicId){
     return `${location.origin}${location.pathname.replace(/index\.html$/, '')}survey.html?clinic=${clinicId}`;
   }
 
-  function renderClinicQR(clinicId){
-    const link = getSurveyLink(clinicId);
-    const qrImg = document.getElementById('clinicQrImg');
-    if (!qrImg) return;
-    // 무료 QR 생성 서비스에 우리 링크를 그대로 넘겨서 QR 이미지를 그려온다 (별도 가입/키 불필요).
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(link)}`;
-    qrImg.dataset.clinicId = clinicId;
+  function loadImagePromise(src){
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
   }
 
-  async function downloadClinicQR(){
-    const qrImg = document.getElementById('clinicQrImg');
-    if (!qrImg || !qrImg.src) return;
+  function drawRoundRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  // A6 비율(105×148mm)의 10배 해상도(1050×1480px)로 QR 포스터를 그려서 캔버스로 반환한다.
+  let qrPosterCanvas = null;
+  async function buildQrPosterCanvas(){
+    const profile = await sbGetMyProfile();
+    if (!profile) return null;
+    const clinicName = profile.clinic_name || 'OO치과';
+    const link = getSurveyLink(profile.id);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1050;
+    canvas.height = 1480;
+    const ctx = canvas.getContext('2d');
+
+    // 배경 (은은한 그라데이션 + 장식 원)
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, '#eaf7f9');
+    grad.addColorStop(1, '#ffffff');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = 'rgba(47,151,170,0.09)';
+    ctx.beginPath(); ctx.arc(120, 120, 230, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(124,107,207,0.08)';
+    ctx.beginPath(); ctx.arc(canvas.width - 90, canvas.height - 120, 260, 0, Math.PI * 2); ctx.fill();
+
+    // 상단 치과명
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#17343b';
+    ctx.font = '900 66px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
+    wrapText(ctx, clinicName, canvas.width / 2, 165, 900, 70);
+
+    ctx.font = '600 34px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
+    ctx.fillStyle = '#5c747c';
+    ctx.fillText('환자용 사전 문진표', canvas.width / 2, 225);
+
+    // 안내 문구
+    ctx.font = '800 48px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
+    ctx.fillStyle = '#2f97aa';
+    ctx.fillText('📱 카메라로 QR코드를 비춰주세요', canvas.width / 2, 335);
+
+    // QR 카드
+    const qrSize = 640;
+    const qrX = (canvas.width - qrSize) / 2;
+    const qrY = 410;
+    ctx.fillStyle = '#ffffff';
+    drawRoundRect(ctx, qrX - 34, qrY - 34, qrSize + 68, qrSize + 68, 28);
+    ctx.fill();
+    ctx.strokeStyle = '#d7e8ee';
+    ctx.lineWidth = 3;
+    drawRoundRect(ctx, qrX - 34, qrY - 34, qrSize + 68, qrSize + 68, 28);
+    ctx.stroke();
+
+    try {
+      const qrImg = await loadImagePromise(`https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(link)}`);
+      ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+    } catch (e) {
+      ctx.fillStyle = '#8a2c22';
+      ctx.font = '600 26px sans-serif';
+      ctx.fillText('QR 이미지를 불러오지 못했습니다', canvas.width / 2, qrY + qrSize / 2);
+    }
+
+    // 하단 안내
+    ctx.font = '500 30px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
+    ctx.fillStyle = '#5c747c';
+    ctx.fillText('문진표 작성 후 더 정확한 상담이 가능합니다', canvas.width / 2, qrY + qrSize + 100);
+
+    ctx.font = '800 28px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
+    ctx.fillStyle = '#2f97aa';
+    ctx.fillText('DENTAL MBTI', canvas.width / 2, canvas.height - 60);
+
+    return canvas;
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+    if (ctx.measureText(text).width <= maxWidth) {
+      ctx.fillText(text, x, y);
+      return;
+    }
+    // 치과명이 너무 길면 폰트 크기를 자동으로 줄여서 한 줄에 맞춘다.
+    let fontSize = 66;
+    const fontFamily = ctx.font.split('px ')[1];
+    while (fontSize > 34 && ctx.measureText(text).width > maxWidth) {
+      fontSize -= 4;
+      ctx.font = `900 ${fontSize}px ${fontFamily}`;
+    }
+    ctx.fillText(text, x, y);
+  }
+
+  async function renderQrPosterPreview(){
+    const canvas = await buildQrPosterCanvas();
+    if (!canvas) return;
+    qrPosterCanvas = canvas;
+    const dataUrl = canvas.toDataURL('image/png');
+    const preview = document.getElementById('qrPosterPreview');
+    if (preview) preview.src = dataUrl;
+    const printImg = document.getElementById('qrPrintImage');
+    if (printImg) printImg.src = dataUrl;
+  }
+
+  async function downloadQrPoster(){
+    if (!qrPosterCanvas) await renderQrPosterPreview();
+    if (!qrPosterCanvas) return;
     const profile = await sbGetMyProfile();
     const clinicName = (profile && profile.clinic_name) ? profile.clinic_name : 'dental-mbti';
     try {
-      const res = await fetch(qrImg.src);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `문진표QR_${clinicName}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      qrPosterCanvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `문진표QR포스터_${clinicName}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
     } catch (e) {
-      alert('QR 다운로드 중 오류가 발생했습니다. 이미지를 길게 눌러(우클릭) 저장해 주세요.');
+      alert('포스터 다운로드 중 오류가 발생했습니다. 미리보기 이미지를 길게 눌러(우클릭) 저장해 주세요.');
     }
+  }
+
+  async function printQrPoster(){
+    if (!qrPosterCanvas) await renderQrPosterPreview();
+    if (!qrPosterCanvas) return;
+    window.print();
   }
 </script>
 
