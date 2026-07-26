@@ -1272,6 +1272,7 @@
             <h2 id="surveyTitle">환자 문진표 입력</h2>
             <div class="sub">모든 문항 필수 선택</div>
           </div>
+          <div id="submissionBanner" style="display:none; background:#eaf7f9; border:1.5px solid #a9dde6; border-radius:14px; padding:12px 16px; margin-bottom:16px; font-size:13.5px; color:#1c5f8a;"></div>
           <div class="question-grid" id="questionGrid"></div>
         </section>
 
@@ -2211,6 +2212,42 @@
       updatePrintMeta();
       window.print();
     });
+    function applyAnswersToForm(loadedAnswers) {
+      answers = { ...loadedAnswers };
+      Object.entries(answers).forEach(([qid, value]) => {
+        const input = document.querySelector(`input[name="${qid}"][value="${value}"]`);
+        if (input) input.checked = true;
+        updateSelectedStyles(qid, Number(value));
+      });
+      updateProgress();
+    }
+
+    // 문진표 보관함에서 "분석결과" 버튼으로 넘어온 경우, 그 환자의 답변을 자동으로 불러와
+    // 문항을 채우고 바로 분석까지 실행한다.
+    async function loadSubmissionIfAny() {
+      const params = new URLSearchParams(location.search);
+      const submissionId = params.get('submission');
+      if (!submissionId) return;
+
+      const { data, error } = await sb
+        .from('patient_submissions')
+        .select('*')
+        .eq('id', submissionId)
+        .single();
+
+      if (error || !data) {
+        showWarning('문진표 보관함에서 해당 제출 기록을 찾을 수 없습니다.');
+        return;
+      }
+
+      const banner = document.getElementById('submissionBanner');
+      banner.style.display = 'block';
+      banner.textContent = `💡 문진표 보관함에서 자동으로 불러왔습니다 — 환자: ${data.patient_name} (연락처 ${data.patient_phone || '-'}, 생년월일 ${data.patient_birthdate}), 제출일시: ${new Date(data.submitted_at).toLocaleString('ko-KR')}`;
+
+      applyAnswersToForm(data.answers);
+      analyze();
+    }
+
     resetBtn.addEventListener('click', resetForm);
 
     renderQuestions();
@@ -2222,6 +2259,7 @@
       const profile = await sbRequireLogin('index.html');
       if (!profile) return;
       await updateBranding();
+      await loadSubmissionIfAny();
       sbStartGuard('index.html');
     })();
   </script>
