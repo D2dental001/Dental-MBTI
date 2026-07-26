@@ -645,6 +645,20 @@
       font-style: normal;
     }
 
+    .laminate-flag {
+      background: linear-gradient(135deg, #fff4d6, #ffe6b8);
+      border: 2px solid #e8b84b;
+      color: #6b4a00;
+      border-radius: 14px;
+      padding: 13px 15px;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.65;
+      margin-bottom: 6px;
+      box-shadow: 0 6px 16px rgba(232, 184, 75, 0.25);
+    }
+    .laminate-flag b { display: block; font-size: 15px; font-weight: 900; margin-bottom: 4px; color: #8a5c00; }
+
     .trauma-flag {
       background: #fdecea;
       border: 1.5px solid #e2a09a;
@@ -656,6 +670,19 @@
       margin-bottom: 4px;
     }
     .trauma-flag b { display: block; font-size: 13px; margin-bottom: 3px; }
+
+    .print-laminate-flag {
+      background: #fff4d6;
+      border: 2px solid #e8b84b;
+      color: #6b4a00;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      line-height: 1.55;
+      margin-bottom: 6px;
+    }
+    .print-laminate-flag b { display: block; font-size: 13px; font-weight: 900; margin-bottom: 3px; color: #8a5c00; }
 
     .print-trauma-flag {
       background: #fdecea;
@@ -953,6 +980,7 @@
     .print-script-list li,
     .print-objection-list li,
     .print-caution,
+    .print-laminate-flag,
     .print-trauma-flag,
     .print-scope-flag,
     .print-keypoint,
@@ -1787,7 +1815,7 @@
       }
     };
 
-    function buildGuideHTML(guide, mode, extremeTrauma, aestheticScopeRisk){
+    function buildGuideHTML(guide, mode, extremeTrauma, aestheticScopeRisk, laminateCandidate){
       const blockClass = mode === 'print' ? 'print-guide-block' : 'guide-block';
       const summaryClass = mode === 'print' ? 'print-guide-summary' : 'guide-summary';
       const scriptClass = mode === 'print' ? 'print-script-list' : 'script-list';
@@ -1795,8 +1823,14 @@
       const cautionClass = mode === 'print' ? 'print-caution' : 'guide-caution';
       const flagClass = mode === 'print' ? 'print-trauma-flag' : 'trauma-flag';
       const scopeFlagClass = mode === 'print' ? 'print-scope-flag' : 'scope-flag';
+      const laminateFlagClass = mode === 'print' ? 'print-laminate-flag' : 'laminate-flag';
       const keyPointClass = mode === 'print' ? 'print-keypoint' : 'guide-keypoint';
       const strategyBoxClass = mode === 'print' ? 'print-strategy-box' : 'strategy-box';
+      // Q7에서 "치아 색이나 모양 때문에 입을 가리거나 신경 쓰인다"를 고른 경우, 분류된 유형과
+      // 무관하게 심미 콤플렉스가 있는 라미네이트 강력 후보군이므로 결과 맨 위에서 가장 먼저 강조한다.
+      const laminateBanner = laminateCandidate
+        ? `<div class="${laminateFlagClass}"><b>⭐ 라미네이트 강력 후보군</b>Q7에서 "치아 색이나 모양 때문에 입을 가리거나 신경 쓰인다"를 선택했습니다. 분류된 성향 유형과 관계없이, 이 환자는 치아 색상·형태에 심미적 콤플렉스가 있는 라미네이트 잠재 고객입니다. 상담 중 자연스럽게 심미 개선 이야기를 꺼내보세요.</div>`
+        : '';
       // Q9에서 "극도의 트라우마"를 선택한 경우, 어떤 유형으로 분류되든 상관없이
       // 최우선으로 봐야 할 안전 경고를 유형 안내보다 위에 먼저 보여준다.
       const traumaBanner = extremeTrauma
@@ -1814,6 +1848,7 @@
       // (유형마다 내용 길이가 달라서, 특정 지점에 강제로 페이지를 나누면 오히려 빈 공간이 생긴다.)
       return `
         <div class="${blockClass}">
+          ${laminateBanner}
           ${traumaBanner}
           ${scopeBanner}
           ${keyPointBox}
@@ -2166,7 +2201,7 @@
       lastAnalysis = { scores, result };
 
       typeOutput.textContent = result.type;
-      guideOutput.innerHTML = buildGuideHTML(result.guide, 'screen', answers.Q9 === 3, answers.Q1 === 4);
+      guideOutput.innerHTML = buildGuideHTML(result.guide, 'screen', answers.Q9 === 3, answers.Q1 === 4, answers.Q7 === 2);
       scoreList.innerHTML = buildScoreListHTML(scores, 'screen');
       const scoreChartEl = document.getElementById('scoreChart');
       if (scoreChartEl) scoreChartEl.innerHTML = buildScoreChartSVG(scores);
