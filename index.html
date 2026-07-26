@@ -149,26 +149,37 @@
   .footnote{ text-align:center; font-size:11.5px; color: #93a7ac; margin-top:22px; }
 
   /* ---------- Menu page ---------- */
-  .card.menu{ max-width: 560px; }
+  .card.menu{ max-width: 960px; padding: 44px 40px 40px; }
   .menu-top{
-    display:flex; align-items:center; justify-content:space-between; margin-bottom:22px;
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:30px;
+    flex-wrap: wrap; gap:14px;
   }
   .clinic-chip{
-    display:flex; align-items:center; gap:10px;
+    display:flex; align-items:center; gap:18px;
     background: var(--teal-pale); border:1px solid #cdeaf0;
-    padding:8px 14px 8px 8px; border-radius: 999px;
+    padding:14px 26px 14px 14px; border-radius: 24px;
   }
-  .clinic-chip .dot{ width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,var(--teal),var(--teal-light)); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px; }
-  .clinic-chip span{ font-size:12.5px; color:var(--ink); font-weight:600; }
-  .clinic-chip small{ display:block; font-size:10.5px; color:var(--ink-soft); font-weight:500; }
-  .logout-link{ font-size:12.5px; color:var(--ink-soft); cursor:pointer; border:none; background:none; text-decoration:underline; font-family:inherit; }
+  .clinic-chip .dot{
+    width:90px; height:90px; border-radius:20px;
+    background:linear-gradient(135deg,var(--teal),var(--teal-light));
+    display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:36px;
+    flex-shrink:0; overflow:hidden; position:relative;
+  }
+  .clinic-chip .dot img{ width:100%; height:100%; object-fit:contain; background:#fff; display:none; }
+  .clinic-chip .dot.has-logo img{ display:block; }
+  .clinic-chip .dot .dot-fallback{ font-size:36px; }
+  .clinic-chip .dot.has-logo .dot-fallback{ display:none; }
+  .clinic-chip span{ font-size:34px; color:var(--ink); font-weight:900; line-height:1.25; display:block; }
+  .clinic-chip small{ display:block; font-size:14.5px; color:var(--ink-soft); font-weight:600; margin-top:4px; }
+  .logout-link{ font-size:13.5px; color:var(--ink-soft); cursor:pointer; border:none; background:none; text-decoration:underline; font-family:inherit; }
   .logout-link:hover{ color:var(--teal); }
 
-  .menu-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:6px; }
+  .menu-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:10px; }
   .menu-grid-3{ grid-template-columns:1fr 1fr 1fr; }
   .menu-grid-4{ grid-template-columns:1fr 1fr 1fr 1fr; }
+  @media (max-width:760px){ .menu-grid-4{ grid-template-columns:1fr 1fr; } }
   @media (max-width:480px){ .menu-grid{ grid-template-columns:1fr; } }
-  @media (max-width:640px){ .menu-grid-3{ grid-template-columns:1fr 1fr; } .menu-grid-4{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:640px){ .menu-grid-3{ grid-template-columns:1fr 1fr; } }
 
   .edit-row{
     border:1px solid var(--line); border-radius:14px; background:#fbfeff; padding:12px 14px;
@@ -189,15 +200,15 @@
   }
   .menu-tile{
     display:block; text-decoration:none; color:inherit;
-    border:1.5px solid var(--line); border-radius: var(--radius-lg);
-    padding:22px 18px; background: #fff;
+    border:1.5px solid var(--line); border-radius: 22px;
+    padding:32px 26px; background: #fff;
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
   }
-  .menu-tile:hover{ transform: translateY(-3px); box-shadow: 0 16px 30px rgba(47,151,170,0.18); border-color: var(--teal-light); }
-  .menu-tile .icon{ width:38px; height:38px; margin-bottom:14px; }
-  .menu-tile h3{ font-size:15.5px; margin:0 0 6px; font-weight:700; }
-  .menu-tile p{ font-size:12px; color:var(--ink-soft); margin:0; line-height:1.55; }
-  .menu-tile .arrow{ margin-top:14px; font-size:12px; color:var(--teal); font-weight:700; }
+  .menu-tile:hover{ transform: translateY(-4px); box-shadow: 0 18px 34px rgba(47,151,170,0.18); border-color: var(--teal-light); }
+  .menu-tile .icon{ width:52px; height:52px; margin-bottom:18px; }
+  .menu-tile h3{ font-size:19px; margin:0 0 8px; font-weight:800; }
+  .menu-tile p{ font-size:14px; color:var(--ink-soft); margin:0; line-height:1.6; }
+  .menu-tile .arrow{ margin-top:18px; font-size:13.5px; color:var(--teal); font-weight:700; }
 
   .admin-link{
     margin-top:18px; text-align:center;
@@ -232,6 +243,11 @@
     font-size:15px; font-weight:800; cursor:pointer; white-space:nowrap;
   }
   .inbox-review-btn:hover{ background:#268297; }
+  .inbox-delete-btn{
+    padding:12px 18px; border:1.5px solid #f1cabb; border-radius:12px; background:#fff8f5; color:#b8492f;
+    font-size:14px; font-weight:700; cursor:pointer; white-space:nowrap;
+  }
+  .inbox-delete-btn:hover{ background:#fdece7; }
   .inbox-empty{ font-size:15px; color:var(--ink-soft); padding:20px 4px; text-align:center; }
   @media (max-width:600px){
     .inbox-row{ flex-direction:column; align-items:flex-start; }
@@ -352,7 +368,10 @@
     <div class="card menu">
       <div class="menu-top">
         <div class="clinic-chip">
-          <div class="dot">치</div>
+          <div class="dot" id="menuClinicLogoWrap">
+            <img id="menuClinicLogoImg" alt="치과 로고" />
+            <span class="dot-fallback">치</span>
+          </div>
           <div><span id="menu-clinic-name">스마일허브 치과</span><small>정상 이용 중 · 세션 1개</small></div>
         </div>
         <button class="logout-link" onclick="doLogout()">로그아웃</button>
@@ -536,6 +555,20 @@
   let currentRole = null;
   let guardTimer = null;
 
+  // ---- 브라우저 "뒤로가기"를 눌러도 사이트를 이탈하지 않고 메인 페이지로 이동하게 만든다 ----
+  history.pushState({ trap: true }, '', location.href);
+  window.addEventListener('popstate', () => {
+    // 뒤로가기가 눌릴 때마다 같은 자리에 다시 쌓아서, 다음 뒤로가기도 계속 붙잡는다.
+    history.pushState({ trap: true }, '', location.href);
+    if (currentRole === 'admin') {
+      showView('view-admin-menu');
+    } else if (currentRole === 'clinic') {
+      showView('view-menu');
+    } else {
+      showView('view-login');
+    }
+  });
+
   function showView(id){
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -576,7 +609,7 @@
     if (profile.role === 'admin') {
       showView('view-admin-menu');
     } else {
-      refreshClinicChip(profile);
+      refreshClinicChip();
       showView('view-menu');
     }
   }
@@ -603,7 +636,7 @@
     if (profile.role === 'admin') {
       showView('view-admin-menu');
     } else {
-      refreshClinicChip(profile);
+      refreshClinicChip();
       showView('view-menu');
     }
   }
@@ -622,8 +655,17 @@
   // ---- clinic brand settings (stored in Supabase `accounts` table: clinic_name, logo_url) ----
   let pendingLogoData = null;
 
-  function refreshClinicChip(profile){
+  async function refreshClinicChip(){
+    const profile = await sbGetMyProfile();
     document.getElementById('menu-clinic-name').textContent = (profile && profile.clinic_name) || '치과명 미설정';
+    const logoWrap = document.getElementById('menuClinicLogoWrap');
+    const logoImg = document.getElementById('menuClinicLogoImg');
+    if (profile && profile.logo_url) {
+      logoImg.src = profile.logo_url;
+      logoWrap.classList.add('has-logo');
+    } else if (logoWrap) {
+      logoWrap.classList.remove('has-logo');
+    }
   }
 
   async function loadBrandingIntoForm(){
@@ -669,7 +711,7 @@
     if (pendingLogoData !== null) update.logo_url = pendingLogoData;
     const { error } = await sb.from('accounts').update(update).eq('id', user.id);
     if (error) { alert('저장 중 오류가 발생했습니다: ' + error.message); return; }
-    refreshClinicChip({ clinic_name: name });
+    refreshClinicChip();
     renderQrPosterPreview();
     const msg = document.getElementById('brand-saved-msg');
     msg.classList.add('show');
@@ -871,6 +913,7 @@
           <div class="inbox-actions">
             <span class="inbox-status ${statusClass}">${statusLabel}</span>
             <button class="inbox-review-btn" onclick="openSubmissionReview(${row.id})">검토결과</button>
+            <button class="inbox-delete-btn" onclick="deleteSubmission(${row.id})">삭제</button>
           </div>
         </div>
       `;
@@ -881,6 +924,17 @@
     // 상태를 '검토완료'로 표시해두고, 분석 페이지를 새 탭으로 열어 해당 제출 데이터를 자동으로 불러오게 한다.
     await sb.from('patient_submissions').update({ status: 'analyzed', analyzed_at: new Date().toISOString() }).eq('id', submissionId);
     window.open(`치과환자문진표_분석상담코칭시스템.html?submission=${submissionId}`, '_blank');
+    loadSubmissions();
+  }
+
+  async function deleteSubmission(submissionId){
+    const ok = confirm('이 문진표를 삭제하시겠습니까? 삭제하면 되돌릴 수 없습니다.');
+    if (!ok) return;
+    const { error } = await sb.from('patient_submissions').delete().eq('id', submissionId);
+    if (error) {
+      alert('삭제 중 오류가 발생했습니다: ' + error.message);
+      return;
+    }
     loadSubmissions();
   }
 
