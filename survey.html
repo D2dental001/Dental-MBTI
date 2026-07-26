@@ -164,8 +164,12 @@
         <input class="input-field" id="patientPhone" type="tel" inputmode="numeric" placeholder="예: 010-1234-5678" />
       </div>
       <div class="field-group" style="margin-bottom:0;">
-        <label class="field-label" for="patientBirth">생년월일</label>
-        <input class="input-field" id="patientBirth" type="date" />
+        <label class="field-label">생년월일</label>
+        <div style="display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:8px;">
+          <select class="input-field" id="birthYear"><option value="">년도</option></select>
+          <select class="input-field" id="birthMonth"><option value="">월</option></select>
+          <select class="input-field" id="birthDay"><option value="">일</option></select>
+        </div>
       </div>
     </div>
 
@@ -256,9 +260,49 @@
   const progressLabel = document.getElementById('progressLabel');
   const patientName = document.getElementById('patientName');
   const patientPhone = document.getElementById('patientPhone');
-  const patientBirth = document.getElementById('patientBirth');
+  const birthYear = document.getElementById('birthYear');
+  const birthMonth = document.getElementById('birthMonth');
+  const birthDay = document.getElementById('birthDay');
   const submitBtn = document.getElementById('submitBtn');
   const warningBox = document.getElementById('warningBox');
+
+  // 생년월일 드롭다운 채우기 — 달력을 한 달씩 넘기지 않고 연도를 목록에서 바로 고를 수 있게 한다.
+  function populateBirthDropdowns() {
+    const thisYear = new Date().getFullYear();
+    for (let y = thisYear; y >= thisYear - 110; y--) {
+      const opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = `${y}년`;
+      birthYear.appendChild(opt);
+    }
+    for (let m = 1; m <= 12; m++) {
+      const opt = document.createElement('option');
+      opt.value = String(m).padStart(2, '0');
+      opt.textContent = `${m}월`;
+      birthMonth.appendChild(opt);
+    }
+    refreshBirthDays();
+  }
+
+  function refreshBirthDays() {
+    const y = Number(birthYear.value) || new Date().getFullYear();
+    const m = Number(birthMonth.value) || 1;
+    const daysInMonth = new Date(y, m, 0).getDate();
+    const currentVal = birthDay.value;
+    birthDay.innerHTML = '<option value="">일</option>';
+    for (let d = 1; d <= daysInMonth; d++) {
+      const opt = document.createElement('option');
+      opt.value = String(d).padStart(2, '0');
+      opt.textContent = `${d}일`;
+      birthDay.appendChild(opt);
+    }
+    if (currentVal && Number(currentVal) <= daysInMonth) birthDay.value = currentVal;
+  }
+
+  function getBirthdateValue() {
+    if (!birthYear.value || !birthMonth.value || !birthDay.value) return '';
+    return `${birthYear.value}-${birthMonth.value}-${birthDay.value}`;
+  }
 
   const TOTAL_FIELDS = questions.length + 3; // 15문항 + 환자명 + 연락처 + 생년월일
 
@@ -300,7 +344,7 @@
     let filled = Object.keys(answers).length;
     if (patientName.value.trim()) filled++;
     if (patientPhone.value.trim()) filled++;
-    if (patientBirth.value) filled++;
+    if (getBirthdateValue()) filled++;
     const pct = Math.round((filled / TOTAL_FIELDS) * 100);
     progressFill.style.width = pct + '%';
     progressLabel.textContent = `${filled} / ${TOTAL_FIELDS} 항목 입력됨`;
@@ -308,7 +352,9 @@
 
   patientName.addEventListener('input', updateProgress);
   patientPhone.addEventListener('input', updateProgress);
-  patientBirth.addEventListener('input', updateProgress);
+  birthYear.addEventListener('change', () => { refreshBirthDays(); updateProgress(); });
+  birthMonth.addEventListener('change', () => { refreshBirthDays(); updateProgress(); });
+  birthDay.addEventListener('change', updateProgress);
 
   function showWarning(msg) {
     warningBox.textContent = msg;
@@ -329,8 +375,8 @@
       showWarning('연락처를 정확히 입력해 주세요. (예: 010-1234-5678)');
       return;
     }
-    if (!patientBirth.value) {
-      showWarning('생년월일을 입력해 주세요.');
+    if (!getBirthdateValue()) {
+      showWarning('생년월일을 선택해 주세요.');
       return;
     }
     const missing = questions.filter(q => answers[q.id] == null);
@@ -352,7 +398,7 @@
       clinic_id: clinicId,
       patient_name: patientName.value.trim(),
       patient_phone: patientPhone.value.trim(),
-      patient_birthdate: patientBirth.value,
+      patient_birthdate: getBirthdateValue(),
       answers: answers,
       status: 'new'
     });
@@ -401,6 +447,7 @@
     document.getElementById('formState').hidden = false;
   }
 
+  populateBirthDropdowns();
   init();
 </script>
 
