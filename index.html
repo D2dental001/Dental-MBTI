@@ -177,7 +177,37 @@
   .menu-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:10px; }
   .menu-grid-3{ grid-template-columns:1fr 1fr 1fr; }
   .menu-grid-4{ grid-template-columns:1fr 1fr 1fr 1fr; }
+  .menu-grid-auto{ grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
   @media (max-width:760px){ .menu-grid-4{ grid-template-columns:1fr 1fr; } }
+
+  .lam-case-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:16px; margin-top:16px; }
+  .lam-case-tile{ display:block; border-radius:16px; overflow:hidden; border:1.5px solid var(--line); text-decoration:none; color:inherit; background:#fff; transition:transform .18s ease, box-shadow .18s ease; }
+  .lam-case-tile:hover{ transform:translateY(-3px); box-shadow:0 12px 26px rgba(47,151,170,0.14); }
+  .lam-case-tile img{ width:100%; aspect-ratio:1/1; object-fit:cover; display:block; }
+  .lam-case-label{ padding:12px 14px; font-weight:800; font-size:14.5px; color:var(--ink); }
+  .lam-case-label small{ display:block; font-weight:500; font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+
+  .lam-compare{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:640px){ .lam-compare{ grid-template-columns:1fr; } }
+  .lam-media{ border-radius:14px; overflow:hidden; background:#111; }
+  .lam-media img, .lam-media video{ width:100%; height:100%; object-fit:cover; display:block; }
+  .lam-media-wide{ margin-top:14px; aspect-ratio:16/9; }
+
+  .lam-caption{ font-size:14.5px; font-weight:700; text-align:center; margin:14px 0 0; color:var(--ink); }
+  .lam-caption-danger{ color:#A32D2D; }
+  .lam-caption-success{ color:#3B6D11; }
+
+  .lam-explain{ background:var(--teal-pale); border:1px solid #cdeaf0; border-radius:14px; padding:16px 18px; font-size:14px; line-height:1.75; color:var(--ink); margin-top:14px; }
+  .lam-explain b{ display:block; font-size:14.5px; margin-bottom:6px; color:#17343b; }
+
+  .lam-btn-row{ display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+  .lam-btn{ flex:1; min-width:180px; padding:15px; border-radius:14px; font-weight:800; font-size:15px; cursor:pointer; border:2px solid transparent; }
+  .lam-btn-danger{ background:#fdece7; color:#A32D2D; border-color:#f0997b; }
+  .lam-btn-danger:hover{ background:#f5c4b3; }
+  .lam-btn-success{ background:#eafdf4; color:#3B6D11; border-color:#97C459; }
+  .lam-btn-success:hover{ background:#c0dd97; }
+  .lam-btn-ghost{ background:#fff; color:var(--ink-soft); border-color:var(--line); flex:0 0 auto; min-width:120px; }
+  .lam-btn-ghost:hover{ background:var(--surface-1, #f7fafb); }
   @media (max-width:480px){ .menu-grid{ grid-template-columns:1fr; } }
   @media (max-width:640px){ .menu-grid-3{ grid-template-columns:1fr 1fr; } }
 
@@ -380,7 +410,7 @@
       <div class="eyebrow">메뉴 선택</div>
       <h1 class="title display" style="font-size:22px;">오늘은 어떤 작업을<br/>진행할까요?</h1>
 
-      <div class="menu-grid menu-grid-4">
+      <div class="menu-grid menu-grid-auto">
         <a class="menu-tile" href="치과환자문진표_분석상담코칭시스템.html" target="_blank">
           <div class="icon"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="#e9f8fb"/><path d="M24 14a6 6 0 016 6c0 3-2 4-2 7.5 0 2-1.4 4.5-2.8 4.5-1.8 0-1.8-3.6-3.9-3.6S19.5 32 17.7 32c-1.4 0-2.7-2.5-2.7-4.5 0-3.5-2-4.5-2-7.5a6 6 0 016-6" stroke="#2f97aa" stroke-width="1.8"/></svg></div>
           <h3>덴탈 MBTI 검사</h3>
@@ -399,6 +429,12 @@
           <p>환자가 QR로 제출한 문진표를 확인하고 바로 검토합니다.</p>
           <div class="arrow">열기 →</div>
         </a>
+        <a class="menu-tile" href="javascript:void(0)" onclick="showView('view-laminate-cases');">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="8" y="16" width="32" height="18" rx="5" fill="#fdeeea"/><path d="M16 25c2-6 6-9 8-9s6 3 8 9" stroke="#d85a30" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>라미네이트 상담</h3>
+          <p>시술 개수별 결과를 사진·영상으로 직관적으로 비교해 보여줍니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
         <a class="menu-tile" href="javascript:void(0)" onclick="showView('view-brand'); loadBrandingIntoForm();">
           <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="8" y="14" width="32" height="22" rx="5" fill="#fff2ea"/><circle cx="24" cy="25" r="6" stroke="#e07a45" stroke-width="1.8"/><path d="M18 14l2-4h8l2 4" stroke="#e07a45" stroke-width="1.8" stroke-linecap="round"/></svg></div>
           <h3>치과 브랜드 설정</h3>
@@ -406,6 +442,35 @@
           <div class="arrow">열기 →</div>
         </a>
       </div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: 라미네이트 상담 - 케이스 목록 ============ -->
+  <div class="view" id="view-laminate-cases">
+    <div class="card admin card-wide">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">라미네이트 상담</div>
+        <button class="logout-link" onclick="showView('view-menu')">← 메뉴로</button>
+      </div>
+      <h1 class="title display" style="font-size:21px; margin-top:10px;">환자 케이스를 선택하세요</h1>
+      <p class="subtitle" style="margin-bottom:6px;">시술 개수에 따른 결과 차이를 사진·영상으로 환자에게 직접 보여줄 수 있습니다.</p>
+      <div class="lam-case-grid">
+        <a class="lam-case-tile" href="javascript:void(0)" onclick="openDiastemaCase()">
+          <img src="assets/laminate/diastema/before.jpg" alt="다이아스테마 케이스" />
+          <div class="lam-case-label">다이아스테마<small>치아 벌어짐</small></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: 라미네이트 상담 - 다이아스테마 케이스 ============ -->
+  <div class="view" id="view-laminate-diastema">
+    <div class="card admin card-wide">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">라미네이트 상담 · 다이아스테마(치아벌어짐)</div>
+        <button class="logout-link" onclick="showView('view-laminate-cases')">← 케이스 목록</button>
+      </div>
+      <div id="diastemaStage" style="margin-top:14px;"></div>
     </div>
   </div>
 
@@ -1087,6 +1152,59 @@
     if (!qrPosterCanvas) await renderQrPosterPreview();
     if (!qrPosterCanvas) return;
     window.print();
+  }
+
+  // ---- 라미네이트 상담 · 다이아스테마(치아벌어짐) 케이스 ----
+  const DIASTEMA_BASE = 'assets/laminate/diastema/';
+
+  const DIASTEMA_TEMPLATES = {
+    intro: `
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${DIASTEMA_BASE}before.jpg" alt="시술 전" /></div>
+        <div class="lam-media"><video src="${DIASTEMA_BASE}video-before-lowconfidence.mp4" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption">환자 상태: 치아 벌어짐(다이아스테마) · 시술 전</p>
+      <div class="lam-btn-row">
+        <button class="lam-btn lam-btn-danger" onclick="setDiastemaState('minimal')">최소 시술만 할 경우</button>
+        <button class="lam-btn lam-btn-success" onclick="setDiastemaState('recommended')">치과의사 추천 시술 할 경우</button>
+      </div>
+    `,
+    minimal: `
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${DIASTEMA_BASE}fail.jpg" alt="최소 시술 결과" /></div>
+        <div class="lam-media"><video src="${DIASTEMA_BASE}video-minimal-regret.mp4" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption lam-caption-danger">앞니 2개만 시술한 경우 — 실패 사례</p>
+      <div class="lam-media lam-media-wide"><video src="${DIASTEMA_BASE}video-minimal-oral-change.mp4" autoplay muted loop playsinline></video></div>
+      <div class="lam-explain">
+        <b>왜 실패할까요?</b>
+        치아 벌어짐은 앞니 2개만의 문제가 아니라, 스마일라인 전체의 비율 문제입니다. 앞니 2개만 라미네이트를 하면 그 2개만 유독 희고 커 보여 "토끼 이빨"처럼 도드라집니다. 자연스러운 결과를 위해서는 스마일라인 안에 들어오는 치아(상악 기준 8~10개)를 함께 개선해야 색상·비율이 고르게 맞아떨어집니다.
+      </div>
+      <div class="lam-btn-row">
+        <button class="lam-btn lam-btn-success" onclick="setDiastemaState('recommended')">다른 선택지 보기 (치과의사 추천 시술)</button>
+        <button class="lam-btn lam-btn-ghost" onclick="setDiastemaState('intro')">처음부터 다시</button>
+      </div>
+    `,
+    recommended: `
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${DIASTEMA_BASE}success.jpg" alt="치과의사 추천 시술 결과" /></div>
+        <div class="lam-media"><video src="${DIASTEMA_BASE}video-recommended-success.mp4" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption lam-caption-success">치과의사 추천 시술(16개) — 성공 사례</p>
+      <div class="lam-btn-row">
+        <button class="lam-btn lam-btn-danger" onclick="setDiastemaState('minimal')">다른 선택지 보기 (최소 시술)</button>
+        <button class="lam-btn lam-btn-ghost" onclick="setDiastemaState('intro')">처음부터 다시</button>
+      </div>
+    `
+  };
+
+  function setDiastemaState(state){
+    document.getElementById('diastemaStage').innerHTML = DIASTEMA_TEMPLATES[state];
+  }
+
+  function openDiastemaCase(){
+    setDiastemaState('intro');
+    showView('view-laminate-diastema');
   }
 </script>
 
