@@ -180,14 +180,15 @@
   .menu-grid-auto{ grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
   @media (max-width:760px){ .menu-grid-4{ grid-template-columns:1fr 1fr; } }
 
-  .lam-case-list{ display:flex; flex-direction:column; gap:12px; margin-top:16px; }
-  .lam-case-row{ display:flex; align-items:center; gap:16px; padding:12px 16px; border:1.5px solid var(--line); border-radius:16px; background:#fff; text-decoration:none; color:inherit; transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+  .lam-case-list{ display:flex; flex-direction:column; gap:14px; margin-top:16px; }
+  .lam-case-row{ display:flex; align-items:center; gap:18px; padding:14px 18px; border:1.5px solid var(--line); border-radius:18px; background:#fff; text-decoration:none; color:inherit; transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
   .lam-case-row:hover{ transform:translateY(-2px); box-shadow:0 10px 22px rgba(47,151,170,0.12); border-color:var(--teal-light); }
-  .lam-case-row img{ width:56px; height:56px; border-radius:12px; object-fit:cover; flex-shrink:0; }
+  .lam-case-row img{ width:168px; height:168px; border-radius:14px; object-fit:cover; flex-shrink:0; }
   .lam-case-info{ flex:1; min-width:0; }
-  .lam-case-title{ font-weight:800; font-size:15.5px; color:var(--ink); }
-  .lam-case-desc{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
+  .lam-case-title{ font-weight:800; font-size:18px; color:var(--ink); }
+  .lam-case-desc{ font-size:14px; color:var(--ink-soft); margin-top:4px; }
   .lam-case-arrow{ font-size:13px; color:var(--teal); font-weight:700; flex-shrink:0; }
+  @media (max-width:480px){ .lam-case-row img{ width:110px; height:110px; } }
 
   .lam-compare{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
   @media (max-width:640px){ .lam-compare{ grid-template-columns:1fr; } }
@@ -232,15 +233,27 @@
   }
   .menu-tile{
     display:block; text-decoration:none; color:inherit;
-    border:1.5px solid var(--line); border-radius: 22px;
-    padding:32px 26px; background: #fff;
+    border:1.5px solid var(--line); border-radius: 18px;
+    padding:22px 18px; background: #fff;
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
   }
   .menu-tile:hover{ transform: translateY(-4px); box-shadow: 0 18px 34px rgba(47,151,170,0.18); border-color: var(--teal-light); }
-  .menu-tile .icon{ width:52px; height:52px; margin-bottom:18px; }
-  .menu-tile h3{ font-size:19px; margin:0 0 8px; font-weight:800; }
-  .menu-tile p{ font-size:14px; color:var(--ink-soft); margin:0; line-height:1.6; }
-  .menu-tile .arrow{ margin-top:18px; font-size:13.5px; color:var(--teal); font-weight:700; }
+  .menu-tile .icon{ width:38px; height:38px; margin-bottom:12px; }
+  .menu-tile h3{ font-size:15px; margin:0 0 6px; font-weight:800; }
+  .menu-tile p{ font-size:12px; color:var(--ink-soft); margin:0; line-height:1.5; }
+  .menu-tile .arrow{ margin-top:12px; font-size:12px; color:var(--teal); font-weight:700; }
+
+  .menu-priority-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:8px; }
+  @media (max-width:520px){ .menu-priority-row{ grid-template-columns:1fr; } }
+  .menu-tile-priority{
+    border:2px solid var(--teal); background:linear-gradient(135deg, #fff, var(--teal-pale));
+    padding:26px 22px;
+  }
+  .menu-tile-priority .icon{ width:46px; height:46px; margin-bottom:14px; }
+  .menu-tile-priority h3{ font-size:17px; }
+  .menu-tile-priority p{ font-size:12.5px; }
+  .menu-tile-priority .arrow{ font-size:12.5px; }
+  .menu-secondary-row{ margin-top:14px; }
 
   .admin-link{
     margin-top:18px; text-align:center;
@@ -412,11 +425,26 @@
       <div class="eyebrow">메뉴 선택</div>
       <h1 class="title display" style="font-size:22px;">오늘은 어떤 작업을<br/>진행할까요?</h1>
 
-      <div class="menu-grid menu-grid-auto">
-        <a class="menu-tile" href="치과환자문진표_분석상담코칭시스템.html" target="_blank">
-          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="#e9f8fb"/><path d="M24 14a6 6 0 016 6c0 3-2 4-2 7.5 0 2-1.4 4.5-2.8 4.5-1.8 0-1.8-3.6-3.9-3.6S19.5 32 17.7 32c-1.4 0-2.7-2.5-2.7-4.5 0-3.5-2-4.5-2-7.5a6 6 0 016-6" stroke="#2f97aa" stroke-width="1.8"/></svg></div>
-          <h3>덴탈 MBTI 검사</h3>
-          <p>환자 성향을 분석해 상담 코칭 스크립트까지 자동 제안합니다.</p>
+      <div class="menu-priority-row">
+        <a class="menu-tile menu-tile-priority" href="javascript:void(0)" onclick="showView('view-laminate-cases');">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="8" y="16" width="32" height="18" rx="5" fill="#fdeeea"/><path d="M16 25c2-6 6-9 8-9s6 3 8 9" stroke="#d85a30" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>라미네이트 상담</h3>
+          <p>시술 개수별 결과를 사진·영상으로 직관적으로 비교해 보여줍니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+        <a class="menu-tile menu-tile-priority" href="javascript:void(0)" onclick="showView('view-inbox'); loadSubmissions();">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="9" y="10" width="30" height="28" rx="5" fill="#f0eefb"/><path d="M9 24h9l3 4h6l3-4h9" stroke="#7c6bcf" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+          <h3>문진표 보관함</h3>
+          <p>환자가 QR로 제출한 문진표를 확인하고 바로 검토합니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+      </div>
+
+      <div class="menu-grid menu-grid-3 menu-secondary-row">
+        <a class="menu-tile" href="javascript:void(0)" onclick="showView('view-brand'); loadBrandingIntoForm();">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="8" y="14" width="32" height="22" rx="5" fill="#fff2ea"/><circle cx="24" cy="25" r="6" stroke="#e07a45" stroke-width="1.8"/><path d="M18 14l2-4h8l2 4" stroke="#e07a45" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>치과 브랜드 설정</h3>
+          <p>치과명·로고 등록과 환자용 QR코드 다운로드를 여기서 합니다.</p>
           <div class="arrow">열기 →</div>
         </a>
         <a class="menu-tile" href="문진표출력.html" target="_blank">
@@ -425,22 +453,10 @@
           <p>치과명·로고를 반영한 환자용 문진표를 작성하고 바로 출력합니다.</p>
           <div class="arrow">열기 →</div>
         </a>
-        <a class="menu-tile" href="javascript:void(0)" onclick="showView('view-inbox'); loadSubmissions();">
-          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="9" y="10" width="30" height="28" rx="5" fill="#f0eefb"/><path d="M9 24h9l3 4h6l3-4h9" stroke="#7c6bcf" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-          <h3>문진표 보관함</h3>
-          <p>환자가 QR로 제출한 문진표를 확인하고 바로 검토합니다.</p>
-          <div class="arrow">열기 →</div>
-        </a>
-        <a class="menu-tile" href="javascript:void(0)" onclick="showView('view-laminate-cases');">
-          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="8" y="16" width="32" height="18" rx="5" fill="#fdeeea"/><path d="M16 25c2-6 6-9 8-9s6 3 8 9" stroke="#d85a30" stroke-width="1.8" stroke-linecap="round"/></svg></div>
-          <h3>라미네이트 상담</h3>
-          <p>시술 개수별 결과를 사진·영상으로 직관적으로 비교해 보여줍니다.</p>
-          <div class="arrow">열기 →</div>
-        </a>
-        <a class="menu-tile" href="javascript:void(0)" onclick="showView('view-brand'); loadBrandingIntoForm();">
-          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="8" y="14" width="32" height="22" rx="5" fill="#fff2ea"/><circle cx="24" cy="25" r="6" stroke="#e07a45" stroke-width="1.8"/><path d="M18 14l2-4h8l2 4" stroke="#e07a45" stroke-width="1.8" stroke-linecap="round"/></svg></div>
-          <h3>치과 브랜드 설정</h3>
-          <p>치과명·로고 등록과 환자용 QR코드 다운로드를 여기서 합니다.</p>
+        <a class="menu-tile" href="치과환자문진표_분석상담코칭시스템.html" target="_blank">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="#e9f8fb"/><path d="M24 14a6 6 0 016 6c0 3-2 4-2 7.5 0 2-1.4 4.5-2.8 4.5-1.8 0-1.8-3.6-3.9-3.6S19.5 32 17.7 32c-1.4 0-2.7-2.5-2.7-4.5 0-3.5-2-4.5-2-7.5a6 6 0 016-6" stroke="#2f97aa" stroke-width="1.8"/></svg></div>
+          <h3>덴탈 MBTI 검사</h3>
+          <p>환자 성향을 분석해 상담 코칭 스크립트까지 자동 제안합니다.</p>
           <div class="arrow">열기 →</div>
         </a>
       </div>
