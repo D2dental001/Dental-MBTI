@@ -180,12 +180,14 @@
   .menu-grid-auto{ grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
   @media (max-width:760px){ .menu-grid-4{ grid-template-columns:1fr 1fr; } }
 
-  .lam-case-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:16px; margin-top:16px; }
-  .lam-case-tile{ display:block; border-radius:16px; overflow:hidden; border:1.5px solid var(--line); text-decoration:none; color:inherit; background:#fff; transition:transform .18s ease, box-shadow .18s ease; }
-  .lam-case-tile:hover{ transform:translateY(-3px); box-shadow:0 12px 26px rgba(47,151,170,0.14); }
-  .lam-case-tile img{ width:100%; aspect-ratio:1/1; object-fit:cover; display:block; }
-  .lam-case-label{ padding:12px 14px; font-weight:800; font-size:14.5px; color:var(--ink); }
-  .lam-case-label small{ display:block; font-weight:500; font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+  .lam-case-list{ display:flex; flex-direction:column; gap:12px; margin-top:16px; }
+  .lam-case-row{ display:flex; align-items:center; gap:16px; padding:12px 16px; border:1.5px solid var(--line); border-radius:16px; background:#fff; text-decoration:none; color:inherit; transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+  .lam-case-row:hover{ transform:translateY(-2px); box-shadow:0 10px 22px rgba(47,151,170,0.12); border-color:var(--teal-light); }
+  .lam-case-row img{ width:56px; height:56px; border-radius:12px; object-fit:cover; flex-shrink:0; }
+  .lam-case-info{ flex:1; min-width:0; }
+  .lam-case-title{ font-weight:800; font-size:15.5px; color:var(--ink); }
+  .lam-case-desc{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
+  .lam-case-arrow{ font-size:13px; color:var(--teal); font-weight:700; flex-shrink:0; }
 
   .lam-compare{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
   @media (max-width:640px){ .lam-compare{ grid-template-columns:1fr; } }
@@ -454,10 +456,14 @@
       </div>
       <h1 class="title display" style="font-size:21px; margin-top:10px;">환자 케이스를 선택하세요</h1>
       <p class="subtitle" style="margin-bottom:6px;">시술 개수에 따른 결과 차이를 사진·영상으로 환자에게 직접 보여줄 수 있습니다.</p>
-      <div class="lam-case-grid">
-        <a class="lam-case-tile" href="javascript:void(0)" onclick="openDiastemaCase()">
+      <div class="lam-case-list">
+        <a class="lam-case-row" href="javascript:void(0)" onclick="openDiastemaCase()">
           <img src="assets/laminate/diastema/before.jpg" alt="다이아스테마 케이스" />
-          <div class="lam-case-label">다이아스테마<small>치아 벌어짐</small></div>
+          <div class="lam-case-info">
+            <div class="lam-case-title">다이아스테마</div>
+            <div class="lam-case-desc">치아 벌어짐 · 시술 개수별 결과 비교</div>
+          </div>
+          <div class="lam-case-arrow">열기 →</div>
         </a>
       </div>
     </div>
@@ -1175,10 +1181,9 @@
         <div class="lam-media"><video src="${DIASTEMA_BASE}video-minimal-regret.mp4" autoplay muted loop playsinline></video></div>
       </div>
       <p class="lam-caption lam-caption-danger">앞니 2개만 시술한 경우 — 실패 사례</p>
-      <div class="lam-media lam-media-wide"><video src="${DIASTEMA_BASE}video-minimal-oral-change.mp4" autoplay muted loop playsinline></video></div>
       <div class="lam-explain">
         <b>왜 실패할까요?</b>
-        치아 벌어짐은 앞니 2개만의 문제가 아니라, 스마일라인 전체의 비율 문제입니다. 앞니 2개만 라미네이트를 하면 그 2개만 유독 희고 커 보여 "토끼 이빨"처럼 도드라집니다. 자연스러운 결과를 위해서는 스마일라인 안에 들어오는 치아(상악 기준 8~10개)를 함께 개선해야 색상·비율이 고르게 맞아떨어집니다.
+        치아 벌어짐은 앞니 2개만의 문제가 아니라, 스마일라인 전체의 비율 문제입니다. 앞니 2개만 라미네이트를 하면 그 2개만 유독 희고 커 보여 "토끼 이빨"처럼 도드라집니다. 자연스러운 결과를 위해서는 스마일라인 안에 들어오는 치아(상악 기준 8~10개)를 함께 개선해야 색상·비율이 고르게 맞아떨어집니다. 게다가 나중에 다시 진행하시려면, 이미 시술된 치아 2개를 제거한 뒤 재시술해야 하기 때문에 시간과 비용이 오히려 더 늘어납니다.
       </div>
       <div class="lam-btn-row">
         <button class="lam-btn lam-btn-success" onclick="setDiastemaState('recommended')">다른 선택지 보기 (치과의사 추천 시술)</button>
@@ -1191,6 +1196,10 @@
         <div class="lam-media"><video src="${DIASTEMA_BASE}video-recommended-success.mp4" autoplay muted loop playsinline></video></div>
       </div>
       <p class="lam-caption lam-caption-success">치과의사 추천 시술(16개) — 성공 사례</p>
+      <div class="lam-explain">
+        <b>비용이 부담되신다면, 나누어 진행할 수도 있습니다</b>
+        가장 이상적인 결과는 상악 10개 + 하악 6개(총 16개)를 한 번에 진행하는 것입니다. 다만 비용 부담이 있으시다면 단계별로 나누어 진행하실 수 있습니다: 먼저 상악 6개를 진행하고, 이후 상악 4개를 추가하며, 마지막으로 하악 6개를 진행하는 방식입니다. 이렇게 나누어 진행하셔도 각 단계마다 자연스러운 비율을 유지하면서 부담을 줄이실 수 있습니다.
+      </div>
       <div class="lam-btn-row">
         <button class="lam-btn lam-btn-danger" onclick="setDiastemaState('minimal')">다른 선택지 보기 (최소 시술)</button>
         <button class="lam-btn lam-btn-ghost" onclick="setDiastemaState('intro')">처음부터 다시</button>
