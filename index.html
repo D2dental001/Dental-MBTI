@@ -180,15 +180,16 @@
   .menu-grid-auto{ grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
   @media (max-width:760px){ .menu-grid-4{ grid-template-columns:1fr 1fr; } }
 
-  .lam-case-list{ display:flex; flex-direction:column; gap:14px; margin-top:16px; }
-  .lam-case-row{ display:flex; align-items:center; gap:18px; padding:14px 18px; border:1.5px solid var(--line); border-radius:18px; background:#fff; text-decoration:none; color:inherit; transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
-  .lam-case-row:hover{ transform:translateY(-2px); box-shadow:0 10px 22px rgba(47,151,170,0.12); border-color:var(--teal-light); }
-  .lam-case-row img{ width:168px; height:168px; border-radius:14px; object-fit:cover; flex-shrink:0; }
-  .lam-case-info{ flex:1; min-width:0; }
-  .lam-case-title{ font-weight:800; font-size:18px; color:var(--ink); }
-  .lam-case-desc{ font-size:14px; color:var(--ink-soft); margin-top:4px; }
-  .lam-case-arrow{ font-size:13px; color:var(--teal); font-weight:700; flex-shrink:0; }
-  @media (max-width:480px){ .lam-case-row img{ width:110px; height:110px; } }
+  .lam-case-list{ display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-top:16px; }
+  @media (max-width:760px){ .lam-case-list{ grid-template-columns:repeat(2, 1fr); } }
+  @media (max-width:480px){ .lam-case-list{ grid-template-columns:1fr; } }
+  .lam-case-row{ display:flex; flex-direction:column; border:1.5px solid var(--line); border-radius:18px; background:#fff; text-decoration:none; color:inherit; overflow:hidden; transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+  .lam-case-row:hover{ transform:translateY(-3px); box-shadow:0 12px 26px rgba(47,151,170,0.14); border-color:var(--teal-light); }
+  .lam-case-row img{ width:100%; aspect-ratio:1/1; object-fit:cover; display:block; }
+  .lam-case-info{ padding:12px 14px 4px; }
+  .lam-case-title{ font-weight:800; font-size:15.5px; color:var(--ink); }
+  .lam-case-desc{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; line-height:1.5; }
+  .lam-case-arrow{ font-size:12.5px; color:var(--teal); font-weight:700; padding:8px 14px 14px; }
 
   .lam-compare{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
   @media (max-width:640px){ .lam-compare{ grid-template-columns:1fr; } }
@@ -501,6 +502,22 @@
           </div>
           <div class="lam-case-arrow">열기 →</div>
         </a>
+        <a class="lam-case-row" href="javascript:void(0)" onclick="openFractureCase()">
+          <img src="assets/laminate/fracture-restoration/before.jpg" alt="파절치 케이스" />
+          <div class="lam-case-info">
+            <div class="lam-case-title">파절치 복원</div>
+            <div class="lam-case-desc">치아 파절 · 강도와 심미성 동시 회복</div>
+          </div>
+          <div class="lam-case-arrow">열기 →</div>
+        </a>
+        <a class="lam-case-row" href="javascript:void(0)" onclick="openUndersizedCase()">
+          <img src="assets/laminate/undersized-restoration/before.jpg" alt="왜소치 케이스" />
+          <div class="lam-case-info">
+            <div class="lam-case-title">왜소치 복원</div>
+            <div class="lam-case-desc">치아 크기·비율 보완 · 스마일라인 균형</div>
+          </div>
+          <div class="lam-case-arrow">열기 →</div>
+        </a>
       </div>
     </div>
   </div>
@@ -535,6 +552,28 @@
         <button class="logout-link" onclick="showView('view-laminate-cases')">← 케이스 목록</button>
       </div>
       <div id="smilelineStage" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: 라미네이트 상담 - 파절치 케이스 ============ -->
+  <div class="view" id="view-laminate-fracture">
+    <div class="card admin card-wide">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">라미네이트 상담 · 파절치 복원</div>
+        <button class="logout-link" onclick="showView('view-laminate-cases')">← 케이스 목록</button>
+      </div>
+      <div id="fractureStage" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: 라미네이트 상담 - 왜소치 케이스 ============ -->
+  <div class="view" id="view-laminate-undersized">
+    <div class="card admin card-wide">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">라미네이트 상담 · 왜소치 복원</div>
+        <button class="logout-link" onclick="showView('view-laminate-cases')">← 케이스 목록</button>
+      </div>
+      <div id="undersizedStage" style="margin-top:14px;"></div>
     </div>
   </div>
 
@@ -1348,6 +1387,82 @@
     smilelinePhase = 'before';
     renderSmilelineStage();
     showView('view-laminate-smileline');
+  }
+
+  // ---- 라미네이트 상담 · 파절치 복원 케이스 ----
+  const FRACTURE_BASE = 'assets/laminate/fracture-restoration/';
+  let fracturePhase = 'before';
+
+  function renderFractureStage(){
+    const isAfter = fracturePhase === 'after';
+    const media = isAfter ? { img: 'after.jpg', video: 'after.mp4' } : { img: 'before.jpg', video: 'before.mp4' };
+
+    document.getElementById('fractureStage').innerHTML = `
+      <div class="lam-tab-row">
+        <button class="lam-tab ${!isAfter ? 'active' : ''}" onclick="setFracturePhase('before')">시술 전</button>
+        <button class="lam-tab ${isAfter ? 'active' : ''}" onclick="setFracturePhase('after')">시술 후</button>
+      </div>
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${FRACTURE_BASE}${media.img}" alt="파절치 복원 ${isAfter ? '시술 후' : '시술 전'}" /></div>
+        <div class="lam-media"><video src="${FRACTURE_BASE}${media.video}" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption ${isAfter ? 'lam-caption-success' : ''}">파절치 복원 · ${isAfter ? '시술 후' : '시술 전'}</p>
+      ${isAfter ? `
+        <div class="lam-explain">
+          <b>파절치는 왜 라미네이트가 효과적일까요?</b>
+          파절치는 치아가 깨지거나 일부 손상된 상태로, 방치하면 시린 증상이나 추가 파절로 이어질 수 있습니다. 라미네이트는 손상된 부분을 강도 높은 최고급 지르코니아 소재로 감싸, 치아의 기능과 심미성을 함께 복원시켜 자연치아에 가장 가까운 형태와 기능으로 편하게 사용하실 수 있습니다.
+        </div>
+      ` : ''}
+    `;
+  }
+
+  function setFracturePhase(phase){
+    fracturePhase = phase;
+    renderFractureStage();
+  }
+
+  function openFractureCase(){
+    fracturePhase = 'before';
+    renderFractureStage();
+    showView('view-laminate-fracture');
+  }
+
+  // ---- 라미네이트 상담 · 왜소치 복원 케이스 ----
+  const UNDERSIZED_BASE = 'assets/laminate/undersized-restoration/';
+  let undersizedPhase = 'before';
+
+  function renderUndersizedStage(){
+    const isAfter = undersizedPhase === 'after';
+    const media = isAfter ? { img: 'after.jpg', video: 'after.mp4' } : { img: 'before.jpg', video: 'before.mp4' };
+
+    document.getElementById('undersizedStage').innerHTML = `
+      <div class="lam-tab-row">
+        <button class="lam-tab ${!isAfter ? 'active' : ''}" onclick="setUndersizedPhase('before')">시술 전</button>
+        <button class="lam-tab ${isAfter ? 'active' : ''}" onclick="setUndersizedPhase('after')">시술 후</button>
+      </div>
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${UNDERSIZED_BASE}${media.img}" alt="왜소치 복원 ${isAfter ? '시술 후' : '시술 전'}" /></div>
+        <div class="lam-media"><video src="${UNDERSIZED_BASE}${media.video}" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption ${isAfter ? 'lam-caption-success' : ''}">왜소치 복원 · ${isAfter ? '시술 후' : '시술 전'}</p>
+      ${isAfter ? `
+        <div class="lam-explain">
+          <b>왜소치는 왜 라미네이트가 효과적일까요?</b>
+          왜소치는 치아가 정상보다 작게 형성되어 옆 치아와 크기·비율이 어긋나 보이는 경우가 많습니다. 라미네이트로 치아 표면에 적정 두께를 더하면, 자연스러운 비율로 크기를 보완하면서 전체적인 스마일라인의 균형을 맞출 수 있습니다.
+        </div>
+      ` : ''}
+    `;
+  }
+
+  function setUndersizedPhase(phase){
+    undersizedPhase = phase;
+    renderUndersizedStage();
+  }
+
+  function openUndersizedCase(){
+    undersizedPhase = 'before';
+    renderUndersizedStage();
+    showView('view-laminate-undersized');
   }
 </script>
 
