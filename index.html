@@ -519,6 +519,14 @@
           </div>
           <div class="lam-case-arrow">열기 →</div>
         </a>
+        <a class="lam-case-row" href="javascript:void(0)" onclick="openOrthoCase()">
+          <img src="assets/laminate/ortho-restoration/before.jpg" alt="교정후 심미복원 케이스" />
+          <div class="lam-case-info">
+            <div class="lam-case-title">교정후 심미복원</div>
+            <div class="lam-case-desc">교정 완성도 보완 · 색상·형태 마무리</div>
+          </div>
+          <div class="lam-case-arrow">열기 →</div>
+        </a>
       </div>
     </div>
   </div>
@@ -575,6 +583,17 @@
         <button class="logout-link" onclick="showView('view-laminate-cases')">← 케이스 목록</button>
       </div>
       <div id="undersizedStage" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: 라미네이트 상담 - 교정후 심미복원 케이스 ============ -->
+  <div class="view" id="view-laminate-ortho">
+    <div class="card admin card-lam-wide">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">라미네이트 상담 · 교정후 심미복원</div>
+        <button class="logout-link" onclick="showView('view-laminate-cases')">← 케이스 목록</button>
+      </div>
+      <div id="orthoStage" style="margin-top:14px;"></div>
     </div>
   </div>
 
@@ -1464,6 +1483,44 @@
     undersizedPhase = 'before';
     renderUndersizedStage();
     showView('view-laminate-undersized');
+  }
+
+  // ---- 라미네이트 상담 · 교정후 심미복원 케이스 ----
+  const ORTHO_BASE = 'assets/laminate/ortho-restoration/';
+  let orthoPhase = 'before';
+
+  function renderOrthoStage(){
+    const isAfter = orthoPhase === 'after';
+    const media = isAfter ? { img: 'after.jpg', video: 'after.mp4' } : { img: 'before.jpg', video: 'before.mp4' };
+
+    document.getElementById('orthoStage').innerHTML = `
+      <div class="lam-tab-row">
+        <button class="lam-tab ${!isAfter ? 'active' : ''}" onclick="setOrthoPhase('before')">시술 전</button>
+        <button class="lam-tab ${isAfter ? 'active' : ''}" onclick="setOrthoPhase('after')">시술 후</button>
+      </div>
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${ORTHO_BASE}${media.img}" alt="교정후 심미복원 ${isAfter ? '시술 후' : '시술 전'}" /></div>
+        <div class="lam-media"><video src="${ORTHO_BASE}${media.video}" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption ${isAfter ? 'lam-caption-success' : ''}">교정후 심미복원 · ${isAfter ? '시술 후' : '시술 전'}</p>
+      ${isAfter ? `
+        <div class="lam-explain">
+          <b>교정 후에도 라미네이트가 필요한 이유는 무엇일까요?</b>
+          교정치료로 치아 배열은 가지런해졌지만, 치아의 색상이나 형태 때문에 정작 원하시던 스마일라인은 완성되지 않는 경우가 많습니다. 저희 치과는 교정 이후 라미네이트를 함께 진행해, 이렇게 남은 아쉬움까지 채워 완벽한 스마일라인을 완성해 드립니다. 25년 이상 보철을 제작해 온 숙련된 기공 기술자가 강도 높은 소재로 치아를 감쌀 만큼 얇고 정밀하게 제작하기 때문에, 치아를 거의 삭제하지 않고도 안전하게 시술할 수 있습니다. 그 결과 치아를 보호하면서 교정 효과도 더 오래 유지되고, 심미적인 완성도까지 함께 높일 수 있습니다.
+        </div>
+      ` : ''}
+    `;
+  }
+
+  function setOrthoPhase(phase){
+    orthoPhase = phase;
+    renderOrthoStage();
+  }
+
+  function openOrthoCase(){
+    orthoPhase = 'before';
+    renderOrthoStage();
+    showView('view-laminate-ortho');
   }
 </script>
 
