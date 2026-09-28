@@ -123,7 +123,23 @@
 
   .small-note{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6;}
 
+  /* ---------- QR 인쇄 포스터 (평소엔 숨김, 인쇄할 때만 이 부분만 출력) ---------- */
+  .qr-poster{display:none;}
+  .qr-poster .poster-inner{
+    max-width:520px;margin:80px auto 0;text-align:center;font-family:'Noto Sans KR',sans-serif;
+  }
+  .qr-poster h1{font-size:24px;margin:0 0 10px;color:#141b33;}
+  .qr-poster p.lead{font-size:14px;color:#4b5568;margin:0 0 34px;line-height:1.6;}
+  .qr-poster .poster-qr{display:inline-block;padding:18px;border:1px solid #ddd;border-radius:16px;}
+  .qr-poster p.company{margin-top:30px;font-size:14px;color:#6b7280;}
+
   @media print{
+    /* 화면에 무엇이 열려 있든, 인쇄 시에는 오직 QR 포스터(.qr-poster)만 출력합니다 */
+    body.printing-qr *{ visibility:hidden; }
+    body.printing-qr .qr-poster, body.printing-qr .qr-poster *{ visibility:visible; }
+    body.printing-qr .qr-poster{ display:block; position:absolute; top:0; left:0; width:100%; }
+
+    /* 일반 화면 인쇄(Ctrl+P 등)를 대비한 기본 규칙 */
     .sidebar,.topbar,.no-print{display:none !important;}
     body{background:#fff;}
     .content{padding:0;max-width:none;}
@@ -205,10 +221,20 @@
               </div>
               <div class="small-note">배포한 실제 도메인과 다르면 아래 주소를 직접 수정한 뒤 저장하세요.</div>
               <div style="margin-top:14px;">
-                <button class="btn green no-print" onclick="window.print()">QR 인쇄</button>
+                <button class="btn green no-print" onclick="printQrPoster()">QR 인쇄</button>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- QR 인쇄 전용 포스터: 평소엔 화면에 보이지 않고, printQrPoster() 실행 시에만 인쇄됩니다 -->
+      <div class="qr-poster" id="qrPoster">
+        <div class="poster-inner">
+          <h1>입사 지원자 조직적합성 설문</h1>
+          <p class="lead">아래 QR코드를 휴대폰 카메라로 스캔하신 뒤,<br>본인의 휴대폰으로 설문을 진행하고 제출해 주세요.</p>
+          <div class="poster-qr" id="qrcodePrint"></div>
+          <p class="company" id="posterCompanyName"></p>
         </div>
       </div>
 
@@ -429,9 +455,16 @@ function renderQr(){
   const base = location.href.replace(/hr-dashboard\.html.*$/, 'interview-apply.html');
   const link = base + '?token=' + COMPANY.share_token;
   document.getElementById('interviewLink').value = link;
+
   const holder = document.getElementById('qrcodeCanvas');
   holder.innerHTML = '';
   new QRCode(holder, { text: link, width:150, height:150, correctLevel: QRCode.CorrectLevel.M });
+
+  // 인쇄 전용 포스터에도 같은 QR을 별도로 그려둡니다 (화면용 QR과 별개의 DOM)
+  const printHolder = document.getElementById('qrcodePrint');
+  printHolder.innerHTML = '';
+  new QRCode(printHolder, { text: link, width:220, height:220, correctLevel: QRCode.CorrectLevel.M });
+  document.getElementById('posterCompanyName').textContent = COMPANY.name ? (COMPANY.name+' 채용 담당자 드림') : '';
 }
 function copyInterviewLink(){
   const el = document.getElementById('interviewLink');
@@ -439,6 +472,13 @@ function copyInterviewLink(){
   document.execCommand('copy');
   alert('링크가 복사되었습니다.');
 }
+// QR 포스터만 인쇄합니다 (회사 정보 입력 화면 등 다른 내용은 인쇄되지 않습니다)
+function printQrPoster(){
+  if(!COMPANY?.share_token){ alert('먼저 회사 정보를 저장해 주세요.'); return; }
+  document.body.classList.add('printing-qr');
+  window.print();
+}
+window.addEventListener('afterprint', ()=>{ document.body.classList.remove('printing-qr'); });
 
 /* ---------------------- 직원 관리 ---------------------- */
 async function refreshEmployees(){ EMPLOYEES = await hrListEmployees(); }
