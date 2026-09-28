@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사내 임직원 관리 OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --navy:#141b33; --navy2:#1e2a52; --accent:#3b6bf5; --accent-soft:#eaf0ff;
+    --accent2:#17a673; --warn:#e5484d; --bg:#eef1f7; --card:#ffffff;
+    --muted:#6b7280; --border:#e7eaf1; --text:#1d2433;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);}
+  a{color:inherit;}
+
+  /* ---------- 레이아웃 ---------- */
+  .app{display:flex;min-height:100vh;}
+  .sidebar{
+    width:240px;flex-shrink:0;background:linear-gradient(180deg,var(--navy),#0d1226 140%);
+    color:#fff;padding:26px 18px;position:sticky;top:0;height:100vh;overflow-y:auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .brand .mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#7c5cf0);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;}
+  .brand .name{font-size:15px;font-weight:700;}
+  .company-name{font-size:12px;color:#9aa5c0;margin:2px 0 26px 44px;}
+  .navgroup{margin-top:8px;}
+  .navlabel{font-size:10.5px;letter-spacing:.08em;color:#7c88ab;text-transform:uppercase;margin:18px 10px 8px;}
+  .navitem{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:13.5px;
+    color:#c7cee3;cursor:pointer;margin-bottom:3px;font-weight:500;
+  }
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:#4a5578;flex-shrink:0;}
+  .navitem:hover{background:rgba(255,255,255,.06);color:#fff;}
+  .navitem.active{background:var(--accent);color:#fff;}
+  .navitem.active .dot{background:#fff;}
+  .logout{margin-top:24px;font-size:12.5px;color:#8b96b8;cursor:pointer;padding:10px 12px;}
+  .logout:hover{color:#fff;}
+
+  .main{flex:1;min-width:0;}
+  .topbar{
+    background:#fff;border-bottom:1px solid var(--border);padding:18px 32px;
+    display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5;
+  }
+  .topbar h1{font-size:18px;margin:0;}
+  .topbar .meta{font-size:12.5px;color:var(--muted);}
+  .content{padding:28px 32px 90px;max-width:1080px;}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 10px rgba(20,27,51,.04);}
+  .card h2{font-size:16px;margin:0 0 4px;}
+  .card .desc{font-size:12.5px;color:var(--muted);margin:0 0 18px;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  @media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr;} .app{flex-direction:column;} .sidebar{width:100%;height:auto;position:relative;} }
+
+  label.field{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px;font-weight:600;}
+  input[type=text],input[type=date],input[type=number],input[type=tel],select,textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:9px;font-size:14px;margin-bottom:14px;
+    font-family:inherit;background:#fbfcfe;
+  }
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);background:#fff;}
+
+  .btn{padding:10px 18px;border-radius:10px;border:none;font-size:13.5px;font-weight:700;cursor:pointer;transition:transform .1s;}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:var(--accent);color:#fff;}
+  .btn.green{background:var(--accent2);color:#fff;}
+  .btn.ghost{background:#fff;border:1px solid var(--border);color:#374151;}
+  .btn.danger{background:#fdecec;color:var(--warn);border:1px solid #f5c6c7;}
+  .btn.sm{padding:6px 12px;font-size:12px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th,td{border-bottom:1px solid var(--border);padding:11px 10px;text-align:left;}
+  th{background:#f7f9fd;color:var(--muted);font-size:12px;font-weight:700;}
+  tr:hover td{background:#fafbfe;}
+
+  .pill{display:inline-block;padding:4px 11px;border-radius:999px;font-size:11px;font-weight:700;}
+  .pill.active{background:#e6f7ef;color:var(--accent2);}
+  .pill.retired{background:#f1f2f6;color:var(--muted);}
+  .pill.pass{background:#e6f7ef;color:var(--accent2);}
+  .pill.review{background:#fff4e0;color:#b3720a;}
+  .pill.caution{background:#fdecec;color:var(--warn);}
+
+  .notice{font-size:12.5px;line-height:1.7;border-radius:11px;padding:13px 15px;margin-bottom:18px;}
+  .notice.danger{color:#8a2c2c;background:#fff8f8;border:1px solid #f3caca;}
+  .notice.info{color:#1b2a4a;background:#eef3ff;border:1px solid #cfe0ff;}
+
+  .hidden{display:none !important;}
+  .stamp-preview{width:76px;height:76px;object-fit:contain;border:1px dashed var(--border);border-radius:10px;background:#fafbfe;}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+  .empcheck{width:auto;margin:0;}
+
+  .qr-box{display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:20px;}
+  #qrcodeCanvas{background:#fff;padding:10px;border-radius:10px;}
+  .link-row{display:flex;gap:8px;align-items:center;}
+  .link-row input{margin-bottom:0;}
+
+  .result-box{background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px;margin-top:16px;font-size:14px;line-height:2;}
+  .result-box b.big{font-size:22px;color:var(--accent);}
+
+  .cert-sheet{border:1px solid var(--border);padding:46px;background:#fff;position:relative;font-size:14px;}
+  .cert-sheet h3{text-align:center;font-size:23px;letter-spacing:.35em;margin-bottom:10px;}
+  .cert-sub{text-align:center;color:var(--muted);font-size:12px;margin-bottom:34px;}
+  .cert-table{width:100%;border-collapse:collapse;}
+  .cert-table td,.cert-table th{border:1px solid #333;padding:11px 14px;font-size:13.5px;}
+  .cert-table th{background:#f5f6f8;width:120px;font-weight:700;}
+  .cert-stamp{position:absolute;width:96px;height:96px;object-fit:contain;opacity:.92;}
+
+  .dim-row{margin-bottom:16px;}
+  .dim-head{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;margin-bottom:6px;}
+  .dim-bar-track{height:10px;background:#eef1f6;border-radius:999px;overflow:hidden;}
+  .dim-bar-fill{height:100%;border-radius:999px;}
+
+  .sub-card{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:12px;}
+  .sub-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+  .sub-head .name{font-weight:700;font-size:14.5px;}
+  .sub-meta{font-size:12px;color:var(--muted);}
+
+  .small-note{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6;}
+
+  @media print{
+    .sidebar,.topbar,.no-print{display:none !important;}
+    body{background:#fff;}
+    .content{padding:0;max-width:none;}
+    .card{border:none;box-shadow:none;padding:0;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar no-print">
+    <div class="brand"><div class="mark">HR</div><div class="name">임직원 관리 OS</div></div>
+    <div class="company-name" id="sbCompanyName">회사 설정 필요</div>
+
+    <div class="navgroup">
+      <div class="navlabel">설정</div>
+      <div class="navitem active" data-tab="company"><span class="dot"></span>회사 설정 &amp; QR</div>
+
+      <div class="navlabel">인사</div>
+      <div class="navitem" data-tab="employees"><span class="dot"></span>직원 관리</div>
+      <div class="navitem" data-tab="interview"><span class="dot"></span>면접 결과</div>
+
+      <div class="navlabel">급여 / 서류</div>
+      <div class="navitem" data-tab="payroll"><span class="dot"></span>급여이체 엑셀</div>
+      <div class="navitem" data-tab="leave"><span class="dot"></span>연차 계산기</div>
+      <div class="navitem" data-tab="severance"><span class="dot"></span>퇴직금 계산기</div>
+      <div class="navitem" data-tab="cert"><span class="dot"></span>재직증명서</div>
+    </div>
+
+    <div class="logout" onclick="location.href='index.html'">← 메인 관리자 메뉴로</div>
+    <div class="logout" onclick="doLogout()">로그아웃</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar no-print">
+      <h1 id="topTitle">회사 설정 &amp; QR</h1>
+      <div class="meta" id="topMeta"></div>
+    </div>
+
+    <div class="content">
+
+      <!-- ===================== 회사 설정 ===================== -->
+      <div id="tab-company" class="tab-panel">
+        <div class="card">
+          <h2>회사 정보</h2>
+          <div class="desc">재직증명서 등 서류에 표시되는 회사 기본 정보입니다.</div>
+          <div class="grid2">
+            <div><label class="field">회사명</label><input type="text" id="companyName" placeholder="예: ㈜ 디투덴탈"></div>
+            <div><label class="field">대표자명</label><input type="text" id="ceoName" placeholder="예: 조주현"></div>
+          </div>
+          <div class="grid2">
+            <div><label class="field">사업자등록번호</label><input type="text" id="bizNumber" placeholder="예: 760-81-03302"></div>
+            <div><label class="field">전화번호</label><input type="text" id="companyPhone" placeholder="예: 02-2135-2857"></div>
+          </div>
+          <label class="field">사업장 주소</label>
+          <input type="text" id="companyAddress" placeholder="사업장 주소">
+          <label class="field">회사 인감(도장) 이미지 — 배경 투명 PNG 권장</label>
+          <input type="file" id="stampFile" accept="image/*">
+          <div style="display:flex;align-items:center;gap:14px;margin-top:6px;">
+            <img id="stampPreview" class="stamp-preview hidden">
+            <span class="small-note" id="stampStatus">등록된 인감 이미지 없음</span>
+          </div>
+          <div style="margin-top:18px;">
+            <button class="btn primary" onclick="saveCompany()">저장</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>면접 지원자 설문 QR코드</h2>
+          <div class="desc">이 QR을 출력해 면접장에 비치하면, 지원자가 휴대폰으로 스캔 → 모바일에서 바로 설문을 진행하고 제출합니다. 제출 결과는 왼쪽 메뉴의 "면접 결과"에서 확인할 수 있습니다.</div>
+          <div class="notice info">회사 정보를 먼저 저장해야 QR코드가 생성됩니다 (설문 링크에 회사 고유 토큰이 포함됩니다).</div>
+          <div class="qr-box" id="qrArea">
+            <div id="qrcodeCanvas"></div>
+            <div style="flex:1;min-width:220px;">
+              <div class="small-note" style="margin-bottom:8px;">설문 접속 링크</div>
+              <div class="link-row">
+                <input type="text" id="interviewLink" readonly>
+                <button class="btn ghost sm no-print" onclick="copyInterviewLink()">복사</button>
+              </div>
+              <div class="small-note">배포한 실제 도메인과 다르면 아래 주소를 직접 수정한 뒤 저장하세요.</div>
+              <div style="margin-top:14px;">
+                <button class="btn green no-print" onclick="window.print()">QR 인쇄</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 직원 관리 ===================== -->
+      <div id="tab-employees" class="tab-panel hidden">
+        <div class="card">
+          <h2 id="empFormTitle">직원 등록</h2>
+          <input type="hidden" id="empId">
+          <div class="grid3">
+            <div><label class="field">이름</label><input type="text" id="empName"></div>
+            <div><label class="field">생년월일</label><input type="date" id="empBirth"></div>
+            <div><label class="field">성별</label>
+              <select id="empGender"><option value="M">남성</option><option value="F">여성</option></select>
+            </div>
+          </div>
+          <div class="grid2">
+            <div><label class="field">근무부서</label><input type="text" id="empDept" placeholder="예: 경영, 기공, 영업"></div>
+            <div><label class="field">직위</label><input type="text" id="empPosition" placeholder="예: 총괄이사, 대리, 팀장"></div>
+          </div>
+          <div class="grid2">
+            <div><label class="field">주소</label><input type="text" id="empAddress"></div>
+            <div><label class="field">연락처</label><input type="text" id="empPhone" placeholder="010-0000-0000"></div>
+          </div>
+          <div class="grid3">
+            <div><label class="field">은행</label><input type="text" id="empBank" placeholder="예: 국민은행"></div>
+            <div><label class="field">계좌번호</label><input type="text" id="empAccount"></div>
+            <div><label class="field">실수령급여(월, 원)</label><input type="number" id="empSalary" placeholder="예: 2800000"></div>
+          </div>
+          <div class="grid2">
+            <div><label class="field">입사일</label><input type="date" id="empHire"></div>
+            <div><label class="field">퇴사일 (재직중이면 비워두세요)</label><input type="date" id="empRetire"></div>
+          </div>
+          <div style="margin-top:4px;">
+            <button class="btn primary" onclick="saveEmployee()">저장</button>
+            <button class="btn ghost" onclick="resetEmpForm()">취소</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>직원 목록</h2>
+          <div style="overflow-x:auto;">
+          <table>
+            <thead><tr>
+              <th>이름</th><th>부서/직위</th><th>연락처</th><th>은행/계좌</th>
+              <th>실수령급여</th><th>입사일</th><th>상태</th><th></th>
+            </tr></thead>
+            <tbody id="empTableBody"></tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 면접 결과 ===================== -->
+      <div id="tab-interview" class="tab-panel hidden">
+        <div class="card">
+          <h2>면접 지원자 설문 결과</h2>
+          <div class="desc">QR을 통해 지원자가 직접 제출한 결과입니다. 최신 제출 순으로 표시됩니다.</div>
+          <div id="submissionList"></div>
+        </div>
+      </div>
+
+      <!-- ===================== 급여이체 엑셀 ===================== -->
+      <div id="tab-payroll" class="tab-panel hidden">
+        <div class="card">
+          <h2>급여이체 엑셀 생성</h2>
+          <div class="desc">체크한 재직중 직원의 은행/계좌/실수령급여 정보로 은행 대량이체 양식 엑셀을 생성합니다.</div>
+          <div class="toolbar">
+            <button class="btn ghost sm" onclick="toggleAllPayroll(true)">전체 선택</button>
+            <button class="btn ghost sm" onclick="toggleAllPayroll(false)">전체 해제</button>
+          </div>
+          <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th></th><th>이름</th><th>은행</th><th>계좌번호</th><th>이체금액(원)</th></tr></thead>
+            <tbody id="payrollTableBody"></tbody>
+          </table>
+          </div>
+          <div style="margin-top:18px;">
+            <button class="btn green" onclick="generatePayrollExcel()">급여이체 엑셀 다운로드</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 연차 계산기 ===================== -->
+      <div id="tab-leave" class="tab-panel hidden">
+        <div class="card">
+          <h2>연차수당 계산기</h2>
+          <div class="notice info">실수령급여(세후)를 4대보험·소득세 근사치로 역산해 세전(통상임금)을 추정합니다. 부양가족 1인 기준 근사치이며 정확한 지급액은 세무사/노무사 확인을 권장합니다.</div>
+          <label class="field">직원 선택</label>
+          <select id="leaveEmpSelect" onchange="renderLeaveCalc()"></select>
+          <div class="grid2">
+            <div><label class="field">기준일 (연차 산정 기준)</label><input type="date" id="leaveAsOf" onchange="renderLeaveCalc()"></div>
+            <div><label class="field">이미 사용한 연차일수</label><input type="number" id="leaveUsed" value="0" onchange="renderLeaveCalc()"></div>
+          </div>
+          <div id="leaveResult"></div>
+        </div>
+      </div>
+
+      <!-- ===================== 퇴직금 계산기 ===================== -->
+      <div id="tab-severance" class="tab-panel hidden">
+        <div class="card">
+          <h2>퇴직금 계산기</h2>
+          <div class="notice info">퇴직금 = 1일 평균임금 × 30일 × (재직일수 ÷ 365). 평균임금은 실수령급여를 역산한 세전 급여 기준 근사치입니다.</div>
+          <label class="field">직원 선택</label>
+          <select id="sevEmpSelect" onchange="renderSeverance()"></select>
+          <div id="severanceResult"></div>
+        </div>
+      </div>
+
+      <!-- ===================== 재직증명서 ===================== -->
+      <div id="tab-cert" class="tab-panel hidden">
+        <div class="card no-print">
+          <h2>재직증명서 생성</h2>
+          <label class="field">직원 선택</label>
+          <select id="certEmpSelect" onchange="renderCert()"></select>
+          <div class="grid2">
+            <div><label class="field">제출용도</label><input type="text" id="certPurpose" placeholder="예: 기관 제출용" onchange="renderCert()"></div>
+            <div><label class="field">발급일</label><input type="date" id="certDate" onchange="renderCert()"></div>
+          </div>
+          <button class="btn green" onclick="window.print()">인쇄 / PDF 저장</button>
+        </div>
+        <div class="card">
+          <div class="cert-sheet" id="certPreview">직원을 선택해 주세요.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="supabase-init-hr.js"></script>
+<script>
+let CURRENT_USER = null;
+let COMPANY = null;
+let EMPLOYEES = [];
+
+(async function init(){
+  CURRENT_USER = await hrRequireAdmin('index.html');
+  if(!CURRENT_USER) return;
+  document.getElementById('topMeta').textContent = CURRENT_USER.email;
+  await refreshCompany();
+  await refreshEmployees();
+  renderEmpTable();
+  document.getElementById('leaveAsOf').value = new Date().toISOString().slice(0,10);
+  document.getElementById('certDate').value = new Date().toISOString().slice(0,10);
+})();
+
+function doLogout(){ hrLogout().then(()=>location.href='index.html'); }
+
+/* ---------------------- 탭 전환 ---------------------- */
+const TAB_TITLES = {
+  company:'회사 설정 & QR', employees:'직원 관리', interview:'면접 결과',
+  payroll:'급여이체 엑셀', leave:'연차 계산기', severance:'퇴직금 계산기', cert:'재직증명서'
+};
+document.querySelectorAll('.navitem').forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    document.querySelectorAll('.navitem').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.add('hidden'));
+    const tab = btn.dataset.tab;
+    document.getElementById('tab-'+tab).classList.remove('hidden');
+    document.getElementById('topTitle').textContent = TAB_TITLES[tab];
+    if(tab==='payroll') renderPayrollTable();
+    if(tab==='leave'){ populateEmpSelect('leaveEmpSelect'); renderLeaveCalc(); }
+    if(tab==='severance'){ populateEmpSelect('sevEmpSelect'); renderSeverance(); }
+    if(tab==='cert'){ populateEmpSelect('certEmpSelect'); renderCert(); }
+    if(tab==='employees') renderEmpTable();
+    if(tab==='interview') renderSubmissions();
+  });
+});
+
+/* ---------------------- 회사 설정 ---------------------- */
+async function refreshCompany(){
+  COMPANY = await hrGetMyCompany();
+  document.getElementById('sbCompanyName').textContent = COMPANY?.name || '회사 설정 필요';
+  if(COMPANY){
+    document.getElementById('companyName').value = COMPANY.name||'';
+    document.getElementById('ceoName').value = COMPANY.ceo_name||'';
+    document.getElementById('bizNumber').value = COMPANY.biz_number||'';
+    document.getElementById('companyPhone').value = COMPANY.phone||'';
+    document.getElementById('companyAddress').value = COMPANY.address||'';
+    if(COMPANY.stamp_image){
+      document.getElementById('stampPreview').src = COMPANY.stamp_image;
+      document.getElementById('stampPreview').classList.remove('hidden');
+      document.getElementById('stampStatus').textContent = '등록된 인감 이미지 있음';
+    }
+    renderQr();
+  }
+}
+document.getElementById('stampFile').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    document.getElementById('stampPreview').src = ev.target.result;
+    document.getElementById('stampPreview').classList.remove('hidden');
+    document.getElementById('stampPreview').dataset.newval = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+async function saveCompany(){
+  const fields = {
+    name: document.getElementById('companyName').value.trim(),
+    ceo_name: document.getElementById('ceoName').value.trim(),
+    biz_number: document.getElementById('bizNumber').value.trim(),
+    phone: document.getElementById('companyPhone').value.trim(),
+    address: document.getElementById('companyAddress').value.trim(),
+  };
+  const preview = document.getElementById('stampPreview');
+  if(preview.dataset.newval) fields.stamp_image = preview.dataset.newval;
+  try{
+    await hrUpsertCompany(fields);
+    await refreshCompany();
+    alert('회사 정보가 저장되었습니다.');
+  } catch(e){ alert('저장 실패: '+e.message); console.error(e); }
+}
+function renderQr(){
+  if(!COMPANY?.share_token) return;
+  const base = location.href.replace(/hr-dashboard\.html.*$/, 'interview-apply.html');
+  const link = base + '?token=' + COMPANY.share_token;
+  document.getElementById('interviewLink').value = link;
+  const holder = document.getElementById('qrcodeCanvas');
+  holder.innerHTML = '';
+  new QRCode(holder, { text: link, width:150, height:150, correctLevel: QRCode.CorrectLevel.M });
+}
+function copyInterviewLink(){
+  const el = document.getElementById('interviewLink');
+  el.select();
+  document.execCommand('copy');
+  alert('링크가 복사되었습니다.');
+}
+
+/* ---------------------- 직원 관리 ---------------------- */
+async function refreshEmployees(){ EMPLOYEES = await hrListEmployees(); }
+function resetEmpForm(){
+  document.getElementById('empId').value='';
+  document.getElementById('empName').value='';
+  document.getElementById('empBirth').value='';
+  document.getElementById('empGender').value='M';
+  document.getElementById('empDept').value='';
+  document.getElementById('empPosition').value='';
+  document.getElementById('empAddress').value='';
+  document.getElementById('empPhone').value='';
+  document.getElementById('empBank').value='';
+  document.getElementById('empAccount').value='';
+  document.getElementById('empSalary').value='';
+  document.getElementById('empHire').value='';
+  document.getElementById('empRetire').value='';
+  document.getElementById('empFormTitle').textContent='직원 등록';
+}
+async function saveEmployee(){
+  const emp = {
+    id: document.getElementById('empId').value || undefined,
+    name: document.getElementById('empName').value.trim(),
+    birth: document.getElementById('empBirth').value || null,
+    gender: document.getElementById('empGender').value,
+    department: document.getElementById('empDept').value.trim(),
+    position: document.getElementById('empPosition').value.trim(),
+    address: document.getElementById('empAddress').value.trim(),
+    phone: document.getElementById('empPhone').value.trim(),
+    bank: document.getElementById('empBank').value.trim(),
+    account: document.getElementById('empAccount').value.trim(),
+    salary: Number(document.getElementById('empSalary').value || 0),
+    hire_date: document.getElementById('empHire').value,
+    retire_date: document.getElementById('empRetire').value || null
+  };
+  if(!emp.name || !emp.hire_date){ alert('이름과 입사일은 필수입니다.'); return; }
+  try{
+    await hrSaveEmployee(emp);
+    resetEmpForm();
+    await refreshEmployees();
+    renderEmpTable();
+  } catch(e){ alert('저장 실패: '+e.message); console.error(e); }
+}
+function editEmployee(id){
+  const emp = EMPLOYEES.find(e=>e.id===id);
+  if(!emp) return;
+  document.getElementById('empId').value = emp.id;
+  document.getElementById('empName').value = emp.name;
+  document.getElementById('empBirth').value = emp.birth||'';
+  document.getElementById('empGender').value = emp.gender||'M';
+  document.getElementById('empDept').value = emp.department||'';
+  document.getElementById('empPosition').value = emp.position||'';
+  document.getElementById('empAddress').value = emp.address||'';
+  document.getElementById('empPhone').value = emp.phone||'';
+  document.getElementById('empBank').value = emp.bank||'';
+  document.getElementById('empAccount').value = emp.account||'';
+  document.getElementById('empSalary').value = emp.salary||0;
+  document.getElementById('empHire').value = emp.hire_date;
+  document.getElementById('empRetire').value = emp.retire_date||'';
+  document.getElementById('empFormTitle').textContent = '직원 정보 수정';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+async function deleteEmployee(id){
+  if(!confirm('정말 삭제하시겠습니까?')) return;
+  try{ await hrDeleteEmployee(id); await refreshEmployees(); renderEmpTable(); }
+  catch(e){ alert('삭제 실패: '+e.message); }
+}
+function fmtWon(n){ return Number(n||0).toLocaleString('ko-KR')+'원'; }
+function renderEmpTable(){
+  const tbody = document.getElementById('empTableBody');
+  tbody.innerHTML='';
+  EMPLOYEES.forEach(emp=>{
+    const tr = document.createElement('tr');
+    const status = emp.retire_date ? '<span class="pill retired">퇴사</span>' : '<span class="pill active">재직중</span>';
+    tr.innerHTML = `
+      <td>${emp.name}</td>
+      <td>${emp.department||'-'} ${emp.position?('· '+emp.position):''}</td>
+      <td>${emp.phone||'-'}</td>
+      <td>${emp.bank||'-'} ${emp.account||''}</td>
+      <td>${fmtWon(emp.salary)}</td>
+      <td>${emp.hire_date}</td>
+      <td>${status}</td>
+      <td>
+        <button class="btn ghost sm" onclick="editEmployee('${emp.id}')">수정</button>
+        <button class="btn danger sm" onclick="deleteEmployee('${emp.id}')">삭제</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+function populateEmpSelect(selectId){
+  const sel = document.getElementById(selectId);
+  const cur = sel.value;
+  sel.innerHTML = '';
+  EMPLOYEES.forEach(emp=>{
+    const opt = document.createElement('option');
+    opt.value = emp.id;
+    opt.textContent = emp.name + (emp.retire_date?' (퇴사)':'');
+    sel.appendChild(opt);
+  });
+  if(cur) sel.value = cur;
+}
+
+/* ---------------------- 급여이체 엑셀 ---------------------- */
+function renderPayrollTable(){
+  const tbody = document.getElementById('payrollTableBody');
+  tbody.innerHTML='';
+  EMPLOYEES.filter(e=>!e.retire_date).forEach(emp=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="checkbox" class="empcheck" data-id="${emp.id}" checked></td>
+      <td>${emp.name}</td>
+      <td>${emp.bank||'-'}</td>
+      <td>${emp.account||'-'}</td>
+      <td><input type="number" class="payAmount" data-id="${emp.id}" value="${emp.salary}" style="margin-bottom:0;"></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function toggleAllPayroll(val){ document.querySelectorAll('.empcheck').forEach(cb=>cb.checked=val); }
+function generatePayrollExcel(){
+  const rows = [];
+  document.querySelectorAll('#payrollTableBody tr').forEach(tr=>{
+    const cb = tr.querySelector('.empcheck');
+    if(!cb.checked) return;
+    const id = cb.dataset.id;
+    const emp = EMPLOYEES.find(e=>e.id===id);
+    const amount = Number(tr.querySelector('.payAmount').value||0);
+    rows.push({ '은행명': emp.bank, '계좌번호': emp.account, '예금주': emp.name, '금액': amount, '비고': (COMPANY?.name||'')+' 급여' });
+  });
+  if(rows.length===0){ alert('선택된 직원이 없습니다.'); return; }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '급여이체');
+  XLSX.writeFile(wb, `급여이체_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+/* ---------------------- 세전급여 역산(근사치) ---------------------- */
+function computeNetFromGross(gross){
+  const pensionBase = Math.min(Math.max(gross,370000), 5900000);
+  const pension = pensionBase*0.045;
+  const health = gross*0.03545;
+  const longterm = health*0.1295;
+  const employment = gross*0.009;
+  const insuranceTotal = pension+health+longterm+employment;
+  const taxBase = Math.max(0, gross - insuranceTotal - 1000000);
+  const incomeTax = taxBase>0 ? taxBase*0.035 : 0;
+  const localTax = incomeTax*0.1;
+  const net = gross - insuranceTotal - incomeTax - localTax;
+  return { net };
+}
+function estimateGrossFromNet(net){
+  if(!net || net<=0) return { gross:0 };
+  let low=net, high=net*1.8, mid=net;
+  for(let i=0;i<80;i++){
+    mid=(low+high)/2;
+    const r = computeNetFromGross(mid);
+    if(r.net < net) low=mid; else high=mid;
+  }
+  return { gross: Math.round(mid) };
+}
+
+/* ---------------------- 연차 계산기 ---------------------- */
+function calcAnnualLeaveEntitlement(hireDateStr, asOfStr){
+  const hire = new Date(hireDateStr);
+  const asOf = new Date(asOfStr);
+  if(asOf <= hire) return 0;
+  let years = asOf.getFullYear()-hire.getFullYear();
+  const anniv = new Date(hire); anniv.setFullYear(hire.getFullYear()+years);
+  if(anniv > asOf) years--;
+  if(years < 1){
+    let months = (asOf.getFullYear()-hire.getFullYear())*12 + (asOf.getMonth()-hire.getMonth());
+    if(asOf.getDate() < hire.getDate()) months--;
+    return Math.min(Math.max(months,0), 11);
+  }
+  return Math.min(15 + Math.floor((years-1)/2), 25);
+}
+function renderLeaveCalc(){
+  const emp = EMPLOYEES.find(e=>e.id===document.getElementById('leaveEmpSelect').value);
+  const box = document.getElementById('leaveResult');
+  if(!emp){ box.innerHTML=''; return; }
+  const asOf = document.getElementById('leaveAsOf').value || new Date().toISOString().slice(0,10);
+  const used = Number(document.getElementById('leaveUsed').value||0);
+  const entitlement = calcAnnualLeaveEntitlement(emp.hire_date, asOf);
+  const unused = Math.max(entitlement-used, 0);
+  const est = estimateGrossFromNet(emp.salary);
+  const hourlyWage = est.gross/209;
+  const dailyWage = hourlyWage*8;
+  const allowance = Math.round(dailyWage*unused);
+  box.innerHTML = `
+    <div class="result-box">
+      <div>발생 연차일수(근속 기준): <b>${entitlement}일</b> · 이미 사용: ${used}일 · 미사용: <b>${unused}일</b></div>
+      <div>추정 세전(통상임금) 월급여: ${fmtWon(est.gross)} (역산 근사치)</div>
+      <div>통상시급: ${fmtWon(Math.round(hourlyWage))} · 통상일급(8시간): ${fmtWon(Math.round(dailyWage))}</div>
+      <div style="margin-top:8px;">예상 연차수당 합계: <b class="big">${fmtWon(allowance)}</b></div>
+    </div>`;
+}
+
+/* ---------------------- 퇴직금 계산기 ---------------------- */
+function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
+function renderSeverance(){
+  const emp = EMPLOYEES.find(e=>e.id===document.getElementById('sevEmpSelect').value);
+  const box = document.getElementById('severanceResult');
+  if(!emp){ box.innerHTML=''; return; }
+  const endDateStr = emp.retire_date || new Date().toISOString().slice(0,10);
+  const hire = new Date(emp.hire_date);
+  const end = new Date(endDateStr);
+  const tenureDays = Math.round((end-hire)/(1000*60*60*24));
+  if(tenureDays < 365){
+    box.innerHTML = `<div class="result-box">근속일수 <b>${tenureDays}일</b>로, 1년 미만 근속자는 법정 퇴직금 지급 대상이 아닙니다. (근로자퇴직급여보장법 제4조)</div>`;
+    return;
+  }
+  let totalDays = 0;
+  for(let i=1;i<=3;i++){
+    const m = new Date(end.getFullYear(), end.getMonth()-i+1, 1);
+    totalDays += daysInMonth(m.getFullYear(), m.getMonth());
+  }
+  const est = estimateGrossFromNet(emp.salary);
+  const avgDailyWage = (est.gross*3)/totalDays;
+  const severance = Math.round(avgDailyWage*30*(tenureDays/365));
+  box.innerHTML = `
+    <div class="result-box">
+      <div>근속기간: ${emp.hire_date} ~ ${endDateStr} (총 <b>${tenureDays}일</b>, 약 ${(tenureDays/365).toFixed(2)}년)</div>
+      <div>추정 세전 월급여: ${fmtWon(est.gross)} · 최근 3개월 총일수: ${totalDays}일</div>
+      <div>1일 평균임금: ${fmtWon(Math.round(avgDailyWage))}</div>
+      <div style="margin-top:8px;">예상 퇴직금: <b class="big">${fmtWon(severance)}</b></div>
+      <div class="small-note">※ 실제 지급액은 상여금/연차수당 등 평균임금 포함 여부에 따라 달라질 수 있습니다.</div>
+    </div>`;
+}
+
+/* ---------------------- 재직증명서 (첨부 양식 반영) ---------------------- */
+function maskRRN(birth, gender){
+  if(!birth) return '-';
+  const d = new Date(birth);
+  const yy = String(d.getFullYear()).slice(2);
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  const genderCode = gender==='M' ? '1' : '2';
+  return `${yy}${mm}${dd}-${genderCode}******`;
+}
+function fmtKoreanDate(dstr){
+  const d = new Date(dstr);
+  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
+}
+function renderCert(){
+  const emp = EMPLOYEES.find(e=>e.id===document.getElementById('certEmpSelect').value);
+  const box = document.getElementById('certPreview');
+  if(!emp){ box.innerHTML='직원을 선택해 주세요.'; return; }
+  const purpose = document.getElementById('certPurpose').value.trim() || '기관 제출용';
+  const issueDate = document.getElementById('certDate').value || new Date().toISOString().slice(0,10);
+  const period = emp.retire_date
+    ? `${fmtKoreanDate(emp.hire_date)} 부터 ${fmtKoreanDate(emp.retire_date)} 까지`
+    : `${fmtKoreanDate(emp.hire_date)} 부터 ${fmtKoreanDate(issueDate)} 현재까지`;
+
+  box.innerHTML = `
+    <h3>재 직 증 명 서</h3>
+    <table class="cert-table" style="margin-bottom:22px;">
+      <tr><th>1. 인적사항</th><td colspan="3"></td></tr>
+      <tr><th>성명 (한글)</th><td>${emp.name}</td><th>주민등록번호</th><td>${maskRRN(emp.birth, emp.gender)}</td></tr>
+      <tr><th>주소</th><td colspan="3">${emp.address||'-'}</td></tr>
+    </table>
+    <table class="cert-table">
+      <tr><th>2. 재직사항 및 제출용도</th><td colspan="3"></td></tr>
+      <tr><th>근무부서</th><td>${emp.department||'-'}</td><th>직위</th><td>${emp.position||'-'}</td></tr>
+      <tr><th>재직기간</th><td colspan="3">${period}</td></tr>
+      <tr><th>제출용도</th><td colspan="3">${purpose}</td></tr>
+    </table>
+    <p style="margin-top:28px;">위의 기재사항이 사실과 다름없음을 증명합니다.</p>
+    <p style="text-align:center;margin-top:36px;font-size:15px;">${fmtKoreanDate(issueDate)}</p>
+    <table class="cert-table" style="margin-top:30px;">
+      <tr><th>회 사 명</th><td>${COMPANY?.name||'-'}</td>
+          <th>대 표 자</th><td style="position:relative;">${COMPANY?.ceo_name||'-'} (인)
+            ${COMPANY?.stamp_image ? `<img src="${COMPANY.stamp_image}" class="cert-stamp" style="right:10px;top:-6px;">` : ''}
+          </td></tr>
+      <tr><th>사업자번호</th><td>${COMPANY?.biz_number||'-'}</td><th>전화</th><td>${COMPANY?.phone||'-'}</td></tr>
+      <tr><th>주 소</th><td colspan="3">${COMPANY?.address||'-'}</td></tr>
+    </table>
+  `;
+}
+
+/* ---------------------- 면접 결과 ---------------------- */
+const DIM_META = {
+  collab:{label:'협업 지향성', color:'#3b6bf5'}, accountability:{label:'책임 수용도', color:'#17a673'},
+  feedback:{label:'피드백 수용성', color:'#7c5cf0'}, conflict:{label:'갈등 처리 방식', color:'#e08a1e'},
+  stress:{label:'스트레스 대응', color:'#e5484d'}, fit:{label:'조직 적합성', color:'#0aa5b0'}
+};
+function verdictClass(v){
+  if(!v) return 'review';
+  if(v.startsWith('PASS')) return 'pass';
+  if(v.startsWith('CAUTION')) return 'caution';
+  return 'review';
+}
+async function renderSubmissions(){
+  const list = document.getElementById('submissionList');
+  list.innerHTML = '불러오는 중...';
+  const subs = await hrListSubmissions();
+  if(subs.length===0){ list.innerHTML = '<div class="small-note">아직 제출된 면접 설문이 없습니다.</div>'; return; }
+  list.innerHTML = '';
+  subs.forEach(s=>{
+    const dims = s.dim_scores || {};
+    const dimHtml = Object.keys(DIM_META).map(d=>{
+      const pct = dims[d] ?? 0;
+      return `<div class="dim-row"><div class="dim-head"><span>${DIM_META[d].label}</span><span>${pct}점</span></div>
+        <div class="dim-bar-track"><div class="dim-bar-fill" style="width:${pct}%;background:${DIM_META[d].color}"></div></div></div>`;
+    }).join('');
+    const div = document.createElement('div');
+    div.className='sub-card';
+    div.innerHTML = `
+      <div class="sub-head">
+        <div>
+          <span class="name">${s.candidate_name}</span>
+          <span class="pill ${verdictClass(s.verdict)}" style="margin-left:8px;">${s.verdict||'-'}</span>
+        </div>
+        <div class="sub-meta">${new Date(s.submitted_at).toLocaleString('ko-KR')} · 응답신뢰도 ${s.sd_index??'-'}점</div>
+      </div>
+      <div style="margin-top:12px;">${dimHtml}</div>
+      <div style="margin-top:10px;display:flex;gap:8px;">
+        <button class="btn ghost sm" onclick="toggleReviewed(${s.id}, ${!s.reviewed})">${s.reviewed?'확인취소':'확인함으로 표시'}</button>
+        <button class="btn danger sm" onclick="removeSubmission(${s.id})">삭제</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+async function toggleReviewed(id, val){ await hrMarkReviewed(id, val); renderSubmissions(); }
+async function removeSubmission(id){
+  if(!confirm('이 제출 결과를 삭제하시겠습니까?')) return;
+  await hrDeleteSubmission(id); renderSubmissions();
+}
+</script>
+</body>
+</html>

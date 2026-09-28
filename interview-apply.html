@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>입사지원자 조직적합성 설문</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{ --navy:#1b2a4a; --navy2:#24365e; --accent:#3b6bf5; --accent2:#17a673; --warn:#e5484d; --bg:#f4f6fb; --border:#e3e7ef; --muted:#6b7280; }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:#1f2937;}
+  header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:30px 20px;text-align:center;}
+  header h1{margin:0 0 6px;font-size:20px;}
+  header p{margin:0;opacity:.85;font-size:13px;}
+  .wrap{max-width:600px;margin:0 auto;padding:20px 16px 80px;}
+  .card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .progressbar{position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:5;}
+  .progress-track{height:8px;background:#e5e9f2;border-radius:999px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--accent);width:0%;transition:width .25s;}
+  .progress-label{font-size:12px;color:var(--muted);margin-top:6px;text-align:right;}
+  .q-index{font-size:12px;color:var(--accent);font-weight:700;margin-bottom:6px;}
+  .q-text{font-size:16px;font-weight:600;line-height:1.5;margin-bottom:14px;}
+  .scale{display:flex;gap:8px;flex-wrap:wrap;}
+  .scale button{flex:1 1 auto;min-width:56px;padding:10px 6px;border:1px solid var(--border);border-radius:10px;background:#fafbfe;cursor:pointer;font-size:13px;white-space:pre-line;}
+  .scale button.selected{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;}
+  .scenario-opts{display:flex;flex-direction:column;gap:10px;}
+  .scenario-opts label{display:flex;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:14px;line-height:1.5;}
+  .scenario-opts label.selected{background:#eef3ff;border-color:var(--accent);}
+  label.field{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px;font-weight:600;}
+  input[type=text],input[type=tel]{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;font-size:14px;margin-bottom:14px;}
+  .btn-row{display:flex;justify-content:space-between;margin-top:22px;}
+  button.nav{padding:11px 22px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;}
+  button.nav.primary{background:var(--accent);color:#fff;}
+  button.nav.ghost{background:#fff;border:1px solid var(--border);color:#374151;}
+  button.nav:disabled{opacity:.4;}
+  .start-btn{display:block;width:100%;padding:14px;border:none;border-radius:12px;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin-top:16px;}
+  .hidden{display:none !important;}
+  .intro-list{padding-left:18px;line-height:1.8;font-size:14px;}
+  .thanks{text-align:center;padding:50px 20px;}
+  .thanks .mark{width:64px;height:64px;border-radius:50%;background:var(--accent2);color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;}
+  .errbox{background:#fff8f8;border:1px solid #f3caca;color:#8a2c2c;border-radius:10px;padding:16px;font-size:14px;text-align:center;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="companyTitle">입사지원자 조직적합성 설문</h1>
+  <p>본 설문은 참고 자료이며, 결과는 담당자만 확인합니다</p>
+</header>
+
+<div class="wrap">
+  <div id="loadingErr" class="card hidden"><div class="errbox">유효하지 않은 링크입니다. 관리자에게 새 QR/링크를 요청해 주세요.</div></div>
+
+  <div id="candidateForm" class="card hidden">
+    <label class="field">이름</label>
+    <input type="text" id="candName">
+    <label class="field">연락처 (선택)</label>
+    <input type="tel" id="candPhone" placeholder="010-0000-0000">
+    <p style="line-height:1.7;font-size:13.5px;color:#374151;">
+      본 설문은 <b>정신 건강을 진단하지 않습니다.</b> 팀 근무 환경에서의 협업 방식, 책임 수용 태도,
+      피드백에 대한 반응 등 업무 행동 스타일을 파악하기 위한 참고 자료이며, 약 8~10분이 소요됩니다.
+    </p>
+    <button class="start-btn" onclick="startSurvey()">설문 시작하기</button>
+  </div>
+
+  <div id="survey" class="hidden">
+    <div class="progressbar">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel"></div>
+    </div>
+    <div class="card">
+      <div class="q-index" id="qSection"></div>
+      <div class="q-text" id="qText"></div>
+      <div id="qBody"></div>
+    </div>
+    <div class="btn-row">
+      <button class="nav ghost" id="btnPrev" onclick="prevQ()">이전</button>
+      <button class="nav primary" id="btnNext" onclick="nextQ()" disabled>다음</button>
+    </div>
+  </div>
+
+  <div id="thanksScreen" class="card thanks hidden">
+    <div class="mark">✓</div>
+    <h2 style="margin:0 0 8px;">제출이 완료되었습니다</h2>
+    <p style="color:var(--muted);">참여해 주셔서 감사합니다. 결과는 채용 담당자가 확인 후 별도로 안내드립니다.</p>
+  </div>
+</div>
+
+<script src="supabase-init-hr.js"></script>
+<script>
+const LIKERT = [{v:1,label:"전혀\n아니다"},{v:2,label:"아닌\n편이다"},{v:3,label:"보통"},{v:4,label:"그런\n편이다"},{v:5,label:"매우\n그렇다"}];
+
+const QUESTIONS = [
+  {dim:"collab", type:"likert", reverse:false, text:"공동 작업에서는 내가 손해를 보더라도 동료와 업무를 나누어 맡는 편이다."},
+  {dim:"collab", type:"likert", reverse:true,  text:"팀 작업보다는 혼자 처리하는 편이 결과물이 훨씬 낫다고 생각한다."},
+  {dim:"collab", type:"likert", reverse:false, text:"다른 사람의 방식이 나와 다르더라도, 결과가 괜찮다면 존중하는 편이다."},
+  {dim:"collab", type:"likert", reverse:true,  text:"동료가 내 의견과 다른 방식을 고집하면 그 사람과 더 이상 협업하고 싶지 않아진다."},
+  {dim:"accountability", type:"likert", reverse:false, text:"업무에서 실수했을 때, 원인이 내게 있다면 먼저 인정하는 편이다."},
+  {dim:"accountability", type:"likert", reverse:true,  text:"일이 잘못되면 대부분 시스템, 상사, 동료 등 외부 요인 때문이라고 생각한다."},
+  {dim:"accountability", type:"likert", reverse:false, text:"내 실수로 팀에 피해가 갔을 때, 변명보다 해결 방법을 먼저 생각한다."},
+  {dim:"accountability", type:"likert", reverse:true,  text:"과거를 돌아보면, 대부분의 갈등에서 잘못은 상대방에게 있었다고 느낀다."},
+  {dim:"feedback", type:"likert", reverse:false, text:"상사나 동료의 지적을 받으면, 감정과 별개로 내용을 곱씹어 보는 편이다."},
+  {dim:"feedback", type:"likert", reverse:true,  text:"내 업무 방식에 대한 지적을 받으면 '나를 싫어해서 그런다'는 생각이 먼저 든다."},
+  {dim:"feedback", type:"likert", reverse:false, text:"내가 틀렸다는 것이 확인되면, 이전 의견을 바꾸는 데 거부감이 없다."},
+  {dim:"feedback", type:"likert", reverse:true,  text:"피드백을 받으면 그 사람이 이전부터 나를 못마땅하게 여겨온 것 같다는 생각이 든다."},
+  {dim:"conflict", type:"likert", reverse:false, text:"동료와 의견이 부딪히면, 당사자에게 직접 이야기해서 풀려고 하는 편이다."},
+  {dim:"conflict", type:"likert", reverse:true,  text:"마음이 상하면 그 사람과 아예 말을 섞지 않는 방식으로 대응하는 편이다."},
+  {dim:"conflict", type:"likert", reverse:false, text:"의견 충돌 후에도 업무상 필요한 협조는 감정과 분리해서 계속하는 편이다."},
+  {dim:"conflict", type:"likert", reverse:true,  text:"한 번 크게 부딪힌 사람과는 이후 계속 불편한 감정이 남아 업무에도 영향을 준다."},
+  {dim:"stress", type:"likert", reverse:false, text:"업무량이 갑자기 늘어나도, 우선순위를 정해 차분히 처리하려고 하는 편이다."},
+  {dim:"stress", type:"likert", reverse:true,  text:"스트레스를 받으면 주변 사람에게 예민하게 반응하게 된다."},
+  {dim:"stress", type:"likert", reverse:false, text:"압박이 심한 상황에서도 동료에게 상황을 공유하고 도움을 요청할 수 있다."},
+  {dim:"fit", type:"likert", reverse:false, text:"회사의 규정이나 절차가 다소 불편해도, 이유가 납득되면 따르는 편이다."},
+  {dim:"fit", type:"likert", reverse:true,  text:"규정보다는 내 판단이 더 합리적이라고 생각될 때가 많아 임의로 처리한 적이 있다."},
+  {dim:"fit", type:"likert", reverse:false, text:"조직에는 개인이 이해하지 못하는 합리적 이유가 있을 수 있다고 생각하는 편이다."},
+  {dim:"sd", type:"likert", reverse:false, text:"나는 지금까지 단 한 번도 동료를 뒷담화한 적이 없다."},
+  {dim:"sd", type:"likert", reverse:false, text:"나는 어떤 상황에서도 화를 내거나 짜증을 낸 적이 없다."},
+  {dim:"sd", type:"likert", reverse:false, text:"나는 지각이나 사소한 규정 위반을 단 한 번도 한 적이 없다."},
+  {dim:"conflict", type:"scenario", text:"팀 프로젝트 마감 전날, 동료의 실수로 내 작업까지 다시 해야 하는 상황이 생겼습니다. 당신의 첫 행동은?",
+    options:[{text:"동료에게 상황을 확인하고, 지금 시점에서 마감을 맞출 방법을 같이 찾는다.",score:5},{text:"일단 내가 처리하고, 나중에 동료에게 조용히 상황을 알린다.",score:4},{text:"팀장에게 먼저 그 동료의 실수를 보고한다.",score:2},{text:"화가 나서 동료에게 강하게 항의하고 다른 동료들에게도 이야기한다.",score:1}]},
+  {dim:"accountability", type:"scenario", text:"본인이 작성한 서류에서 오류가 발견되어 고객사 컴플레인이 들어왔습니다. 어떻게 하시겠습니까?",
+    options:[{text:"내 실수를 먼저 인정하고, 재발 방지 방법을 함께 보고한다.",score:5},{text:"내 실수를 인정하되, 확인 절차 자체의 개선도 함께 건의한다.",score:5},{text:"확인 절차가 원래 허술했다는 점을 먼저 강조한다.",score:2},{text:"오류의 원인을 다른 담당자나 시스템 탓으로 설명한다.",score:1}]},
+  {dim:"feedback", type:"scenario", text:"상사가 여러 사람 앞에서 당신의 업무 방식을 지적했습니다. 그 순간 가장 먼저 드는 생각/행동은?",
+    options:[{text:"공개적으로 말한 방식은 아쉽지만, 지적 내용 자체는 따로 검토해본다.",score:5},{text:"당황스럽지만 일단 알겠다고 하고 넘어간다.",score:4},{text:"왜 하필 나에게, 이 사람이 평소에도 나를 벼르고 있었나 하는 생각이 먼저 든다.",score:1},{text:"그 자리에서 반박하며 상사의 잘못을 지적한다.",score:2}]},
+  {dim:"collab", type:"scenario", text:"새로 온 동료가 당신과 다른 방식으로 업무를 처리하려고 합니다. 결과물의 품질에는 큰 차이가 없어 보입니다.",
+    options:[{text:"그 방식의 장단점을 물어보고, 팀에 도움이 되면 받아들인다.",score:5},{text:"내 방식대로 하라고 요구하고 따르지 않으면 넘어가지 않는다.",score:1},{text:"겉으로는 두되 실제로는 계속 내 방식만 쓰도록 유도한다.",score:2},{text:"일단 지켜보고 문제가 생기면 그때 이야기한다.",score:4}]}
+];
+
+let answers = {}; let cur = 0;
+let shareToken = null;
+
+(async function init(){
+  const params = new URLSearchParams(location.search);
+  shareToken = params.get('token');
+  if(!shareToken){ document.getElementById('loadingErr').classList.remove('hidden'); return; }
+  const company = await hrGetCompanyByToken(shareToken);
+  if(!company){ document.getElementById('loadingErr').classList.remove('hidden'); return; }
+  document.getElementById('companyTitle').textContent = (company.name||'회사') + ' 입사지원자 조직적합성 설문';
+  document.getElementById('candidateForm').classList.remove('hidden');
+})();
+
+function startSurvey(){
+  const name = document.getElementById('candName').value.trim();
+  if(!name){ alert('이름을 입력해 주세요.'); return; }
+  document.getElementById('candidateForm').classList.add('hidden');
+  document.getElementById('survey').classList.remove('hidden');
+  renderQ();
+}
+function renderQ(){
+  const q = QUESTIONS[cur];
+  document.getElementById('qSection').textContent = (q.type==='scenario'?'상황 판단 문항':'자기 응답 문항') + ' · ' + (cur+1) + ' / ' + QUESTIONS.length;
+  document.getElementById('qText').textContent = q.text;
+  const body = document.getElementById('qBody');
+  body.innerHTML = '';
+  if(q.type==='likert'){
+    const div = document.createElement('div'); div.className='scale';
+    LIKERT.forEach(opt=>{
+      const b=document.createElement('button');
+      b.textContent = opt.label;
+      if(answers[cur]===opt.v) b.classList.add('selected');
+      b.onclick=()=>{ answers[cur]=opt.v; renderQ(); };
+      div.appendChild(b);
+    });
+    body.appendChild(div);
+  } else {
+    const div = document.createElement('div'); div.className='scenario-opts';
+    q.options.forEach((opt,oi)=>{
+      const lbl=document.createElement('label');
+      if(answers[cur]===oi) lbl.classList.add('selected');
+      lbl.innerHTML = '<input type="radio" name="scn'+cur+'" '+(answers[cur]===oi?'checked':'')+'/> <span>'+opt.text+'</span>';
+      lbl.onclick=()=>{ answers[cur]=oi; renderQ(); };
+      div.appendChild(lbl);
+    });
+    body.appendChild(div);
+  }
+  document.getElementById('btnPrev').disabled = (cur===0);
+  document.getElementById('btnNext').disabled = (answers[cur]===undefined);
+  document.getElementById('btnNext').textContent = (cur===QUESTIONS.length-1) ? '제출하기' : '다음';
+  const pct = Math.round((cur)/(QUESTIONS.length)*100);
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressLabel').textContent = pct+'% 진행';
+}
+function nextQ(){
+  if(answers[cur]===undefined) return;
+  if(cur===QUESTIONS.length-1){ submitSurvey(); return; }
+  cur++; renderQ();
+}
+function prevQ(){ if(cur===0) return; cur--; renderQ(); }
+
+function scoreLikert(qi){ const q=QUESTIONS[qi]; const raw=answers[qi]; return q.reverse ? (6-raw) : raw; }
+
+async function submitSurvey(){
+  document.getElementById('btnNext').disabled = true;
+  document.getElementById('btnNext').textContent = '제출 중...';
+
+  const dimScores = {collab:[], accountability:[], feedback:[], conflict:[], stress:[], fit:[]};
+  const sdRaw = [];
+  QUESTIONS.forEach((q,qi)=>{
+    if(q.dim==='sd'){ sdRaw.push(answers[qi]); return; }
+    if(q.type==='likert'){ dimScores[q.dim].push(scoreLikert(qi)); }
+    else { dimScores[q.dim].push(q.options[answers[qi]].score); }
+  });
+  const dimPct = {};
+  Object.keys(dimScores).forEach(d=>{
+    const arr = dimScores[d];
+    const avg = arr.reduce((a,b)=>a+b,0)/arr.length;
+    dimPct[d] = Math.round((avg-1)/4*100);
+  });
+  const sdAvg = sdRaw.reduce((a,b)=>a+b,0)/sdRaw.length;
+  const sdIndex = Math.round((sdAvg-1)/4*100);
+  let inconsistencyFlag = false;
+  Object.keys(dimScores).forEach(d=>{
+    const arr = dimScores[d];
+    if(arr.length<3) return;
+    const avg = arr.reduce((a,b)=>a+b,0)/arr.length;
+    const variance = arr.reduce((s,v)=>s+Math.pow(v-avg,2),0)/arr.length;
+    if(variance > 2.6) inconsistencyFlag = true;
+  });
+  const coreLow = ['accountability','feedback','collab'].filter(d=>dimPct[d] < 40);
+  const anyLow = Object.keys(dimPct).filter(d=>dimPct[d] < 35);
+  let verdict;
+  if(sdIndex >= 80 || inconsistencyFlag) verdict = 'CAUTION(응답신뢰도)';
+  else if(coreLow.length >= 2 || anyLow.length >= 3) verdict = 'CAUTION(적합성 주의)';
+  else if(coreLow.length===1 || anyLow.length>=1) verdict = 'REVIEW(일부 확인)';
+  else verdict = 'PASS';
+
+  const rawAnswers = {};
+  Object.keys(answers).forEach(k=>rawAnswers[k]=answers[k]);
+
+  try{
+    await hrSubmitInterview({
+      company_share_token: shareToken,
+      candidate_name: document.getElementById('candName').value.trim(),
+      candidate_phone: document.getElementById('candPhone').value.trim(),
+      answers: rawAnswers,
+      dim_scores: dimPct,
+      sd_index: sdIndex,
+      inconsistency: inconsistencyFlag,
+      verdict
+    });
+    document.getElementById('survey').classList.add('hidden');
+    document.getElementById('thanksScreen').classList.remove('hidden');
+  } catch(e){
+    alert('제출 중 오류가 발생했습니다. 다시 시도해 주세요.');
+    console.error(e);
+    document.getElementById('btnNext').disabled = false;
+    document.getElementById('btnNext').textContent = '제출하기';
+  }
+}
+</script>
+</body>
+</html>

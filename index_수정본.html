@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>덴탈 케어 포털 · 프로토타입</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-init.js"></script>
+<style>
+  :root{
+    --bg: #f6fbfb;
+    --surface: #ffffff;
+    --ink: #17343b;
+    --ink-soft: #5c747c;
+    --teal: #2f97aa;
+    --teal-light: #75c9d7;
+    --teal-pale: #e9f8fb;
+    --blue-pale: #eef7ff;
+    --blush: #ffe3d1;
+    --line: #d9eaef;
+    --shadow: 0 24px 60px rgba(23, 76, 90, 0.14);
+    --radius-xl: 28px;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; height:100%; }
+  body{
+    font-family: "Noto Sans KR", -apple-system, "Apple SD Gothic Neo", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .display{ font-family:"Fraunces", "Noto Sans KR", serif; }
+
+  /* ---------- Ambient dental motif backdrop ---------- */
+  .backdrop{
+    position: fixed; inset:0; z-index:0; overflow:hidden;
+    background:
+      radial-gradient(circle at 14% 18%, rgba(117,201,215,0.20), transparent 40%),
+      radial-gradient(circle at 88% 12%, rgba(255,227,209,0.35), transparent 38%),
+      radial-gradient(circle at 80% 88%, rgba(47,151,170,0.10), transparent 45%),
+      linear-gradient(180deg, #fbfeff 0%, var(--bg) 100%);
+  }
+  .molar{
+    position:absolute; opacity:0.5; filter: drop-shadow(0 10px 24px rgba(47,151,170,0.08));
+    animation: drift 22s ease-in-out infinite;
+  }
+  .molar svg{ width:100%; height:100%; display:block; }
+  .m1{ width:220px; top:8%; left:-40px; animation-delay:0s; }
+  .m2{ width:150px; top:62%; left:4%; animation-delay:-6s; opacity:0.35;}
+  .m3{ width:260px; top:-30px; right:-60px; animation-delay:-3s; }
+  .m4{ width:170px; bottom:6%; right:8%; animation-delay:-10s; opacity:0.4;}
+  .m5{ width:120px; top:38%; right:26%; animation-delay:-14s; opacity:0.3; }
+  @keyframes drift{
+    0%,100%{ transform: translateY(0) rotate(0deg); }
+    50%{ transform: translateY(-18px) rotate(6deg); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .molar{ animation:none; }
+  }
+
+  /* ---------- Stage ---------- */
+  .stage{
+    position:relative; z-index:1;
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding: 32px 20px;
+  }
+
+  .card{
+    width:100%; max-width:440px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(14px);
+    border:1px solid var(--line);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    padding: 40px 36px 32px;
+    transition: transform .5s cubic-bezier(.22,.68,0,1.01), opacity .4s ease;
+  }
+
+  .brand-row{
+    display:flex; align-items:center; gap:14px; margin-bottom: 26px;
+  }
+  .brand-mark{
+    width:52px; height:52px; border-radius:13px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .brand-mark img{ width:100%; height:100%; object-fit:contain; }
+  .brand-name{ font-size:12px; letter-spacing:0.08em; color: var(--ink-soft); text-transform:uppercase; }
+  .brand-name b{
+    display:block; font-size:18px; letter-spacing:-0.01em; font-weight:800; margin-top:2px;
+  }
+  .brand-name b .w-dental{ color:#1c5f8a; }
+  .brand-name b .w-mbti{ color:var(--teal); }
+
+  .eyebrow{ font-size:12.5px; color:var(--teal); font-weight:600; letter-spacing:0.04em; margin-bottom:8px; }
+  h1.title{
+    font-size: 27px; font-weight:600; line-height:1.32; margin:0 0 10px;
+    color: var(--ink);
+  }
+  .subtitle{ font-size:14px; color:var(--ink-soft); line-height:1.6; margin:0 0 26px; }
+
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
+  .field input{
+    width:100%; padding:13px 14px; border-radius: var(--radius-md);
+    border:1.5px solid var(--line); background: #fbfeff;
+    font-size:14.5px; color:var(--ink); font-family:inherit;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .field input:focus{
+    outline:none; border-color: var(--teal); box-shadow: 0 0 0 4px rgba(47,151,170,0.12);
+  }
+
+  .btn{
+    width:100%; padding:14px; border:none; border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--teal), #268297);
+    color:#fff; font-size:15px; font-weight:700; letter-spacing:0.01em;
+    cursor:pointer; margin-top:8px;
+    transition: transform .15s ease, box-shadow .15s ease;
+    box-shadow: 0 12px 24px rgba(47,151,170,0.28);
+  }
+  .btn:hover{ transform: translateY(-1px); box-shadow: 0 16px 30px rgba(47,151,170,0.34); }
+  .btn:active{ transform: translateY(0); }
+  .btn.ghost{
+    background: transparent; color: var(--teal); box-shadow:none;
+    border:1.5px solid var(--line);
+  }
+  .btn.ghost:hover{ background: var(--teal-pale); }
+
+  .error-msg{
+    display:none; font-size:12.5px; color:#c1462f; background:#fdf0ec;
+    border:1px solid #f4cec2; padding:9px 12px; border-radius:10px; margin-top:12px;
+  }
+  .error-msg.show{ display:block; }
+
+  .hint-box{
+    margin-top:20px; padding:12px 14px; border-radius: var(--radius-md);
+    background: var(--blue-pale); border:1px dashed #b9d7ee;
+    font-size:12px; color:var(--ink-soft); line-height:1.6;
+  }
+  .hint-box b{ color:var(--ink); }
+
+  .footnote{ text-align:center; font-size:11.5px; color: #93a7ac; margin-top:22px; }
+
+  /* ---------- Menu page ---------- */
+  .card.menu{ max-width: 960px; padding: 44px 40px 40px; }
+  .menu-top{
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:30px;
+    flex-wrap: wrap; gap:14px;
+  }
+  .clinic-chip{
+    display:flex; align-items:center; gap:18px;
+    background: var(--teal-pale); border:1px solid #cdeaf0;
+    padding:14px 26px 14px 14px; border-radius: 24px;
+  }
+  .clinic-chip .dot{
+    width:90px; height:90px; border-radius:20px;
+    background:linear-gradient(135deg,var(--teal),var(--teal-light));
+    display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:36px;
+    flex-shrink:0; overflow:hidden; position:relative;
+  }
+  .clinic-chip .dot img{ width:100%; height:100%; object-fit:contain; background:#fff; display:none; }
+  .clinic-chip .dot.has-logo img{ display:block; }
+  .clinic-chip .dot .dot-fallback{ font-size:36px; }
+  .clinic-chip .dot.has-logo .dot-fallback{ display:none; }
+  .clinic-chip span{ font-size:34px; color:var(--ink); font-weight:900; line-height:1.25; display:block; }
+  .clinic-chip small{ display:block; font-size:14.5px; color:var(--ink-soft); font-weight:600; margin-top:4px; }
+  .logout-link{ font-size:13.5px; color:var(--ink-soft); cursor:pointer; border:none; background:none; text-decoration:underline; font-family:inherit; }
+  .logout-link:hover{ color:var(--teal); }
+
+  .menu-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:10px; }
+  .menu-grid-3{ grid-template-columns:1fr 1fr 1fr; }
+  .menu-grid-4{ grid-template-columns:1fr 1fr 1fr 1fr; }
+  .menu-grid-auto{ grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
+  @media (max-width:760px){ .menu-grid-4{ grid-template-columns:1fr 1fr; } }
+
+  .lam-case-list{ display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-top:16px; }
+  @media (max-width:760px){ .lam-case-list{ grid-template-columns:repeat(2, 1fr); } }
+  @media (max-width:480px){ .lam-case-list{ grid-template-columns:1fr; } }
+  .lam-case-row{ display:flex; flex-direction:column; border:1.5px solid var(--line); border-radius:18px; background:#fff; text-decoration:none; color:inherit; overflow:hidden; transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+  .lam-case-row:hover{ transform:translateY(-3px); box-shadow:0 12px 26px rgba(47,151,170,0.14); border-color:var(--teal-light); }
+  .lam-case-row img{ width:100%; aspect-ratio:1/1; object-fit:cover; display:block; }
+  .lam-case-info{ padding:12px 14px 4px; }
+  .lam-case-title{ font-weight:800; font-size:15.5px; color:var(--ink); }
+  .lam-case-desc{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; line-height:1.5; }
+  .lam-case-arrow{ font-size:12.5px; color:var(--teal); font-weight:700; padding:8px 14px 14px; }
+
+  .lam-compare{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:640px){ .lam-compare{ grid-template-columns:1fr; } }
+  .lam-media{ border-radius:14px; overflow:hidden; background:#111; }
+  .lam-media img, .lam-media video{ width:100%; height:100%; object-fit:cover; display:block; }
+  .lam-media-wide{ margin-top:14px; aspect-ratio:16/9; }
+
+  .lam-caption{ font-size:14.5px; font-weight:700; text-align:center; margin:14px 0 0; color:var(--ink); }
+  .lam-caption-danger{ color:#A32D2D; }
+  .lam-caption-success{ color:#3B6D11; }
+
+  .lam-explain{ background:var(--teal-pale); border:1px solid #cdeaf0; border-radius:14px; padding:16px 18px; font-size:14px; line-height:1.75; color:var(--ink); margin-top:14px; }
+  .lam-explain b{ display:block; font-size:14.5px; margin-bottom:6px; color:#17343b; }
+
+  .lam-btn-row{ display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+  .lam-btn{ flex:1; min-width:180px; padding:15px; border-radius:14px; font-weight:800; font-size:15px; cursor:pointer; border:2px solid transparent; }
+  .lam-btn-danger{ background:#fdece7; color:#A32D2D; border-color:#f0997b; }
+  .lam-btn-danger:hover{ background:#f5c4b3; }
+  .lam-btn-success{ background:#eafdf4; color:#3B6D11; border-color:#97C459; }
+  .lam-btn-success:hover{ background:#c0dd97; }
+  .lam-btn-ghost{ background:#fff; color:var(--ink-soft); border-color:var(--line); flex:0 0 auto; min-width:120px; }
+  .lam-btn-ghost:hover{ background:var(--surface-1, #f7fafb); }
+
+  .lam-tab-row{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .lam-tab{ flex:1; min-width:110px; padding:10px; border-radius:12px; border:1.5px solid var(--line); background:#fff; font-size:13.5px; font-weight:700; color:var(--ink-soft); cursor:pointer; }
+  .lam-tab.active{ border-color:var(--teal); background:var(--teal-pale); color:var(--teal); }
+  @media (max-width:480px){ .menu-grid{ grid-template-columns:1fr; } }
+  @media (max-width:640px){ .menu-grid-3{ grid-template-columns:1fr 1fr; } }
+
+  .edit-row{
+    border:1px solid var(--line); border-radius:14px; background:#fbfeff; padding:12px 14px;
+  }
+  .edit-row .edit-row-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; }
+  .edit-row .edit-row-head span{ font-size:13px; font-weight:700; }
+  .edit-row .edit-row-head small{ display:block; font-size:11px; color:var(--ink-soft); font-weight:500; margin-top:2px; }
+  .edit-row .edit-row-toggle{ font-size:12px; color:var(--teal); font-weight:700; flex-shrink:0; }
+  .edit-row-body{ display:none; margin-top:12px; }
+  .edit-row-body.open{ display:block; }
+  .edit-row-body textarea{
+    width:100%; min-height:90px; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line);
+    font-family:inherit; font-size:12.5px; line-height:1.6; resize:vertical;
+  }
+  .edit-row-body .save-row-btn{
+    margin-top:8px; padding:8px 14px; border:none; border-radius:9px; background:var(--teal); color:#fff;
+    font-size:12px; font-weight:700; cursor:pointer;
+  }
+  .menu-tile{
+    display:block; text-decoration:none; color:inherit;
+    border:1.5px solid var(--line); border-radius: 18px;
+    padding:22px 18px; background: #fff;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .menu-tile:hover{ transform: translateY(-4px); box-shadow: 0 18px 34px rgba(47,151,170,0.18); border-color: var(--teal-light); }
+  .menu-tile .icon{ width:38px; height:38px; margin-bottom:12px; }
+  .menu-tile h3{ font-size:15px; margin:0 0 6px; font-weight:800; }
+  .menu-tile p{ font-size:12px; color:var(--ink-soft); margin:0; line-height:1.5; }
+  .menu-tile .arrow{ margin-top:12px; font-size:12px; color:var(--teal); font-weight:700; }
+
+  .menu-priority-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:8px; }
+  @media (max-width:520px){ .menu-priority-row{ grid-template-columns:1fr; } }
+  .menu-tile-priority{
+    border:2px solid var(--teal); background:linear-gradient(135deg, #fff, var(--teal-pale));
+    padding:26px 22px;
+  }
+  .menu-tile-priority .icon{ width:46px; height:46px; margin-bottom:14px; }
+  .menu-tile-priority h3{ font-size:17px; }
+  .menu-tile-priority p{ font-size:12.5px; }
+  .menu-tile-priority .arrow{ font-size:12.5px; }
+  .menu-secondary-row{ margin-top:14px; }
+
+  .admin-link{
+    margin-top:18px; text-align:center;
+  }
+  .admin-link button{
+    background:none; border:none; font-family:inherit; font-size:12px;
+    color: var(--ink-soft); cursor:pointer; text-decoration:underline;
+  }
+  .admin-link button:hover{ color: var(--teal); }
+
+  /* ---------- Admin mock panel ---------- */
+  .card.admin{ max-width:560px; text-align:left; }
+  .card.admin.card-wide{ max-width:780px; }
+  .card.admin.card-lam-wide{ max-width:1015px; }
+
+  .inbox-list{ display:flex; flex-direction:column; gap:14px; }
+  .inbox-row{
+    display:flex; align-items:center; justify-content:space-between; gap:18px;
+    border:1.5px solid var(--line); border-radius:18px; padding:20px 22px; background:#fff;
+    transition: box-shadow .15s ease, border-color .15s ease;
+  }
+  .inbox-row:hover{ border-color: var(--teal-light); box-shadow: 0 10px 24px rgba(47,151,170,0.10); }
+  .inbox-row .inbox-name{ font-size:19px; font-weight:800; color:var(--ink); margin-bottom:6px; }
+  .inbox-row .inbox-meta{ font-size:14.5px; color:var(--ink-soft); line-height:1.6; }
+  .inbox-row .inbox-actions{ display:flex; align-items:center; gap:14px; flex-shrink:0; }
+  .inbox-status{
+    font-size:13px; font-weight:800; letter-spacing:0.02em; padding:6px 14px; border-radius:999px;
+  }
+  .inbox-status.new{ background:#fdece7; color:#b8492f; }
+  .inbox-status.done{ background:#eafdf4; color:#1c8a4c; }
+  .inbox-review-btn{
+    padding:12px 22px; border:none; border-radius:12px; background:var(--teal); color:#fff;
+    font-size:15px; font-weight:800; cursor:pointer; white-space:nowrap;
+  }
+  .inbox-review-btn:hover{ background:#268297; }
+  .inbox-delete-btn{
+    padding:12px 18px; border:1.5px solid #f1cabb; border-radius:12px; background:#fff8f5; color:#b8492f;
+    font-size:14px; font-weight:700; cursor:pointer; white-space:nowrap;
+  }
+  .inbox-delete-btn:hover{ background:#fdece7; }
+  .inbox-empty{ font-size:15px; color:var(--ink-soft); padding:20px 4px; text-align:center; }
+  @media (max-width:600px){
+    .inbox-row{ flex-direction:column; align-items:flex-start; }
+    .inbox-row .inbox-actions{ width:100%; justify-content:space-between; }
+  }
+
+  #qrPrintArea{ display:none; }
+  @media print {
+    @page{ size: A4; margin: 0; }
+    body *{ visibility: hidden; }
+    #qrPrintArea, #qrPrintArea *{ visibility: visible; }
+    #qrPrintArea{
+      display:block;
+      position: absolute; top:0; left:0;
+      width: 105mm; height: 148mm;
+    }
+    #qrPrintArea img{ width:100%; height:100%; object-fit:contain; }
+  }
+  .admin-list{ margin-top:18px; display:flex; flex-direction:column; gap:10px; }
+  .acct-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 14px; border:1px solid var(--line); border-radius:14px; background:#fbfeff;
+  }
+  .acct-row .who{ font-size:13px; font-weight:600; }
+  .acct-row .who small{ display:block; font-size:11px; color:var(--ink-soft); font-weight:500; margin-top:2px; }
+  .toggle{
+    position:relative; width:42px; height:24px; border-radius:999px; background:#d9e3e6;
+    cursor:pointer; border:none; flex-shrink:0; transition: background .2s ease;
+  }
+  .toggle::after{
+    content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%;
+    background:#fff; transition: transform .2s ease; box-shadow:0 1px 3px rgba(0,0,0,0.25);
+  }
+  .toggle.on{ background: var(--teal); }
+  .toggle.on::after{ transform: translateX(18px); }
+  .acct-status{ font-size:10.5px; font-weight:700; letter-spacing:0.02em; margin-right:10px; }
+  .acct-status.active{ color:#1c8a4c; }
+  .acct-status.blocked{ color:#c1462f; }
+  .add-acct{ display:flex; gap:8px; margin-top:16px; }
+  .add-acct input{ flex:1; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line); font-size:13px; font-family:inherit; }
+  .add-acct button{ padding:0 16px; border-radius:10px; border:none; background:var(--teal); color:#fff; font-weight:700; font-size:12.5px; cursor:pointer; }
+
+  .iplog-btn{
+    font-size:11px; color:var(--teal); background:none; border:1px solid var(--line);
+    border-radius:8px; padding:5px 9px; cursor:pointer; font-family:inherit; margin-left:8px;
+  }
+  .iplog-btn:hover{ background:var(--teal-pale); }
+  .iplog-panel{ display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); }
+  .iplog-panel.open{ display:block; }
+  .iplog-row{
+    display:flex; justify-content:space-between; gap:10px; font-size:11.5px; color:var(--ink-soft);
+    padding:5px 0;
+  }
+  .iplog-row b{ color:var(--ink); font-weight:700; }
+  .iplog-empty{ font-size:12px; color:var(--ink-soft); padding:4px 0; }
+
+  /* ---------- view switching ---------- */
+  .view{ display:none; }
+  .view.active{ display:block; animation: fadein .45s ease; }
+  @keyframes fadein{ from{ opacity:0; transform: translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+
+  .badge-note{
+    position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:5;
+    background: rgba(23,52,59,0.88); color:#fff; font-size:11.5px; padding:6px 14px;
+    border-radius:999px; letter-spacing:0.02em;
+  }
+</style>
+</head>
+<body>
+
+<div class="backdrop">
+  <div class="molar m1">
+    <svg viewBox="0 0 100 100"><path d="M50 6C28 6 16 20 16 38c0 12 5 16 5 30 0 10 6 20 12 20 8 0 8-16 17-16s9 16 17 16c6 0 12-10 12-20 0-14 5-18 5-30C84 20 72 6 50 6z" fill="#2f97aa" opacity="0.14"/></svg>
+  </div>
+  <div class="molar m2"><svg viewBox="0 0 100 100"><path d="M50 6C28 6 16 20 16 38c0 12 5 16 5 30 0 10 6 20 12 20 8 0 8-16 17-16s9 16 17 16c6 0 12-10 12-20 0-14 5-18 5-30C84 20 72 6 50 6z" fill="#75c9d7" opacity="0.22"/></svg></div>
+  <div class="molar m3"><svg viewBox="0 0 100 100"><path d="M50 6C28 6 16 20 16 38c0 12 5 16 5 30 0 10 6 20 12 20 8 0 8-16 17-16s9 16 17 16c6 0 12-10 12-20 0-14 5-18 5-30C84 20 72 6 50 6z" fill="#ffb08a" opacity="0.16"/></svg></div>
+  <div class="molar m4"><svg viewBox="0 0 100 100"><path d="M50 6C28 6 16 20 16 38c0 12 5 16 5 30 0 10 6 20 12 20 8 0 8-16 17-16s9 16 17 16c6 0 12-10 12-20 0-14 5-18 5-30C84 20 72 6 50 6z" fill="#2f97aa" opacity="0.12"/></svg></div>
+  <div class="molar m5"><svg viewBox="0 0 100 100"><path d="M50 6C28 6 16 20 16 38c0 12 5 16 5 30 0 10 6 20 12 20 8 0 8-16 17-16s9 16 17 16c6 0 12-10 12-20 0-14 5-18 5-30C84 20 72 6 50 6z" fill="#75c9d7" opacity="0.18"/></svg></div>
+</div>
+
+<div class="stage">
+
+  <!-- ============ VIEW 1: LOGIN ============ -->
+  <div class="view active" id="view-login">
+    <div class="card" id="login-card">
+      <div class="brand-row">
+        <div class="brand-mark">
+          <img src="logo-icon.png" alt="DENTAL MBTI 로고" />
+        </div>
+        <div class="brand-name">PATIENT INSIGHT SYSTEM<b><span class="w-dental">DENTAL</span> <span class="w-mbti">MBTI</span></b></div>
+      </div>
+
+      <h1 class="title display">환자의 마음을 읽어주는<br/>DENTAL MBTI</h1>
+      <p class="subtitle">관리자가 발급한 계정으로만 접속할 수 있습니다.<br/>아이디와 비밀번호를 입력해 주세요.</p>
+
+      <div class="field">
+        <label for="login-id">아이디 (이메일)</label>
+        <input id="login-id" type="text" placeholder="clinic@example.com" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label for="login-pw">비밀번호</label>
+        <input id="login-pw" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+
+      <button class="btn" onclick="tryLogin()">로그인</button>
+      <div class="error-msg" id="login-error"></div>
+
+      <div class="hint-box">
+        관리자가 Supabase에서 발급한 이메일과 비밀번호로만 접속할 수 있습니다.<br/>
+        비활성화된 계정이거나 다른 PC에서 이미 로그인 중인 계정은 자동으로 접속이 차단됩니다.
+      </div>
+      <div class="footnote">© DENTAL MBTI · 환자 상담 코칭 시스템</div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW 2: MENU ============ -->
+  <div class="view" id="view-menu">
+    <div class="card menu">
+      <div class="menu-top">
+        <div class="clinic-chip">
+          <div class="dot" id="menuClinicLogoWrap">
+            <img id="menuClinicLogoImg" alt="치과 로고" />
+            <span class="dot-fallback">치</span>
+          </div>
+          <div><span id="menu-clinic-name">스마일허브 치과</span><small>정상 이용 중 · 세션 1개</small></div>
+        </div>
+        <button class="logout-link" onclick="doLogout()">로그아웃</button>
+      </div>
+
+      <div class="eyebrow">메뉴 선택</div>
+      <h1 class="title display" style="font-size:22px;">오늘은 어떤 작업을<br/>진행할까요?</h1>
+
+      <div class="menu-priority-row">
+        <a class="menu-tile menu-tile-priority" href="javascript:void(0)" onclick="showView('view-laminate-cases');">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="8" y="16" width="32" height="18" rx="5" fill="#fdeeea"/><path d="M16 25c2-6 6-9 8-9s6 3 8 9" stroke="#d85a30" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>라미네이트 상담</h3>
+          <p>시술 개수별 결과를 사진·영상으로 직관적으로 비교해 보여줍니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+        <a class="menu-tile menu-tile-priority" href="javascript:void(0)" onclick="showView('view-inbox'); loadSubmissions();">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="9" y="10" width="30" height="28" rx="5" fill="#f0eefb"/><path d="M9 24h9l3 4h6l3-4h9" stroke="#7c6bcf" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+          <h3>문진표 보관함</h3>
+          <p>환자가 QR로 제출한 문진표를 확인하고 바로 검토합니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+      </div>
+
+      <div class="menu-grid menu-grid-3 menu-secondary-row">
+        <a class="menu-tile" href="javascript:void(0)" onclick="showView('view-brand'); loadBrandingIntoForm();">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="8" y="14" width="32" height="22" rx="5" fill="#fff2ea"/><circle cx="24" cy="25" r="6" stroke="#e07a45" stroke-width="1.8"/><path d="M18 14l2-4h8l2 4" stroke="#e07a45" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>치과 브랜드 설정</h3>
+          <p>치과명·로고 등록과 환자용 QR코드 다운로드를 여기서 합니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+        <a class="menu-tile" href="문진표출력.html" target="_blank">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="10" y="8" width="28" height="32" rx="4" fill="#eef7ff"/><path d="M16 16h16M16 22h16M16 28h10" stroke="#2f97aa" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>문진표 작성 · 출력</h3>
+          <p>치과명·로고를 반영한 환자용 문진표를 작성하고 바로 출력합니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+        <a class="menu-tile" href="치과환자문진표_분석상담코칭시스템.html" target="_blank">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="#e9f8fb"/><path d="M24 14a6 6 0 016 6c0 3-2 4-2 7.5 0 2-1.4 4.5-2.8 4.5-1.8 0-1.8-3.6-3.9-3.6S19.5 32 17.7 32c-1.4 0-2.7-2.5-2.7-4.5 0-3.5-2-4.5-2-7.5a6 6 0 016-6" stroke="#2f97aa" stroke-width="1.8"/></svg></div>
+          <h3>덴탈 MBTI 검사</h3>
+          <p>환자 성향을 분석해 상담 코칭 스크립트까지 자동 제안합니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: 라미네이트 상담 - 케이스 목록 ============ -->
+  <div class="view" id="view-laminate-cases">
+    <div class="card admin card-wide">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">라미네이트 상담</div>
+        <button class="logout-link" onclick="showView('view-menu')">← 메뉴로</button>
+      </div>
+      <h1 class="title display" style="font-size:21px; margin-top:10px;">환자 케이스를 선택하세요</h1>
+      <p class="subtitle" style="margin-bottom:6px;">시술 개수에 따른 결과 차이를 사진·영상으로 환자에게 직접 보여줄 수 있습니다.</p>
+      <div class="lam-case-list">
+        <a class="lam-case-row" href="javascript:void(0)" onclick="openDiastemaCase()">
+          <img src="assets/laminate/diastema/before.jpg" alt="다이아스테마 케이스" />
+          <div class="lam-case-info">
+            <div class="lam-case-title">다이아스테마</div>
+            <div class="lam-case-desc">치아 벌어짐 · 시술 개수별 결과 비교</div>
+          </div>
+          <div class="lam-case-arrow">열기 →</div>
+        </a>
+        <a class="lam-case-row" href="javascript:void(0)" onclick="openDiscolorationCase()">
+          <img src="assets/laminate/discoloration-restoration/before.jpg" alt="변색치 복원치료 케이스" />
+          <div class="lam-case-info">
+            <div class="lam-case-title">변색치 복원치료</div>
+            <div class="lam-case-desc">치아 변색 · 지르코니아 소재로 변색 완전 차단</div>
+          </div>
+          <div class="lam-case-arrow">열기 →</div>
+        </a>
+        <a class="lam-case-row" href="javascript:void(0)" onclick="openSmilelineCase()">
+          <img src="assets/laminate/smileline-restoration/before.jpg" alt="스마일라인 복원 케이스" />
+          <div class="lam-case-info">
+            <div class="lam-case-title">스마일라인 복원</div>
+            <div class="lam-case-desc">무마취 교정 · 반영구 미백 효과</div>
+          </div>
+          <div class="lam-case-arrow">열기 →</div>
+        </a>
+        <a class="lam-case-row" href="javascript:void(0)" onclick="openFractureCase()">
+          <img src="assets/laminate/fracture-restoration/before.jpg" alt="파절치 케이스" />
+          <div class="lam-case-info">
+            <div class="lam-case-title">파절치 복원</div>
+            <div class="lam-case-desc">치아 파절 · 강도와 심미성 동시 회복</div>
+          </div>
+          <div class="lam-case-arrow">열기 →</div>
+        </a>
+        <a class="lam-case-row" href="javascript:void(0)" onclick="openUndersizedCase()">
+          <img src="assets/laminate/undersized-restoration/before.jpg" alt="왜소치 케이스" />
+          <div class="lam-case-info">
+            <div class="lam-case-title">왜소치 복원</div>
+            <div class="lam-case-desc">치아 크기·비율 보완 · 스마일라인 균형</div>
+          </div>
+          <div class="lam-case-arrow">열기 →</div>
+        </a>
+        <a class="lam-case-row" href="javascript:void(0)" onclick="openOrthoCase()">
+          <img src="assets/laminate/ortho-restoration/before.jpg" alt="교정후 심미복원 케이스" />
+          <div class="lam-case-info">
+            <div class="lam-case-title">교정후 심미복원</div>
+            <div class="lam-case-desc">교정 완성도 보완 · 색상·형태 마무리</div>
+          </div>
+          <div class="lam-case-arrow">열기 →</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: 라미네이트 상담 - 다이아스테마 케이스 ============ -->
+  <div class="view" id="view-laminate-diastema">
+    <div class="card admin card-lam-wide">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">라미네이트 상담 · 다이아스테마(치아벌어짐)</div>
+        <button class="logout-link" onclick="showView('view-laminate-cases')">← 케이스 목록</button>
+      </div>
+      <div id="diastemaStage" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: 라미네이트 상담 - 변색치 복원치료 케이스 ============ -->
+  <div class="view" id="view-laminate-discoloration">
+    <div class="card admin card-lam-wide">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">라미네이트 상담 · 변색치 복원치료</div>
+        <button class="logout-link" onclick="showView('view-laminate-cases')">← 케이스 목록</button>
+      </div>
+      <div id="discolorationStage" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: 라미네이트 상담 - 스마일라인 복원 케이스 ============ -->
+  <div class="view" id="view-laminate-smileline">
+    <div class="card admin card-lam-wide">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">라미네이트 상담 · 스마일라인 복원</div>
+        <button class="logout-link" onclick="showView('view-laminate-cases')">← 케이스 목록</button>
+      </div>
+      <div id="smilelineStage" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: 라미네이트 상담 - 파절치 케이스 ============ -->
+  <div class="view" id="view-laminate-fracture">
+    <div class="card admin card-lam-wide">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">라미네이트 상담 · 파절치 복원</div>
+        <button class="logout-link" onclick="showView('view-laminate-cases')">← 케이스 목록</button>
+      </div>
+      <div id="fractureStage" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: 라미네이트 상담 - 왜소치 케이스 ============ -->
+  <div class="view" id="view-laminate-undersized">
+    <div class="card admin card-lam-wide">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">라미네이트 상담 · 왜소치 복원</div>
+        <button class="logout-link" onclick="showView('view-laminate-cases')">← 케이스 목록</button>
+      </div>
+      <div id="undersizedStage" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: 라미네이트 상담 - 교정후 심미복원 케이스 ============ -->
+  <div class="view" id="view-laminate-ortho">
+    <div class="card admin card-lam-wide">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">라미네이트 상담 · 교정후 심미복원</div>
+        <button class="logout-link" onclick="showView('view-laminate-cases')">← 케이스 목록</button>
+      </div>
+      <div id="orthoStage" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: 문진표 보관함 (patient survey inbox) ============ -->
+  <div class="view" id="view-inbox">
+    <div class="card admin card-wide">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">치과 계정 · 문진표 보관함</div>
+        <button class="logout-link" onclick="showView('view-menu')">← 메뉴로</button>
+      </div>
+      <h1 class="title display" style="font-size:23px; margin-top:10px;">환자가 제출한 문진표</h1>
+      <p class="subtitle" style="margin-bottom:6px; font-size:14.5px;">"치과 브랜드 설정" 메뉴의 QR코드를 환자가 스캔해 작성하면, 이 목록에 자동으로 쌓입니다.</p>
+
+      <div class="inbox-list" id="inboxList" style="margin-top:18px;"></div>
+    </div>
+  </div>
+
+
+  <!-- ============ VIEW: CLINIC BRAND SETTINGS ============ -->
+  <div class="view" id="view-brand">
+    <div class="card admin">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">치과 계정 · 브랜드 설정</div>
+        <button class="logout-link" onclick="showView('view-menu')">← 메뉴로</button>
+      </div>
+      <h1 class="title display" style="font-size:21px; margin-top:10px;">치과명 · 로고 등록</h1>
+      <p class="subtitle" style="margin-bottom:6px;">여기서 저장한 치과명과 로고는 <b>덴탈 MBTI 분석 결과</b>와 <b>문진표 작성·출력</b> 두 화면 및 인쇄물에 자동으로 반영됩니다. 두 화면에는 더 이상 별도의 이름·로고 입력란이 없습니다.</p>
+
+      <div class="field" style="margin-top:18px;">
+        <label for="brandNameInput">치과명</label>
+        <input id="brandNameInput" type="text" placeholder="예: 스마일허브 치과" />
+      </div>
+      <div class="field">
+        <label for="brandLogoInput">로고 이미지</label>
+        <input id="brandLogoInput" type="file" accept="image/*" style="padding:9px 10px;" />
+      </div>
+
+      <div style="display:flex; align-items:center; gap:12px; margin:16px 0 6px; padding:12px 14px; border:1px dashed var(--line); border-radius:14px; background:#fbfeff;">
+        <div id="brandPreviewLogo" style="width:46px;height:46px;border-radius:12px;background:var(--teal-pale);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+          <span id="brandPreviewFallback" style="font-size:22px;">🦷</span>
+          <img id="brandPreviewImg" style="width:100%;height:100%;object-fit:contain;display:none;" />
+        </div>
+        <div style="font-size:13px; font-weight:700;" id="brandPreviewName">치과명을 입력해 주세요</div>
+      </div>
+
+      <button class="btn" onclick="saveBranding()">저장하기</button>
+      <div class="error-msg" id="brand-saved-msg" style="background:#eefdf7;border-color:#bfe9d3;color:#1c8a4c;">저장되었습니다. 문진표·분석 화면을 열면 바로 반영됩니다.</div>
+      <div class="footnote" style="margin-top:16px;">저장하신 치과명·로고는 서버(Supabase)에 저장되어, 어떤 기기·브라우저에서 접속해도 동일하게 적용됩니다.</div>
+
+      <div style="margin-top:22px; padding-top:18px; border-top:1px dashed var(--line);">
+        <div class="eyebrow" style="margin-bottom:6px;">환자용 문진표 QR 포스터</div>
+        <p class="subtitle" style="margin-bottom:12px;">치과명·안내 문구·QR코드가 하나로 디자인된 포스터입니다. 데스크에 태블릿으로 띄워두거나, 인쇄해서 세워두세요. 계정마다 고유한 QR이라 다른 치과와 겹치지 않습니다.</p>
+        <div style="display:flex; align-items:flex-start; gap:20px; flex-wrap:wrap;">
+          <div style="width:180px; aspect-ratio:1050/1480; border:1.5px solid var(--line); border-radius:14px; background:#fff; overflow:hidden; flex-shrink:0; box-shadow:0 8px 20px rgba(23,76,90,0.10);">
+            <img id="qrPosterPreview" alt="문진표 QR 포스터 미리보기" style="width:100%; height:100%; object-fit:contain;" />
+          </div>
+          <div style="flex:1; min-width:200px; display:flex; flex-direction:column; gap:10px;">
+            <button class="btn" style="margin-top:0;" onclick="downloadQrPoster()">포스터 이미지 다운로드</button>
+            <button class="btn ghost" style="margin-top:0;" onclick="printQrPoster()">인쇄하기 (A6 · A4 왼쪽 상단)</button>
+            <div class="footnote" style="margin-top:2px;">이미지 크기: 1050×1480px (A6 비율, 고해상도) · 인쇄 시 A4 용지 왼쪽 상단에 A6 크기로 출력됩니다.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 인쇄 전용: A6 포스터를 A4 왼쪽 상단에 배치하기 위한 영역 (평소엔 화면에 보이지 않음) -->
+  <div id="qrPrintArea">
+    <img id="qrPrintImage" alt="문진표 QR 포스터" />
+  </div>
+
+  <!-- ============ VIEW: ADMIN ROOT MENU ============ -->
+  <div class="view" id="view-admin-menu">
+    <div class="card menu">
+      <div class="menu-top">
+        <div class="clinic-chip">
+          <div class="dot" style="background:linear-gradient(135deg,#5c6b73,#8fa1a8);">관</div>
+          <div><span>시스템 관리자</span><small>admin@portal.com</small></div>
+        </div>
+        <button class="logout-link" onclick="doLogout()">로그아웃</button>
+      </div>
+
+      <div class="eyebrow">관리자 메뉴</div>
+      <h1 class="title display" style="font-size:22px;">거래처와 콘텐츠를<br/>관리합니다</h1>
+
+      <div class="menu-grid">
+        <a class="menu-tile" href="javascript:void(0)" onclick="showView('view-admin'); loadAccountsList();">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><circle cx="18" cy="18" r="7" fill="#e9f8fb"/><path d="M6 40c0-8 6-13 12-13s12 5 12 13" stroke="#2f97aa" stroke-width="1.8"/><circle cx="34" cy="16" r="5" fill="#eef7ff"/><path d="M28 40c0-6 3-10 8-11" stroke="#2f97aa" stroke-width="1.8"/></svg></div>
+          <h3>거래처 계정 관리</h3>
+          <p>치과 계정을 발급하고 사용 허가·차단을 설정합니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+        <a class="menu-tile" href="javascript:void(0)" onclick="showView('view-admin-editor')">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="10" y="8" width="28" height="32" rx="4" fill="#eef7ff"/><path d="M16 16h16M16 22h16M16 28h10" stroke="#2f97aa" stroke-width="1.8" stroke-linecap="round"/><path d="M30 30l6 6-2 2-6-6z" fill="#2f97aa"/></svg></div>
+          <h3>문진표 · 분석결과 수정</h3>
+          <p>문진표 질문과 성향 유형별 분석·상담 스크립트를 수정합니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+        <a class="menu-tile" href="hr-dashboard.html">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none"><rect x="8" y="14" width="14" height="26" rx="3" fill="#eef7ff"/><rect x="26" y="8" width="14" height="32" rx="3" fill="#e9f8fb"/><path d="M12 22h6M12 28h6M12 34h6M30 16h6M30 22h6M30 28h6" stroke="#2f97aa" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <h3>사내 임직원 관리 OS</h3>
+          <p>면접 설문(QR), 직원 정보, 급여이체 엑셀, 연차·퇴직금 계산, 재직증명서를 관리합니다.</p>
+          <div class="arrow">열기 →</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: ADMIN ACCOUNTS (existing mock) ============ -->
+  <div class="view" id="view-admin">
+    <div class="card admin">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">관리자 전용 · 계정 관리</div>
+        <button class="logout-link" onclick="showView('view-admin-menu')">← 관리자 메뉴로</button>
+      </div>
+      <h1 class="title display" style="font-size:21px; margin-top:10px;">거래처 계정 사용 허가</h1>
+      <p class="subtitle" style="margin-bottom:6px;">토글로 계정을 즉시 활성/비활성 전환합니다. 계정을 비활성화하면 해당 계정은 다음 확인 주기(최대 20초) 안에 자동 로그아웃됩니다. 각 계정의 "IP 이력"을 눌러 최근 접속 기록을 확인할 수 있습니다.</p>
+
+      <div class="admin-list" id="admin-list"></div>
+
+      <div class="hint-box" style="margin-top:16px;">
+        <b>새 거래처 계정 발급</b>은 이 화면이 아니라 <b>Supabase 관리자 페이지</b>에서 진행합니다 (아이디만 아는 사람 아무나 계정을 만들 수 없도록, 계정 발급 권한을 완전히 분리한 것입니다).<br/>
+        Supabase 프로젝트 → Authentication → Users → "Add user"에서 이메일과 임시 비밀번호를 입력하면, 이 목록에 자동으로 나타납니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: ADMIN CONTENT EDITOR ============ -->
+  <div class="view" id="view-admin-editor">
+    <div class="card admin" style="max-width:640px;">
+      <div class="menu-top">
+        <div class="eyebrow" style="margin:0;">관리자 전용 · 문진표 / 분석결과 수정 (개념 미리보기)</div>
+        <button class="logout-link" onclick="showView('view-admin-menu')">← 관리자 메뉴로</button>
+      </div>
+      <h1 class="title display" style="font-size:21px; margin-top:10px;">콘텐츠 관리</h1>
+      <p class="subtitle" style="margin-bottom:4px;">여기서 수정하면 모든 치과 계정의 덴탈 MBTI 화면에 동일하게 반영됩니다. (지금은 UI 개념 미리보기이며, 실서비스에서는 저장 시 서버의 문항·분석결과 데이터가 즉시 갱신됩니다.)</p>
+
+      <div style="display:flex; gap:8px; margin:16px 0 10px;">
+        <button class="btn ghost" style="width:auto; flex:1; padding:10px;" id="tabQuestionsBtn" onclick="switchEditorTab('questions')">문진표 질문 (15)</button>
+        <button class="btn ghost" style="width:auto; flex:1; padding:10px;" id="tabTypesBtn" onclick="switchEditorTab('types')">분석 유형 (9)</button>
+      </div>
+
+      <div id="editorQuestions" class="admin-list"></div>
+      <div id="editorTypes" class="admin-list" style="display:none;"></div>
+
+      <div class="error-msg" id="editor-saved-msg" style="background:#eefdf7;border-color:#bfe9d3;color:#1c8a4c;">저장되었습니다.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentRole = null;
+  let guardTimer = null;
+
+  // ---- 브라우저 "뒤로가기"를 눌러도 사이트를 이탈하지 않고 메인 페이지로 이동하게 만든다 ----
+  history.pushState({ trap: true }, '', location.href);
+  window.addEventListener('popstate', () => {
+    // 뒤로가기가 눌릴 때마다 같은 자리에 다시 쌓아서, 다음 뒤로가기도 계속 붙잡는다.
+    history.pushState({ trap: true }, '', location.href);
+    if (currentRole === 'admin') {
+      showView('view-admin-menu');
+    } else if (currentRole === 'clinic') {
+      showView('view-menu');
+    } else {
+      showView('view-login');
+    }
+  });
+
+  function showView(id){
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  async function tryLogin(){
+    const id = document.getElementById('login-id').value.trim();
+    const pw = document.getElementById('login-pw').value;
+    const err = document.getElementById('login-error');
+    err.classList.remove('show');
+
+    const { error: signInError } = await sb.auth.signInWithPassword({ email: id, password: pw });
+    if (signInError) {
+      err.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
+      err.classList.add('show');
+      return;
+    }
+
+    const profile = await sbGetMyProfile();
+    if (!profile) {
+      err.textContent = "계정 정보를 찾을 수 없습니다. 관리자에게 문의해 주세요.";
+      err.classList.add('show');
+      await sb.auth.signOut();
+      return;
+    }
+    if (!profile.is_active) {
+      err.textContent = "이 계정은 현재 사용이 정지되어 있습니다. 관리자에게 문의해 주세요.";
+      err.classList.add('show');
+      await sb.auth.signOut();
+      return;
+    }
+
+    await sbClaimSession(profile.id);
+    sbLogLoginIp(profile.id);
+    currentRole = profile.role;
+    guardTimer = sbStartGuard('index.html');
+
+    if (profile.role === 'admin') {
+      showView('view-admin-menu');
+    } else {
+      refreshClinicChip();
+      showView('view-menu');
+    }
+  }
+
+  async function doLogout(){
+    if (guardTimer) clearInterval(guardTimer);
+    await sb.auth.signOut();
+    sessionStorage.removeItem('sb_session_id');
+    document.getElementById('login-id').value = "";
+    document.getElementById('login-pw').value = "";
+    currentRole = null;
+    showView('view-login');
+  }
+
+  // If a session already exists (page refresh), resume it automatically instead of forcing re-login
+  async function resumeSessionIfAny(){
+    const profile = await sbGetMyProfile();
+    if (!profile || !profile.is_active) return;
+    // Only resume automatically if this tab already claimed a session (avoids silently
+    // logging back in a browser that still has an old Supabase token after logout elsewhere)
+    if (!sessionStorage.getItem('sb_session_id')) return;
+    currentRole = profile.role;
+    guardTimer = sbStartGuard('index.html');
+    if (profile.role === 'admin') {
+      showView('view-admin-menu');
+    } else {
+      refreshClinicChip();
+      showView('view-menu');
+    }
+  }
+
+  // allow Enter key to submit login
+  document.addEventListener('DOMContentLoaded', () => {
+    ['login-id','login-pw'].forEach(id=>{
+      document.getElementById(id).addEventListener('keydown', e=>{
+        if(e.key === 'Enter') tryLogin();
+      });
+    });
+    wireBrandForm();
+    resumeSessionIfAny();
+  });
+
+  // ---- clinic brand settings (stored in Supabase `accounts` table: clinic_name, logo_url) ----
+  let pendingLogoData = null;
+
+  async function refreshClinicChip(){
+    const profile = await sbGetMyProfile();
+    document.getElementById('menu-clinic-name').textContent = (profile && profile.clinic_name) || '치과명 미설정';
+    const logoWrap = document.getElementById('menuClinicLogoWrap');
+    const logoImg = document.getElementById('menuClinicLogoImg');
+    if (profile && profile.logo_url) {
+      logoImg.src = profile.logo_url;
+      logoWrap.classList.add('has-logo');
+    } else if (logoWrap) {
+      logoWrap.classList.remove('has-logo');
+    }
+  }
+
+  async function loadBrandingIntoForm(){
+    const profile = await sbGetMyProfile();
+    if (!profile) return;
+    document.getElementById('brandNameInput').value = profile.clinic_name || '';
+    updateBrandPreview(profile.clinic_name, profile.logo_url);
+    renderQrPosterPreview();
+  }
+
+  function wireBrandForm(){
+    document.getElementById('brandLogoInput').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if(!file){ pendingLogoData = null; return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingLogoData = reader.result;
+        updateBrandPreview(document.getElementById('brandNameInput').value, pendingLogoData);
+      };
+      reader.readAsDataURL(file);
+    });
+    document.getElementById('brandNameInput').addEventListener('input', (e) => {
+      updateBrandPreview(e.target.value, pendingLogoData);
+    });
+  }
+
+  function updateBrandPreview(name, logo){
+    document.getElementById('brandPreviewName').textContent = name && name.trim() ? name.trim() : '치과명을 입력해 주세요';
+    const img = document.getElementById('brandPreviewImg');
+    const fallback = document.getElementById('brandPreviewFallback');
+    if(logo){
+      img.src = logo; img.style.display = 'block'; fallback.style.display = 'none';
+    } else {
+      img.style.display = 'none'; fallback.style.display = 'block';
+    }
+  }
+
+  async function saveBranding(){
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    const name = document.getElementById('brandNameInput').value.trim() || 'OO치과';
+    const update = { clinic_name: name };
+    if (pendingLogoData !== null) update.logo_url = pendingLogoData;
+    const { error } = await sb.from('accounts').update(update).eq('id', user.id);
+    if (error) { alert('저장 중 오류가 발생했습니다: ' + error.message); return; }
+    refreshClinicChip();
+    renderQrPosterPreview();
+    const msg = document.getElementById('brand-saved-msg');
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 2800);
+  }
+
+  // ---- admin content editor (session-only mock) ----
+  const editorQuestions = [
+    { id:'Q1', title:'Q1 [내원 목적]', body:'1) 특정 치아가 아프거나 시림\n2) 전체적인 구강 검진 및 스케일링\n3) 음식을 씹는 데 불편함이 있음\n4) 치아 색상, 모양, 벌어짐 등 보이는 부분이 신경 쓰임' },
+    { id:'Q2', title:'Q2 [과거 경험]', body:'1) 치료 시 발생했던 통증이나 마취에 대한 두려움\n2) 치료 비용에 대한 부담이나 설명 부족\n3) 잦은 내원과 긴 대기시간\n4) 치료 후 모양이나 색상 등 결과에 대한 불만족' },
+    { id:'Q3', title:'Q3 [가치관]', body:'1) 되도록 적은 비용으로 경제적인 치료\n2) 아프지 않고 편안한 무통 치료\n3) 내원 횟수를 최소화하는 빠른 치료 진행\n4) 치료한 티가 나지 않는 자연스럽고 예쁜 결과' },
+    { id:'Q4', title:'Q4 [치료 일정]', body:'1) 1~3개월 이내에 일정이 있어 빠른 마무리를 원함\n2) 6개월 내외로 일정이 있어 계획적인 치료를 원함\n3) 특별한 일정은 없으며, 꼼꼼하고 여유 있는 치료를 원함' },
+    { id:'Q5', title:'Q5 [치료 범위]', body:'1) 당장 아프고 불편한 곳만 최소한으로 치료받고 싶음\n2) 비용/시간이 들더라도 문제 있는 곳은 이번 기회에 다 치료하고 싶음\n3) 의료진이 권장하는 급한 순서대로 나누어 진행하고 싶음' },
+    { id:'Q6', title:'Q6 [상담 선호도]', body:'1) 구강 카메라나 CT 등 사진을 보며 현재 상태를 정확히 설명\n2) 여러 가지 치료 재료의 장단점과 비용을 명확히 비교\n3) 치료 후 어떻게 달라질 수 있는지 비슷한 사례나 전후 사진으로 설명' },
+    { id:'Q7', title:'Q7 [구강 관심도]', body:'1) 내 치아나 미소에 자신감이 있고 활짝 웃는 편이다\n2) 치아 색이나 모양 때문에 가끔 입을 가리거나 신경이 쓰인다\n3) 치아보다는 기능적인 부분만 문제없으면 상관없다' },
+    { id:'Q8', title:'Q8 [재료 선택]', body:'1) 무조건 비용이 가장 저렴한 재료\n2) 비용이 적당하고 가장 대중적으로 많이 쓰는 재료\n3) 비용이 더 들더라도 심미성이 뛰어나고 A/S 보증이 확실한 최고급 재료' },
+    { id:'Q9', title:'Q9 [치과 공포증]', body:'1) 특별히 두렵지 않으며 일반적인 진료를 잘 받음\n2) 마취 주사나 기계 소리가 무서워 긴장을 많이 하는 편임\n3) 과거 트라우마가 있어 극도로 두려움' },
+    { id:'Q10', title:'Q10 [의사결정]', body:'1) 원장님(의료진)이 내 구강 상태에 맞춰 가장 추천하는 방법을 따른다\n2) 가족과 상의하거나 다른 치과와 꼼꼼히 비교해 보고 결정한다\n3) 내가 생각한 예산과 목적에 부합하면 당일 바로 결정한다' },
+    { id:'Q11', title:'Q11 [치료 결과 최우선순위]', body:'1) 비용을 최대한 아끼는 것\n2) 자연스럽고 예쁜 심미적 결과\n3) 치료 기간과 방문 횟수를 최소화하는 것\n4) 안전하고 검증된 방법으로 진행하는 것' },
+    { id:'Q12', title:'Q12 [통증 감내 vs 편안함]', body:'1) 약간 불편하더라도 내원 횟수를 줄이는 편이 낫다\n2) 시간이 더 걸리더라도 편안하고 안전한 방식이 낫다' },
+    { id:'Q13', title:'Q13 [비급여 치료를 안내받을 때]', body:'1) 왜 필요한지 자료나 설명을 자세히 요청한다\n2) 일단 보험되는 치료만 받고 나중에 생각한다\n3) 원장님이 권하는 방법이면 진행한다\n4) 사진이나 데이터로 확인되면 진행한다' },
+    { id:'Q14', title:'Q14 [치료 재료 정보 탐색 방식]', body:'1) 인터넷에서 가격과 후기를 직접 비교해본다\n2) 원장님 추천을 그대로 따른다\n3) 유명하거나 고급스러운 치과의 사례를 찾아본다\n4) 급한 대로 그 자리에서 바로 정한다' },
+    { id:'Q15', title:'Q15 [치료 후 정기검진 관리]', body:'1) 알림이 없어도 스스로 꼬박꼬박 챙긴다\n2) 아프거나 문제가 생겼을 때만 온다\n3) 비용을 아끼려고 꼭 필요한 것만 최소로 받는다\n4) 치아 색이나 모양이 변한 것 같으면 바로 확인하러 온다' },
+  ];
+
+  const editorTypes = [
+    { id:'t1', title:'1. 심미 완벽주의 VIP형', body:'라미네이트 최상위 타겟. 가격할인 언급 절대 금지, 최고급 수입재료·VIP 프라이빗 경험 중심으로 상담.' },
+    { id:'t2', title:'2. 안전 지향 심미형', body:'미적 개선 니즈는 높으나 공포심이 장벽. 무삭제 라미네이트의 안전성과 무통 프로세스를 우선 안내.' },
+    { id:'t3', title:'3. 가성비 심미형', body:'예쁜 결과를 원하나 예산 한계. 앞니 4개 우선 패키지 + 무이자 분납 제안.' },
+    { id:'t4', title:'4. 속전속결 바쁜 현대인형', body:'결과 중심 두괄식 브리핑. 원데이 진료의 시간 절약 강점을 핵심 소구점으로 제시. (비용에는 비교적 관대)' },
+    { id:'t4b', title:'4B. 속전속결 가성비형', body:'속도와 비용 둘 다 우선시하는 유형. 보험 적용 항목과 가장 빠른 최소 처치 위주로 안내, 프리미엄 옵션은 먼저 권하지 않음.' },
+    { id:'t5', title:'5. 깐깐한 데이터 분석형', body:'감성 설득 대신 정품 인증·보증기간·임상 경력 등 숫자 기반 신뢰 지표로 설득.' },
+    { id:'t6', title:'6. 최소 치료 방어형', body:'보험 진료 위주로 신뢰를 먼저 쌓고, 손실회피 프레임으로 우선순위 치료를 안내.' },
+    { id:'t7', title:'7. 논리적 검증/의심형', body:'구강카메라·CT 시각자료 필수. mm 단위 수치로 원리원칙적으로 설명.' },
+    { id:'t8', title:'8. 원장 맹신 의존형', body:'실장은 사무 절차만 정리하고, 핵심 결정 멘트는 원장이 체어사이드에서 전달하도록 위임.' },
+  ];
+
+  function buildEditorRows(container, data){
+    container.innerHTML = data.map((item, i) => `
+      <div class="edit-row">
+        <div class="edit-row-head" onclick="toggleEditRow('${container.id}-${i}')">
+          <div><span>${item.title}</span><small>${item.id}</small></div>
+          <span class="edit-row-toggle" id="${container.id}-${i}-arrow">수정 ▾</span>
+        </div>
+        <div class="edit-row-body" id="${container.id}-${i}">
+          <textarea id="${container.id}-${i}-ta">${item.body}</textarea>
+          <button class="save-row-btn" onclick="saveEditRow('${container.id}', ${i})">저장</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function toggleEditRow(key){
+    const body = document.getElementById(key);
+    const arrow = document.getElementById(key + '-arrow');
+    const open = body.classList.toggle('open');
+    arrow.textContent = open ? '접기 ▴' : '수정 ▾';
+  }
+
+  function saveEditRow(containerId, index){
+    const ta = document.getElementById(`${containerId}-${index}-ta`);
+    const data = containerId === 'editorQuestions' ? editorQuestions : editorTypes;
+    data[index].body = ta.value;
+    const msg = document.getElementById('editor-saved-msg');
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 2400);
+  }
+
+  function switchEditorTab(tab){
+    document.getElementById('editorQuestions').style.display = tab === 'questions' ? 'flex' : 'none';
+    document.getElementById('editorTypes').style.display = tab === 'types' ? 'flex' : 'none';
+    document.getElementById('tabQuestionsBtn').style.background = tab === 'questions' ? 'var(--teal-pale)' : 'transparent';
+    document.getElementById('tabTypesBtn').style.background = tab === 'types' ? 'var(--teal-pale)' : 'transparent';
+  }
+
+  buildEditorRows(document.getElementById('editorQuestions'), editorQuestions);
+  buildEditorRows(document.getElementById('editorTypes'), editorTypes);
+  document.getElementById('editorQuestions').style.display = 'flex';
+  document.getElementById('editorQuestions').style.flexDirection = 'column';
+  document.getElementById('editorQuestions').style.gap = '10px';
+  document.getElementById('editorTypes').style.flexDirection = 'column';
+  document.getElementById('editorTypes').style.gap = '10px';
+  switchEditorTab('questions');
+
+  // ---- real account list (Supabase `accounts` table), loaded when the admin opens the screen ----
+  let accountsCache = [];
+
+  async function loadAccountsList(){
+    const list = document.getElementById('admin-list');
+    list.innerHTML = '<div class="footnote">불러오는 중…</div>';
+    const { data, error } = await sb
+      .from('accounts')
+      .select('*')
+      .eq('role', 'clinic')
+      .order('created_at', { ascending: false });
+    if (error) {
+      list.innerHTML = `<div class="footnote">불러오기 실패: ${error.message}</div>`;
+      return;
+    }
+    accountsCache = data || [];
+    renderAccounts();
+  }
+
+  function renderAccounts(){
+    const list = document.getElementById('admin-list');
+    if (accountsCache.length === 0) {
+      list.innerHTML = '<div class="footnote">아직 발급된 거래처 계정이 없습니다.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    accountsCache.forEach((acc) => {
+      const row = document.createElement('div');
+      row.className = 'acct-row';
+      row.style.flexDirection = 'column';
+      row.style.alignItems = 'stretch';
+      row.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div class="who">${acc.clinic_name || '(이름 미설정)'}<small>${acc.email || acc.id}</small></div>
+          <div style="display:flex; align-items:center;">
+            <span class="acct-status ${acc.is_active ? 'active':'blocked'}">${acc.is_active ? '사용중' : '차단됨'}</span>
+            <button class="toggle ${acc.is_active ? 'on':''}" onclick="toggleAccount('${acc.id}', ${!acc.is_active})"></button>
+            <button class="iplog-btn" onclick="toggleIpLog('${acc.id}')">IP 이력</button>
+          </div>
+        </div>
+        <div class="iplog-panel" id="iplog-${acc.id}"></div>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  async function toggleAccount(id, newVal){
+    const { error } = await sb.from('accounts').update({ is_active: newVal }).eq('id', id);
+    if (error) { alert('변경 실패: ' + error.message); return; }
+    await loadAccountsList();
+  }
+
+  async function toggleIpLog(id){
+    const panel = document.getElementById('iplog-' + id);
+    const isOpen = panel.classList.contains('open');
+    // collapse all other panels first
+    document.querySelectorAll('.iplog-panel.open').forEach(p => p.classList.remove('open'));
+    if (isOpen) return; // was open -> just closed it above
+
+    panel.innerHTML = '<div class="iplog-empty">불러오는 중…</div>';
+    panel.classList.add('open');
+    const { data, error } = await sb
+      .from('login_logs')
+      .select('*')
+      .eq('account_id', id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (error) {
+      panel.innerHTML = `<div class="iplog-empty">불러오기 실패: ${error.message}</div>`;
+      return;
+    }
+    if (!data || data.length === 0) {
+      panel.innerHTML = '<div class="iplog-empty">접속 기록이 없습니다.</div>';
+      return;
+    }
+    panel.innerHTML = data.map(log => {
+      const t = new Date(log.created_at).toLocaleString('ko-KR');
+      return `<div class="iplog-row"><b>${log.ip || '알 수 없음'}</b><span>${t}</span></div>`;
+    }).join('');
+  }
+
+  // ---- 문진표 보관함 (환자가 링크로 제출한 문진표) ----
+  async function loadSubmissions(){
+    const list = document.getElementById('inboxList');
+    list.innerHTML = '<div class="inbox-empty">불러오는 중…</div>';
+
+    const profile = await sbGetMyProfile();
+    if (!profile) return;
+
+    const { data, error } = await sb
+      .from('patient_submissions')
+      .select('*')
+      .eq('clinic_id', profile.id)
+      .order('submitted_at', { ascending: false });
+
+    if (error) {
+      list.innerHTML = `<div class="inbox-empty">불러오기 실패: ${error.message}</div>`;
+      return;
+    }
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="inbox-empty">아직 제출된 문진표가 없습니다.<br/>"치과 브랜드 설정"의 QR코드를 환자에게 스캔하게 해보세요.</div>';
+      return;
+    }
+
+    list.innerHTML = data.map(row => {
+      const submitted = new Date(row.submitted_at).toLocaleString('ko-KR');
+      const statusLabel = row.status === 'analyzed' ? '검토완료' : '신규';
+      const statusClass = row.status === 'analyzed' ? 'done' : 'new';
+      return `
+        <div class="inbox-row">
+          <div>
+            <div class="inbox-name">${row.patient_name}</div>
+            <div class="inbox-meta">연락처 ${row.patient_phone || '-'} · 생년월일 ${row.patient_birthdate}<br/>제출 ${submitted}</div>
+          </div>
+          <div class="inbox-actions">
+            <span class="inbox-status ${statusClass}">${statusLabel}</span>
+            <button class="inbox-review-btn" onclick="openSubmissionReview(${row.id})">검토결과</button>
+            <button class="inbox-delete-btn" onclick="deleteSubmission(${row.id})">삭제</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function openSubmissionReview(submissionId){
+    // 상태를 '검토완료'로 표시해두고, 분석 페이지를 새 탭으로 열어 해당 제출 데이터를 자동으로 불러오게 한다.
+    await sb.from('patient_submissions').update({ status: 'analyzed', analyzed_at: new Date().toISOString() }).eq('id', submissionId);
+    window.open(`치과환자문진표_분석상담코칭시스템.html?submission=${submissionId}`, '_blank');
+    loadSubmissions();
+  }
+
+  async function deleteSubmission(submissionId){
+    const ok = confirm('이 문진표를 삭제하시겠습니까? 삭제하면 되돌릴 수 없습니다.');
+    if (!ok) return;
+    const { error } = await sb.from('patient_submissions').delete().eq('id', submissionId);
+    if (error) {
+      alert('삭제 중 오류가 발생했습니다: ' + error.message);
+      return;
+    }
+    loadSubmissions();
+  }
+
+  // ---- 환자용 문진표 QR 포스터 (치과 브랜드 설정 화면에서 사용) ----
+  function getSurveyLink(clinicId){
+    return `${location.origin}${location.pathname.replace(/index\.html$/, '')}survey.html?clinic=${clinicId}`;
+  }
+
+  function loadImagePromise(src){
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  function drawRoundRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  // A6 비율(105×148mm)의 10배 해상도(1050×1480px)로 QR 포스터를 그려서 캔버스로 반환한다.
+  let qrPosterCanvas = null;
+  async function buildQrPosterCanvas(){
+    const profile = await sbGetMyProfile();
+    if (!profile) return null;
+    const clinicName = profile.clinic_name || 'OO치과';
+    const link = getSurveyLink(profile.id);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1050;
+    canvas.height = 1480;
+    const ctx = canvas.getContext('2d');
+
+    // 배경 (은은한 그라데이션 + 장식 원)
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, '#eaf7f9');
+    grad.addColorStop(1, '#ffffff');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = 'rgba(47,151,170,0.09)';
+    ctx.beginPath(); ctx.arc(120, 120, 230, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(124,107,207,0.08)';
+    ctx.beginPath(); ctx.arc(canvas.width - 90, canvas.height - 120, 260, 0, Math.PI * 2); ctx.fill();
+
+    // 상단 치과명
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#17343b';
+    ctx.font = '900 66px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
+    wrapText(ctx, clinicName, canvas.width / 2, 165, 900, 70);
+
+    ctx.font = '600 34px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
+    ctx.fillStyle = '#5c747c';
+    ctx.fillText('환자용 사전 문진표', canvas.width / 2, 225);
+
+    // 안내 문구
+    ctx.font = '800 48px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
+    ctx.fillStyle = '#2f97aa';
+    ctx.fillText('📱 카메라로 QR코드를 비춰주세요', canvas.width / 2, 335);
+
+    // QR 카드
+    const qrSize = 640;
+    const qrX = (canvas.width - qrSize) / 2;
+    const qrY = 410;
+    ctx.fillStyle = '#ffffff';
+    drawRoundRect(ctx, qrX - 34, qrY - 34, qrSize + 68, qrSize + 68, 28);
+    ctx.fill();
+    ctx.strokeStyle = '#d7e8ee';
+    ctx.lineWidth = 3;
+    drawRoundRect(ctx, qrX - 34, qrY - 34, qrSize + 68, qrSize + 68, 28);
+    ctx.stroke();
+
+    try {
+      const qrImg = await loadImagePromise(`https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(link)}`);
+      ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+    } catch (e) {
+      ctx.fillStyle = '#8a2c22';
+      ctx.font = '600 26px sans-serif';
+      ctx.fillText('QR 이미지를 불러오지 못했습니다', canvas.width / 2, qrY + qrSize / 2);
+    }
+
+    // 하단 안내
+    ctx.font = '500 30px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
+    ctx.fillStyle = '#5c747c';
+    ctx.fillText('문진표 작성 후 더 정확한 상담이 가능합니다', canvas.width / 2, qrY + qrSize + 100);
+
+    ctx.font = '800 28px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
+    ctx.fillStyle = '#2f97aa';
+    ctx.fillText('DENTAL MBTI', canvas.width / 2, canvas.height - 60);
+
+    return canvas;
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+    if (ctx.measureText(text).width <= maxWidth) {
+      ctx.fillText(text, x, y);
+      return;
+    }
+    // 치과명이 너무 길면 폰트 크기를 자동으로 줄여서 한 줄에 맞춘다.
+    let fontSize = 66;
+    const fontFamily = ctx.font.split('px ')[1];
+    while (fontSize > 34 && ctx.measureText(text).width > maxWidth) {
+      fontSize -= 4;
+      ctx.font = `900 ${fontSize}px ${fontFamily}`;
+    }
+    ctx.fillText(text, x, y);
+  }
+
+  async function renderQrPosterPreview(){
+    const canvas = await buildQrPosterCanvas();
+    if (!canvas) return;
+    qrPosterCanvas = canvas;
+    const dataUrl = canvas.toDataURL('image/png');
+    const preview = document.getElementById('qrPosterPreview');
+    if (preview) preview.src = dataUrl;
+    const printImg = document.getElementById('qrPrintImage');
+    if (printImg) printImg.src = dataUrl;
+  }
+
+  async function downloadQrPoster(){
+    if (!qrPosterCanvas) await renderQrPosterPreview();
+    if (!qrPosterCanvas) return;
+    const profile = await sbGetMyProfile();
+    const clinicName = (profile && profile.clinic_name) ? profile.clinic_name : 'dental-mbti';
+    try {
+      qrPosterCanvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `문진표QR포스터_${clinicName}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    } catch (e) {
+      alert('포스터 다운로드 중 오류가 발생했습니다. 미리보기 이미지를 길게 눌러(우클릭) 저장해 주세요.');
+    }
+  }
+
+  async function printQrPoster(){
+    if (!qrPosterCanvas) await renderQrPosterPreview();
+    if (!qrPosterCanvas) return;
+    window.print();
+  }
+
+  // ---- 라미네이트 상담 · 다이아스테마(치아벌어짐) 케이스 ----
+  const DIASTEMA_BASE = 'assets/laminate/diastema/';
+
+  const DIASTEMA_TEMPLATES = {
+    intro: `
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${DIASTEMA_BASE}before.jpg" alt="시술 전" /></div>
+        <div class="lam-media"><video src="${DIASTEMA_BASE}video-before-lowconfidence.mp4" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption">환자 상태: 치아 벌어짐(다이아스테마) · 시술 전</p>
+      <div class="lam-btn-row">
+        <button class="lam-btn lam-btn-danger" onclick="setDiastemaState('minimal')">최소 시술만 할 경우</button>
+        <button class="lam-btn lam-btn-success" onclick="setDiastemaState('recommended')">치과의사 추천 시술 할 경우</button>
+      </div>
+    `,
+    minimal: `
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${DIASTEMA_BASE}fail.jpg" alt="최소 시술 결과" /></div>
+        <div class="lam-media"><video src="${DIASTEMA_BASE}video-minimal-regret.mp4" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption lam-caption-danger">앞니 2개만 시술한 경우 — 실패 사례</p>
+      <div class="lam-explain">
+        <b>왜 실패할까요?</b>
+        치아 벌어짐은 앞니 2개만의 문제가 아니라, 스마일라인 전체의 비율 문제입니다. 앞니 2개만 라미네이트를 하면 그 2개만 유독 희고 커 보여 "토끼 이빨"처럼 도드라집니다. 자연스러운 결과를 위해서는 스마일라인 안에 들어오는 치아(상악 기준 8~10개)를 함께 개선해야 색상·비율이 고르게 맞아떨어집니다. 게다가 나중에 다시 진행하시려면, 이미 시술된 치아 2개를 제거한 뒤 재시술해야 하기 때문에 시간과 비용이 오히려 더 늘어납니다.
+      </div>
+      <div class="lam-btn-row">
+        <button class="lam-btn lam-btn-success" onclick="setDiastemaState('recommended')">다른 선택지 보기 (치과의사 추천 시술)</button>
+        <button class="lam-btn lam-btn-ghost" onclick="setDiastemaState('intro')">처음부터 다시</button>
+      </div>
+    `,
+    recommended: `
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${DIASTEMA_BASE}success.jpg" alt="치과의사 추천 시술 결과" /></div>
+        <div class="lam-media"><video src="${DIASTEMA_BASE}video-recommended-success.mp4" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption lam-caption-success">치과의사 추천 시술(16개) — 성공 사례</p>
+      <div class="lam-explain">
+        <b>비용이 부담되신다면, 나누어 진행할 수도 있습니다</b>
+        다이아스테마(치아 벌어짐)에서 가장 자연스러운 결과를 원하신다면, 상악은 최소 6개(권장 10개), 하악은 최소 4개(권장 6개) 시술을 권해드립니다. 다만 한 번에 진행하기 비용이 부담되신다면, 먼저 상악 6개부터 시작해 달라진 미소를 직접 확인해 보시고, 이후 상악을 추가하신 다음 하악까지 순차적으로 진행하시는 방법도 있습니다. 이렇게 단계별로 진행하셔도 각 단계마다 자연스러운 비율을 유지할 수 있어, 부담 없이 시작해 보실 수 있습니다.
+      </div>
+      <div class="lam-btn-row">
+        <button class="lam-btn lam-btn-danger" onclick="setDiastemaState('minimal')">다른 선택지 보기 (최소 시술)</button>
+        <button class="lam-btn lam-btn-ghost" onclick="setDiastemaState('intro')">처음부터 다시</button>
+      </div>
+    `
+  };
+
+  function setDiastemaState(state){
+    document.getElementById('diastemaStage').innerHTML = DIASTEMA_TEMPLATES[state];
+  }
+
+  function openDiastemaCase(){
+    setDiastemaState('intro');
+    showView('view-laminate-diastema');
+  }
+
+  // ---- 라미네이트 상담 · 변색치 복원치료 케이스 (60대 여성) ----
+  const DISCOLOR_BASE = 'assets/laminate/discoloration-restoration/';
+  let discolorPhase = 'before';
+
+  function renderDiscolorStage(){
+    const isAfter = discolorPhase === 'after';
+    const media = isAfter ? { img: 'after.jpg', video: 'after.mp4' } : { img: 'before.jpg', video: 'before.mp4' };
+
+    document.getElementById('discolorationStage').innerHTML = `
+      <div class="lam-tab-row">
+        <button class="lam-tab ${!isAfter ? 'active' : ''}" onclick="setDiscolorPhase('before')">시술 전</button>
+        <button class="lam-tab ${isAfter ? 'active' : ''}" onclick="setDiscolorPhase('after')">시술 후</button>
+      </div>
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${DISCOLOR_BASE}${media.img}" alt="변색치 복원치료 ${isAfter ? '시술 후' : '시술 전'}" /></div>
+        <div class="lam-media"><video src="${DISCOLOR_BASE}${media.video}" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption ${isAfter ? 'lam-caption-success' : ''}">변색치 복원치료 · ${isAfter ? '시술 후' : '시술 전'}</p>
+      ${isAfter ? `
+        <div class="lam-explain">
+          <b>변색치는 왜 라미네이트가 효과적일까요?</b>
+          변색치는 치아 안쪽(상아질) 자체의 색이 변한 경우가 많아, 미백만으로는 원하는 만큼 밝아지지 않는 경우가 흔합니다. 엠프레스 계열의 일반적인 라미네이트는 투과율이 높아 이런 심한 변색에는 시술이 사실상 불가능한데, 저희 일루미네이트는 차단율이 높은 최고급 지르코니아 소재로 제작되어 자연스러운 투명감은 그대로 유지하면서도 안쪽의 변색을 확실하게 차단합니다. 그 결과 내부 변색과 상관없이 균일하고 자연스러운 흰색 스마일을 만들어 드릴 수 있습니다.
+        </div>
+      ` : ''}
+    `;
+  }
+
+  function setDiscolorPhase(phase){
+    discolorPhase = phase;
+    renderDiscolorStage();
+  }
+
+  function openDiscolorationCase(){
+    discolorPhase = 'before';
+    renderDiscolorStage();
+    showView('view-laminate-discoloration');
+  }
+
+  // ---- 라미네이트 상담 · 스마일라인 복원 케이스 (20대 여성) ----
+  const SMILELINE_BASE = 'assets/laminate/smileline-restoration/';
+  let smilelinePhase = 'before';
+
+  function renderSmilelineStage(){
+    const isAfter = smilelinePhase === 'after';
+    const media = isAfter ? { img: 'after.jpg', video: 'after.mp4' } : { img: 'before.jpg', video: 'before.mp4' };
+
+    document.getElementById('smilelineStage').innerHTML = `
+      <div class="lam-tab-row">
+        <button class="lam-tab ${!isAfter ? 'active' : ''}" onclick="setSmilelinePhase('before')">시술 전</button>
+        <button class="lam-tab ${isAfter ? 'active' : ''}" onclick="setSmilelinePhase('after')">시술 후</button>
+      </div>
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${SMILELINE_BASE}${media.img}" alt="스마일라인 복원 ${isAfter ? '시술 후' : '시술 전'}" /></div>
+        <div class="lam-media"><video src="${SMILELINE_BASE}${media.video}" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption ${isAfter ? 'lam-caption-success' : ''}">스마일라인 복원 · ${isAfter ? '시술 후' : '시술 전'}</p>
+      ${isAfter ? `
+        <div class="lam-explain">
+          <b>왜 마취 없이도 안전하게 교정이 가능할까요?</b>
+          변색치는 치아 안쪽(상아질) 자체의 색이 변한 경우가 많아, 미백만으로는 원하는 만큼 밝아지지 않는 경우가 흔하며, 보다 아름다운 스마일라인을 위해 굳이 치아를 많이 삭제할 필요가 없습니다. 일루미네이트는 지르코니아 소재를 매우 얇으면서도 강도 높게 정밀 가공하기 때문에, 적은 삭제량으로도 치아에 튼튼하게 부착할 수 있어 훨씬 안전합니다. 이 덕분에 마취 없이도 스마일라인 교정이 가능하며, 변색 차단율이 뛰어나 한 번의 시술로 반영구적인 미백 효과까지 함께 누리실 수 있습니다.
+        </div>
+      ` : ''}
+    `;
+  }
+
+  function setSmilelinePhase(phase){
+    smilelinePhase = phase;
+    renderSmilelineStage();
+  }
+
+  function openSmilelineCase(){
+    smilelinePhase = 'before';
+    renderSmilelineStage();
+    showView('view-laminate-smileline');
+  }
+
+  // ---- 라미네이트 상담 · 파절치 복원 케이스 ----
+  const FRACTURE_BASE = 'assets/laminate/fracture-restoration/';
+  let fracturePhase = 'before';
+
+  function renderFractureStage(){
+    const isAfter = fracturePhase === 'after';
+    const media = isAfter ? { img: 'after.jpg', video: 'after.mp4' } : { img: 'before.jpg', video: 'before.mp4' };
+
+    document.getElementById('fractureStage').innerHTML = `
+      <div class="lam-tab-row">
+        <button class="lam-tab ${!isAfter ? 'active' : ''}" onclick="setFracturePhase('before')">시술 전</button>
+        <button class="lam-tab ${isAfter ? 'active' : ''}" onclick="setFracturePhase('after')">시술 후</button>
+      </div>
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${FRACTURE_BASE}${media.img}" alt="파절치 복원 ${isAfter ? '시술 후' : '시술 전'}" /></div>
+        <div class="lam-media"><video src="${FRACTURE_BASE}${media.video}" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption ${isAfter ? 'lam-caption-success' : ''}">파절치 복원 · ${isAfter ? '시술 후' : '시술 전'}</p>
+      ${isAfter ? `
+        <div class="lam-explain">
+          <b>파절치는 왜 라미네이트가 효과적일까요?</b>
+          파절치는 치아가 깨지거나 일부 손상된 상태로, 방치하면 시린 증상이나 추가 파절로 이어질 수 있습니다. 라미네이트는 손상된 부분을 강도 높은 최고급 지르코니아 소재로 감싸, 치아의 기능과 심미성을 함께 복원시켜 자연치아에 가장 가까운 형태와 기능으로 편하게 사용하실 수 있습니다.
+        </div>
+      ` : ''}
+    `;
+  }
+
+  function setFracturePhase(phase){
+    fracturePhase = phase;
+    renderFractureStage();
+  }
+
+  function openFractureCase(){
+    fracturePhase = 'before';
+    renderFractureStage();
+    showView('view-laminate-fracture');
+  }
+
+  // ---- 라미네이트 상담 · 왜소치 복원 케이스 ----
+  const UNDERSIZED_BASE = 'assets/laminate/undersized-restoration/';
+  let undersizedPhase = 'before';
+
+  function renderUndersizedStage(){
+    const isAfter = undersizedPhase === 'after';
+    const media = isAfter ? { img: 'after.jpg', video: 'after.mp4' } : { img: 'before.jpg', video: 'before.mp4' };
+
+    document.getElementById('undersizedStage').innerHTML = `
+      <div class="lam-tab-row">
+        <button class="lam-tab ${!isAfter ? 'active' : ''}" onclick="setUndersizedPhase('before')">시술 전</button>
+        <button class="lam-tab ${isAfter ? 'active' : ''}" onclick="setUndersizedPhase('after')">시술 후</button>
+      </div>
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${UNDERSIZED_BASE}${media.img}" alt="왜소치 복원 ${isAfter ? '시술 후' : '시술 전'}" /></div>
+        <div class="lam-media"><video src="${UNDERSIZED_BASE}${media.video}" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption ${isAfter ? 'lam-caption-success' : ''}">왜소치 복원 · ${isAfter ? '시술 후' : '시술 전'}</p>
+      ${isAfter ? `
+        <div class="lam-explain">
+          <b>왜소치는 왜 라미네이트가 효과적일까요?</b>
+          왜소치는 치아가 정상보다 작게 형성되어 옆 치아와 크기·비율이 어긋나 보이는 경우가 많습니다. 라미네이트로 치아 표면에 적정 두께를 더하면, 자연스러운 비율로 크기를 보완하면서 전체적인 스마일라인의 균형을 맞출 수 있습니다.
+        </div>
+      ` : ''}
+    `;
+  }
+
+  function setUndersizedPhase(phase){
+    undersizedPhase = phase;
+    renderUndersizedStage();
+  }
+
+  function openUndersizedCase(){
+    undersizedPhase = 'before';
+    renderUndersizedStage();
+    showView('view-laminate-undersized');
+  }
+
+  // ---- 라미네이트 상담 · 교정후 심미복원 케이스 ----
+  const ORTHO_BASE = 'assets/laminate/ortho-restoration/';
+  let orthoPhase = 'before';
+
+  function renderOrthoStage(){
+    const isAfter = orthoPhase === 'after';
+    const media = isAfter ? { img: 'after.jpg', video: 'after.mp4' } : { img: 'before.jpg', video: 'before.mp4' };
+
+    document.getElementById('orthoStage').innerHTML = `
+      <div class="lam-tab-row">
+        <button class="lam-tab ${!isAfter ? 'active' : ''}" onclick="setOrthoPhase('before')">시술 전</button>
+        <button class="lam-tab ${isAfter ? 'active' : ''}" onclick="setOrthoPhase('after')">시술 후</button>
+      </div>
+      <div class="lam-compare">
+        <div class="lam-media"><img src="${ORTHO_BASE}${media.img}" alt="교정후 심미복원 ${isAfter ? '시술 후' : '시술 전'}" /></div>
+        <div class="lam-media"><video src="${ORTHO_BASE}${media.video}" autoplay muted loop playsinline></video></div>
+      </div>
+      <p class="lam-caption ${isAfter ? 'lam-caption-success' : ''}">교정후 심미복원 · ${isAfter ? '시술 후' : '시술 전'}</p>
+      ${isAfter ? `
+        <div class="lam-explain">
+          <b>교정 후에도 라미네이트가 필요한 이유는 무엇일까요?</b>
+          교정치료로 치아 배열은 가지런해졌지만, 치아의 색상이나 형태 때문에 정작 원하시던 스마일라인은 완성되지 않는 경우가 많습니다. 저희 치과는 교정 이후 라미네이트를 함께 진행해, 이렇게 남은 아쉬움까지 채워 완벽한 스마일라인을 완성해 드립니다. 25년 이상 보철을 제작해 온 숙련된 기공 기술자가 강도 높은 소재로 치아를 감쌀 만큼 얇고 정밀하게 제작하기 때문에, 치아를 거의 삭제하지 않고도 안전하게 시술할 수 있습니다. 그 결과 치아를 보호하면서 교정 효과도 더 오래 유지되고, 심미적인 완성도까지 함께 높일 수 있습니다.
+        </div>
+      ` : ''}
+    `;
+  }
+
+  function setOrthoPhase(phase){
+    orthoPhase = phase;
+    renderOrthoStage();
+  }
+
+  function openOrthoCase(){
+    orthoPhase = 'before';
+    renderOrthoStage();
+    showView('view-laminate-ortho');
+  }
+</script>
+
+</body>
+</html>
