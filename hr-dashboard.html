@@ -123,6 +123,19 @@
 
   .small-note{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6;}
 
+  /* ---------- 생일 캘린더 ---------- */
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px;}
+  .cal-dow{text-align:center;font-size:12px;color:var(--muted);font-weight:700;padding:4px 0;}
+  .cal-cell{min-height:74px;border:1px solid var(--border);border-radius:10px;padding:6px 7px;font-size:12.5px;background:#fbfcfe;}
+  .cal-cell.empty{background:transparent;border-color:transparent;}
+  .cal-cell.today{border-color:var(--accent);background:var(--accent-soft);}
+  .cal-daynum{font-weight:700;color:#374151;margin-bottom:4px;}
+  .cal-cell.today .cal-daynum{color:var(--accent);}
+  .cal-birth{display:block;background:#ffe9d6;color:#a05a12;border-radius:6px;padding:2px 6px;font-size:11px;font-weight:700;margin-bottom:3px;line-height:1.5;}
+  .birthday-row{display:flex;justify-content:space-between;padding:9px 4px;border-bottom:1px solid var(--border);font-size:13.5px;}
+  .birthday-row:last-child{border-bottom:none;}
+
   /* ---------- QR 인쇄 포스터 (평소엔 숨김, 인쇄할 때만 이 부분만 출력) ---------- */
   .qr-poster{display:none;}
   .qr-poster .poster-inner{
@@ -155,8 +168,11 @@
     <div class="company-name" id="sbCompanyName">회사 설정 필요</div>
 
     <div class="navgroup">
+      <div class="navlabel">홈</div>
+      <div class="navitem active" data-tab="home"><span class="dot"></span>홈 (생일 캘린더)</div>
+
       <div class="navlabel">설정</div>
-      <div class="navitem active" data-tab="company"><span class="dot"></span>회사 설정 &amp; QR</div>
+      <div class="navitem" data-tab="company"><span class="dot"></span>회사 설정 &amp; QR</div>
 
       <div class="navlabel">인사</div>
       <div class="navitem" data-tab="employees"><span class="dot"></span>직원 관리</div>
@@ -175,14 +191,31 @@
 
   <div class="main">
     <div class="topbar no-print">
-      <h1 id="topTitle">회사 설정 &amp; QR</h1>
+      <h1 id="topTitle">홈 (생일 캘린더)</h1>
       <div class="meta" id="topMeta"></div>
     </div>
 
     <div class="content">
 
+      <!-- ===================== 홈 (생일 캘린더) ===================== -->
+      <div id="tab-home" class="tab-panel">
+        <div class="card">
+          <div class="cal-head">
+            <button class="btn ghost sm" onclick="shiftCalendar(-1)">← 이전달</button>
+            <h2 id="calMonthLabel" style="margin:0;"></h2>
+            <button class="btn ghost sm" onclick="shiftCalendar(1)">다음달 →</button>
+          </div>
+          <div class="desc">재직중인 임직원의 생일만 표시됩니다 (퇴사 처리된 직원은 자동으로 빠집니다).</div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+        <div class="card">
+          <h2>이번 달 생일자</h2>
+          <div id="birthdayList"></div>
+        </div>
+      </div>
+
       <!-- ===================== 회사 설정 ===================== -->
-      <div id="tab-company" class="tab-panel">
+      <div id="tab-company" class="tab-panel hidden">
         <div class="card">
           <h2>회사 정보</h2>
           <div class="desc">재직증명서 등 서류에 표시되는 회사 기본 정보입니다.</div>
@@ -264,6 +297,10 @@
             <div><label class="field">실수령급여(월, 원)</label><input type="number" id="empSalary" placeholder="예: 2800000"></div>
           </div>
           <div class="grid2">
+            <div><label class="field">기타수당(월, 원)</label><input type="number" id="empAllowance" placeholder="예: 100000"></div>
+            <div class="small-note" style="margin-top:26px;">※ 기타수당은 급여이체 엑셀 금액에는 포함되지 않습니다.</div>
+          </div>
+          <div class="grid2">
             <div><label class="field">입사일</label><input type="date" id="empHire"></div>
             <div><label class="field">퇴사일 (재직중이면 비워두세요)</label><input type="date" id="empRetire"></div>
           </div>
@@ -279,7 +316,7 @@
           <table>
             <thead><tr>
               <th>이름</th><th>부서/직위</th><th>연락처</th><th>은행/계좌</th>
-              <th>실수령급여</th><th>입사일</th><th>상태</th><th></th>
+              <th>실수령급여</th><th>기타수당</th><th>입사일</th><th>상태</th><th></th>
             </tr></thead>
             <tbody id="empTableBody"></tbody>
           </table>
@@ -377,6 +414,7 @@ let EMPLOYEES = [];
   await refreshCompany();
   await refreshEmployees();
   renderEmpTable();
+  renderCalendar();
   document.getElementById('leaveAsOf').value = new Date().toISOString().slice(0,10);
   document.getElementById('certDate').value = new Date().toISOString().slice(0,10);
 })();
@@ -385,7 +423,7 @@ function doLogout(){ hrLogout().then(()=>location.href='index.html'); }
 
 /* ---------------------- 탭 전환 ---------------------- */
 const TAB_TITLES = {
-  company:'회사 설정 & QR', employees:'직원 관리', interview:'면접 결과',
+  home:'홈 (생일 캘린더)', company:'회사 설정 & QR', employees:'직원 관리', interview:'면접 결과',
   payroll:'급여이체 엑셀', leave:'연차 계산기', severance:'퇴직금 계산기', cert:'재직증명서'
 };
 document.querySelectorAll('.navitem').forEach(btn=>{
@@ -396,6 +434,7 @@ document.querySelectorAll('.navitem').forEach(btn=>{
     const tab = btn.dataset.tab;
     document.getElementById('tab-'+tab).classList.remove('hidden');
     document.getElementById('topTitle').textContent = TAB_TITLES[tab];
+    if(tab==='home') renderCalendar();
     if(tab==='payroll') renderPayrollTable();
     if(tab==='leave'){ populateEmpSelect('leaveEmpSelect'); renderLeaveCalc(); }
     if(tab==='severance'){ populateEmpSelect('sevEmpSelect'); renderSeverance(); }
@@ -404,6 +443,61 @@ document.querySelectorAll('.navitem').forEach(btn=>{
     if(tab==='interview') renderSubmissions();
   });
 });
+
+/* ---------------------- 생일 캘린더 ---------------------- */
+let calendarViewDate = new Date(); // 현재 보고 있는 달 (day는 1로 취급)
+function shiftCalendar(delta){
+  calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth()+delta, 1);
+  renderCalendar();
+}
+function renderCalendar(){
+  const y = calendarViewDate.getFullYear();
+  const m = calendarViewDate.getMonth(); // 0-indexed
+  document.getElementById('calMonthLabel').textContent = `${y}년 ${m+1}월`;
+
+  // 재직중(퇴사일 없음)인 직원만 대상으로, 생일의 월/일만 비교합니다.
+  const activeEmployees = EMPLOYEES.filter(e => !e.retire_date && e.birth);
+  const birthdaysByDay = {}; // day(1~31) -> [이름, ...]
+  activeEmployees.forEach(e=>{
+    const b = new Date(e.birth);
+    if(b.getMonth() === m){
+      const d = b.getDate();
+      (birthdaysByDay[d] = birthdaysByDay[d] || []).push(e.name);
+    }
+  });
+
+  const firstDow = new Date(y, m, 1).getDay(); // 0=일요일
+  const daysInThisMonth = new Date(y, m+1, 0).getDate();
+  const today = new Date();
+  const isThisMonthReal = (today.getFullYear()===y && today.getMonth()===m);
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  ['일','월','화','수','목','금','토'].forEach(d=>{
+    const el = document.createElement('div'); el.className='cal-dow'; el.textContent=d; grid.appendChild(el);
+  });
+  for(let i=0;i<firstDow;i++){
+    const el = document.createElement('div'); el.className='cal-cell empty'; grid.appendChild(el);
+  }
+  for(let d=1; d<=daysInThisMonth; d++){
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell' + ((isThisMonthReal && today.getDate()===d) ? ' today' : '');
+    const names = birthdaysByDay[d] || [];
+    cell.innerHTML = `<div class="cal-daynum">${d}</div>` + names.map(n=>`<span class="cal-birth">생일 · ${n}</span>`).join('');
+    grid.appendChild(cell);
+  }
+
+  // 이번 달 생일자 목록 (날짜순 정렬)
+  const listBox = document.getElementById('birthdayList');
+  const sortedDays = Object.keys(birthdaysByDay).map(Number).sort((a,b)=>a-b);
+  if(sortedDays.length===0){
+    listBox.innerHTML = '<div class="small-note">해당 월에 생일인 재직 직원이 없습니다.</div>';
+  } else {
+    listBox.innerHTML = sortedDays.map(d=>
+      birthdaysByDay[d].map(n=>`<div class="birthday-row"><span>${n}</span><span>${m+1}월 ${d}일</span></div>`).join('')
+    ).join('');
+  }
+}
 
 /* ---------------------- 회사 설정 ---------------------- */
 async function refreshCompany(){
@@ -494,6 +588,7 @@ function resetEmpForm(){
   document.getElementById('empBank').value='';
   document.getElementById('empAccount').value='';
   document.getElementById('empSalary').value='';
+  document.getElementById('empAllowance').value='';
   document.getElementById('empHire').value='';
   document.getElementById('empRetire').value='';
   document.getElementById('empFormTitle').textContent='직원 등록';
@@ -511,6 +606,7 @@ async function saveEmployee(){
     bank: document.getElementById('empBank').value.trim(),
     account: document.getElementById('empAccount').value.trim(),
     salary: Number(document.getElementById('empSalary').value || 0),
+    allowance: Number(document.getElementById('empAllowance').value || 0),
     hire_date: document.getElementById('empHire').value,
     retire_date: document.getElementById('empRetire').value || null
   };
@@ -536,6 +632,7 @@ function editEmployee(id){
   document.getElementById('empBank').value = emp.bank||'';
   document.getElementById('empAccount').value = emp.account||'';
   document.getElementById('empSalary').value = emp.salary||0;
+  document.getElementById('empAllowance').value = emp.allowance||0;
   document.getElementById('empHire').value = emp.hire_date;
   document.getElementById('empRetire').value = emp.retire_date||'';
   document.getElementById('empFormTitle').textContent = '직원 정보 수정';
@@ -559,6 +656,7 @@ function renderEmpTable(){
       <td>${emp.phone||'-'}</td>
       <td>${emp.bank||'-'} ${emp.account||''}</td>
       <td>${fmtWon(emp.salary)}</td>
+      <td>${emp.allowance ? fmtWon(emp.allowance) : '-'}</td>
       <td>${emp.hire_date}</td>
       <td>${status}</td>
       <td>
