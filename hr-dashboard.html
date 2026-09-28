@@ -172,9 +172,18 @@
     .card{border:none;box-shadow:none;padding:0;}
 
     /* 재직증명서는 실제 A4 한 장 그대로 인쇄되도록 브라우저 여백을 0으로 둡니다
-       (여백은 .cert-sheet 자체의 padding이 담당하므로 이중으로 밀리지 않습니다) */
+       (여백은 .cert-sheet 자체의 padding이 담당하므로 이중으로 밀리지 않습니다).
+       카드의 margin-bottom, 그리고 min-height로 인한 미세한 초과분까지
+       전부 없애서 종이 2장째로 넘어가는 현상을 막습니다. */
     @page{ size:A4; margin:0; }
-    .cert-sheet{ border:none; box-shadow:none; margin:0; }
+    body, html{ margin:0; padding:0; }
+    #tab-cert.tab-panel{ margin:0; padding:0; }
+    #tab-cert .card{ margin:0 !important; }
+    .cert-sheet{
+      border:none; box-shadow:none; margin:0;
+      height:297mm; min-height:0; max-height:297mm; overflow:hidden;
+      page-break-after:avoid; page-break-inside:avoid;
+    }
   }
 </style>
 </head>
