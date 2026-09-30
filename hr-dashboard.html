@@ -149,6 +149,20 @@
   .birthday-row{display:flex;justify-content:space-between;padding:9px 4px;border-bottom:1px solid var(--border);font-size:13.5px;}
   .birthday-row:last-child{border-bottom:none;}
 
+  /* ---------- 지출 분석 ---------- */
+  .exp-group{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;}
+  .exp-group-head{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;background:#fbfcfe;cursor:pointer;font-weight:700;font-size:14px;}
+  .exp-group-head:hover{background:#f2f5fb;}
+  .exp-group-head .arrow-ic{display:inline-block;margin-right:7px;color:var(--muted);transition:transform .15s;}
+  .exp-group-head.open .arrow-ic{transform:rotate(90deg);}
+  .exp-group-body{padding:2px 16px 12px;}
+  .exp-item-row{display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px solid var(--border);font-size:13px;}
+  .exp-item-row:last-child{border-bottom:none;}
+  .exp-summary{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:16px;}
+  .exp-summary .box{background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:14px 20px;min-width:150px;}
+  .exp-summary .box .lbl{font-size:12px;color:var(--muted);margin-bottom:4px;}
+  .exp-summary .box .val{font-size:18px;font-weight:800;}
+
   /* ---------- QR 인쇄 포스터 (평소엔 숨김, 인쇄할 때만 이 부분만 출력) ---------- */
   .qr-poster{display:none;}
   .qr-poster .poster-inner{
@@ -210,6 +224,9 @@
       <div class="navitem" data-tab="leave"><span class="dot"></span>연차 계산기</div>
       <div class="navitem" data-tab="severance"><span class="dot"></span>퇴직금 계산기</div>
       <div class="navitem" data-tab="cert"><span class="dot"></span>재직증명서</div>
+
+      <div class="navlabel">재무</div>
+      <div class="navitem" data-tab="expense"><span class="dot"></span>지출 분석</div>
     </div>
 
     <div class="logout" onclick="location.href='index.html'">← 메인 관리자 메뉴로</div>
@@ -427,6 +444,55 @@
         </div>
       </div>
 
+      <!-- ===================== 지출 분석 ===================== -->
+      <div id="tab-expense" class="tab-panel hidden">
+        <div class="card">
+          <h2>법인통장 거래내역 업로드</h2>
+          <div class="desc">
+            거래내역 엑셀을 업로드하면, 이전에 분류를 입력했던 거래처(계좌번호 또는 거래내용 기준)는
+            자동으로 항목이 인식됩니다. 처음 보는 거래처만 아래에서 분류를 입력하면 되고,
+            한 번 입력하면 다음 업로드부터는 그 거래처가 자동으로 분류됩니다. 같은 거래를 다시
+            업로드해도 중복 저장되지 않습니다.
+          </div>
+          <input type="file" id="expenseFile" accept=".xlsx,.xls">
+          <div class="small-note" id="expenseUploadStatus"></div>
+          <datalist id="expMajorList"></datalist>
+        </div>
+
+        <div class="card hidden" id="expenseReviewCard">
+          <h2>신규 거래처 분류 입력 <span class="pill review" id="expenseNewCount"></span></h2>
+          <div class="desc">아래 거래처들은 이번에 처음 인식되었습니다. 대분류와 항목을 입력하고 저장하면, 다음부터는 자동으로 분류됩니다.</div>
+          <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>날짜</th><th>거래내용 / 예금주</th><th>계좌번호</th><th>금액</th><th>대분류</th><th>항목</th></tr></thead>
+            <tbody id="expenseReviewBody"></tbody>
+          </table>
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn primary" onclick="confirmExpenseSave()">분류 확정 후 저장</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>월별 지출 현황</h2>
+          <div class="toolbar">
+            <label class="field" style="margin:0;">조회 월</label>
+            <select id="expenseMonthSelect" onchange="renderExpenseMonth()" style="width:auto;margin-bottom:0;"></select>
+          </div>
+          <div id="expenseMonthView"><div class="small-note">저장된 데이터가 없습니다. 위에서 거래내역 엑셀을 업로드해 주세요.</div></div>
+        </div>
+
+        <div class="card">
+          <h2>기간 비교</h2>
+          <div class="toolbar">
+            <button class="btn ghost sm" onclick="renderExpenseCompare(3)">최근 3개월</button>
+            <button class="btn ghost sm" onclick="renderExpenseCompare(6)">최근 6개월</button>
+            <button class="btn ghost sm" onclick="renderExpenseCompare('year')">연도 전체</button>
+          </div>
+          <div id="expenseCompareView"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -436,6 +502,9 @@
 let CURRENT_USER = null;
 let COMPANY = null;
 let EMPLOYEES = [];
+let PAYEE_MAP = {};          // payee_key -> {major_category, item_name} (학습된 거래처 분류)
+let EXPENSE_PARSED_ROWS = []; // 업로드 후 저장 전, 화면에 대기 중인 파싱된 거래 목록
+let EXPENSE_MONTHS = [];      // 저장되어 있는 년-월 목록 (최신순)
 
 (async function init(){
   CURRENT_USER = await hrRequireAdmin('index.html');
@@ -454,7 +523,8 @@ function doLogout(){ hrLogout().then(()=>location.href='index.html'); }
 /* ---------------------- 탭 전환 ---------------------- */
 const TAB_TITLES = {
   home:'홈 (생일 캘린더)', company:'회사 설정 & QR', employees:'직원 관리', interview:'면접 결과',
-  payroll:'급여이체 엑셀', leave:'연차 계산기', severance:'퇴직금 계산기', cert:'재직증명서'
+  payroll:'급여이체 엑셀', leave:'연차 계산기', severance:'퇴직금 계산기', cert:'재직증명서',
+  expense:'지출 분석'
 };
 document.querySelectorAll('.navitem').forEach(btn=>{
   btn.addEventListener('click', async ()=>{
@@ -471,6 +541,7 @@ document.querySelectorAll('.navitem').forEach(btn=>{
     if(tab==='cert'){ populateEmpSelect('certEmpSelect'); renderCert(); }
     if(tab==='employees') renderEmpTable();
     if(tab==='interview') renderSubmissions();
+    if(tab==='expense') initExpenseTab();
   });
 });
 
@@ -960,6 +1031,357 @@ async function toggleReviewed(id, val){ await hrMarkReviewed(id, val); renderSub
 async function removeSubmission(id){
   if(!confirm('이 제출 결과를 삭제하시겠습니까?')) return;
   await hrDeleteSubmission(id); renderSubmissions();
+}
+
+/* ==================================================================
+   지출 분석 (법인통장 거래내역 업로드 → 자동 분류 학습 → 월별/기간 비교)
+   엑셀 열 구성 (헤더 행 없음, 실제 은행 거래내역 파일 기준):
+   A:대분류  B:항목  C:거래일시  D:출금액  E:입금액  F:거래후잔액
+   G:거래내용  H:계좌번호  I:은행명  J:메모  K:거래방법  N:예금주명
+   (L,M열은 사용하지 않음)
+   ================================================================== */
+
+// 간단한 문자열 해시(FNV-1a) — 암호화 목적이 아니라, 같은 거래를 다시
+// 업로드했을 때 중복 저장을 막기 위한 용도입니다.
+function hashString(str){
+  let h = 0x811c9dc5;
+  for(let i=0;i<str.length;i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16);
+}
+
+async function loadPayeeMap(){
+  const rows = await hrListPayeeMap();
+  PAYEE_MAP = {};
+  rows.forEach(r=>{ PAYEE_MAP[r.payee_key] = { major_category: r.major_category, item_name: r.item_name }; });
+}
+
+// 계좌번호가 있으면 계좌번호로, 없으면(카드자동이체 등) 거래내용 텍스트로 거래처를 식별합니다.
+function computePayeeKey(desc, account){
+  const acc = (account||'').toString().trim();
+  if(acc) return 'ACC:' + acc;
+  return 'DESC:' + (desc||'').toString().trim();
+}
+
+function rowToObj(arr){
+  return {
+    major_category: (arr[0]==null ? '' : arr[0].toString().trim()),
+    item_name: (arr[1]==null ? '' : arr[1].toString().trim()),
+    txn_date_raw: arr[2],
+    amount_out: Number(arr[3]||0),
+    amount_in: Number(arr[4]||0),
+    balance_after: Number(arr[5]||0),
+    desc: (arr[6]==null ? '' : arr[6].toString().trim()),
+    account: (arr[7]==null ? '' : arr[7].toString().trim()),
+    bank: (arr[8]==null ? '' : arr[8].toString().trim()),
+    memo: (arr[9]==null ? '' : arr[9].toString().trim()),
+    method: (arr[10]==null ? '' : arr[10].toString().trim()),
+    payee_name: (arr[13]==null ? '' : arr[13].toString().trim()),
+  };
+}
+function parseTxnDate(raw){
+  if(raw instanceof Date) return raw;
+  if(typeof raw === 'number' && typeof XLSX!=='undefined' && XLSX.SSF){
+    const d = XLSX.SSF.parse_date_code(raw);
+    if(d) return new Date(d.y, d.m-1, d.d, d.H||0, d.M||0, d.S||0);
+  }
+  const s = (raw==null ? '' : raw.toString()).trim();
+  let m = s.match(/(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
+  if(m) return new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]);
+  m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return new Date(+m[1], +m[2]-1, +m[3]);
+  return null;
+}
+// 한 행을 분류합니다: 엑셀에 이미 항목이 적혀 있으면 그대로 사용(+학습),
+// 아니면 이전에 학습된 매핑을 찾아 자동 적용, 그래도 없으면 사용자 입력이 필요합니다.
+function classifyRow(obj){
+  const key = computePayeeKey(obj.desc, obj.account);
+  if(obj.major_category && obj.item_name){
+    return { key, major_category: obj.major_category, item_name: obj.item_name, learned:true, needsInput:false };
+  }
+  const known = PAYEE_MAP[key];
+  if(known){
+    return { key, major_category: known.major_category, item_name: known.item_name, learned:false, needsInput:false };
+  }
+  return { key, major_category:'', item_name:'', learned:false, needsInput:true };
+}
+
+function fmtWon2(n){ return Number(n||0).toLocaleString('ko-KR')+'원'; }
+
+async function initExpenseTab(){
+  await loadPayeeMap();
+  EXPENSE_MONTHS = await hrListExpenseYearMonths();
+  const sel = document.getElementById('expenseMonthSelect');
+  sel.innerHTML = EXPENSE_MONTHS.length
+    ? EXPENSE_MONTHS.map(m=>`<option value="${m}">${m}</option>`).join('')
+    : '<option value="">저장된 데이터 없음</option>';
+  await renderExpenseMonth();
+}
+
+document.getElementById('expenseFile').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  handleExpenseFile(file);
+});
+
+async function handleExpenseFile(file){
+  const statusEl = document.getElementById('expenseUploadStatus');
+  statusEl.textContent = '읽는 중...';
+  document.getElementById('expenseReviewCard').classList.add('hidden');
+  try{
+    await loadPayeeMap();
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type:'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const aoa = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:null });
+
+    const parsed = [];
+    aoa.forEach(arr=>{
+      if(!arr || arr.length===0) return;
+      const obj = rowToObj(arr);
+      const dt = parseTxnDate(obj.txn_date_raw);
+      if(!dt) return; // 날짜를 인식할 수 없는 행(헤더/빈행 등)은 건너뜁니다
+      if(!obj.amount_out && !obj.amount_in) return;
+      obj.txn_date = dt;
+      obj.year_month = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+      const cls = classifyRow(obj);
+      obj.key = cls.key;
+      obj.major_category = cls.major_category;
+      obj.item_name = cls.item_name;
+      obj.needsInput = cls.needsInput;
+      obj.learnedFromExcel = cls.learned;
+      obj.row_hash = hashString([dt.getTime(), obj.amount_out, obj.amount_in, obj.desc, obj.account, obj.balance_after].join('|'));
+      parsed.push(obj);
+    });
+
+    if(parsed.length===0){
+      statusEl.textContent = '인식 가능한 거래내역을 찾지 못했습니다. 파일 형식을 확인해 주세요.';
+      return;
+    }
+    EXPENSE_PARSED_ROWS = parsed;
+    const newKeys = [...new Set(parsed.filter(r=>r.needsInput).map(r=>r.key))];
+    const autoCount = parsed.length - parsed.filter(r=>r.needsInput).length;
+
+    // 대분류 자동완성용 후보 목록 (기존에 학습된 값 + 이 파일에서 이미 분류된 값)
+    const knownMajors = new Set(Object.values(PAYEE_MAP).map(v=>v.major_category).filter(Boolean));
+    parsed.forEach(r=>{ if(r.major_category) knownMajors.add(r.major_category); });
+    document.getElementById('expMajorList').innerHTML =
+      [...knownMajors].map(m=>`<option value="${m}"></option>`).join('');
+
+    if(newKeys.length > 0){
+      document.getElementById('expenseReviewCard').classList.remove('hidden');
+      document.getElementById('expenseNewCount').textContent = newKeys.length+'건 신규';
+      const tbody = document.getElementById('expenseReviewBody');
+      tbody.innerHTML = '';
+      newKeys.forEach(key=>{
+        const rep = parsed.find(r=>r.key===key);
+        const tr = document.createElement('tr');
+        tr.dataset.key = key;
+        tr.innerHTML = `
+          <td>${rep.txn_date.toLocaleDateString('ko-KR')}</td>
+          <td>${rep.desc||'-'}${rep.payee_name?(' · '+rep.payee_name):''}</td>
+          <td>${rep.account||'-'}</td>
+          <td>${fmtWon2(rep.amount_out||rep.amount_in)}</td>
+          <td><input type="text" class="expNewMajor" list="expMajorList" placeholder="예: 고정비" style="margin-bottom:0;"></td>
+          <td><input type="text" class="expNewItem" placeholder="예: 통신비" style="margin-bottom:0;"></td>`;
+        tbody.appendChild(tr);
+      });
+      statusEl.textContent = `${parsed.length}건 인식됨 (자동분류 ${autoCount}건 · 신규 거래처 ${newKeys.length}건 — 아래에서 분류를 입력한 뒤 저장해 주세요)`;
+    } else {
+      statusEl.textContent = `${parsed.length}건 모두 자동 분류되었습니다. 저장 중...`;
+      await confirmExpenseSave();
+    }
+  } catch(e){
+    statusEl.textContent = '파일을 읽는 중 오류가 발생했습니다: '+e.message;
+    console.error(e);
+  }
+}
+
+async function confirmExpenseSave(){
+  const statusEl = document.getElementById('expenseUploadStatus');
+  const reviewRows = document.querySelectorAll('#expenseReviewBody tr');
+  const newlyClassified = {};
+  let missing = false;
+  reviewRows.forEach(tr=>{
+    const key = tr.dataset.key;
+    const major = tr.querySelector('.expNewMajor').value.trim();
+    const item = tr.querySelector('.expNewItem').value.trim();
+    if(!major || !item){ missing = true; return; }
+    newlyClassified[key] = { major_category: major, item_name: item };
+  });
+  if(missing){ alert('모든 신규 거래처의 대분류/항목을 입력해 주세요.'); return; }
+
+  EXPENSE_PARSED_ROWS.forEach(r=>{
+    if(r.needsInput && newlyClassified[r.key]){
+      r.major_category = newlyClassified[r.key].major_category;
+      r.item_name = newlyClassified[r.key].item_name;
+    }
+  });
+
+  // 이번에 새로 학습해야 할 거래처: 사용자가 방금 입력했거나, 엑셀에 이미 적혀 있던 분류
+  const mapUpserts = {};
+  EXPENSE_PARSED_ROWS.forEach(r=>{
+    if(r.major_category && r.item_name && (r.needsInput || r.learnedFromExcel)){
+      mapUpserts[r.key] = {
+        payee_key: r.key,
+        payee_label: r.payee_name || r.desc || '',
+        major_category: r.major_category,
+        item_name: r.item_name
+      };
+    }
+  });
+
+  try{
+    const mapRows = Object.values(mapUpserts);
+    if(mapRows.length>0) await hrUpsertPayeeMap(mapRows);
+
+    const recordRows = EXPENSE_PARSED_ROWS.map(r=>({
+      year_month: r.year_month,
+      txn_date: r.txn_date.toISOString(),
+      major_category: r.major_category || '미분류',
+      item_name: r.item_name || '기타',
+      amount_out: r.amount_out || 0,
+      amount_in: r.amount_in || 0,
+      payee_key: r.key,
+      payee_name: r.payee_name || r.desc || '',
+      payee_bank: r.bank || '',
+      payee_account: r.account || '',
+      memo: r.memo || '',
+      method: r.method || '',
+      balance_after: r.balance_after || 0,
+      row_hash: r.row_hash
+    }));
+    const inserted = await hrInsertExpenseRecords(recordRows);
+
+    await loadPayeeMap();
+    document.getElementById('expenseReviewCard').classList.add('hidden');
+    document.getElementById('expenseFile').value = '';
+    const skipped = recordRows.length - inserted.length;
+    statusEl.textContent = `저장 완료: 신규 ${inserted.length}건 저장`
+      + (skipped>0 ? ` (이미 저장되어 있던 ${skipped}건은 건너뛰었습니다)` : '') + '.';
+
+    EXPENSE_MONTHS = await hrListExpenseYearMonths();
+    const sel = document.getElementById('expenseMonthSelect');
+    sel.innerHTML = EXPENSE_MONTHS.map(m=>`<option value="${m}">${m}</option>`).join('');
+    if(EXPENSE_MONTHS.length) sel.value = EXPENSE_MONTHS[0];
+    await renderExpenseMonth();
+  } catch(e){
+    alert('저장 실패: '+e.message);
+    console.error(e);
+  }
+}
+
+/* ---------------------- 대분류/항목별 접기/펼치기 그룹 렌더 ---------------------- */
+function renderExpenseGroups(records, containerEl){
+  if(!records || records.length===0){
+    containerEl.innerHTML = '<div class="small-note">해당 기간에 저장된 거래내역이 없습니다.</div>';
+    return;
+  }
+  const groups = {};
+  records.forEach(r=>{
+    const g = r.major_category || '미분류';
+    if(!groups[g]) groups[g] = { totalOut:0, totalIn:0, items:{} };
+    groups[g].totalOut += Number(r.amount_out||0);
+    groups[g].totalIn += Number(r.amount_in||0);
+    const it = r.item_name || '기타';
+    if(!groups[g].items[it]) groups[g].items[it] = { totalOut:0, totalIn:0, count:0 };
+    groups[g].items[it].totalOut += Number(r.amount_out||0);
+    groups[g].items[it].totalIn += Number(r.amount_in||0);
+    groups[g].items[it].count += 1;
+  });
+  const groupNames = Object.keys(groups).sort((a,b)=>
+    (groups[b].totalOut-groups[b].totalIn) - (groups[a].totalOut-groups[a].totalIn));
+
+  let html = '';
+  groupNames.forEach((g, gi)=>{
+    const grp = groups[g];
+    const net = grp.totalOut - grp.totalIn;
+    const gid = 'expgroup_'+gi;
+    const itemNames = Object.keys(grp.items).sort((a,b)=>
+      (grp.items[b].totalOut-grp.items[b].totalIn) - (grp.items[a].totalOut-grp.items[a].totalIn));
+    html += `<div class="exp-group">
+      <div class="exp-group-head" onclick="toggleExpGroup('${gid}', this)">
+        <span><span class="arrow-ic">▶</span>${g} <span class="small-note">(${itemNames.length}개 항목)</span></span>
+        <span>${fmtWon2(net)}</span>
+      </div>
+      <div class="exp-group-body hidden" id="${gid}">`;
+    itemNames.forEach(it=>{
+      const item = grp.items[it];
+      html += `<div class="exp-item-row"><span>${it} <span class="small-note">(${item.count}건)</span></span><span>${fmtWon2(item.totalOut-item.totalIn)}</span></div>`;
+    });
+    html += `</div></div>`;
+  });
+  containerEl.innerHTML = html;
+}
+function toggleExpGroup(id, headEl){
+  document.getElementById(id).classList.toggle('hidden');
+  if(headEl) headEl.classList.toggle('open');
+}
+
+async function renderExpenseMonth(){
+  const m = document.getElementById('expenseMonthSelect').value;
+  const box = document.getElementById('expenseMonthView');
+  if(!m){
+    box.innerHTML = '<div class="small-note">저장된 월별 데이터가 없습니다. 위에서 거래내역 엑셀을 업로드해 주세요.</div>';
+    return;
+  }
+  box.innerHTML = '불러오는 중...';
+  const records = await hrListExpenseRecordsByMonths([m]);
+  const totalOut = records.reduce((s,r)=>s+Number(r.amount_out||0),0);
+  const totalIn = records.reduce((s,r)=>s+Number(r.amount_in||0),0);
+  box.innerHTML = `
+    <div class="exp-summary">
+      <div class="box"><div class="lbl">${m} 총 지출</div><div class="val">${fmtWon2(totalOut)}</div></div>
+      ${totalIn ? `<div class="box"><div class="lbl">${m} 총 입금</div><div class="val">${fmtWon2(totalIn)}</div></div>` : ''}
+      <div class="box"><div class="lbl">거래 건수</div><div class="val">${records.length}건</div></div>
+    </div>
+    <div id="expenseMonthGroups"></div>`;
+  renderExpenseGroups(records, document.getElementById('expenseMonthGroups'));
+}
+
+async function renderExpenseCompare(kind){
+  const box = document.getElementById('expenseCompareView');
+  let months;
+  if(kind==='year'){
+    const y = new Date().getFullYear();
+    months = EXPENSE_MONTHS.filter(m=>m.startsWith(String(y)));
+  } else {
+    months = EXPENSE_MONTHS.slice(0, kind);
+  }
+  if(!months || months.length===0){
+    box.innerHTML = '<div class="small-note">비교할 저장된 데이터가 없습니다.</div>';
+    return;
+  }
+  box.innerHTML = '불러오는 중...';
+  const records = await hrListExpenseRecordsByMonths(months);
+  const cats = {};
+  records.forEach(r=>{
+    const g = r.major_category || '미분류';
+    if(!cats[g]) cats[g] = {};
+    cats[g][r.year_month] = (cats[g][r.year_month]||0) + Number(r.amount_out||0) - Number(r.amount_in||0);
+  });
+  const monthsSorted = [...months].sort();
+  const catNames = Object.keys(cats).sort();
+  const colTotals = {}; monthsSorted.forEach(m=>colTotals[m]=0);
+  let grand = 0;
+  let rowsHtml = '';
+  catNames.forEach(g=>{
+    let rowTotal = 0;
+    const tds = monthsSorted.map(m=>{
+      const v = cats[g][m] || 0;
+      rowTotal += v; colTotals[m] += v;
+      return `<td>${fmtWon2(v)}</td>`;
+    }).join('');
+    grand += rowTotal;
+    rowsHtml += `<tr><td>${g}</td>${tds}<td style="font-weight:700;">${fmtWon2(rowTotal)}</td></tr>`;
+  });
+  rowsHtml += `<tr class="emp-total-row"><td style="font-weight:700;">합계</td>${
+    monthsSorted.map(m=>`<td style="font-weight:700;">${fmtWon2(colTotals[m])}</td>`).join('')
+  }<td style="font-weight:700;">${fmtWon2(grand)}</td></tr>`;
+  const thead = `<tr><th>대분류</th>${monthsSorted.map(m=>`<th>${m}</th>`).join('')}<th>합계</th></tr>`;
+  box.innerHTML = `<div style="overflow-x:auto;"><table><thead>${thead}</thead><tbody>${rowsHtml}</tbody></table></div>`;
 }
 </script>
 </body>

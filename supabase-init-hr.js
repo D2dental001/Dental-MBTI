@@ -119,3 +119,57 @@ async function hrDeleteSubmission(id){
   const { error } = await hrsb.from('hr_interview_submissions').delete().eq('id', id);
   if(error) throw error;
 }
+
+/* ---------------------- 지출 분석 (거래처 학습 매핑) ---------------------- */
+// 이 관리자가 지금까지 학습시킨 "거래처 -> 대분류/항목" 매핑 전체를 가져옵니다.
+async function hrListPayeeMap(){
+  const { data, error } = await hrsb.from('hr_expense_payee_map').select('*');
+  if(error){ console.error('[hrListPayeeMap]', error); return []; }
+  return data;
+}
+// 신규로 분류를 입력했거나(또는 엑셀에 이미 적혀 있던 값을 그대로 학습한) 거래처들을
+// payee_key 기준으로 upsert합니다 (같은 거래처가 다시 오면 최신 분류로 갱신됩니다).
+async function hrUpsertPayeeMap(rows){
+  if(!rows || rows.length===0) return [];
+  const { data: { user } } = await hrsb.auth.getUser();
+  if(!user) throw new Error('로그인이 필요합니다.');
+  const withOwner = rows.map(r=>({ ...r, owner_id: user.id, updated_at: new Date().toISOString() }));
+  const { data, error } = await hrsb.from('hr_expense_payee_map')
+    .upsert(withOwner, { onConflict: 'owner_id,payee_key' }).select();
+  if(error) throw error;
+  return data || [];
+}
+
+/* ---------------------- 지출 분석 (거래 원장) ---------------------- */
+// row_hash가 이미 존재하는 거래는 조용히 건너뛰고(중복 방지), 새 거래만 저장합니다.
+async function hrInsertExpenseRecords(rows){
+  if(!rows || rows.length===0) return [];
+  const { data: { user } } = await hrsb.auth.getUser();
+  if(!user) throw new Error('로그인이 필요합니다.');
+  const withOwner = rows.map(r=>({ ...r, owner_id: user.id }));
+  const { data, error } = await hrsb.from('hr_expense_records')
+    .upsert(withOwner, { onConflict: 'owner_id,row_hash', ignoreDuplicates: true }).select();
+  if(error) throw error;
+  return data || [];
+}
+// 저장되어 있는 년-월(YYYY-MM) 목록을 최신순으로 가져옵니다.
+async function hrListExpenseYearMonths(){
+  const { data, error } = await hrsb.from('hr_expense_records')
+    .select('year_month').order('year_month', { ascending:false });
+  if(error){ console.error('[hrListExpenseYearMonths]', error); return []; }
+  return [...new Set((data||[]).map(d=>d.year_month))];
+}
+// 특정 년-월들(예: ['2026-08','2026-07'])의 거래 내역 전체를 가져옵니다.
+async function hrListExpenseRecordsByMonths(months){
+  if(!months || months.length===0) return [];
+  const { data, error } = await hrsb.from('hr_expense_records')
+    .select('*').in('year_month', months).order('txn_date', { ascending:false });
+  if(error){ console.error('[hrListExpenseRecordsByMonths]', error); return []; }
+  return data;
+}
+// 이미 저장된 거래 1건의 분류를 나중에 수정할 때 사용 (수정하면 해당 거래처 학습도 함께 갱신).
+async function hrUpdateExpenseRecordCategory(id, major_category, item_name){
+  const { error } = await hrsb.from('hr_expense_records')
+    .update({ major_category, item_name }).eq('id', id);
+  if(error) throw error;
+}
