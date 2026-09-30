@@ -1099,32 +1099,76 @@ function computePayeeKey(desc, account){
   return 'DESC:' + (desc||'').toString().trim();
 }
 
-function rowToObj(arr){
+// 은행마다 거래내역 엑셀의 열 구성이 다릅니다 (기업은행: 헤더 없이 바로 데이터,
+// 신한은행: 1행에 "거래일시/적요/입금액/출금액/내용/잔액..." 헤더가 있고 열 순서도 다름).
+// 0,1열(대분류/항목)은 항상 사용자가 직접 채우는 칸이므로 고정이고, 그 뒤(2열~)는
+// 헤더 행이 있으면 헤더 텍스트를 보고 열 위치를 자동으로 찾고, 헤더가 없으면
+// 기업은행 형식(기본값)으로 가정합니다. 이렇게 하면 어느 은행 엑셀을 올리든
+// "거래일시"를 실제로 찾아서 인식하고, 여러 은행 파일이 같은 년-월로 합산됩니다.
+const DEFAULT_COLMAP = { date:2, amount_out:3, amount_in:4, balance:5, desc:6, account:7, bank:8, memo:9, method:10, payee:13 };
+function detectColumnMap(aoa){
+  for(let i=0; i<Math.min(aoa.length,5); i++){
+    const row = aoa[i] || [];
+    const map = {};
+    let hits = 0;
+    row.forEach((cell, idx)=>{
+      if(idx<2 || cell==null) return; // 0,1열(대분류/항목)은 헤더 검사에서 제외
+      const s = cell.toString().trim();
+      if(!s) return;
+      if(map.date==null && (s.includes('거래일시')||s.includes('거래일자'))){ map.date=idx; hits++; }
+      else if(map.amount_out==null && s.includes('출금액')){ map.amount_out=idx; hits++; }
+      else if(map.amount_in==null && s.includes('입금액')){ map.amount_in=idx; hits++; }
+      else if(map.balance==null && s.includes('잔액')){ map.balance=idx; hits++; }
+      else if(map.content==null && s==='내용'){ map.content=idx; hits++; }
+      else if(map.summary==null && s.includes('적요')){ map.summary=idx; hits++; }
+      else if(map.account==null && s.includes('계좌')){ map.account=idx; hits++; }
+      else if(map.bank==null && s.includes('은행명')){ map.bank=idx; hits++; }
+      else if(map.memo==null && s.includes('메모')){ map.memo=idx; hits++; }
+      else if(map.payee==null && (s.includes('예금주')||s.includes('송금인'))){ map.payee=idx; hits++; }
+      else if(map.branch==null && s.includes('거래점')){ map.branch=idx; hits++; }
+      else if(map.method==null && (s.includes('거래방법')||s.includes('거래구분'))){ map.method=idx; hits++; }
+    });
+    if(hits>=2){
+      // "거래내용"에 해당하는 열: 내용(content)이 있으면 그것을, 없으면 적요(summary)를 사용
+      map.desc = map.content!=null ? map.content : map.summary;
+      if(map.content!=null && map.summary!=null && map.method==null) map.method = map.summary;
+      map.headerRowIndex = i;
+      return map;
+    }
+  }
+  return null; // 헤더를 찾지 못하면 기본 형식(기업은행)으로 처리
+}
+function rowToObjByMap(arr, colmap){
+  const get = idx => idx==null ? null : arr[idx];
   return {
     major_category: (arr[0]==null ? '' : arr[0].toString().trim()),
     item_name: (arr[1]==null ? '' : arr[1].toString().trim()),
-    txn_date_raw: arr[2],
-    amount_out: Number(arr[3]||0),
-    amount_in: Number(arr[4]||0),
-    balance_after: Number(arr[5]||0),
-    desc: (arr[6]==null ? '' : arr[6].toString().trim()),
-    account: (arr[7]==null ? '' : arr[7].toString().trim()),
-    bank: (arr[8]==null ? '' : arr[8].toString().trim()),
-    memo: (arr[9]==null ? '' : arr[9].toString().trim()),
-    method: (arr[10]==null ? '' : arr[10].toString().trim()),
-    payee_name: (arr[13]==null ? '' : arr[13].toString().trim()),
+    txn_date_raw: get(colmap.date),
+    amount_out: Number(get(colmap.amount_out)||0),
+    amount_in: Number(get(colmap.amount_in)||0),
+    balance_after: Number(get(colmap.balance)||0),
+    desc: (get(colmap.desc)==null ? '' : get(colmap.desc).toString().trim()),
+    account: (get(colmap.account)==null ? '' : get(colmap.account).toString().trim()),
+    bank: (get(colmap.bank)==null ? '' : get(colmap.bank).toString().trim()),
+    memo: (get(colmap.memo)==null ? '' : get(colmap.memo).toString().trim()),
+    method: (get(colmap.method)==null ? '' : get(colmap.method).toString().trim()),
+    payee_name: (get(colmap.payee)==null ? '' : get(colmap.payee).toString().trim()),
   };
 }
 function parseTxnDate(raw){
   if(raw instanceof Date) return raw;
   if(typeof raw === 'number' && typeof XLSX!=='undefined' && XLSX.SSF){
     const d = XLSX.SSF.parse_date_code(raw);
-    if(d) return new Date(d.y, d.m-1, d.d, d.H||0, d.M||0, d.S||0);
+    // 엑셀 일련번호가 아닌 단순 순번("No" 열 등)을 날짜로 잘못 인식하지 않도록,
+    // 너무 오래된(1971년 이전) 날짜로 해석되면 무시합니다.
+    if(d && d.y > 1970) return new Date(d.y, d.m-1, d.d, d.H||0, d.M||0, d.S||0);
+    return null;
   }
   const s = (raw==null ? '' : raw.toString()).trim();
-  let m = s.match(/(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
+  // "2026-08-31 18:00:29" 및 "2026.08.31 16:38:49" 형식을 모두 지원합니다.
+  let m = s.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})[ T](\d{1,2}):(\d{2}):(\d{2})/);
   if(m) return new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]);
-  m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  m = s.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
   if(m) return new Date(+m[1], +m[2]-1, +m[3]);
   return null;
 }
@@ -1220,13 +1264,19 @@ async function handleExpenseFile(file){
     const ws = wb.Sheets[wb.SheetNames[0]];
     const aoa = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:null });
 
+    // 이 파일의 실제 열 구성을 확인합니다 (은행마다 거래일시/입출금액 열 위치가 다릅니다)
+    const detectedMap = detectColumnMap(aoa);
+    const colmap = detectedMap || DEFAULT_COLMAP;
+    const startRow = detectedMap ? detectedMap.headerRowIndex + 1 : 0;
+
     const parsed = [];
-    aoa.forEach(arr=>{
-      if(!arr || arr.length===0) return;
-      const obj = rowToObj(arr);
+    for(let ri = startRow; ri < aoa.length; ri++){
+      const arr = aoa[ri];
+      if(!arr || arr.length===0) continue;
+      const obj = rowToObjByMap(arr, colmap);
       const dt = parseTxnDate(obj.txn_date_raw);
-      if(!dt) return; // 날짜를 인식할 수 없는 행(헤더/빈행 등)은 건너뜁니다
-      if(!obj.amount_out && !obj.amount_in) return;
+      if(!dt) continue; // 날짜를 인식할 수 없는 행(헤더/합계행/빈행 등)은 건너뜁니다
+      if(!obj.amount_out && !obj.amount_in) continue;
       obj.txn_date = dt;
       obj.year_month = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
       obj.account_label = accountLabel;
@@ -1238,7 +1288,7 @@ async function handleExpenseFile(file){
       obj.learnedFromExcel = cls.learned;
       obj.row_hash = hashString([dt.getTime(), obj.amount_out, obj.amount_in, obj.desc, obj.account, obj.balance_after, accountLabel].join('|'));
       parsed.push(obj);
-    });
+    }
 
     if(parsed.length===0){
       statusEl.textContent = '인식 가능한 거래내역을 찾지 못했습니다. 파일 형식을 확인해 주세요.';
