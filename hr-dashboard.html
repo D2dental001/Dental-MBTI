@@ -472,8 +472,8 @@
         </div>
 
         <div class="card hidden" id="expenseReviewCard">
-          <h2>신규 거래처 분류 입력 <span class="pill review" id="expenseNewCount"></span></h2>
-          <div class="desc">아래 거래처들은 이번에 처음 인식되었습니다. 대분류와 항목을 입력하고 저장하면, 다음부터는 자동으로 분류됩니다.</div>
+          <h2>업로드 내용 확인 <span class="pill review" id="expenseNewCount"></span></h2>
+          <div class="desc">아직 저장되지 않았습니다. 신규 거래처가 있다면 대분류/항목을 입력하고, 내용을 확인한 뒤 "저장하기"를 눌러야 실제로 저장됩니다. 파일에 문제가 있다면 "취소"를 눌러 저장하지 않고 되돌릴 수 있습니다.</div>
           <div style="overflow-x:auto;">
           <table>
             <thead><tr><th>날짜</th><th>거래내용 / 예금주</th><th>계좌번호</th><th>금액</th><th>대분류</th><th>항목</th></tr></thead>
@@ -481,7 +481,19 @@
           </table>
           </div>
           <div style="margin-top:16px;">
-            <button class="btn primary" onclick="confirmExpenseSave()">분류 확정 후 저장</button>
+            <button class="btn primary" onclick="confirmExpenseSave()">저장하기</button>
+            <button class="btn ghost" onclick="cancelExpenseUpload()">취소 (저장하지 않음)</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>업로드된 파일 현황 (인식된 엑셀 파일 관리)</h2>
+          <div class="desc">저장을 완료한 엑셀 파일 목록입니다. 파일 자체에 오류가 있었다면 삭제를 눌러 그 파일에서 저장된 거래내역 전체를 한 번에 제거할 수 있습니다.</div>
+          <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>저장 일시</th><th>파일명</th><th>통장</th><th>해당 월</th><th>저장 건수</th><th></th></tr></thead>
+            <tbody id="expenseUploadsBody"></tbody>
+          </table>
           </div>
         </div>
 
@@ -539,6 +551,7 @@ let EXPENSE_PARSED_ROWS = []; // 업로드 후 저장 전, 화면에 대기 중�
 let EXPENSE_MONTHS = [];      // 저장되어 있는 년-월 목록 (최신순)
 let EXPENSE_ACCOUNTS = [];   // 등록된 통장(계좌) 목록
 let EXPENSE_LIST_CACHE = []; // 결산확인리스트에 현재 표시 중인(필터 적용된) 거래 목록
+let EXPENSE_PENDING_FILENAME = ''; // 저장하기를 누르기 전, 미리보기 중인 파일명
 
 (async function init(){
   CURRENT_USER = await hrRequireAdmin('index.html');
@@ -1092,57 +1105,106 @@ async function loadPayeeMap(){
   rows.forEach(r=>{ PAYEE_MAP[r.payee_key] = { major_category: r.major_category, item_name: r.item_name }; });
 }
 
-// 계좌번호가 있으면 계좌번호로, 없으면(카드자동이체 등) 거래내용 텍스트로 거래처를 식별합니다.
-function computePayeeKey(desc, account){
+// 계좌번호가 있으면 계좌번호로 거래처를 식별합니다. 계좌번호가 없는 경우(자동이체/CC 등)에는
+// 예금주명이 있으면 그것을, 없으면 거래내용 텍스트를 사용합니다. 이때 거래내용 끝에 붙는
+// 숫자(예: "한화생명06026"→06026, "고용보험2607"→2607)는 은행이 매달 자동으로 붙이는
+// 월/회차 표시인 경우가 많아서 제거합니다 — 그래야 "한화생명06026"(6월)과 "한화생명07027"(7월)이
+// 같은 거래처로 인식되어 자동 분류됩니다.
+function computePayeeKey(desc, account, payeeName){
   const acc = (account||'').toString().trim();
   if(acc) return 'ACC:' + acc;
-  return 'DESC:' + (desc||'').toString().trim();
+  const payee = (payeeName||'').toString().trim();
+  if(payee) return 'PAYEE:' + payee;
+  const d = (desc||'').toString().trim();
+  const stripped = d.replace(/[0-9]+$/, '').trim();
+  return 'DESC:' + (stripped || d);
 }
 
-// 은행마다 거래내역 엑셀의 열 구성이 다릅니다 (기업은행: 헤더 없이 바로 데이터,
-// 신한은행: 1행에 "거래일시/적요/입금액/출금액/내용/잔액..." 헤더가 있고 열 순서도 다름).
-// 0,1열(대분류/항목)은 항상 사용자가 직접 채우는 칸이므로 고정이고, 그 뒤(2열~)는
-// 헤더 행이 있으면 헤더 텍스트를 보고 열 위치를 자동으로 찾고, 헤더가 없으면
-// 기업은행 형식(기본값)으로 가정합니다. 이렇게 하면 어느 은행 엑셀을 올리든
-// "거래일시"를 실제로 찾아서 인식하고, 여러 은행 파일이 같은 년-월로 합산됩니다.
-const DEFAULT_COLMAP = { date:2, amount_out:3, amount_in:4, balance:5, desc:6, account:7, bank:8, memo:9, method:10, payee:13 };
+// 은행마다, 그리고 "대분류/항목을 직접 적었는지"에 따라 거래내역 엑셀의 열 구성이
+// 달라집니다:
+//   - 기업은행(헤더 없음) + 분류 있음: [대분류,항목,거래일시,출금액,입금액,잔액,거래내용,계좌번호,은행명,메모,거래방법,-,-,예금주]
+//   - 기업은행(헤더 없음) + 분류 없음: [거래일시,출금액,입금액,잔액,거래내용,계좌번호,은행명,메모,거래방법,-,-,예금주]  (2칸이 통째로 빠짐)
+//   - 신한은행(헤더 있음) + 분류 있음: [(빈칸),(빈칸),No,전체선택,거래일시,적요,입금액,출금액,내용,잔액,거래점명,입금인코드,메모]
+//   - 신한은행(헤더 있음) + 분류 없음: [No,전체선택,거래일시,적요,입금액,출금액,내용,잔액,거래점명,입금인코드,메모]  (앞의 빈칸 2개가 없음)
+// 즉 "분류를 적었는지"는 열 개수만으로는 알 수 없고, 실제 데이터(날짜가 어디서
+// 나오는지 / 헤더 앞칸이 비어 있는지)를 보고 그때그때 판단해야 합니다.
+function parseTxnDateProbe(raw){ return parseTxnDate(raw); }
+
+// 헤더가 있는 파일(신한은행 등): 헤더 텍스트로 은행 원본 열 위치를 찾습니다.
 function detectColumnMap(aoa){
   for(let i=0; i<Math.min(aoa.length,5); i++){
     const row = aoa[i] || [];
     const map = {};
     let hits = 0;
+    let minHitIdx = null;
     row.forEach((cell, idx)=>{
-      if(idx<2 || cell==null) return; // 0,1열(대분류/항목)은 헤더 검사에서 제외
+      if(cell==null) return;
       const s = cell.toString().trim();
       if(!s) return;
-      if(map.date==null && (s.includes('거래일시')||s.includes('거래일자'))){ map.date=idx; hits++; }
-      else if(map.amount_out==null && s.includes('출금액')){ map.amount_out=idx; hits++; }
-      else if(map.amount_in==null && s.includes('입금액')){ map.amount_in=idx; hits++; }
-      else if(map.balance==null && s.includes('잔액')){ map.balance=idx; hits++; }
-      else if(map.content==null && s==='내용'){ map.content=idx; hits++; }
-      else if(map.summary==null && s.includes('적요')){ map.summary=idx; hits++; }
-      else if(map.account==null && s.includes('계좌')){ map.account=idx; hits++; }
-      else if(map.bank==null && s.includes('은행명')){ map.bank=idx; hits++; }
-      else if(map.memo==null && s.includes('메모')){ map.memo=idx; hits++; }
-      else if(map.payee==null && (s.includes('예금주')||s.includes('송금인'))){ map.payee=idx; hits++; }
-      else if(map.branch==null && s.includes('거래점')){ map.branch=idx; hits++; }
-      else if(map.method==null && (s.includes('거래방법')||s.includes('거래구분'))){ map.method=idx; hits++; }
+      let matched = false;
+      if(map.date==null && (s.includes('거래일시')||s.includes('거래일자'))){ map.date=idx; matched=true; }
+      else if(map.amount_out==null && s.includes('출금액')){ map.amount_out=idx; matched=true; }
+      else if(map.amount_in==null && s.includes('입금액')){ map.amount_in=idx; matched=true; }
+      else if(map.balance==null && s.includes('잔액')){ map.balance=idx; matched=true; }
+      else if(map.content==null && s==='내용'){ map.content=idx; matched=true; }
+      else if(map.summary==null && s.includes('적요')){ map.summary=idx; matched=true; }
+      else if(map.account==null && s.includes('계좌')){ map.account=idx; matched=true; }
+      else if(map.bank==null && s.includes('은행명')){ map.bank=idx; matched=true; }
+      else if(map.memo==null && s.includes('메모')){ map.memo=idx; matched=true; }
+      else if(map.payee==null && (s.includes('예금주')||s.includes('송금인'))){ map.payee=idx; matched=true; }
+      else if(map.branch==null && s.includes('거래점')){ map.branch=idx; matched=true; }
+      else if(map.method==null && (s.includes('거래방법')||s.includes('거래구분'))){ map.method=idx; matched=true; }
+      if(matched){ hits++; if(minHitIdx==null || idx<minHitIdx) minHitIdx = idx; }
     });
     if(hits>=2){
       // "거래내용"에 해당하는 열: 내용(content)이 있으면 그것을, 없으면 적요(summary)를 사용
       map.desc = map.content!=null ? map.content : map.summary;
       if(map.content!=null && map.summary!=null && map.method==null) map.method = map.summary;
       map.headerRowIndex = i;
+      // 대분류/항목 칸이 있는지는 "0,1열이 헤더 행에서 비어 있는가"로만 판단합니다.
+      // 은행 자체 헤더(예: 신한은행의 "No","전체선택")는 대분류/항목 칸 뒤에도 계속
+      // 나올 수 있으므로, 0,1열 자체가 비어 있는지만 보고 판단해야 정확합니다.
+      const isBlankCell = v => v==null || v.toString().trim()==='';
+      const idx0Blank = isBlankCell(row[0]);
+      const idx1Blank = isBlankCell(row[1]);
+      map.majorIdx = idx0Blank ? 0 : null;
+      map.itemIdx = (idx0Blank && idx1Blank) ? 1 : null;
       return map;
     }
   }
-  return null; // 헤더를 찾지 못하면 기본 형식(기업은행)으로 처리
+  return null; // 헤더를 찾지 못하면 기업은행(헤더 없음) 형식으로 처리
+}
+
+// 헤더가 없는 파일(기업은행 등): 은행 데이터의 상대적인 열 순서는 고정이지만
+// (거래일시,출금액,입금액,잔액,거래내용,계좌번호,은행명,메모,거래방법,-,-,예금주),
+// 그 앞에 대분류/항목 2칸이 붙어 있는지는 파일마다 다릅니다. 앞에 2칸을 붙였다고
+// 가정했을 때와, 안 붙였다고 가정했을 때 중 실제로 "거래일시"가 날짜로 읽히는
+// 쪽을 골라 자동으로 판단합니다.
+const RAW_BANK_COLS = { date:0, amount_out:1, amount_in:2, balance:3, desc:4, account:5, bank:6, memo:7, method:8, payee:11 };
+function buildHeaderlessColmap(offset){
+  const map = { majorIdx: offset>=2 ? 0 : null, itemIdx: offset>=2 ? 1 : null };
+  Object.keys(RAW_BANK_COLS).forEach(k=>{ map[k] = RAW_BANK_COLS[k] + offset; });
+  return map;
+}
+function detectHeaderlessColmap(aoa){
+  let best = null;
+  [2, 0].forEach(offset=>{
+    const map = buildHeaderlessColmap(offset);
+    let score = 0;
+    for(let i=0; i<Math.min(aoa.length,5); i++){
+      const arr = aoa[i];
+      if(!arr) continue;
+      if(parseTxnDateProbe(arr[map.date])) score++;
+    }
+    if(!best || score>best.score) best = { offset, score, map };
+  });
+  return best.map;
 }
 function rowToObjByMap(arr, colmap){
   const get = idx => idx==null ? null : arr[idx];
   return {
-    major_category: (arr[0]==null ? '' : arr[0].toString().trim()),
-    item_name: (arr[1]==null ? '' : arr[1].toString().trim()),
+    major_category: (colmap.majorIdx==null || get(colmap.majorIdx)==null) ? '' : get(colmap.majorIdx).toString().trim(),
+    item_name: (colmap.itemIdx==null || get(colmap.itemIdx)==null) ? '' : get(colmap.itemIdx).toString().trim(),
     txn_date_raw: get(colmap.date),
     amount_out: Number(get(colmap.amount_out)||0),
     amount_in: Number(get(colmap.amount_in)||0),
@@ -1175,7 +1237,7 @@ function parseTxnDate(raw){
 // 한 행을 분류합니다: 엑셀에 이미 항목이 적혀 있으면 그대로 사용(+학습),
 // 아니면 이전에 학습된 매핑을 찾아 자동 적용, 그래도 없으면 사용자 입력이 필요합니다.
 function classifyRow(obj){
-  const key = computePayeeKey(obj.desc, obj.account);
+  const key = computePayeeKey(obj.desc, obj.account, obj.payee_name);
   if(obj.major_category && obj.item_name){
     return { key, major_category: obj.major_category, item_name: obj.item_name, learned:true, needsInput:false };
   }
@@ -1239,6 +1301,7 @@ async function initExpenseTab(){
   await refreshExpenseMonths();
   await renderExpenseMonth();
   await renderExpenseList();
+  await renderExpenseUploads();
 }
 
 document.getElementById('expenseFile').addEventListener('change', function(e){
@@ -1264,9 +1327,9 @@ async function handleExpenseFile(file){
     const ws = wb.Sheets[wb.SheetNames[0]];
     const aoa = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:null });
 
-    // 이 파일의 실제 열 구성을 확인합니다 (은행마다 거래일시/입출금액 열 위치가 다릅니다)
+    // 이 파일의 실제 열 구성을 확인합니다 (은행마다, 그리고 대분류/항목 기재 여부에 따라 다릅니다)
     const detectedMap = detectColumnMap(aoa);
-    const colmap = detectedMap || DEFAULT_COLMAP;
+    const colmap = detectedMap || detectHeaderlessColmap(aoa);
     const startRow = detectedMap ? detectedMap.headerRowIndex + 1 : 0;
 
     const parsed = [];
@@ -1304,10 +1367,13 @@ async function handleExpenseFile(file){
     document.getElementById('expMajorList').innerHTML =
       [...knownMajors].map(m=>`<option value="${m}"></option>`).join('');
 
+    EXPENSE_PENDING_FILENAME = file.name;
+
+    // 파일을 열어 미리보기만 만들고, 실제 DB 저장은 사용자가 "저장하기"를 눌러야 진행됩니다.
+    document.getElementById('expenseReviewCard').classList.remove('hidden');
+    const tbody = document.getElementById('expenseReviewBody');
     if(newKeys.length > 0){
-      document.getElementById('expenseReviewCard').classList.remove('hidden');
       document.getElementById('expenseNewCount').textContent = newKeys.length+'건 신규';
-      const tbody = document.getElementById('expenseReviewBody');
       tbody.innerHTML = '';
       newKeys.forEach(key=>{
         const rep = parsed.find(r=>r.key===key);
@@ -1322,15 +1388,23 @@ async function handleExpenseFile(file){
           <td><input type="text" class="expNewItem" placeholder="예: 통신비" style="margin-bottom:0;"></td>`;
         tbody.appendChild(tr);
       });
-      statusEl.textContent = `${parsed.length}건 인식됨 (자동분류 ${autoCount}건 · 신규 거래처 ${newKeys.length}건 — 아래에서 분류를 입력한 뒤 저장해 주세요)`;
     } else {
-      statusEl.textContent = `${parsed.length}건 모두 자동 분류되었습니다. 저장 중...`;
-      await confirmExpenseSave();
+      document.getElementById('expenseNewCount').textContent = '신규 없음';
+      tbody.innerHTML = '<tr><td colspan="6" class="small-note">이 파일의 모든 거래처가 이전에 학습된 내용(또는 파일에 이미 적힌 분류)으로 자동 인식되었습니다. 내용을 확인한 뒤 "저장하기"를 눌러 저장을 완료해 주세요.</td></tr>';
     }
+    statusEl.textContent = `${parsed.length}건 인식됨 (자동분류 ${autoCount}건 · 신규 거래처 ${newKeys.length}건) — 아직 저장되지 않았습니다. 내용을 확인한 뒤 "저장하기"를 눌러 주세요.`;
   } catch(e){
     statusEl.textContent = '파일을 읽는 중 오류가 발생했습니다: '+e.message;
     console.error(e);
   }
+}
+
+function cancelExpenseUpload(){
+  EXPENSE_PARSED_ROWS = [];
+  EXPENSE_PENDING_FILENAME = '';
+  document.getElementById('expenseReviewCard').classList.add('hidden');
+  document.getElementById('expenseFile').value = '';
+  document.getElementById('expenseUploadStatus').textContent = '업로드가 취소되었습니다 (저장되지 않았습니다).';
 }
 
 async function confirmExpenseSave(){
@@ -1371,6 +1445,16 @@ async function confirmExpenseSave(){
     const mapRows = Object.values(mapUpserts);
     if(mapRows.length>0) await hrUpsertPayeeMap(mapRows);
 
+    // 이 업로드(파일 1건)를 하나의 기록으로 남겨 두어, 나중에 "파일현황"에서
+    // 파일 단위로 통째로 삭제할 수 있게 합니다.
+    const yearMonths = [...new Set(EXPENSE_PARSED_ROWS.map(r=>r.year_month))].sort();
+    const uploadRow = await hrCreateExpenseUpload({
+      filename: EXPENSE_PENDING_FILENAME || '(파일명 없음)',
+      account_label: EXPENSE_PARSED_ROWS[0]?.account_label || '',
+      row_count: 0,
+      year_months: yearMonths
+    });
+
     const recordRows = EXPENSE_PARSED_ROWS.map(r=>({
       year_month: r.year_month,
       txn_date: r.txn_date.toISOString(),
@@ -1386,13 +1470,23 @@ async function confirmExpenseSave(){
       method: r.method || '',
       balance_after: r.balance_after || 0,
       row_hash: r.row_hash,
-      account_label: r.account_label || ''
+      account_label: r.account_label || '',
+      upload_batch_id: uploadRow.id
     }));
     const inserted = await hrInsertExpenseRecords(recordRows);
+
+    if(inserted.length>0){
+      await hrUpdateExpenseUploadRowCount(uploadRow.id, inserted.length);
+    } else {
+      // 전부 이미 저장되어 있던 거래(완전 중복 재업로드)라면, 빈 업로드 기록은 남기지 않습니다.
+      await hrDeleteExpenseUpload(uploadRow.id);
+    }
 
     await loadPayeeMap();
     document.getElementById('expenseReviewCard').classList.add('hidden');
     document.getElementById('expenseFile').value = '';
+    EXPENSE_PARSED_ROWS = [];
+    EXPENSE_PENDING_FILENAME = '';
     const skipped = recordRows.length - inserted.length;
     statusEl.textContent = `저장 완료: 신규 ${inserted.length}건 저장`
       + (skipped>0 ? ` (이미 저장되어 있던 ${skipped}건은 건너뛰었습니다)` : '') + '.';
@@ -1400,6 +1494,7 @@ async function confirmExpenseSave(){
     await refreshExpenseMonths();
     await renderExpenseMonth();
     await renderExpenseList();
+    await renderExpenseUploads();
   } catch(e){
     alert('저장 실패: '+e.message);
     console.error(e);
@@ -1657,7 +1752,7 @@ async function saveManualAddRow(){
   if(!out && !inAmt){ alert('출금액 또는 입금액 중 하나는 입력해 주세요.'); return; }
   const dt = new Date(dateVal);
   const year_month = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
-  const key = payee ? computePayeeKey(payee, '') : ('MANUAL:'+hashString([dateVal,major,item,out,inAmt,Math.random()].join('|')));
+  const key = payee ? computePayeeKey('', '', payee) : ('MANUAL:'+hashString([dateVal,major,item,out,inAmt,Math.random()].join('|')));
   const row_hash = 'MANUAL-'+hashString([Date.now(), Math.random(), dateVal, major, item, out, inAmt, payee, account].join('|'));
   try{
     await hrInsertExpenseRecords([{
@@ -1691,6 +1786,36 @@ function exportExpenseList(){
   XLSX.utils.book_append_sheet(wb, ws, '결산리스트');
   const m = document.getElementById('expenseListMonthSelect').value || 'export';
   XLSX.writeFile(wb, `비용결산_${m}.xlsx`);
+}
+
+/* ---------------------- 업로드된 파일 현황 / 파일 삭제 ---------------------- */
+async function renderExpenseUploads(){
+  const tbody = document.getElementById('expenseUploadsBody');
+  tbody.innerHTML = '<tr><td colspan="6">불러오는 중...</td></tr>';
+  const uploads = await hrListExpenseUploads();
+  if(uploads.length===0){
+    tbody.innerHTML = '<tr><td colspan="6" class="small-note">아직 저장된 업로드가 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = uploads.map(u=>`
+    <tr>
+      <td>${new Date(u.uploaded_at).toLocaleString('ko-KR')}</td>
+      <td>${u.filename||'-'}</td>
+      <td>${u.account_label||'-'}</td>
+      <td>${(u.year_months||[]).join(', ')||'-'}</td>
+      <td>${u.row_count||0}건</td>
+      <td><button class="btn danger sm" onclick="deleteExpenseUpload('${u.id}')">삭제</button></td>
+    </tr>`).join('');
+}
+async function deleteExpenseUpload(id){
+  if(!confirm('이 파일에서 저장된 거래내역 전체를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+  try{
+    await hrDeleteExpenseUpload(id);
+    await renderExpenseUploads();
+    await refreshExpenseMonths();
+    await renderExpenseMonth();
+    await renderExpenseList();
+  } catch(e){ alert('삭제 실패: '+e.message); console.error(e); }
 }
 </script>
 </body>

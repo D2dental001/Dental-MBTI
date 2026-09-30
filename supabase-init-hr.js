@@ -197,3 +197,29 @@ async function hrDeleteExpenseAccount(id){
   const { error } = await hrsb.from('hr_expense_accounts').delete().eq('id', id);
   if(error) throw error;
 }
+
+/* ---------------------- 지출 분석 (업로드 파일 현황/삭제) ---------------------- */
+// 엑셀 1건을 저장할 때마다 "업로드 기록"을 하나 만듭니다. 이 기록을 삭제하면
+// (hr_expense_records.upload_batch_id의 on delete cascade 덕분에) 그 파일에서
+// 저장된 거래내역 전체가 함께 삭제됩니다 — 파일 자체에 오류가 있었을 때 사용합니다.
+async function hrCreateExpenseUpload(fields){
+  const { data: { user } } = await hrsb.auth.getUser();
+  if(!user) throw new Error('로그인이 필요합니다.');
+  const { data, error } = await hrsb.from('hr_expense_uploads')
+    .insert({ ...fields, owner_id: user.id }).select().single();
+  if(error) throw error;
+  return data;
+}
+async function hrUpdateExpenseUploadRowCount(id, row_count){
+  const { error } = await hrsb.from('hr_expense_uploads').update({ row_count }).eq('id', id);
+  if(error) throw error;
+}
+async function hrListExpenseUploads(){
+  const { data, error } = await hrsb.from('hr_expense_uploads').select('*').order('uploaded_at', { ascending:false });
+  if(error){ console.error('[hrListExpenseUploads]', error); return []; }
+  return data;
+}
+async function hrDeleteExpenseUpload(id){
+  const { error } = await hrsb.from('hr_expense_uploads').delete().eq('id', id);
+  if(error) throw error;
+}
