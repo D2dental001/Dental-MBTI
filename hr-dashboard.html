@@ -1447,14 +1447,22 @@ async function confirmExpenseSave(){
     if(mapRows.length>0) await hrUpsertPayeeMap(mapRows);
 
     // 이 업로드(파일 1건)를 하나의 기록으로 남겨 두어, 나중에 "파일현황"에서
-    // 파일 단위로 통째로 삭제할 수 있게 합니다.
-    const yearMonths = [...new Set(EXPENSE_PARSED_ROWS.map(r=>r.year_month))].sort();
-    const uploadRow = await hrCreateExpenseUpload({
-      filename: EXPENSE_PENDING_FILENAME || '(파일명 없음)',
-      account_label: EXPENSE_PARSED_ROWS[0]?.account_label || '',
-      row_count: 0,
-      year_months: yearMonths
-    });
+    // 파일 단위로 통째로 삭제할 수 있게 합니다. 이 기록 자체가 실패하더라도
+    // (예: hr_expense_uploads.sql 마이그레이션을 아직 실행하지 않은 경우)
+    // 아래의 실제 거래내역 저장은 막히지 않도록 별도로 감싸서 처리합니다.
+    let uploadRow = null;
+    try{
+      const yearMonths = [...new Set(EXPENSE_PARSED_ROWS.map(r=>r.year_month))].sort();
+      uploadRow = await hrCreateExpenseUpload({
+        filename: EXPENSE_PENDING_FILENAME || '(파일명 없음)',
+        account_label: EXPENSE_PARSED_ROWS[0]?.account_label || '',
+        row_count: 0,
+        year_months: yearMonths
+      });
+    } catch(uploadErr){
+      console.error('[hrCreateExpenseUpload 실패 — 파일현황 기록 없이 거래내역 저장을 계속 진행합니다]', uploadErr);
+      uploadRow = null;
+    }
 
     const recordRows = EXPENSE_PARSED_ROWS.map(r=>({
       year_month: r.year_month,
@@ -1472,15 +1480,21 @@ async function confirmExpenseSave(){
       balance_after: r.balance_after || 0,
       row_hash: r.row_hash,
       account_label: r.account_label || '',
-      upload_batch_id: uploadRow.id
+      ...(uploadRow ? { upload_batch_id: uploadRow.id } : {})
     }));
     const inserted = await hrInsertExpenseRecords(recordRows);
 
-    if(inserted.length>0){
-      await hrUpdateExpenseUploadRowCount(uploadRow.id, inserted.length);
-    } else {
-      // 전부 이미 저장되어 있던 거래(완전 중복 재업로드)라면, 빈 업로드 기록은 남기지 않습니다.
-      await hrDeleteExpenseUpload(uploadRow.id);
+    if(uploadRow){
+      try{
+        if(inserted.length>0){
+          await hrUpdateExpenseUploadRowCount(uploadRow.id, inserted.length);
+        } else {
+          // 전부 이미 저장되어 있던 거래(완전 중복 재업로드)라면, 빈 업로드 기록은 남기지 않습니다.
+          await hrDeleteExpenseUpload(uploadRow.id);
+        }
+      } catch(cleanupErr){
+        console.error('[업로드 기록 마무리 실패 — 거래내역 저장에는 영향 없음]', cleanupErr);
+      }
     }
 
     await loadPayeeMap();
