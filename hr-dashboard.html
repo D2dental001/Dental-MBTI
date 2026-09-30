@@ -1410,7 +1410,9 @@ function cancelExpenseUpload(){
 
 async function confirmExpenseSave(){
   const statusEl = document.getElementById('expenseUploadStatus');
-  const reviewRows = document.querySelectorAll('#expenseReviewBody tr');
+  // 신규 거래처가 없을 때는 안내 문구만 담긴 행(입력칸 없음)이 표시되므로,
+  // data-key가 실제로 있는(=신규 거래처 입력 행인) <tr>만 대상으로 합니다.
+  const reviewRows = document.querySelectorAll('#expenseReviewBody tr[data-key]');
   const newlyClassified = {};
   let missing = false;
   reviewRows.forEach(tr=>{
