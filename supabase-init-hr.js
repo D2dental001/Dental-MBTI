@@ -167,9 +167,33 @@ async function hrListExpenseRecordsByMonths(months){
   if(error){ console.error('[hrListExpenseRecordsByMonths]', error); return []; }
   return data;
 }
-// 이미 저장된 거래 1건의 분류를 나중에 수정할 때 사용 (수정하면 해당 거래처 학습도 함께 갱신).
-async function hrUpdateExpenseRecordCategory(id, major_category, item_name){
-  const { error } = await hrsb.from('hr_expense_records')
-    .update({ major_category, item_name }).eq('id', id);
+// 이미 저장된 거래 1건을 자유롭게 수정합니다 (날짜/통장/분류/거래내용/금액 등).
+async function hrUpdateExpenseRecord(id, fields){
+  const { error } = await hrsb.from('hr_expense_records').update(fields).eq('id', id);
+  if(error) throw error;
+}
+// 거래 1건 삭제.
+async function hrDeleteExpenseRecord(id){
+  const { error } = await hrsb.from('hr_expense_records').delete().eq('id', id);
+  if(error) throw error;
+}
+
+/* ---------------------- 지출 분석 (통장/계좌 목록) ---------------------- */
+// 통장이 여러 개인 경우를 위해, 통장 이름 목록을 관리합니다.
+async function hrListExpenseAccounts(){
+  const { data, error } = await hrsb.from('hr_expense_accounts').select('*').order('label', { ascending:true });
+  if(error){ console.error('[hrListExpenseAccounts]', error); return []; }
+  return data;
+}
+async function hrUpsertExpenseAccount(fields){
+  const { data: { user } } = await hrsb.auth.getUser();
+  if(!user) throw new Error('로그인이 필요합니다.');
+  const { data, error } = await hrsb.from('hr_expense_accounts')
+    .upsert({ ...fields, owner_id: user.id }, { onConflict: 'owner_id,label' }).select().single();
+  if(error) throw error;
+  return data;
+}
+async function hrDeleteExpenseAccount(id){
+  const { error } = await hrsb.from('hr_expense_accounts').delete().eq('id', id);
   if(error) throw error;
 }

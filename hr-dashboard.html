@@ -226,7 +226,7 @@
       <div class="navitem" data-tab="cert"><span class="dot"></span>재직증명서</div>
 
       <div class="navlabel">재무</div>
-      <div class="navitem" data-tab="expense"><span class="dot"></span>지출 분석</div>
+      <div class="navitem" data-tab="expense"><span class="dot"></span>비용결산</div>
     </div>
 
     <div class="logout" onclick="location.href='index.html'">← 메인 관리자 메뉴로</div>
@@ -444,7 +444,7 @@
         </div>
       </div>
 
-      <!-- ===================== 지출 분석 ===================== -->
+      <!-- ===================== 비용결산 ===================== -->
       <div id="tab-expense" class="tab-panel hidden">
         <div class="card">
           <h2>법인통장 거래내역 업로드</h2>
@@ -454,9 +454,21 @@
             한 번 입력하면 다음 업로드부터는 그 거래처가 자동으로 분류됩니다. 같은 거래를 다시
             업로드해도 중복 저장되지 않습니다.
           </div>
+          <div class="grid2">
+            <div>
+              <label class="field">통장(계좌) 선택 — 업로드할 파일이 어느 통장 거래내역인지 선택하세요</label>
+              <select id="expenseAccountSelect"></select>
+            </div>
+            <div style="padding-top:26px;">
+              <button class="btn ghost sm" onclick="addNewAccount()">+ 새 통장 추가</button>
+            </div>
+          </div>
+          <div class="small-note">통장이 여러 개라면 각 통장마다 미리 추가해 두고, 거래내역 엑셀을 통장별로 업로드하세요. 같은 거래내역을 어느 통장 것인지 구분해 저장하고, 아래 결산확인리스트에서 통장별로 조회/집계할 수 있습니다.</div>
+          <label class="field" style="margin-top:14px;">거래내역 엑셀 파일</label>
           <input type="file" id="expenseFile" accept=".xlsx,.xls">
           <div class="small-note" id="expenseUploadStatus"></div>
           <datalist id="expMajorList"></datalist>
+          <datalist id="expAccountList"></datalist>
         </div>
 
         <div class="card hidden" id="expenseReviewCard">
@@ -474,12 +486,32 @@
         </div>
 
         <div class="card">
-          <h2>월별 지출 현황</h2>
+          <h2>월별 지출 현황 (요약)</h2>
           <div class="toolbar">
             <label class="field" style="margin:0;">조회 월</label>
             <select id="expenseMonthSelect" onchange="renderExpenseMonth()" style="width:auto;margin-bottom:0;"></select>
           </div>
           <div id="expenseMonthView"><div class="small-note">저장된 데이터가 없습니다. 위에서 거래내역 엑셀을 업로드해 주세요.</div></div>
+        </div>
+
+        <div class="card">
+          <h2>결산확인리스트 (연도별·월별 저장 내역 — 수정 / 추가 / 삭제)</h2>
+          <div class="desc">저장된 거래를 하나씩 확인하고 수정하거나 삭제할 수 있습니다. 엑셀에 없던 거래(다른 통장, 현금 지출 등)는 "거래 수동 추가"로 직접 넣을 수 있습니다.</div>
+          <div class="toolbar">
+            <label class="field" style="margin:0;">연도-월</label>
+            <select id="expenseListMonthSelect" onchange="renderExpenseList()" style="width:auto;margin-bottom:0;"></select>
+            <label class="field" style="margin:0;">통장</label>
+            <select id="expenseListAccountFilter" onchange="renderExpenseList()" style="width:auto;margin-bottom:0;"><option value="">전체 통장</option></select>
+            <button class="btn green sm" onclick="openManualAddRow()">+ 거래 수동 추가</button>
+            <button class="btn ghost sm" onclick="exportExpenseList()">엑셀로 내보내기</button>
+          </div>
+          <div class="exp-summary" id="expenseAccountSubtotals"></div>
+          <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>날짜</th><th>통장</th><th>대분류</th><th>항목</th><th>거래내용</th><th>출금액</th><th>입금액</th><th></th></tr></thead>
+            <tbody id="expenseListBody"></tbody>
+          </table>
+          </div>
         </div>
 
         <div class="card">
@@ -505,6 +537,8 @@ let EMPLOYEES = [];
 let PAYEE_MAP = {};          // payee_key -> {major_category, item_name} (학습된 거래처 분류)
 let EXPENSE_PARSED_ROWS = []; // 업로드 후 저장 전, 화면에 대기 중인 파싱된 거래 목록
 let EXPENSE_MONTHS = [];      // 저장되어 있는 년-월 목록 (최신순)
+let EXPENSE_ACCOUNTS = [];   // 등록된 통장(계좌) 목록
+let EXPENSE_LIST_CACHE = []; // 결산확인리스트에 현재 표시 중인(필터 적용된) 거래 목록
 
 (async function init(){
   CURRENT_USER = await hrRequireAdmin('index.html');
@@ -524,7 +558,7 @@ function doLogout(){ hrLogout().then(()=>location.href='index.html'); }
 const TAB_TITLES = {
   home:'홈 (생일 캘린더)', company:'회사 설정 & QR', employees:'직원 관리', interview:'면접 결과',
   payroll:'급여이체 엑셀', leave:'연차 계산기', severance:'퇴직금 계산기', cert:'재직증명서',
-  expense:'지출 분석'
+  expense:'비용결산'
 };
 document.querySelectorAll('.navitem').forEach(btn=>{
   btn.addEventListener('click', async ()=>{
@@ -1110,14 +1144,57 @@ function classifyRow(obj){
 
 function fmtWon2(n){ return Number(n||0).toLocaleString('ko-KR')+'원'; }
 
-async function initExpenseTab(){
-  await loadPayeeMap();
-  EXPENSE_MONTHS = await hrListExpenseYearMonths();
-  const sel = document.getElementById('expenseMonthSelect');
-  sel.innerHTML = EXPENSE_MONTHS.length
+function populateExpenseMonthSelects(){
+  const optsHtml = EXPENSE_MONTHS.length
     ? EXPENSE_MONTHS.map(m=>`<option value="${m}">${m}</option>`).join('')
     : '<option value="">저장된 데이터 없음</option>';
+  ['expenseMonthSelect','expenseListMonthSelect'].forEach(id=>{
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = optsHtml;
+    if(EXPENSE_MONTHS.includes(cur)) sel.value = cur;
+  });
+}
+async function refreshExpenseMonths(){
+  EXPENSE_MONTHS = await hrListExpenseYearMonths();
+  populateExpenseMonthSelects();
+}
+
+/* ---------------------- 통장(계좌) 관리 ---------------------- */
+async function loadExpenseAccounts(){
+  EXPENSE_ACCOUNTS = await hrListExpenseAccounts();
+  const sel = document.getElementById('expenseAccountSelect');
+  const curSel = sel.value;
+  sel.innerHTML = EXPENSE_ACCOUNTS.length
+    ? EXPENSE_ACCOUNTS.map(a=>`<option value="${a.label}">${a.label}</option>`).join('')
+    : '<option value="">등록된 통장 없음 — 먼저 추가하세요</option>';
+  if(EXPENSE_ACCOUNTS.some(a=>a.label===curSel)) sel.value = curSel;
+
+  const filterSel = document.getElementById('expenseListAccountFilter');
+  const curFilter = filterSel.value;
+  filterSel.innerHTML = '<option value="">전체 통장</option>' +
+    EXPENSE_ACCOUNTS.map(a=>`<option value="${a.label}">${a.label}</option>`).join('');
+  if(EXPENSE_ACCOUNTS.some(a=>a.label===curFilter)) filterSel.value = curFilter;
+
+  document.getElementById('expAccountList').innerHTML =
+    EXPENSE_ACCOUNTS.map(a=>`<option value="${a.label}"></option>`).join('');
+}
+async function addNewAccount(){
+  const label = prompt('새 통장 이름을 입력하세요 (예: 국민은행-법인, 우리은행-예비비 등)');
+  if(!label || !label.trim()) return;
+  try{
+    await hrUpsertExpenseAccount({ label: label.trim() });
+    await loadExpenseAccounts();
+    document.getElementById('expenseAccountSelect').value = label.trim();
+  } catch(e){ alert('통장 추가 실패: '+e.message); console.error(e); }
+}
+
+async function initExpenseTab(){
+  await loadPayeeMap();
+  await loadExpenseAccounts();
+  await refreshExpenseMonths();
   await renderExpenseMonth();
+  await renderExpenseList();
 }
 
 document.getElementById('expenseFile').addEventListener('change', function(e){
@@ -1128,6 +1205,12 @@ document.getElementById('expenseFile').addEventListener('change', function(e){
 
 async function handleExpenseFile(file){
   const statusEl = document.getElementById('expenseUploadStatus');
+  const accountLabel = document.getElementById('expenseAccountSelect').value;
+  if(!accountLabel){
+    alert('먼저 이 파일이 어느 통장 거래내역인지 통장을 추가/선택해 주세요.');
+    document.getElementById('expenseFile').value = '';
+    return;
+  }
   statusEl.textContent = '읽는 중...';
   document.getElementById('expenseReviewCard').classList.add('hidden');
   try{
@@ -1146,13 +1229,14 @@ async function handleExpenseFile(file){
       if(!obj.amount_out && !obj.amount_in) return;
       obj.txn_date = dt;
       obj.year_month = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+      obj.account_label = accountLabel;
       const cls = classifyRow(obj);
       obj.key = cls.key;
       obj.major_category = cls.major_category;
       obj.item_name = cls.item_name;
       obj.needsInput = cls.needsInput;
       obj.learnedFromExcel = cls.learned;
-      obj.row_hash = hashString([dt.getTime(), obj.amount_out, obj.amount_in, obj.desc, obj.account, obj.balance_after].join('|'));
+      obj.row_hash = hashString([dt.getTime(), obj.amount_out, obj.amount_in, obj.desc, obj.account, obj.balance_after, accountLabel].join('|'));
       parsed.push(obj);
     });
 
@@ -1251,7 +1335,8 @@ async function confirmExpenseSave(){
       memo: r.memo || '',
       method: r.method || '',
       balance_after: r.balance_after || 0,
-      row_hash: r.row_hash
+      row_hash: r.row_hash,
+      account_label: r.account_label || ''
     }));
     const inserted = await hrInsertExpenseRecords(recordRows);
 
@@ -1262,11 +1347,9 @@ async function confirmExpenseSave(){
     statusEl.textContent = `저장 완료: 신규 ${inserted.length}건 저장`
       + (skipped>0 ? ` (이미 저장되어 있던 ${skipped}건은 건너뛰었습니다)` : '') + '.';
 
-    EXPENSE_MONTHS = await hrListExpenseYearMonths();
-    const sel = document.getElementById('expenseMonthSelect');
-    sel.innerHTML = EXPENSE_MONTHS.map(m=>`<option value="${m}">${m}</option>`).join('');
-    if(EXPENSE_MONTHS.length) sel.value = EXPENSE_MONTHS[0];
+    await refreshExpenseMonths();
     await renderExpenseMonth();
+    await renderExpenseList();
   } catch(e){
     alert('저장 실패: '+e.message);
     console.error(e);
@@ -1382,6 +1465,182 @@ async function renderExpenseCompare(kind){
   }<td style="font-weight:700;">${fmtWon2(grand)}</td></tr>`;
   const thead = `<tr><th>대분류</th>${monthsSorted.map(m=>`<th>${m}</th>`).join('')}<th>합계</th></tr>`;
   box.innerHTML = `<div style="overflow-x:auto;"><table><thead>${thead}</thead><tbody>${rowsHtml}</tbody></table></div>`;
+}
+
+/* ---------------------- 결산확인리스트 (통장별 조회 + 수정/추가/삭제) ---------------------- */
+function renderAccountSubtotals(allRecords){
+  const box = document.getElementById('expenseAccountSubtotals');
+  if(!allRecords || allRecords.length===0){ box.innerHTML=''; return; }
+  const byAcc = {};
+  allRecords.forEach(r=>{
+    const a = r.account_label || '통장 미지정';
+    byAcc[a] = (byAcc[a]||0) + Number(r.amount_out||0) - Number(r.amount_in||0);
+  });
+  box.innerHTML = Object.keys(byAcc).sort().map(a=>
+    `<div class="box"><div class="lbl">${a}</div><div class="val">${fmtWon2(byAcc[a])}</div></div>`
+  ).join('');
+}
+
+function fmtDateInput(d){ return new Date(d).toISOString().slice(0,10); }
+
+async function renderExpenseList(){
+  const m = document.getElementById('expenseListMonthSelect').value;
+  const accFilter = document.getElementById('expenseListAccountFilter').value;
+  const tbody = document.getElementById('expenseListBody');
+  if(!m){
+    tbody.innerHTML = '<tr><td colspan="8" class="small-note">저장된 데이터가 없습니다. 위에서 거래내역 엑셀을 업로드하거나 "거래 수동 추가"로 입력해 주세요.</td></tr>';
+    document.getElementById('expenseAccountSubtotals').innerHTML = '';
+    return;
+  }
+  tbody.innerHTML = '<tr><td colspan="8">불러오는 중...</td></tr>';
+  const allRecords = await hrListExpenseRecordsByMonths([m]);
+  renderAccountSubtotals(allRecords);
+  const records = accFilter ? allRecords.filter(r=>r.account_label===accFilter) : allRecords;
+  EXPENSE_LIST_CACHE = records;
+  if(records.length===0){
+    tbody.innerHTML = '<tr><td colspan="8" class="small-note">해당 조건의 거래내역이 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = records.map(r=>`
+    <tr data-id="${r.id}">
+      <td>${new Date(r.txn_date).toLocaleDateString('ko-KR')}</td>
+      <td>${r.account_label||'-'}</td>
+      <td>${r.major_category||'-'}</td>
+      <td>${r.item_name||'-'}</td>
+      <td>${r.payee_name||'-'}</td>
+      <td>${r.amount_out?fmtWon2(r.amount_out):'-'}</td>
+      <td>${r.amount_in?fmtWon2(r.amount_in):'-'}</td>
+      <td>
+        <button class="btn ghost sm" onclick="editExpenseRow('${r.id}')">수정</button>
+        <button class="btn danger sm" onclick="deleteExpenseRow('${r.id}')">삭제</button>
+      </td>
+    </tr>`).join('');
+}
+
+function editExpenseRow(id){
+  const r = EXPENSE_LIST_CACHE.find(x=>x.id===id);
+  if(!r) return;
+  const tr = document.querySelector(`#expenseListBody tr[data-id="${id}"]`);
+  if(!tr) return;
+  tr.innerHTML = `
+    <td><input type="date" value="${fmtDateInput(r.txn_date)}" class="editDate" style="margin-bottom:0;"></td>
+    <td><input type="text" value="${r.account_label||''}" class="editAccount" list="expAccountList" style="margin-bottom:0;"></td>
+    <td><input type="text" value="${r.major_category||''}" class="editMajor" list="expMajorList" style="margin-bottom:0;"></td>
+    <td><input type="text" value="${r.item_name||''}" class="editItem" style="margin-bottom:0;"></td>
+    <td><input type="text" value="${r.payee_name||''}" class="editPayee" style="margin-bottom:0;"></td>
+    <td><input type="number" value="${r.amount_out||0}" class="editOut" style="margin-bottom:0;"></td>
+    <td><input type="number" value="${r.amount_in||0}" class="editIn" style="margin-bottom:0;"></td>
+    <td>
+      <button class="btn primary sm" onclick="saveExpenseRowEdit('${id}')">저장</button>
+      <button class="btn ghost sm" onclick="renderExpenseList()">취소</button>
+    </td>`;
+}
+async function saveExpenseRowEdit(id){
+  const tr = document.querySelector(`#expenseListBody tr[data-id="${id}"]`);
+  if(!tr) return;
+  const dateVal = tr.querySelector('.editDate').value;
+  if(!dateVal){ alert('날짜를 입력해 주세요.'); return; }
+  const fields = {
+    txn_date: new Date(dateVal).toISOString(),
+    account_label: tr.querySelector('.editAccount').value.trim(),
+    major_category: tr.querySelector('.editMajor').value.trim(),
+    item_name: tr.querySelector('.editItem').value.trim(),
+    payee_name: tr.querySelector('.editPayee').value.trim(),
+    amount_out: Number(tr.querySelector('.editOut').value||0),
+    amount_in: Number(tr.querySelector('.editIn').value||0),
+  };
+  try{
+    await hrUpdateExpenseRecord(id, fields);
+    // 분류를 고쳤다면, 같은 거래처의 다음 자동인식도 함께 갱신합니다
+    const r = EXPENSE_LIST_CACHE.find(x=>x.id===id);
+    if(r && r.payee_key && fields.major_category && fields.item_name){
+      await hrUpsertPayeeMap([{ payee_key:r.payee_key, payee_label: fields.payee_name || r.payee_name || '', major_category: fields.major_category, item_name: fields.item_name }]);
+      await loadPayeeMap();
+    }
+    await renderExpenseList();
+    await renderExpenseMonth();
+  } catch(e){ alert('수정 실패: '+e.message); console.error(e); }
+}
+async function deleteExpenseRow(id){
+  if(!confirm('이 거래 내역을 삭제하시겠습니까?')) return;
+  try{
+    await hrDeleteExpenseRecord(id);
+    await renderExpenseList();
+    await renderExpenseMonth();
+  } catch(e){ alert('삭제 실패: '+e.message); console.error(e); }
+}
+
+function openManualAddRow(){
+  if(document.getElementById('manualAddRow')) return; // 이미 입력 중이면 중복 생성 방지
+  const tbody = document.getElementById('expenseListBody');
+  const tr = document.createElement('tr');
+  tr.id = 'manualAddRow';
+  const todayStr = new Date().toISOString().slice(0,10);
+  const defaultAccount = document.getElementById('expenseListAccountFilter').value
+    || document.getElementById('expenseAccountSelect').value || '';
+  tr.innerHTML = `
+    <td><input type="date" class="newDate" value="${todayStr}" style="margin-bottom:0;"></td>
+    <td><input type="text" class="newAccount" value="${defaultAccount}" list="expAccountList" style="margin-bottom:0;"></td>
+    <td><input type="text" class="newMajor" list="expMajorList" placeholder="예: 고정비" style="margin-bottom:0;"></td>
+    <td><input type="text" class="newItem" placeholder="예: 통신비" style="margin-bottom:0;"></td>
+    <td><input type="text" class="newPayee" placeholder="거래처명" style="margin-bottom:0;"></td>
+    <td><input type="number" class="newOut" value="0" style="margin-bottom:0;"></td>
+    <td><input type="number" class="newIn" value="0" style="margin-bottom:0;"></td>
+    <td>
+      <button class="btn primary sm" onclick="saveManualAddRow()">저장</button>
+      <button class="btn ghost sm" onclick="document.getElementById('manualAddRow').remove()">취소</button>
+    </td>`;
+  tbody.prepend(tr);
+}
+async function saveManualAddRow(){
+  const tr = document.getElementById('manualAddRow');
+  if(!tr) return;
+  const dateVal = tr.querySelector('.newDate').value;
+  const major = tr.querySelector('.newMajor').value.trim();
+  const item = tr.querySelector('.newItem').value.trim();
+  const payee = tr.querySelector('.newPayee').value.trim();
+  const account = tr.querySelector('.newAccount').value.trim();
+  const out = Number(tr.querySelector('.newOut').value||0);
+  const inAmt = Number(tr.querySelector('.newIn').value||0);
+  if(!dateVal){ alert('날짜를 입력해 주세요.'); return; }
+  if(!major || !item){ alert('대분류와 항목을 입력해 주세요.'); return; }
+  if(!out && !inAmt){ alert('출금액 또는 입금액 중 하나는 입력해 주세요.'); return; }
+  const dt = new Date(dateVal);
+  const year_month = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+  const key = payee ? computePayeeKey(payee, '') : ('MANUAL:'+hashString([dateVal,major,item,out,inAmt,Math.random()].join('|')));
+  const row_hash = 'MANUAL-'+hashString([Date.now(), Math.random(), dateVal, major, item, out, inAmt, payee, account].join('|'));
+  try{
+    await hrInsertExpenseRecords([{
+      year_month, txn_date: dt.toISOString(), major_category: major, item_name: item,
+      amount_out: out, amount_in: inAmt, payee_key: key, payee_name: payee, payee_bank:'', payee_account:'',
+      memo:'수동 입력', method:'수동입력', balance_after:0, row_hash, account_label: account
+    }]);
+    if(payee){
+      await hrUpsertPayeeMap([{ payee_key:key, payee_label:payee, major_category:major, item_name:item }]);
+      await loadPayeeMap();
+    }
+    await refreshExpenseMonths();
+    await renderExpenseList();
+    await renderExpenseMonth();
+  } catch(e){ alert('저장 실패: '+e.message); console.error(e); }
+}
+
+function exportExpenseList(){
+  if(!EXPENSE_LIST_CACHE || EXPENSE_LIST_CACHE.length===0){ alert('내보낼 데이터가 없습니다.'); return; }
+  const rows = EXPENSE_LIST_CACHE.map(r=>({
+    '날짜': new Date(r.txn_date).toLocaleDateString('ko-KR'),
+    '통장': r.account_label||'',
+    '대분류': r.major_category||'',
+    '항목': r.item_name||'',
+    '거래내용': r.payee_name||'',
+    '출금액': r.amount_out||0,
+    '입금액': r.amount_in||0
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '결산리스트');
+  const m = document.getElementById('expenseListMonthSelect').value || 'export';
+  XLSX.writeFile(wb, `비용결산_${m}.xlsx`);
 }
 </script>
 </body>
