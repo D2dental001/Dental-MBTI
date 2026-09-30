@@ -516,11 +516,12 @@
             <select id="expenseListAccountFilter" onchange="renderExpenseList()" style="width:auto;margin-bottom:0;"><option value="">전체 통장</option></select>
             <button class="btn green sm" onclick="openManualAddRow()">+ 거래 수동 추가</button>
             <button class="btn ghost sm" onclick="exportExpenseList()">엑셀로 내보내기</button>
+            <button class="btn danger sm" id="expenseBulkDeleteBtn" onclick="bulkDeleteExpenseRows()" disabled>선택 삭제 (0건)</button>
           </div>
           <div class="exp-summary" id="expenseAccountSubtotals"></div>
           <div style="overflow-x:auto;">
           <table>
-            <thead><tr><th>날짜</th><th>통장</th><th>대분류</th><th>항목</th><th>거래내용</th><th>출금액</th><th>입금액</th><th></th></tr></thead>
+            <thead><tr><th style="width:32px;"><input type="checkbox" id="expenseSelectAll" onchange="toggleSelectAllExpenseRows(this)"></th><th>날짜</th><th>통장</th><th>대분류</th><th>항목</th><th>거래내용</th><th>출금액</th><th>입금액</th><th></th></tr></thead>
             <tbody id="expenseListBody"></tbody>
           </table>
           </div>
@@ -1633,21 +1634,24 @@ async function renderExpenseList(){
   const accFilter = document.getElementById('expenseListAccountFilter').value;
   const tbody = document.getElementById('expenseListBody');
   if(!m){
-    tbody.innerHTML = '<tr><td colspan="8" class="small-note">저장된 데이터가 없습니다. 위에서 거래내역 엑셀을 업로드하거나 "거래 수동 추가"로 입력해 주세요.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="small-note">저장된 데이터가 없습니다. 위에서 거래내역 엑셀을 업로드하거나 "거래 수동 추가"로 입력해 주세요.</td></tr>';
     document.getElementById('expenseAccountSubtotals').innerHTML = '';
     return;
   }
-  tbody.innerHTML = '<tr><td colspan="8">불러오는 중...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="9">불러오는 중...</td></tr>';
   const allRecords = await hrListExpenseRecordsByMonths([m]);
   renderAccountSubtotals(allRecords);
   const records = accFilter ? allRecords.filter(r=>r.account_label===accFilter) : allRecords;
   EXPENSE_LIST_CACHE = records;
+  EXPENSE_SELECTED_IDS.clear();
+  updateExpenseBulkDeleteBtn();
   if(records.length===0){
-    tbody.innerHTML = '<tr><td colspan="8" class="small-note">해당 조건의 거래내역이 없습니다.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="small-note">해당 조건의 거래내역이 없습니다.</td></tr>';
     return;
   }
   tbody.innerHTML = records.map(r=>`
     <tr data-id="${r.id}">
+      <td><input type="checkbox" class="expenseRowCheck" data-id="${r.id}" onchange="onExpenseRowCheckChange()"></td>
       <td>${new Date(r.txn_date).toLocaleDateString('ko-KR')}</td>
       <td>${r.account_label||'-'}</td>
       <td>${r.major_category||'-'}</td>
@@ -1662,12 +1666,56 @@ async function renderExpenseList(){
     </tr>`).join('');
 }
 
+/* ---------------------- 결산확인리스트 체크박스 선택 / 전체 삭제 ---------------------- */
+let EXPENSE_SELECTED_IDS = new Set();
+
+function toggleSelectAllExpenseRows(checkbox){
+  document.querySelectorAll('#expenseListBody .expenseRowCheck').forEach(cb=>{
+    cb.checked = checkbox.checked;
+    if(checkbox.checked) EXPENSE_SELECTED_IDS.add(cb.dataset.id);
+    else EXPENSE_SELECTED_IDS.delete(cb.dataset.id);
+  });
+  updateExpenseBulkDeleteBtn();
+}
+
+function onExpenseRowCheckChange(){
+  const checks = [...document.querySelectorAll('#expenseListBody .expenseRowCheck')];
+  EXPENSE_SELECTED_IDS.clear();
+  checks.forEach(cb=>{ if(cb.checked) EXPENSE_SELECTED_IDS.add(cb.dataset.id); });
+  const selectAll = document.getElementById('expenseSelectAll');
+  if(selectAll) selectAll.checked = checks.length>0 && checks.every(cb=>cb.checked);
+  updateExpenseBulkDeleteBtn();
+}
+
+function updateExpenseBulkDeleteBtn(){
+  const btn = document.getElementById('expenseBulkDeleteBtn');
+  if(!btn) return;
+  const n = EXPENSE_SELECTED_IDS.size;
+  btn.textContent = `선택 삭제 (${n}건)`;
+  btn.disabled = n===0;
+}
+
+async function bulkDeleteExpenseRows(){
+  const ids = [...EXPENSE_SELECTED_IDS];
+  if(ids.length===0) return;
+  if(!confirm(`선택한 거래내역 ${ids.length}건을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) return;
+  try{
+    await hrDeleteExpenseRecords(ids);
+    await renderExpenseList();
+    await renderExpenseMonth();
+    await renderExpenseUploads();
+  } catch(e){ alert('삭제 실패: '+e.message); console.error(e); }
+}
+
 function editExpenseRow(id){
   const r = EXPENSE_LIST_CACHE.find(x=>x.id===id);
   if(!r) return;
   const tr = document.querySelector(`#expenseListBody tr[data-id="${id}"]`);
   if(!tr) return;
+  EXPENSE_SELECTED_IDS.delete(id);
+  updateExpenseBulkDeleteBtn();
   tr.innerHTML = `
+    <td></td>
     <td><input type="date" value="${fmtDateInput(r.txn_date)}" class="editDate" style="margin-bottom:0;"></td>
     <td><input type="text" value="${r.account_label||''}" class="editAccount" list="expAccountList" style="margin-bottom:0;"></td>
     <td><input type="text" value="${r.major_category||''}" class="editMajor" list="expMajorList" style="margin-bottom:0;"></td>
@@ -1724,6 +1772,7 @@ function openManualAddRow(){
   const defaultAccount = document.getElementById('expenseListAccountFilter').value
     || document.getElementById('expenseAccountSelect').value || '';
   tr.innerHTML = `
+    <td></td>
     <td><input type="date" class="newDate" value="${todayStr}" style="margin-bottom:0;"></td>
     <td><input type="text" class="newAccount" value="${defaultAccount}" list="expAccountList" style="margin-bottom:0;"></td>
     <td><input type="text" class="newMajor" list="expMajorList" placeholder="예: 고정비" style="margin-bottom:0;"></td>

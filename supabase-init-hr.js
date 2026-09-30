@@ -177,6 +177,12 @@ async function hrDeleteExpenseRecord(id){
   const { error } = await hrsb.from('hr_expense_records').delete().eq('id', id);
   if(error) throw error;
 }
+// 거래 여러 건을 한 번에 삭제 (결산확인리스트의 체크박스 다중 선택 삭제용).
+async function hrDeleteExpenseRecords(ids){
+  if(!ids || ids.length===0) return;
+  const { error } = await hrsb.from('hr_expense_records').delete().in('id', ids);
+  if(error) throw error;
+}
 
 /* ---------------------- 지출 분석 (통장/계좌 목록) ---------------------- */
 // 통장이 여러 개인 경우를 위해, 통장 이름 목록을 관리합니다.
