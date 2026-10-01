@@ -229,3 +229,36 @@ async function hrDeleteExpenseUpload(id){
   const { error } = await hrsb.from('hr_expense_uploads').delete().eq('id', id);
   if(error) throw error;
 }
+
+/* ---------------------- 홈 캘린더 — 모든 관리자 공유 일정 ---------------------- */
+// year: 숫자(예: 2026), month: 1~12. 해당 달에 속하는 일정 전체를 가져옵니다.
+// owner_id가 아니라 RLS 규칙(활성 admin 계정이면 모두 접근 가능)으로 공유되므로
+// 다른 관리자가 입력한 일정도 함께 보입니다.
+async function hrListSchedulesByMonth(year, month){
+  const mm = String(month).padStart(2,'0');
+  const startStr = `${year}-${mm}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const endStr = `${year}-${mm}-${String(lastDay).padStart(2,'0')}`;
+  const { data, error } = await hrsb.from('hr_schedule').select('*')
+    .gte('schedule_date', startStr).lte('schedule_date', endStr)
+    .order('start_time', { ascending: true, nullsFirst: false });
+  if(error){ console.error('[hrListSchedulesByMonth]', error); return []; }
+  return data || [];
+}
+async function hrCreateSchedule(fields){
+  const { data: { user } } = await hrsb.auth.getUser();
+  if(!user) throw new Error('로그인이 필요합니다.');
+  const { data, error } = await hrsb.from('hr_schedule')
+    .insert({ ...fields, created_by: user.id, created_by_email: user.email }).select().single();
+  if(error) throw error;
+  return data;
+}
+async function hrUpdateSchedule(id, fields){
+  const { error } = await hrsb.from('hr_schedule')
+    .update({ ...fields, updated_at: new Date().toISOString() }).eq('id', id);
+  if(error) throw error;
+}
+async function hrDeleteSchedule(id){
+  const { error } = await hrsb.from('hr_schedule').delete().eq('id', id);
+  if(error) throw error;
+}

@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>사내 임직원 관리 OS</title>
+<!-- 모바일에서 "홈 화면에 추가"로 앱처럼 설치할 수 있도록 하는 PWA 설정 -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#4f6df5">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="임직원 관리 OS">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -60,7 +68,7 @@
   @media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr;} .app{flex-direction:column;} .sidebar{width:100%;height:auto;position:relative;} }
 
   label.field{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px;font-weight:600;}
-  input[type=text],input[type=date],input[type=number],input[type=tel],select,textarea{
+  input[type=text],input[type=date],input[type=number],input[type=tel],input[type=time],select,textarea{
     width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:9px;font-size:14px;margin-bottom:14px;
     font-family:inherit;background:#fbfcfe;
   }
@@ -140,14 +148,41 @@
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px;}
   .cal-dow{text-align:center;font-size:12px;color:var(--muted);font-weight:700;padding:4px 0;}
-  .cal-cell{min-height:74px;border:1px solid var(--border);border-radius:10px;padding:6px 7px;font-size:12.5px;background:#fbfcfe;}
-  .cal-cell.empty{background:transparent;border-color:transparent;}
+  .cal-cell{min-height:74px;border:1px solid var(--border);border-radius:10px;padding:6px 7px;font-size:12.5px;background:#fbfcfe;cursor:pointer;transition:background .1s,border-color .1s;}
+  .cal-cell.empty{background:transparent;border-color:transparent;cursor:default;}
+  .cal-cell:not(.empty):hover{background:#f0f4ff;border-color:#c7d2fe;}
+  .cal-cell:not(.empty):active{background:#e5ebff;}
   .cal-cell.today{border-color:var(--accent);background:var(--accent-soft);}
   .cal-daynum{font-weight:700;color:#374151;margin-bottom:4px;}
   .cal-cell.today .cal-daynum{color:var(--accent);}
   .cal-birth{display:block;background:#ffe9d6;color:#a05a12;border-radius:6px;padding:2px 6px;font-size:11px;font-weight:700;margin-bottom:3px;line-height:1.5;}
+  .cal-sched-tag{display:block;border-radius:5px;padding:1px 5px;font-size:10.5px;font-weight:700;margin-bottom:3px;line-height:1.5;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cal-sched-more{display:block;font-size:10.5px;color:var(--muted);font-weight:700;padding:0 2px;}
   .birthday-row{display:flex;justify-content:space-between;padding:9px 4px;border-bottom:1px solid var(--border);font-size:13.5px;}
   .birthday-row:last-child{border-bottom:none;}
+
+  /* ---------- 일정 상세/입력 모달 ---------- */
+  .modal-overlay{position:fixed;inset:0;background:rgba(17,24,39,.46);display:flex;align-items:flex-end;justify-content:center;z-index:200;padding:0;}
+  .modal-box{background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 30px rgba(0,0,0,.18);}
+  @media(min-width:560px){
+    .modal-overlay{align-items:center;padding:20px;}
+    .modal-box{border-radius:18px;max-height:85vh;}
+  }
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+  .modal-head h2{margin:0;font-size:17px;}
+  .modal-close{background:none;border:none;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:4px 6px;}
+  .sched-item{border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin:12px 0;}
+  .sched-item-head{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+  .sched-color-dot{width:11px;height:11px;border-radius:50%;flex:none;}
+  .sched-item-title{font-weight:700;font-size:14.5px;flex:1;}
+  .sched-item-time{font-size:12px;color:var(--muted);}
+  .sched-item-content{font-size:13px;color:#4b5568;white-space:pre-wrap;line-height:1.55;margin-top:4px;}
+  .sched-item-actions{display:flex;gap:6px;margin-top:8px;}
+  .sched-empty{font-size:13px;color:var(--muted);padding:10px 2px;}
+  .color-swatch-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:7px;margin:8px 0 14px;}
+  .color-swatch{width:100%;aspect-ratio:1/1;border-radius:50%;border:2px solid transparent;cursor:pointer;}
+  .color-swatch.selected{border-color:#111827;box-shadow:0 0 0 2px #fff inset;}
+  @media(max-width:420px){ .color-swatch-grid{grid-template-columns:repeat(8,1fr);} }
 
   /* ---------- 지출 분석 ---------- */
   .exp-group{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;}
@@ -249,12 +284,44 @@
             <h2 id="calMonthLabel" style="margin:0;"></h2>
             <button class="btn ghost sm" onclick="shiftCalendar(1)">다음달 →</button>
           </div>
-          <div class="desc">재직중인 임직원의 생일만 표시됩니다 (퇴사 처리된 직원은 자동으로 빠집니다).</div>
+          <div class="desc">재직중인 임직원의 생일만 표시됩니다 (퇴사 처리된 직원은 자동으로 빠집니다). 날짜를 누르면 그날의 일정을 보거나 추가할 수 있습니다 — 입력한 일정은 모든 관리자 계정에 공유됩니다.</div>
+          <div style="margin-bottom:10px;">
+            <button class="btn ghost sm" id="notifToggleBtn" onclick="enableScheduleNotifications()">🔔 이 기기에서 일정 알림 켜기</button>
+            <span class="small-note" id="notifStatusNote" style="margin-left:8px;"></span>
+          </div>
           <div class="cal-grid" id="calGrid"></div>
         </div>
         <div class="card">
           <h2>이번 달 생일자</h2>
           <div id="birthdayList"></div>
+        </div>
+      </div>
+
+      <!-- ===================== 일정 상세/입력 모달 ===================== -->
+      <div class="modal-overlay hidden" id="scheduleModal" onclick="if(event.target===this) closeDayDetail()">
+        <div class="modal-box">
+          <div class="modal-head">
+            <h2 id="scheduleModalDate"></h2>
+            <button class="modal-close" onclick="closeDayDetail()">&times;</button>
+          </div>
+          <div id="scheduleExistingList"></div>
+          <div id="scheduleAddFormWrap">
+            <button class="btn green sm" id="scheduleAddToggleBtn" onclick="openScheduleAddForm()">+ 새 일정 추가</button>
+            <div id="scheduleAddForm" class="hidden" style="margin-top:14px;">
+              <label class="field">제목</label>
+              <input type="text" id="schedTitle" placeholder="예: 정기 회의">
+              <label class="field">시간 (선택)</label>
+              <input type="time" id="schedTime">
+              <label class="field">내용</label>
+              <textarea id="schedContent" rows="3" placeholder="상세 내용을 입력하세요" style="resize:vertical;"></textarea>
+              <label class="field">표시 색깔</label>
+              <div class="color-swatch-grid" id="schedColorGrid"></div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn primary sm" onclick="saveNewSchedule()">저장</button>
+                <button class="btn ghost sm" onclick="closeScheduleAddForm()">취소</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -562,6 +629,8 @@ let EXPENSE_PENDING_FILENAME = ''; // 저장하기를 누르기 전, 미리보�
   await refreshEmployees();
   renderEmpTable();
   renderCalendar();
+  updateNotifStatusNote();
+  if('Notification' in window && Notification.permission==='granted') startScheduleNotificationWatcher();
   document.getElementById('leaveAsOf').value = new Date().toISOString().slice(0,10);
   document.getElementById('certDate').value = new Date().toISOString().slice(0,10);
 })();
@@ -593,13 +662,20 @@ document.querySelectorAll('.navitem').forEach(btn=>{
   });
 });
 
-/* ---------------------- 생일 캘린더 ---------------------- */
+/* ---------------------- 생일 캘린더 + 공유 일정 ---------------------- */
 let calendarViewDate = new Date(); // 현재 보고 있는 달 (day는 1로 취급)
+let SCHEDULES_BY_DAY = {}; // day(1~31) -> [일정 레코드, ...] (현재 보고 있는 달 기준)
+const SCHEDULE_COLORS = [
+  '#ef4444','#f97316','#f59e0b','#eab308','#84cc16',
+  '#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9',
+  '#3b82f6','#6366f1','#8b5cf6','#a855f7','#d946ef',
+  '#ec4899','#f43f5e','#78716c','#64748b','#334155'
+];
 function shiftCalendar(delta){
   calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth()+delta, 1);
   renderCalendar();
 }
-function renderCalendar(){
+async function renderCalendar(){
   const y = calendarViewDate.getFullYear();
   const m = calendarViewDate.getMonth(); // 0-indexed
   document.getElementById('calMonthLabel').textContent = `${y}년 ${m+1}월`;
@@ -613,6 +689,14 @@ function renderCalendar(){
       const d = b.getDate();
       (birthdaysByDay[d] = birthdaysByDay[d] || []).push(e.name);
     }
+  });
+
+  // 이 달의 공유 일정(모든 관리자 계정이 입력한 것 전체)을 가져옵니다.
+  const scheduleRows = await hrListSchedulesByMonth(y, m+1);
+  SCHEDULES_BY_DAY = {};
+  scheduleRows.forEach(r=>{
+    const d = Number(r.schedule_date.slice(8,10));
+    (SCHEDULES_BY_DAY[d] = SCHEDULES_BY_DAY[d] || []).push(r);
   });
 
   const firstDow = new Date(y, m, 1).getDay(); // 0=일요일
@@ -631,8 +715,16 @@ function renderCalendar(){
   for(let d=1; d<=daysInThisMonth; d++){
     const cell = document.createElement('div');
     cell.className = 'cal-cell' + ((isThisMonthReal && today.getDate()===d) ? ' today' : '');
+    cell.onclick = ()=>openDayDetail(y, m, d);
     const names = birthdaysByDay[d] || [];
-    cell.innerHTML = `<div class="cal-daynum">${d}</div>` + names.map(n=>`<span class="cal-birth">생일 · ${n}</span>`).join('');
+    const scheds = SCHEDULES_BY_DAY[d] || [];
+    // 일정은 앞 4글자만 작게 표시하고, 너무 많으면 "+N"으로 요약합니다.
+    const maxShow = 3;
+    let schedHtml = scheds.slice(0, maxShow).map(s=>
+      `<span class="cal-sched-tag" style="background:${s.color}">${(s.title||'').slice(0,4)}</span>`
+    ).join('');
+    if(scheds.length > maxShow) schedHtml += `<span class="cal-sched-more">+${scheds.length - maxShow}건 더</span>`;
+    cell.innerHTML = `<div class="cal-daynum">${d}</div>` + names.map(n=>`<span class="cal-birth">생일 · ${n}</span>`).join('') + schedHtml;
     grid.appendChild(cell);
   }
 
@@ -646,6 +738,163 @@ function renderCalendar(){
       birthdaysByDay[d].map(n=>`<div class="birthday-row"><span>${n}</span><span>${m+1}월 ${d}일</span></div>`).join('')
     ).join('');
   }
+}
+
+/* ---------------------- 일정 상세/입력 모달 ---------------------- */
+let scheduleModalYMD = null; // {y, m, d} 현재 모달이 열려 있는 날짜
+let editingScheduleId = null; // 수정 중인 일정 id (null이면 신규 입력)
+
+function openDayDetail(y, m, d){
+  scheduleModalYMD = { y, m, d };
+  document.getElementById('scheduleModalDate').textContent = `${y}년 ${m+1}월 ${d}일`;
+  renderScheduleExistingList();
+  closeScheduleAddForm();
+  document.getElementById('scheduleModal').classList.remove('hidden');
+}
+function closeDayDetail(){
+  document.getElementById('scheduleModal').classList.add('hidden');
+  scheduleModalYMD = null;
+}
+function renderScheduleExistingList(){
+  const { d } = scheduleModalYMD;
+  const list = (SCHEDULES_BY_DAY[d] || []).slice().sort((a,b)=>(a.start_time||'99:99').localeCompare(b.start_time||'99:99'));
+  const box = document.getElementById('scheduleExistingList');
+  if(list.length===0){
+    box.innerHTML = '<div class="sched-empty">이 날짜에 등록된 일정이 없습니다.</div>';
+    return;
+  }
+  box.innerHTML = list.map(s=>`
+    <div class="sched-item">
+      <div class="sched-item-head">
+        <span class="sched-color-dot" style="background:${s.color}"></span>
+        <span class="sched-item-title">${s.title}</span>
+        ${s.start_time ? `<span class="sched-item-time">${s.start_time}</span>` : ''}
+      </div>
+      ${s.content ? `<div class="sched-item-content">${s.content.replace(/</g,'&lt;')}</div>` : ''}
+      ${s.created_by_email ? `<div class="small-note" style="margin-top:4px;">입력: ${s.created_by_email}</div>` : ''}
+      <div class="sched-item-actions">
+        <button class="btn ghost sm" onclick="startEditSchedule('${s.id}')">수정</button>
+        <button class="btn danger sm" onclick="deleteScheduleItem('${s.id}')">삭제</button>
+      </div>
+    </div>`).join('');
+}
+function renderColorSwatches(selected){
+  const grid = document.getElementById('schedColorGrid');
+  grid.innerHTML = SCHEDULE_COLORS.map(c=>
+    `<div class="color-swatch${c===selected?' selected':''}" style="background:${c}" data-color="${c}" onclick="selectScheduleColor('${c}')"></div>`
+  ).join('');
+}
+function selectScheduleColor(c){
+  document.getElementById('schedColorGrid').dataset.selected = c;
+  renderColorSwatches(c);
+}
+function openScheduleAddForm(){
+  editingScheduleId = null;
+  document.getElementById('schedTitle').value = '';
+  document.getElementById('schedTime').value = '';
+  document.getElementById('schedContent').value = '';
+  renderColorSwatches(SCHEDULE_COLORS[0]);
+  document.getElementById('schedColorGrid').dataset.selected = SCHEDULE_COLORS[0];
+  document.getElementById('scheduleAddForm').classList.remove('hidden');
+  document.getElementById('scheduleAddToggleBtn').classList.add('hidden');
+}
+function closeScheduleAddForm(){
+  editingScheduleId = null;
+  document.getElementById('scheduleAddForm').classList.add('hidden');
+  document.getElementById('scheduleAddToggleBtn').classList.remove('hidden');
+}
+function startEditSchedule(id){
+  const { d } = scheduleModalYMD;
+  const s = (SCHEDULES_BY_DAY[d] || []).find(x=>x.id===id);
+  if(!s) return;
+  editingScheduleId = id;
+  document.getElementById('schedTitle').value = s.title || '';
+  document.getElementById('schedTime').value = s.start_time || '';
+  document.getElementById('schedContent').value = s.content || '';
+  renderColorSwatches(s.color);
+  document.getElementById('schedColorGrid').dataset.selected = s.color;
+  document.getElementById('scheduleAddForm').classList.remove('hidden');
+  document.getElementById('scheduleAddToggleBtn').classList.add('hidden');
+}
+async function saveNewSchedule(){
+  const title = document.getElementById('schedTitle').value.trim();
+  const time = document.getElementById('schedTime').value;
+  const content = document.getElementById('schedContent').value.trim();
+  const color = document.getElementById('schedColorGrid').dataset.selected || SCHEDULE_COLORS[0];
+  if(!title){ alert('일정 제목을 입력해 주세요.'); return; }
+  const { y, m, d } = scheduleModalYMD;
+  const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  try{
+    if(editingScheduleId){
+      await hrUpdateSchedule(editingScheduleId, { schedule_date: dateStr, start_time: time||null, title, content, color });
+    } else {
+      await hrCreateSchedule({ schedule_date: dateStr, start_time: time||null, title, content, color });
+    }
+    closeScheduleAddForm();
+    await renderCalendar();
+    renderScheduleExistingList();
+  } catch(e){ alert('일정 저장 실패: '+e.message); console.error(e); }
+}
+async function deleteScheduleItem(id){
+  if(!confirm('이 일정을 삭제하시겠습니까?')) return;
+  try{
+    await hrDeleteSchedule(id);
+    await renderCalendar();
+    renderScheduleExistingList();
+  } catch(e){ alert('삭제 실패: '+e.message); console.error(e); }
+}
+
+/* ---------------------- 일정 알림 (이 화면/설치된 앱이 열려 있는 동안만 동작) ----------------------
+   브라우저 Notification API를 사용합니다. 진짜 "앱이 꺼져 있어도 오는 푸시 알림"은
+   서버(Supabase Edge Function + 예약 발송)가 추가로 필요한 별도 기능이며, 이 코드는
+   화면이 열려 있는 동안(백그라운드 탭 포함) 일정 시작 시각에 알림을 띄워주는 수준입니다. */
+let notifiedScheduleIds = new Set();
+let scheduleWatcherTimer = null;
+function updateNotifStatusNote(){
+  const note = document.getElementById('notifStatusNote');
+  const btn = document.getElementById('notifToggleBtn');
+  if(!('Notification' in window)){ note.textContent = '(이 브라우저는 알림을 지원하지 않습니다)'; btn.disabled = true; return; }
+  if(Notification.permission === 'granted'){ note.textContent = '알림 켜짐 — 이 화면이 열려 있는 동안 작동합니다.'; btn.textContent = '🔔 알림 켜짐'; }
+  else if(Notification.permission === 'denied'){ note.textContent = '브라우저에서 알림이 차단되어 있습니다 (브라우저 설정에서 허용해 주세요).'; }
+  else { note.textContent = ''; btn.textContent = '🔔 이 기기에서 일정 알림 켜기'; }
+}
+function enableScheduleNotifications(){
+  if(!('Notification' in window)){ alert('이 브라우저는 알림 기능을 지원하지 않습니다.'); return; }
+  Notification.requestPermission().then(perm=>{
+    updateNotifStatusNote();
+    if(perm==='granted'){
+      startScheduleNotificationWatcher();
+      alert('알림이 켜졌습니다. 이 화면(또는 설치된 앱)을 열어 둔 상태에서, 일정 시작 시각에 알림이 뜹니다.');
+    } else if(perm==='denied'){
+      alert('알림 권한이 거부되었습니다. 브라우저 설정에서 이 사이트의 알림을 허용해야 사용할 수 있습니다.');
+    }
+  });
+}
+function startScheduleNotificationWatcher(){
+  if(scheduleWatcherTimer) return;
+  checkUpcomingSchedules();
+  scheduleWatcherTimer = setInterval(checkUpcomingSchedules, 30000);
+}
+async function checkUpcomingSchedules(){
+  if(!('Notification' in window) || Notification.permission!=='granted') return;
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth()+1, d = now.getDate();
+  const rows = await hrListSchedulesByMonth(y, m);
+  const todayStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  rows.filter(r=>r.schedule_date===todayStr && r.start_time).forEach(r=>{
+    const [hh,mm] = r.start_time.split(':').map(Number);
+    const schedDt = new Date(y, m-1, d, hh, mm);
+    const diffMin = (schedDt - now)/60000;
+    if(diffMin <= 0 && diffMin > -1 && !notifiedScheduleIds.has(r.id)){
+      notifiedScheduleIds.add(r.id);
+      new Notification(`📅 ${r.title}`, { body: r.content || '일정 시작 시각입니다.', tag: 'sched-'+r.id });
+    }
+  });
+}
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(e=>console.error('[service worker 등록 실패]', e));
+  });
 }
 
 /* ---------------------- 회사 설정 ---------------------- */
