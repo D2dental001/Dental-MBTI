@@ -271,7 +271,10 @@
   <div class="main">
     <div class="topbar no-print">
       <h1 id="topTitle">홈 (생일 캘린더)</h1>
-      <div class="meta" id="topMeta"></div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="btn primary sm hidden" id="installAppBtn" onclick="installApp()">📲 앱으로 설치</button>
+        <div class="meta" id="topMeta"></div>
+      </div>
     </div>
 
     <div class="content">
@@ -896,6 +899,33 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('service-worker.js').catch(e=>console.error('[service worker 등록 실패]', e));
   });
 }
+
+/* ---------------------- 앱 설치(PWA) — 상단 "📲 앱으로 설치" 버튼 ----------------------
+   크롬의 "홈 화면에 추가/앱 설치" 조건이 충족되면 beforeinstallprompt 이벤트가 발생합니다.
+   이 이벤트를 가로채서 버튼으로 직접 설치창을 띄워주면, 사용자가 점3개 메뉴를 직접
+   찾아 들어가지 않아도 한 번의 클릭으로 설치할 수 있습니다. (이미 설치되어 있거나
+   아이폰 사파리처럼 이 이벤트를 지원하지 않는 환경에서는 버튼이 표시되지 않습니다 —
+   아이폰은 사파리의 공유 버튼 → "홈 화면에 추가"로 설치합니다.) */
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById('installAppBtn');
+  if(btn) btn.classList.remove('hidden');
+});
+async function installApp(){
+  if(!deferredInstallPrompt) return;
+  const btn = document.getElementById('installAppBtn');
+  if(btn) btn.classList.add('hidden');
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+}
+window.addEventListener('appinstalled', ()=>{
+  deferredInstallPrompt = null;
+  const btn = document.getElementById('installAppBtn');
+  if(btn) btn.classList.add('hidden');
+});
 
 /* ---------------------- 회사 설정 ---------------------- */
 async function refreshCompany(){
