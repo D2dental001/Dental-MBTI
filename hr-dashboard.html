@@ -65,7 +65,29 @@
 
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-  @media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr;} .app{flex-direction:column;} .sidebar{width:100%;height:auto;position:relative;} }
+  .menuBtn{display:none;}
+  .sidebar-backdrop{display:none;}
+  @media(max-width:820px){
+    .grid2,.grid3{grid-template-columns:1fr;}
+    .app{flex-direction:column;}
+    /* 모바일에서는 사이드바(전체 메뉴)를 화면 왼쪽에서 슬라이드되어 나오는
+       오버레이로 바꿔서, 어느 메뉴/탭의 내용을 아무리 스크롤해 내려가 있어도
+       상단 ☰ 버튼 한 번으로 바로 다른 메뉴로 이동할 수 있게 합니다. */
+    .sidebar{
+      width:260px;height:100vh;position:fixed;top:0;left:-280px;z-index:60;
+      transition:left .25s ease;box-shadow:6px 0 24px rgba(0,0,0,.25);
+    }
+    .sidebar.open{left:0;}
+    .menuBtn{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:38px;height:38px;border-radius:10px;border:1px solid var(--border);
+      background:#fff;font-size:18px;cursor:pointer;flex-shrink:0;
+    }
+    .sidebar-backdrop{
+      display:none;position:fixed;inset:0;background:rgba(10,14,30,.45);z-index:55;
+    }
+    .sidebar-backdrop.show{display:block;}
+  }
 
   label.field{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px;font-weight:600;}
   input[type=text],input[type=date],input[type=number],input[type=tel],input[type=time],select,textarea{
@@ -239,7 +261,8 @@
 <body>
 
 <div class="app">
-  <div class="sidebar no-print">
+  <div class="sidebar-backdrop no-print" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+  <div class="sidebar no-print" id="sidebarEl">
     <div class="brand"><div class="mark">HR</div><div class="name">임직원 관리 OS</div></div>
     <div class="company-name" id="sbCompanyName">회사 설정 필요</div>
 
@@ -270,7 +293,10 @@
 
   <div class="main">
     <div class="topbar no-print">
-      <h1 id="topTitle">홈 (생일 캘린더)</h1>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="menuBtn" id="menuToggleBtn" onclick="toggleSidebar()" aria-label="전체 메뉴 열기">☰</button>
+        <h1 id="topTitle">홈 (생일 캘린더)</h1>
+      </div>
       <div style="display:flex;align-items:center;gap:12px;">
         <button class="btn primary sm hidden" id="installAppBtn" onclick="installApp()">📲 앱으로 설치</button>
         <div class="meta" id="topMeta"></div>
@@ -646,8 +672,20 @@ const TAB_TITLES = {
   payroll:'급여이체 엑셀', leave:'연차 계산기', severance:'퇴직금 계산기', cert:'재직증명서',
   expense:'비용결산'
 };
+function toggleSidebar(){
+  const sb = document.getElementById('sidebarEl');
+  const bd = document.getElementById('sidebarBackdrop');
+  const open = sb.classList.toggle('open');
+  bd.classList.toggle('show', open);
+}
+function closeSidebar(){
+  document.getElementById('sidebarEl').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
+}
+
 document.querySelectorAll('.navitem').forEach(btn=>{
   btn.addEventListener('click', async ()=>{
+    closeSidebar();
     document.querySelectorAll('.navitem').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.add('hidden'));
