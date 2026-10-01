@@ -1,8 +1,8 @@
 {
   "name": "디투덴탈 공유 캘린더",
   "short_name": "공유 캘린더",
-  "description": "생일 캘린더 + 전체 관리자 공유 일정만 따로 담은 간편 앱",
-  "start_url": "./calendar.html",
+  "description": "직원 관리/비용결산/연차 등 전체 메뉴가 있는 임직원 관리 OS로 바로 이동합니다",
+  "start_url": "./hr-dashboard.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f3f5fb",
