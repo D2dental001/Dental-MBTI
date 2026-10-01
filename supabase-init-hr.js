@@ -45,10 +45,11 @@ async function hrRequireAdmin(mainSiteUrl){
 }
 
 /* ---------------------- 회사 정보 ---------------------- */
+// 디투덴탈 내부용 OS는 회사가 하나뿐이므로, "내가 만든 회사"가 아니라
+// 활성 admin 계정이면 누구나 보이는 회사 정보 1건을 그대로 가져옵니다
+// (어느 admin이 먼저 등록했는지는 상관없이 전체 admin이 공유합니다).
 async function hrGetMyCompany(){
-  const { data: { user } } = await hrsb.auth.getUser();
-  if(!user) return null;
-  const { data, error } = await hrsb.from('hr_company').select('*').eq('owner_id', user.id).maybeSingle();
+  const { data, error } = await hrsb.from('hr_company').select('*').limit(1).maybeSingle();
   if(error){ console.error('[hrGetMyCompany]', error); return null; }
   return data;
 }
@@ -135,7 +136,7 @@ async function hrUpsertPayeeMap(rows){
   if(!user) throw new Error('로그인이 필요합니다.');
   const withOwner = rows.map(r=>({ ...r, owner_id: user.id, updated_at: new Date().toISOString() }));
   const { data, error } = await hrsb.from('hr_expense_payee_map')
-    .upsert(withOwner, { onConflict: 'owner_id,payee_key' }).select();
+    .upsert(withOwner, { onConflict: 'payee_key' }).select();
   if(error) throw error;
   return data || [];
 }
@@ -148,7 +149,7 @@ async function hrInsertExpenseRecords(rows){
   if(!user) throw new Error('로그인이 필요합니다.');
   const withOwner = rows.map(r=>({ ...r, owner_id: user.id }));
   const { data, error } = await hrsb.from('hr_expense_records')
-    .upsert(withOwner, { onConflict: 'owner_id,row_hash', ignoreDuplicates: true }).select();
+    .upsert(withOwner, { onConflict: 'row_hash', ignoreDuplicates: true }).select();
   if(error) throw error;
   return data || [];
 }
@@ -195,7 +196,7 @@ async function hrUpsertExpenseAccount(fields){
   const { data: { user } } = await hrsb.auth.getUser();
   if(!user) throw new Error('로그인이 필요합니다.');
   const { data, error } = await hrsb.from('hr_expense_accounts')
-    .upsert({ ...fields, owner_id: user.id }, { onConflict: 'owner_id,label' }).select().single();
+    .upsert({ ...fields, owner_id: user.id }, { onConflict: 'label' }).select().single();
   if(error) throw error;
   return data;
 }
