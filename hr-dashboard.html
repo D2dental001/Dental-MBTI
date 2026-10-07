@@ -1178,6 +1178,10 @@ function renderPayrollTable(){
 }
 function toggleAllPayroll(val){ document.querySelectorAll('.empcheck').forEach(cb=>cb.checked=val); }
 function generatePayrollExcel(){
+  // 기업은행 "급여이체명세등록 파일마법사"는 ① 헤더 행 없이 데이터만 있어야 하고,
+  // ② 컬럼 순서가 [입금은행, 입금계좌번호, 이체금액, 받는사람(예금주), 비고] 고정입니다.
+  // (이전에는 헤더 행이 포함되어 "은행명"이 은행명으로 오인되고, 금액/예금주 순서가
+  //  뒤바뀌어 금액 칸에 이름이 들어가는 바람에 은행에서 둘 다 오류로 반려했습니다.)
   const rows = [];
   document.querySelectorAll('#payrollTableBody tr').forEach(tr=>{
     const cb = tr.querySelector('.empcheck');
@@ -1185,10 +1189,16 @@ function generatePayrollExcel(){
     const id = cb.dataset.id;
     const emp = EMPLOYEES.find(e=>e.id===id);
     const amount = Number(tr.querySelector('.payAmount').value||0);
-    rows.push({ '은행명': emp.bank, '계좌번호': emp.account, '예금주': emp.name, '금액': amount, '비고': (COMPANY?.name||'')+' 급여' });
+    rows.push([ emp.bank, emp.account, amount, emp.name, (COMPANY?.name||'')+' 급여' ]);
   });
   if(rows.length===0){ alert('선택된 직원이 없습니다.'); return; }
-  const ws = XLSX.utils.json_to_sheet(rows);
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  // 계좌번호가 숫자로만 되어 있으면 엑셀이 자동으로 숫자로 바꿔 앞자리 0이 없어지거나
+  // 과학적 표기(1.23E+12)로 바뀔 수 있어, 계좌번호 컬럼(B열)은 전부 텍스트 형식으로 고정합니다.
+  rows.forEach((r, i)=>{
+    const cell = ws['B'+(i+1)];
+    if(cell){ cell.t='s'; cell.v=String(r[1]); }
+  });
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '급여이체');
   XLSX.writeFile(wb, `급여이체_${new Date().toISOString().slice(0,10)}.xlsx`);
