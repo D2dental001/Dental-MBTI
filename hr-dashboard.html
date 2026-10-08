@@ -66,6 +66,7 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
   .menuBtn{display:none;}
+  .leave-badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#e0f5f2;color:#0d9488;}
   .sidebar-backdrop{display:none;}
   @media(max-width:820px){
     .grid2,.grid3{grid-template-columns:1fr;}
@@ -87,6 +88,9 @@
       display:none;position:fixed;inset:0;background:rgba(10,14,30,.45);z-index:55;
     }
     .sidebar-backdrop.show{display:block;}
+    /* 모바일: 표는 글자를 세로로 찌그러뜨리지 않고, 가로로 밀어서 보도록 합니다 */
+    div[style*="overflow-x:auto"] > table{min-width:720px;}
+    div[style*="overflow-x:auto"] th, div[style*="overflow-x:auto"] td{white-space:nowrap;}
   }
 
   label.field{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px;font-weight:600;}
@@ -168,16 +172,27 @@
 
   /* ---------- 생일 캘린더 ---------- */
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:16px;}
   .cal-dow{text-align:center;font-size:12px;color:var(--muted);font-weight:700;padding:4px 0;}
-  .cal-cell{min-height:74px;border:1px solid var(--border);border-radius:10px;padding:6px 7px;font-size:12.5px;background:#fbfcfe;cursor:pointer;transition:background .1s,border-color .1s;}
+  .cal-cell{min-width:0;overflow:hidden;min-height:74px;border:1px solid var(--border);border-radius:10px;padding:6px 7px;font-size:12.5px;background:#fbfcfe;cursor:pointer;transition:background .1s,border-color .1s;}
   .cal-cell.empty{background:transparent;border-color:transparent;cursor:default;}
   .cal-cell:not(.empty):hover{background:#f0f4ff;border-color:#c7d2fe;}
   .cal-cell:not(.empty):active{background:#e5ebff;}
   .cal-cell.today{border-color:var(--accent);background:var(--accent-soft);}
   .cal-daynum{font-weight:700;color:#374151;margin-bottom:4px;}
   .cal-cell.today .cal-daynum{color:var(--accent);}
-  .cal-birth{display:block;background:#ffe9d6;color:#a05a12;border-radius:6px;padding:2px 6px;font-size:11px;font-weight:700;margin-bottom:3px;line-height:1.5;}
+  .cal-birth{display:block;background:#ffe9d6;color:#a05a12;border-radius:6px;padding:2px 6px;font-size:11px;font-weight:700;margin-bottom:3px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  @media(max-width:520px){
+    .content{padding:16px 10px 90px;}
+    .topbar{padding:12px 12px;}
+    .card{padding:16px 12px;}
+    .cal-grid{gap:3px;}
+    .cal-cell{padding:3px 2px;min-height:64px;border-radius:8px;}
+    .cal-daynum{margin-left:2px;}
+    /* 휴대폰 화면에서도 일정 앞 4글자가 보이도록 글자를 작게 */
+    .cal-sched-tag,.cal-birth{padding:1px 2px;font-size:9px;letter-spacing:-.3px;border-radius:4px;}
+    .cal-sched-more{font-size:9px;}
+  }
   .cal-sched-tag{display:block;border-radius:5px;padding:1px 5px;font-size:10.5px;font-weight:700;margin-bottom:3px;line-height:1.5;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .cal-sched-more{display:block;font-size:10.5px;color:var(--muted);font-weight:700;padding:0 2px;}
   .birthday-row{display:flex;justify-content:space-between;padding:9px 4px;border-bottom:1px solid var(--border);font-size:13.5px;}
@@ -335,7 +350,35 @@
           </div>
           <div id="scheduleExistingList"></div>
           <div id="scheduleAddFormWrap">
-            <button class="btn green sm" id="scheduleAddToggleBtn" onclick="openScheduleAddForm()">+ 새 일정 추가</button>
+            <div id="addToggleRow" style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn green sm" id="scheduleAddToggleBtn" onclick="openScheduleAddForm()">+ 새 일정 추가</button>
+              <button class="btn primary sm" id="leaveAddToggleBtn" onclick="openLeaveForm()">🌴 연차 입력</button>
+            </div>
+            <div id="leaveAddForm" class="hidden" style="margin-top:14px;">
+              <label class="field">직원</label>
+              <select id="leaveEmpSel" onchange="updateLeavePreview()"></select>
+              <label class="field">구분</label>
+              <select id="leaveKind" onchange="onLeaveKindChange()">
+                <option value="연차">연차 (1일)</option>
+                <option value="반차">반차 (0.5일)</option>
+                <option value="반반차">반반차 (0.25일)</option>
+              </select>
+              <div class="grid2">
+                <div><label class="field">시작일</label><input type="date" id="leaveStart" onchange="onLeaveDateChange()"></div>
+                <div><label class="field">종료일 (연차만 여러 날 가능)</label><input type="date" id="leaveEnd" onchange="updateLeavePreview()"></div>
+              </div>
+              <label id="leaveSkipWeekendRow" style="display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:12px;cursor:pointer;">
+                <input type="checkbox" id="leaveSkipWeekend" checked onchange="updateLeavePreview()" style="width:auto;margin:0;">
+                여러 날 입력 시 토·일요일 제외 (공휴일은 직접 확인해 주세요)
+              </label>
+              <label class="field">메모 (선택)</label>
+              <input type="text" id="leaveMemo" placeholder="예: 가족여행">
+              <div class="small-note" id="leavePreview" style="margin-bottom:12px;"></div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn primary sm" onclick="saveLeave()">저장</button>
+                <button class="btn ghost sm" onclick="closeLeaveForm()">취소</button>
+              </div>
+            </div>
             <div id="scheduleAddForm" class="hidden" style="margin-top:14px;">
               <label class="field">제목</label>
               <input type="text" id="schedTitle" placeholder="예: 정기 회의">
@@ -362,6 +405,28 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- ===================== 직원 연차 내역/조정 모달 ===================== -->
+      <div class="modal-overlay hidden" id="leaveDetailModal" onclick="if(event.target===this) closeLeaveDetail()">
+        <div class="modal-box">
+          <div class="modal-head">
+            <h2 id="leaveDetailTitle"></h2>
+            <button class="modal-close" onclick="closeLeaveDetail()">&times;</button>
+          </div>
+          <label class="field">연차 기간 (입사일 기준)</label>
+          <select id="leaveDetailPeriod" onchange="renderLeaveDetail()"></select>
+          <div id="leaveDetailSummary" class="result-box"></div>
+          <div style="margin-top:14px;">
+            <label class="field">조정 일수 (+/− 입력 · 예: 이월 2, 선사용 -1)</label>
+            <input type="number" step="0.25" id="leaveAdjustDays" placeholder="0">
+            <label class="field">조정 사유 (선택)</label>
+            <input type="text" id="leaveAdjustMemo" placeholder="예: 전년도 이월분">
+            <button class="btn primary sm" onclick="saveLeaveAdjust()">조정 저장</button>
+          </div>
+          <h3 style="font-size:14px;margin:20px 0 8px;">사용 내역 <span class="small-note">(캘린더에서 입력한 연차가 여기 쌓입니다)</span></h3>
+          <div id="leaveDetailList"></div>
         </div>
       </div>
 
@@ -473,6 +538,19 @@
               <th>실수령급여</th><th>기타수당</th><th>입사일</th><th>상태</th><th></th>
             </tr></thead>
             <tbody id="empTableBody"></tbody>
+          </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>연차 현황 (입사일 기준 · 자동 차감)</h2>
+          <div class="desc">법정 연차는 입사일로 자동 계산됩니다(입사 1년 미만은 매월 1일씩 최대 11일, 1년 이상은 15일 + 근속 2년마다 1일, 최대 25일). 홈 캘린더에서 "🌴 연차 입력"으로 등록하면 <b>사용</b>에 자동 반영되어 잔여가 차감됩니다. 이월·선사용 등은 "내역/조정"에서 +/− 일수로 수정하세요. 반차는 0.5일, 반반차는 0.25일입니다.</div>
+          <div style="overflow-x:auto;">
+          <table>
+            <thead><tr>
+              <th>이름</th><th>입사일</th><th>현재 연차 기간</th><th>법정 발생</th><th>조정</th><th>사용(예정 포함)</th><th>잔여</th><th></th>
+            </tr></thead>
+            <tbody id="leaveStatusBody"></tbody>
           </table>
           </div>
         </div>
@@ -717,6 +795,7 @@ document.querySelectorAll('.navitem').forEach(btn=>{
 /* ---------------------- 생일 캘린더 + 공유 일정 ---------------------- */
 let calendarViewDate = new Date(); // 현재 보고 있는 달 (day는 1로 취급)
 let SCHEDULES_BY_DAY = {}; // day(1~31) -> [일정 레코드, ...] (현재 보고 있는 달 기준)
+let LEAVE_BY_DAY = {};     // day(1~31) -> [연차 사용 레코드, ...] (현재 보고 있는 달 기준)
 const SCHEDULE_COLORS = [
   '#ef4444','#f97316','#f59e0b','#eab308','#84cc16',
   '#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9',
@@ -750,6 +829,15 @@ async function renderCalendar(){
     const d = Number(r.schedule_date.slice(8,10));
     (SCHEDULES_BY_DAY[d] = SCHEDULES_BY_DAY[d] || []).push(r);
   });
+  // 이 달에 입력된 직원 연차(🌴)도 함께 가져옵니다.
+  const mm2 = String(m+1).padStart(2,'0');
+  const lastDayNum = new Date(y, m+1, 0).getDate();
+  const leaveRows = await hrListLeaveUsageFrom(`${y}-${mm2}-01`, `${y}-${mm2}-${String(lastDayNum).padStart(2,'0')}`);
+  LEAVE_BY_DAY = {};
+  leaveRows.forEach(r=>{
+    const d = Number(r.leave_date.slice(8,10));
+    (LEAVE_BY_DAY[d] = LEAVE_BY_DAY[d] || []).push(r);
+  });
 
   const firstDow = new Date(y, m, 1).getDay(); // 0=일요일
   const daysInThisMonth = new Date(y, m+1, 0).getDate();
@@ -772,11 +860,14 @@ async function renderCalendar(){
     const scheds = SCHEDULES_BY_DAY[d] || [];
     // 일정은 앞 4글자만 작게 표시하고, 너무 많으면 "+N"으로 요약합니다.
     const maxShow = 3;
-    let schedHtml = scheds.slice(0, maxShow).map(s=>
-      `<span class="cal-sched-tag" style="background:${s.color}">${(s.title||'').slice(0,4)}</span>`
-    ).join('');
-    if(scheds.length > maxShow) schedHtml += `<span class="cal-sched-more">+${scheds.length - maxShow}건 더</span>`;
-    cell.innerHTML = `<div class="cal-daynum">${d}</div>` + names.map(n=>`<span class="cal-birth">생일 · ${n}</span>`).join('') + schedHtml;
+    const leaves = LEAVE_BY_DAY[d] || [];
+    const tagItems = [
+      ...leaves.map(l=>`<span class="cal-sched-tag" style="background:${LEAVE_COLOR}">${LEAVE_ICON[l.kind]||'🌴'}${leaveEmpName(l.employee_id).slice(0,3)}</span>`),
+      ...scheds.map(s=>`<span class="cal-sched-tag" style="background:${s.color}">${(s.title||'').slice(0,4)}</span>`)
+    ];
+    let schedHtml = tagItems.slice(0, maxShow).join('');
+    if(tagItems.length > maxShow) schedHtml += `<span class="cal-sched-more">+${tagItems.length - maxShow}건 더</span>`;
+    cell.innerHTML = `<div class="cal-daynum">${d}</div>` + names.map(n=>`<span class="cal-birth">🎂${n}</span>`).join('') + schedHtml;
     grid.appendChild(cell);
   }
 
@@ -801,6 +892,7 @@ function openDayDetail(y, m, d){
   document.getElementById('scheduleModalDate').textContent = `${y}년 ${m+1}월 ${d}일`;
   renderScheduleExistingList();
   closeScheduleAddForm();
+  closeLeaveForm();
   document.getElementById('scheduleModal').classList.remove('hidden');
 }
 function closeDayDetail(){
@@ -811,11 +903,26 @@ function renderScheduleExistingList(){
   const { d } = scheduleModalYMD;
   const list = (SCHEDULES_BY_DAY[d] || []).slice().sort((a,b)=>(a.start_time||'99:99').localeCompare(b.start_time||'99:99'));
   const box = document.getElementById('scheduleExistingList');
-  if(list.length===0){
+  const leaves = LEAVE_BY_DAY[d] || [];
+  if(list.length===0 && leaves.length===0){
     box.innerHTML = '<div class="sched-empty">이 날짜에 등록된 일정이 없습니다.</div>';
     return;
   }
-  box.innerHTML = list.map(s=>{
+  const leaveHtml = leaves.map(l=>`
+    <div class="sched-item">
+      <div class="sched-item-head">
+        <span class="sched-color-dot" style="background:${LEAVE_COLOR}"></span>
+        <span class="sched-item-title">${LEAVE_ICON[l.kind]||'🌴'} ${leaveEmpName(l.employee_id)} · ${l.kind}</span>
+        <span class="sched-item-time">${fmtDays(l.days)}일</span>
+      </div>
+      ${l.memo ? `<div class="sched-item-content">${escHtmlLeave(l.memo)}</div>` : ''}
+      ${l.created_by_email ? `<div class="small-note" style="margin-top:4px;">입력: ${l.created_by_email}</div>` : ''}
+      <div class="sched-item-actions">
+        <button class="btn ghost sm" onclick="startEditLeave('${l.id}')">수정</button>
+        <button class="btn danger sm" onclick="deleteLeave('${l.id}')">삭제</button>
+      </div>
+    </div>`).join('');
+  const schedHtml = list.map(s=>{
     const repeatLabel = s.repeat_type==='monthly' ? '🔁 매월 반복' : (s.repeat_type==='yearly' ? '🔁 매년 반복' : '');
     const untilNote = (repeatLabel && s.repeat_until) ? ` · ${s.repeat_until}까지` : '';
     const delButtons = s.is_recurring
@@ -838,6 +945,7 @@ function renderScheduleExistingList(){
       </div>
     </div>`;
   }).join('');
+  box.innerHTML = leaveHtml + schedHtml;
 }
 function onSchedRepeatChange(){
   const v = document.getElementById('schedRepeat').value;
@@ -858,15 +966,19 @@ function openScheduleAddForm(){
   document.getElementById('schedTitle').value = '';
   document.getElementById('schedTime').value = '';
   document.getElementById('schedContent').value = '';
+  document.getElementById('schedRepeat').value = 'none';
+  document.getElementById('schedRepeatUntil').value = '';
+  onSchedRepeatChange();
+  document.getElementById('schedRepeatEditNote').classList.add('hidden');
   renderColorSwatches(SCHEDULE_COLORS[0]);
   document.getElementById('schedColorGrid').dataset.selected = SCHEDULE_COLORS[0];
   document.getElementById('scheduleAddForm').classList.remove('hidden');
-  document.getElementById('scheduleAddToggleBtn').classList.add('hidden');
+  document.getElementById('addToggleRow').classList.add('hidden');
 }
 function closeScheduleAddForm(){
   editingScheduleId = null;
   document.getElementById('scheduleAddForm').classList.add('hidden');
-  document.getElementById('scheduleAddToggleBtn').classList.remove('hidden');
+  document.getElementById('addToggleRow').classList.remove('hidden');
 }
 function startEditSchedule(id){
   const { d } = scheduleModalYMD;
@@ -876,37 +988,357 @@ function startEditSchedule(id){
   document.getElementById('schedTitle').value = s.title || '';
   document.getElementById('schedTime').value = s.start_time || '';
   document.getElementById('schedContent').value = s.content || '';
+  document.getElementById('schedRepeat').value = s.repeat_type || 'none';
+  document.getElementById('schedRepeatUntil').value = s.repeat_until || '';
+  onSchedRepeatChange();
+  document.getElementById('schedRepeatEditNote').classList.toggle('hidden', !s.is_recurring);
   renderColorSwatches(s.color);
   document.getElementById('schedColorGrid').dataset.selected = s.color;
   document.getElementById('scheduleAddForm').classList.remove('hidden');
-  document.getElementById('scheduleAddToggleBtn').classList.add('hidden');
+  document.getElementById('addToggleRow').classList.add('hidden');
 }
 async function saveNewSchedule(){
   const title = document.getElementById('schedTitle').value.trim();
   const time = document.getElementById('schedTime').value;
   const content = document.getElementById('schedContent').value.trim();
   const color = document.getElementById('schedColorGrid').dataset.selected || SCHEDULE_COLORS[0];
+  const repeat_type = document.getElementById('schedRepeat').value;
+  const repeat_until = (repeat_type!=='none' && document.getElementById('schedRepeatUntil').value) || null;
   if(!title){ alert('일정 제목을 입력해 주세요.'); return; }
   const { y, m, d } = scheduleModalYMD;
   const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  if(repeat_until && repeat_until < dateStr){ alert('반복 종료일이 일정 날짜보다 앞설 수 없습니다.'); return; }
   try{
     if(editingScheduleId){
-      await hrUpdateSchedule(editingScheduleId, { schedule_date: dateStr, start_time: time||null, title, content, color });
+      const orig = (SCHEDULES_BY_DAY[d] || []).find(x=>x.id===editingScheduleId);
+      // 반복 일정을 수정할 때는 "첫 일정 날짜"를 그대로 유지해야 모든 반복 날짜가 어긋나지 않습니다.
+      // (단, 반복을 '없음'으로 바꾸면 지금 보고 있는 날짜의 단일 일정이 됩니다.)
+      const keepAnchor = orig && orig.is_recurring && repeat_type !== 'none';
+      const schedule_date = keepAnchor ? orig.master_date : dateStr;
+      await hrUpdateSchedule(editingScheduleId, { schedule_date, start_time: time||null, title, content, color, repeat_type, repeat_until });
     } else {
-      await hrCreateSchedule({ schedule_date: dateStr, start_time: time||null, title, content, color });
+      await hrCreateSchedule({ schedule_date: dateStr, start_time: time||null, title, content, color, repeat_type, repeat_until });
     }
     closeScheduleAddForm();
     await renderCalendar();
     renderScheduleExistingList();
-  } catch(e){ alert('일정 저장 실패: '+e.message); console.error(e); }
+  } catch(e){
+    const hint = /repeat_|exdates|schema cache|column/i.test(e.message||'') ? '\n(반복 일정용 SQL(hr_schedule_repeat.sql)을 Supabase에서 아직 실행하지 않았다면 먼저 실행해 주세요.)' : '';
+    alert('일정 저장 실패: '+e.message+hint); console.error(e);
+  }
 }
-async function deleteScheduleItem(id){
-  if(!confirm('이 일정을 삭제하시겠습니까?')) return;
+async function deleteScheduleItem(id, allRepeat){
+  const msg = allRepeat ? '이 반복 일정을 모든 날짜에서 삭제하시겠습니까? (되돌릴 수 없습니다)' : '이 일정을 삭제하시겠습니까?';
+  if(!confirm(msg)) return;
   try{
     await hrDeleteSchedule(id);
     await renderCalendar();
     renderScheduleExistingList();
   } catch(e){ alert('삭제 실패: '+e.message); console.error(e); }
+}
+// 반복 일정에서 "이 날짜만" 빼기 — 첫 일정은 그대로 두고 제외 날짜 목록(exdates)에만 추가합니다.
+async function deleteScheduleOccurrence(id, dateStr){
+  if(!confirm(dateStr+' 하루만 이 반복 일정에서 삭제하시겠습니까?')) return;
+  const { d } = scheduleModalYMD;
+  const s = (SCHEDULES_BY_DAY[d] || []).find(x=>x.id===id);
+  if(!s) return;
+  try{
+    const exdates = Array.from(new Set([...(s.exdates||[]), dateStr]));
+    await hrUpdateSchedule(id, { exdates });
+    await renderCalendar();
+    renderScheduleExistingList();
+  } catch(e){ alert('삭제 실패: '+e.message); console.error(e); }
+}
+
+/* ---------------------- 연차 관리: 캘린더 입력 → 직원관리 잔여 연차 자동 차감 ----------------------
+   - 연차 기간은 "입사일 기준"입니다 (입사일 ~ 1년 후 전날, 이후 매년 입사 기념일 단위).
+   - 입사 1년 미만 기간: 매월 개근 시 1일씩 발생(최대 11일). 1년 이상: 15일 + 근속 2년마다 1일(최대 25일).
+   - 사용 기록은 hr_leave_usage(하루 1줄), 이월·선사용 등 보정은 hr_leave_adjust(기간별 +/- 일수)에 저장합니다. */
+const LEAVE_KINDS = { '연차':1, '반차':0.5, '반반차':0.25 };
+const LEAVE_ICON  = { '연차':'🌴', '반차':'🌓', '반반차':'🌒' };
+const LEAVE_COLOR = '#0d9488';
+let editingLeaveId = null;
+let LEAVE_DETAIL = null; // { emp, usage, adjusts } — 직원 연차 내역 모달에서 쓰는 데이터
+
+function pad2(n){ return String(n).padStart(2,'0'); }
+function dateToYMD(dt){ return `${dt.getFullYear()}-${pad2(dt.getMonth()+1)}-${pad2(dt.getDate())}`; }
+function parseYMD(str){ const [y,m,d] = str.split('-').map(Number); return new Date(y, m-1, d); }
+function addYearsYMD(str, n){ const [y,m,d] = str.split('-').map(Number); return dateToYMD(new Date(y+n, m-1, d)); }
+function prevDayYMD(str){ const dt = parseYMD(str); dt.setDate(dt.getDate()-1); return dateToYMD(dt); }
+function fmtDays(n){ return String(Number(Number(n||0).toFixed(2))); }
+function escHtmlLeave(s){ return String(s||'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function leaveEmpName(id){ const e = EMPLOYEES.find(x=>x.id===id); return e ? e.name : '(삭제된 직원)'; }
+
+// asOf 날짜가 속한 연차 기간 번호(0=입사 첫 해, 1=1년 근속 후 첫 기간, ...)
+function leavePeriodIndex(hireStr, asOfStr){
+  let k = 0;
+  while(addYearsYMD(hireStr, k+1) <= asOfStr) k++;
+  return k;
+}
+// 연차 기간 k의 요약. usageRows/adjustRows는 전체(또는 해당 직원) 기록을 넘기면 됩니다.
+function leaveSummary(emp, k, usageRows, adjustRows, asOfStr){
+  asOfStr = asOfStr || dateToYMD(new Date());
+  if(k === null || k === undefined) k = leavePeriodIndex(emp.hire_date, asOfStr);
+  const start = addYearsYMD(emp.hire_date, k);
+  const endEx = addYearsYMD(emp.hire_date, k+1);
+  let accrued;
+  if(k === 0){
+    // 1년 미만: 개근한 달마다 1일씩, 최대 11일
+    const h = parseYMD(emp.hire_date), a = parseYMD(asOfStr < endEx ? asOfStr : endEx);
+    let months = (a.getFullYear()-h.getFullYear())*12 + (a.getMonth()-h.getMonth());
+    if(a.getDate() < h.getDate()) months--;
+    accrued = Math.min(Math.max(months,0), 11);
+  } else {
+    accrued = Math.min(15 + Math.floor((k-1)/2), 25);
+  }
+  const adj = (adjustRows||[]).find(x=>x.employee_id===emp.id && x.period_start===start);
+  const adjust = adj ? Number(adj.adjust_days||0) : 0;
+  const used = (usageRows||[])
+    .filter(r=>r.employee_id===emp.id && r.leave_date>=start && r.leave_date<endEx)
+    .reduce((sum,r)=>sum+Number(r.days||0), 0);
+  return { k, start, endEx, endIncl: prevDayYMD(endEx), accrued, adjust, adjustMemo: adj ? (adj.memo||'') : '', used, remain: accrued + adjust - used };
+}
+
+/* ----- 캘린더 날짜 모달: 연차 입력 폼 ----- */
+function openLeaveForm(){
+  const active = EMPLOYEES.filter(e=>!e.retire_date);
+  if(active.length===0){ alert('재직중인 직원이 없습니다. 먼저 직원 관리에서 직원을 등록해 주세요.'); return; }
+  closeScheduleAddForm();
+  editingLeaveId = null;
+  const sel = document.getElementById('leaveEmpSel');
+  sel.innerHTML = '<option value="">직원을 선택하세요</option>' + active.map(e=>`<option value="${e.id}">${e.name}${e.position?' ('+e.position+')':''}</option>`).join('');
+  sel.disabled = false;
+  const { y, m, d } = scheduleModalYMD;
+  const dateStr = `${y}-${pad2(m+1)}-${pad2(d)}`;
+  document.getElementById('leaveKind').value = '연차';
+  document.getElementById('leaveStart').value = dateStr;
+  document.getElementById('leaveEnd').value = dateStr;
+  document.getElementById('leaveStart').disabled = false;
+  document.getElementById('leaveEnd').disabled = false;
+  document.getElementById('leaveSkipWeekend').checked = true;
+  document.getElementById('leaveSkipWeekendRow').classList.remove('hidden');
+  document.getElementById('leaveMemo').value = '';
+  document.getElementById('leaveAddForm').classList.remove('hidden');
+  document.getElementById('addToggleRow').classList.add('hidden');
+  updateLeavePreview();
+}
+function closeLeaveForm(){
+  editingLeaveId = null;
+  document.getElementById('leaveAddForm').classList.add('hidden');
+  document.getElementById('addToggleRow').classList.remove('hidden');
+}
+function onLeaveKindChange(){
+  const kind = document.getElementById('leaveKind').value;
+  if(kind !== '연차'){
+    document.getElementById('leaveEnd').value = document.getElementById('leaveStart').value;
+  }
+  updateLeavePreview();
+}
+function onLeaveDateChange(){
+  const kind = document.getElementById('leaveKind').value;
+  const start = document.getElementById('leaveStart').value;
+  const endEl = document.getElementById('leaveEnd');
+  if(kind !== '연차' || !endEl.value || endEl.value < start) endEl.value = start;
+  updateLeavePreview();
+}
+// 시작~종료일 사이에 실제로 차감될 날짜 목록
+function computeLeaveDates(){
+  const kind = document.getElementById('leaveKind').value;
+  const start = document.getElementById('leaveStart').value;
+  let end = document.getElementById('leaveEnd').value || start;
+  if(!start) return [];
+  if(kind !== '연차') end = start;
+  if(end < start) return [];
+  const skipWeekend = document.getElementById('leaveSkipWeekend').checked && start !== end;
+  const dates = [];
+  for(let dt = parseYMD(start); dateToYMD(dt) <= end; dt.setDate(dt.getDate()+1)){
+    const dow = dt.getDay();
+    if(skipWeekend && (dow===0 || dow===6)) continue;
+    dates.push(dateToYMD(dt));
+    if(dates.length > 60) break; // 안전장치
+  }
+  return dates;
+}
+function updateLeavePreview(){
+  if(editingLeaveId) return;
+  const kind = document.getElementById('leaveKind').value;
+  const dates = computeLeaveDates();
+  const per = LEAVE_KINDS[kind];
+  document.getElementById('leavePreview').textContent = dates.length===0
+    ? '날짜를 확인해 주세요.'
+    : `총 ${dates.length}일 × ${fmtDays(per)}일 = ${fmtDays(dates.length*per)}일 차감됩니다.`;
+}
+async function saveLeave(){
+  const kind = document.getElementById('leaveKind').value;
+  const days = LEAVE_KINDS[kind];
+  const memo = document.getElementById('leaveMemo').value.trim() || null;
+  try{
+    if(editingLeaveId){
+      // 기존 기록의 구분/메모만 수정 (직원·날짜는 바꾸지 않습니다)
+      const { d } = scheduleModalYMD;
+      const row = (LEAVE_BY_DAY[d]||[]).find(x=>x.id===editingLeaveId);
+      if(!row) return;
+      const others = (LEAVE_BY_DAY[d]||[]).filter(x=>x.employee_id===row.employee_id && x.id!==row.id)
+        .reduce((s,x)=>s+Number(x.days||0), 0);
+      if(others + days > 1){ alert('같은 직원의 하루 연차 합계가 1일을 넘을 수 없습니다.'); return; }
+      await hrUpdateLeaveUsage(row.id, { kind, days, memo });
+    } else {
+      const empId = document.getElementById('leaveEmpSel').value;
+      if(!empId){ alert('직원을 선택해 주세요.'); return; }
+      const emp = EMPLOYEES.find(e=>e.id===empId);
+      const start = document.getElementById('leaveStart').value;
+      const dates = computeLeaveDates();
+      if(!start || dates.length===0){ alert('날짜를 확인해 주세요. (종료일은 시작일보다 같거나 뒤여야 합니다)'); return; }
+      if(dates[0] < emp.hire_date){ alert(`${emp.name} 직원의 입사일(${emp.hire_date}) 이전 날짜는 입력할 수 없습니다.`); return; }
+      // 이미 입력된 같은 직원 연차와 합쳐서 하루 1일을 넘지 않도록 확인
+      const existing = (await hrListLeaveUsageFrom(dates[0], dates[dates.length-1])).filter(r=>r.employee_id===empId);
+      const sumByDate = {};
+      existing.forEach(r=>{ sumByDate[r.leave_date] = (sumByDate[r.leave_date]||0) + Number(r.days||0); });
+      const okDates = dates.filter(dt=>(sumByDate[dt]||0) + days <= 1);
+      const skipped = dates.filter(dt=>!okDates.includes(dt));
+      if(okDates.length===0){ alert('선택한 날짜에는 이미 이 직원의 연차가 입력되어 있습니다.'); return; }
+      // 잔여 연차 확인 (부족해도 저장은 가능하게 하되, 먼저 알려드립니다)
+      const [usage, adjusts] = await Promise.all([hrListLeaveUsageByEmployee(empId), hrListLeaveAdjusts()]);
+      const k = leavePeriodIndex(emp.hire_date, okDates[0]);
+      const sum = leaveSummary(emp, k, usage, adjusts, okDates[0]);
+      const willUse = okDates.length * days;
+      if(sum.remain - willUse < 0){
+        const ok = confirm(`${emp.name} 직원의 현재 연차 기간(${sum.start} ~ ${sum.endIncl}) 잔여는 ${fmtDays(sum.remain)}일인데, ${fmtDays(willUse)}일을 입력하면 ${fmtDays(sum.remain - willUse)}일(마이너스)이 됩니다.\n그래도 저장하시겠습니까?`);
+        if(!ok) return;
+      }
+      await hrCreateLeaveUsage(okDates.map(dt=>({ employee_id: empId, leave_date: dt, kind, days, memo })));
+      if(skipped.length) alert(`이미 입력되어 있어 제외된 날짜: ${skipped.join(', ')}`);
+    }
+    closeLeaveForm();
+    await afterLeaveChange();
+  } catch(e){
+    const hint = /hr_leave|relation|schema cache/i.test(e.message||'') ? '\n(연차용 SQL(hr_leave.sql)을 Supabase에서 아직 실행하지 않았다면 먼저 실행해 주세요.)' : '';
+    alert('연차 저장 실패: '+e.message+hint); console.error(e);
+  }
+}
+function startEditLeave(id){
+  const { d } = scheduleModalYMD;
+  const row = (LEAVE_BY_DAY[d]||[]).find(x=>x.id===id);
+  if(!row) return;
+  closeScheduleAddForm();
+  editingLeaveId = id;
+  const sel = document.getElementById('leaveEmpSel');
+  sel.innerHTML = `<option value="${row.employee_id}">${leaveEmpName(row.employee_id)}</option>`;
+  sel.disabled = true;
+  document.getElementById('leaveKind').value = row.kind;
+  document.getElementById('leaveStart').value = row.leave_date;
+  document.getElementById('leaveEnd').value = row.leave_date;
+  document.getElementById('leaveStart').disabled = true;
+  document.getElementById('leaveEnd').disabled = true;
+  document.getElementById('leaveSkipWeekendRow').classList.add('hidden');
+  document.getElementById('leaveMemo').value = row.memo || '';
+  document.getElementById('leavePreview').textContent = '직원과 날짜는 바꿀 수 없습니다. 날짜를 바꾸려면 삭제 후 다시 입력해 주세요.';
+  document.getElementById('leaveAddForm').classList.remove('hidden');
+  document.getElementById('addToggleRow').classList.add('hidden');
+}
+async function deleteLeave(id){
+  if(!confirm('이 연차 기록을 삭제하시겠습니까? 해당 직원의 사용 일수가 되돌아갑니다.')) return;
+  try{
+    await hrDeleteLeaveUsage(id);
+    await afterLeaveChange();
+  } catch(e){ alert('삭제 실패: '+e.message); console.error(e); }
+}
+// 연차가 바뀐 뒤 화면(캘린더·열려 있는 모달·직원 연차 표)을 한꺼번에 새로 고칩니다.
+async function afterLeaveChange(){
+  await renderCalendar();
+  if(scheduleModalYMD) renderScheduleExistingList();
+  renderLeaveStatusTable();
+  if(LEAVE_DETAIL && !document.getElementById('leaveDetailModal').classList.contains('hidden')){
+    LEAVE_DETAIL.usage = await hrListLeaveUsageByEmployee(LEAVE_DETAIL.emp.id);
+    renderLeaveDetail();
+  }
+}
+
+/* ----- 직원 관리 탭: 연차 현황 표 ----- */
+async function renderLeaveStatusTable(){
+  const tbody = document.getElementById('leaveStatusBody');
+  if(!tbody) return;
+  const active = EMPLOYEES.filter(e=>!e.retire_date);
+  if(active.length===0){ tbody.innerHTML = '<tr><td colspan="8" class="small-note">재직중인 직원이 없습니다.</td></tr>'; return; }
+  // 현재 연차 기간은 길어야 1년이므로, 최근 약 14개월치만 가져오면 충분합니다.
+  const from = new Date(); from.setDate(from.getDate()-430);
+  const [usage, adjusts] = await Promise.all([hrListLeaveUsageFrom(dateToYMD(from)), hrListLeaveAdjusts()]);
+  tbody.innerHTML = active.map(emp=>{
+    const s = leaveSummary(emp, null, usage, adjusts);
+    const remainColor = s.remain < 0 ? 'var(--warn)' : 'var(--accent2)';
+    const accruedNote = s.k===0 ? ' <span class="small-note">(1년 미만 · 최대 11일)</span>' : '';
+    return `<tr>
+      <td>${emp.name}</td>
+      <td>${emp.hire_date}</td>
+      <td>${s.start} ~ ${s.endIncl}</td>
+      <td>${fmtDays(s.accrued)}일${accruedNote}</td>
+      <td>${s.adjust ? (s.adjust>0?'+':'')+fmtDays(s.adjust)+'일' : '-'}</td>
+      <td>${fmtDays(s.used)}일</td>
+      <td><b style="color:${remainColor}">${fmtDays(s.remain)}일</b></td>
+      <td><button class="btn ghost sm" onclick="openLeaveDetail('${emp.id}')">내역/조정</button></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ----- 직원별 연차 내역/조정 모달 ----- */
+async function openLeaveDetail(empId){
+  const emp = EMPLOYEES.find(e=>e.id===empId);
+  if(!emp) return;
+  const [usage, adjusts] = await Promise.all([hrListLeaveUsageByEmployee(empId), hrListLeaveAdjusts()]);
+  LEAVE_DETAIL = { emp, usage, adjusts };
+  document.getElementById('leaveDetailTitle').textContent = `${emp.name} 연차 내역`;
+  const today = dateToYMD(new Date());
+  const curK = leavePeriodIndex(emp.hire_date, today);
+  const opts = [];
+  for(let k=curK; k>=0; k--){
+    opts.push(`<option value="${k}">${addYearsYMD(emp.hire_date,k)} ~ ${prevDayYMD(addYearsYMD(emp.hire_date,k+1))}${k===curK?' (현재)':''}</option>`);
+  }
+  document.getElementById('leaveDetailPeriod').innerHTML = opts.join('');
+  document.getElementById('leaveDetailModal').classList.remove('hidden');
+  renderLeaveDetail();
+}
+function closeLeaveDetail(){
+  document.getElementById('leaveDetailModal').classList.add('hidden');
+  LEAVE_DETAIL = null;
+}
+function renderLeaveDetail(){
+  if(!LEAVE_DETAIL) return;
+  const { emp, usage, adjusts } = LEAVE_DETAIL;
+  const k = Number(document.getElementById('leaveDetailPeriod').value);
+  const s = leaveSummary(emp, k, usage, adjusts);
+  document.getElementById('leaveDetailSummary').innerHTML = `
+    <div>법정 발생 <b>${fmtDays(s.accrued)}일</b>${k===0?' (1년 미만 · 개근 월 수 기준, 최대 11일)':''} · 조정 <b>${s.adjust?(s.adjust>0?'+':'')+fmtDays(s.adjust):'0'}일</b> · 사용 <b>${fmtDays(s.used)}일</b></div>
+    <div style="margin-top:6px;">잔여: <b class="big" style="color:${s.remain<0?'var(--warn)':'var(--accent2)'}">${fmtDays(s.remain)}일</b></div>
+    ${s.adjustMemo ? `<div class="small-note">조정 사유: ${escHtmlLeave(s.adjustMemo)}</div>` : ''}`;
+  document.getElementById('leaveAdjustDays').value = s.adjust || '';
+  document.getElementById('leaveAdjustMemo').value = s.adjustMemo || '';
+  const rows = usage.filter(r=>r.leave_date>=s.start && r.leave_date<s.endEx);
+  const today = dateToYMD(new Date());
+  document.getElementById('leaveDetailList').innerHTML = rows.length===0
+    ? '<div class="sched-empty">이 기간에 사용한 연차가 없습니다.</div>'
+    : rows.map(r=>`
+      <div class="sched-item">
+        <div class="sched-item-head">
+          <span class="sched-item-title">${r.leave_date} · ${LEAVE_ICON[r.kind]||''} ${r.kind}</span>
+          <span class="sched-item-time">${fmtDays(r.days)}일${r.leave_date>today?' · 예정':''}</span>
+        </div>
+        ${r.memo ? `<div class="sched-item-content">${escHtmlLeave(r.memo)}</div>` : ''}
+        <div class="sched-item-actions"><button class="btn danger sm" onclick="deleteLeave('${r.id}')">삭제</button></div>
+      </div>`).join('');
+}
+async function saveLeaveAdjust(){
+  if(!LEAVE_DETAIL) return;
+  const { emp } = LEAVE_DETAIL;
+  const k = Number(document.getElementById('leaveDetailPeriod').value);
+  const start = addYearsYMD(emp.hire_date, k);
+  const adjust_days = Number(document.getElementById('leaveAdjustDays').value || 0);
+  const memo = document.getElementById('leaveAdjustMemo').value.trim() || null;
+  try{
+    await hrUpsertLeaveAdjust({ employee_id: emp.id, period_start: start, adjust_days, memo });
+    LEAVE_DETAIL.adjusts = await hrListLeaveAdjusts();
+    renderLeaveDetail();
+    renderLeaveStatusTable();
+  } catch(e){ alert('조정 저장 실패: '+e.message); console.error(e); }
 }
 
 /* ---------------------- 일정 알림 (이 화면/설치된 앱이 열려 있는 동안만 동작) ----------------------
@@ -950,9 +1382,10 @@ async function checkUpcomingSchedules(){
     const [hh,mm] = r.start_time.split(':').map(Number);
     const schedDt = new Date(y, m-1, d, hh, mm);
     const diffMin = (schedDt - now)/60000;
-    if(diffMin <= 0 && diffMin > -1 && !notifiedScheduleIds.has(r.id)){
-      notifiedScheduleIds.add(r.id);
-      new Notification(`📅 ${r.title}`, { body: r.content || '일정 시작 시각입니다.', tag: 'sched-'+r.id });
+    const notifKey = r.id + '@' + r.schedule_date; // 반복 일정은 같은 id가 날짜마다 나오므로 날짜까지 합쳐서 구분
+    if(diffMin <= 0 && diffMin > -1 && !notifiedScheduleIds.has(notifKey)){
+      notifiedScheduleIds.add(notifKey);
+      new Notification(`📅 ${r.title}`, { body: r.content || '일정 시작 시각입니다.', tag: 'sched-'+notifKey });
     }
   });
 }
@@ -1162,6 +1595,8 @@ function renderEmpTable(){
       totalAllowanceActive += Number(emp.allowance||0);
     }
   });
+
+  renderLeaveStatusTable();
 
   const totalRow = document.createElement('tr');
   totalRow.className = 'emp-total-row';

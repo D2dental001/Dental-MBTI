@@ -299,3 +299,46 @@ async function hrDeleteSchedule(id){
   const { error } = await hrsb.from('hr_schedule').delete().eq('id', id);
   if(error) throw error;
 }
+
+/* ---------------------- 연차 관리 (캘린더 입력 → 직원 잔여 연차 자동 차감) ---------------------- */
+// startStr/endStr: 'YYYY-MM-DD'. endStr를 생략하면 startStr 이후 전부.
+async function hrListLeaveUsageFrom(startStr, endStr){
+  let q = hrsb.from('hr_leave_usage').select('*').gte('leave_date', startStr);
+  if(endStr) q = q.lte('leave_date', endStr);
+  const { data, error } = await q.order('leave_date', { ascending: true });
+  if(error){ console.error('[hrListLeaveUsageFrom]', error); return []; }
+  return data || [];
+}
+async function hrListLeaveUsageByEmployee(employeeId){
+  const { data, error } = await hrsb.from('hr_leave_usage').select('*')
+    .eq('employee_id', employeeId).order('leave_date', { ascending: true });
+  if(error){ console.error('[hrListLeaveUsageByEmployee]', error); return []; }
+  return data || [];
+}
+async function hrCreateLeaveUsage(rows){
+  if(!rows || rows.length===0) return [];
+  const { data: { user } } = await hrsb.auth.getUser();
+  if(!user) throw new Error('로그인이 필요합니다.');
+  const withUser = rows.map(r=>({ ...r, created_by: user.id, created_by_email: user.email }));
+  const { data, error } = await hrsb.from('hr_leave_usage').insert(withUser).select();
+  if(error) throw error;
+  return data || [];
+}
+async function hrUpdateLeaveUsage(id, fields){
+  const { error } = await hrsb.from('hr_leave_usage').update(fields).eq('id', id);
+  if(error) throw error;
+}
+async function hrDeleteLeaveUsage(id){
+  const { error } = await hrsb.from('hr_leave_usage').delete().eq('id', id);
+  if(error) throw error;
+}
+async function hrListLeaveAdjusts(){
+  const { data, error } = await hrsb.from('hr_leave_adjust').select('*');
+  if(error){ console.error('[hrListLeaveAdjusts]', error); return []; }
+  return data || [];
+}
+async function hrUpsertLeaveAdjust(fields){
+  const { error } = await hrsb.from('hr_leave_adjust')
+    .upsert({ ...fields, updated_at: new Date().toISOString() }, { onConflict: 'employee_id,period_start' });
+  if(error) throw error;
+}
