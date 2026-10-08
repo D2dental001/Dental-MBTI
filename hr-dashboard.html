@@ -170,6 +170,38 @@
   .small-note{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6;}
   .emp-total-row td{background:#f7f9fd;border-top:2px solid var(--border);}
 
+
+  /* ---------- 인사 서류 (계약서 등) ---------- */
+  .doc-wrap{overflow-x:auto;}
+  .doc-sheet{width:210mm;box-sizing:border-box;margin:0 auto;padding:14mm;background:#fff;border:1px solid var(--border);box-shadow:0 2px 14px rgba(20,27,51,.06);position:relative;color:#111;font-size:10.5pt;line-height:1.55;font-family:'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif;}
+  .doc-sheet h3.dt{text-align:center;font-size:24pt;letter-spacing:.3em;margin:0 0 2mm;font-weight:800;}
+  .doc-sheet .dsub{text-align:center;color:#666;font-size:10pt;letter-spacing:.12em;margin-bottom:10mm;}
+  .doc-sheet .dstate{text-align:center;font-size:13pt;line-height:1.9;margin:12mm 0 8mm;}
+  .doc-sheet .ddate{text-align:center;font-size:13pt;margin:0 0 10mm;}
+  .doc-sheet .dpara{font-size:11.5pt;line-height:1.85;margin:0 0 4mm;text-align:justify;}
+  .ft{width:100%;border-collapse:collapse;}
+  .ft th,.ft td{border:1px solid #222;padding:3mm 4mm;font-size:11pt;text-align:left;}
+  .ft th{background:#f3f4f6;width:28mm;text-align:center;font-weight:700;}
+  .ft th.sec{background:#e9edf3;text-align:left;width:auto;}
+  .ft.grid th,.ft.grid td{padding:2mm 2mm;font-size:9.5pt;text-align:center;width:auto;}
+  .appr{margin-left:auto;border-collapse:collapse;}
+  .appr th,.appr td{border:1px solid #222;width:22mm;text-align:center;font-size:10pt;padding:1mm;background:#fff;}
+  .ct{width:100%;border-collapse:collapse;table-layout:auto;}
+  .ct td,.ct th{border:1px solid #222;padding:1.6mm 2.4mm;font-size:9.8pt;vertical-align:top;}
+  .ct .lb{width:23mm;text-align:center;background:#f3f4f6;font-weight:700;vertical-align:middle;}
+  .ct th.k{background:#f3f4f6;width:20mm;text-align:center;}
+  .ct tr{page-break-inside:avoid;break-inside:avoid;}
+  .ct .it{display:flex;gap:1.5mm;margin:.6mm 0;} .ct .it>span{min-width:4mm;} .ct .it2{padding-left:3mm;}
+  .ulb{display:inline-block;min-width:30mm;border-bottom:1px solid #333;text-align:center;padding:0 1mm;line-height:1.3;}
+  .wh{display:flex;gap:10mm;font-size:10.5pt;flex-wrap:wrap;}
+  .pg{width:100%;border-collapse:collapse;margin-top:1mm;}
+  .pg td{border:1px solid #888;padding:1mm 2mm;font-size:9.5pt;}
+  .pg td.pn{background:#fafafa;width:24%;} .pg td.pa{width:26%;text-align:right;}
+  .pd{font-size:8.5pt;color:#666;}
+  .pv{width:100%;border-collapse:collapse;} .pv th,.pv td{border:1px solid #888;padding:1mm 2mm;font-size:9.5pt;text-align:left;} .pv th{width:34mm;background:#fafafa;}
+  .sg{width:100%;border-collapse:collapse;} .sg th,.sg td{border:1px solid #222;padding:1.6mm 2mm;font-size:9.8pt;} .sg th{background:#f3f4f6;}
+  @media screen and (max-width:820px){ .doc-sheet{zoom:.5;} }
+
   /* ---------- 생일 캘린더 ---------- */
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
   .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:16px;}
@@ -263,6 +295,11 @@
        전부 없애서 종이 2장째로 넘어가는 현상을 막습니다. */
     @page{ size:A4; margin:0; }
     body, html{ margin:0; padding:0; }
+    #tab-docs.tab-panel{ margin:0; padding:0; }
+    #tab-docs .card{ margin:0 !important; }
+    #tab-docs .doc-wrap{ overflow:visible; }
+    @page doc{ size:A4; margin:12mm; }
+    #tab-docs .doc-sheet{ page:doc; border:none; box-shadow:none; margin:0; width:auto; padding:0; zoom:1; }
     #tab-cert.tab-panel{ margin:0; padding:0; }
     #tab-cert .card{ margin:0 !important; }
     .cert-sheet{
@@ -297,6 +334,7 @@
       <div class="navitem" data-tab="leave"><span class="dot"></span>연차 계산기</div>
       <div class="navitem" data-tab="severance"><span class="dot"></span>퇴직금 계산기</div>
       <div class="navitem" data-tab="cert"><span class="dot"></span>재직증명서</div>
+      <div class="navitem" data-tab="docs"><span class="dot"></span>인사 서류 (계약서 등)</div>
 
       <div class="navlabel">재무</div>
       <div class="navitem" data-tab="expense"><span class="dot"></span>비용결산</div>
@@ -409,6 +447,60 @@
       </div>
 
       <!-- ===================== 직원 연차 내역/조정 모달 ===================== -->
+      <div class="modal-overlay hidden" id="termsModal" onclick="if(event.target===this) closeTermsModal()">
+        <div class="modal-box" style="max-width:640px;">
+          <div class="modal-head"><h2 id="termsTitle">근로조건</h2><button class="modal-close" onclick="closeTermsModal()">&times;</button></div>
+          <div class="small-note" style="margin:0 0 8px;">근로계약서 등에 들어가는 근로조건입니다. (주민등록번호는 저장하지 않습니다)</div>
+          <input type="hidden" id="tmEmpId">
+          <div class="grid2">
+            <div><label class="field">계약 유형</label><select id="tmType"><option>정규직</option><option>연봉제</option><option>기간제</option></select></div>
+            <div><label class="field">업무내용</label><input type="text" id="tmJob" placeholder="예: 치과기공업무"></div>
+          </div>
+          <div class="grid3">
+            <div><label class="field">계약기간(개월, 기간제)</label><input type="number" id="tmMonths"></div>
+            <div><label class="field">계약 만료일(기간제)</label><input type="date" id="tmContractEnd"></div>
+            <div></div>
+          </div>
+          <div class="grid2">
+            <div><label class="field">근로조건 적용 시작일</label><input type="date" id="tmApplyStart"></div>
+            <div><label class="field">근로조건 적용 종료일</label><input type="date" id="tmApplyEnd"></div>
+          </div>
+          <div class="grid3">
+            <div><label class="field">근무요일</label><input type="text" id="tmWorkDays" placeholder="월-금"></div>
+            <div><label class="field">평일 시업</label><input type="time" id="tmStart"></div>
+            <div><label class="field">평일 종업</label><input type="time" id="tmEnd"></div>
+          </div>
+          <div class="grid3">
+            <div><label class="field">토요일 근무</label><input type="text" id="tmSatWork" placeholder="없으면 비움 (예: 토(매주))"></div>
+            <div><label class="field">토요일 시업</label><input type="time" id="tmSatStart"></div>
+            <div><label class="field">토요일 종업</label><input type="time" id="tmSatEnd"></div>
+          </div>
+          <div class="grid2">
+            <div><label class="field">휴게시간</label><input type="text" id="tmBreak" placeholder="13:00~14:00"></div>
+            <div><label class="field">유급주휴일 요일</label><input type="text" id="tmWeeklyHoliday" placeholder="일"></div>
+          </div>
+          <div class="grid2">
+            <div><label class="field">월 급여액(원, 세전)</label><input type="number" id="tmMonthly" oninput="updateTmSum()" onblur="tmFillAnnual()"></div>
+            <div><label class="field">연봉 총액(원)</label><input type="number" id="tmAnnual"></div>
+          </div>
+          <label class="field">고정 시간외근로 (월 시간)</label>
+          <div class="grid2">
+            <div><input type="number" step="0.01" id="tmOtExt" placeholder="고정연장"></div>
+            <div><input type="number" step="0.01" id="tmOtNight" placeholder="고정야간"></div>
+            <div><input type="number" step="0.01" id="tmOtHol" placeholder="고정휴일"></div>
+            <div><input type="number" step="0.01" id="tmOtHolExt" placeholder="고정휴일연장"></div>
+          </div>
+          <label class="field">임금 구성항목</label>
+          <div id="tmItems"></div>
+          <select id="tmPreset" onchange="tmAddItem(this)"></select>
+          <div class="small-note" id="tmSum"></div>
+          <div style="margin-top:12px;display:flex;gap:8px;">
+            <button class="btn primary" onclick="saveTerms()">저장</button>
+            <button class="btn ghost" onclick="closeTermsModal()">닫기</button>
+          </div>
+        </div>
+      </div>
+
       <div class="modal-overlay hidden" id="leaveDetailModal" onclick="if(event.target===this) closeLeaveDetail()">
         <div class="modal-box">
           <div class="modal-head">
@@ -542,6 +634,14 @@
           </div>
         </div>
 
+                <div class="card no-print">
+          <h2>설계명부 엑셀 업로드 (근로조건 일괄 등록)</h2>
+          <div class="desc">"근로자명부 및 급여설계" 엑셀(설계명부 시트)을 올리면 직원별 계약유형·근로시간·연봉·임금 구성항목이 한 번에 등록됩니다. 이름이 같은 기존 직원은 근로조건만 갱신하고, 없는 이름은 신규 등록합니다. <b>주민등록번호 열은 읽자마자 버리며 저장·전송하지 않습니다.</b></div>
+          <input type="file" id="designFile" accept=".xlsx,.xls" onchange="onDesignFile(this)">
+          <div class="small-note" id="designMsg"></div>
+          <div id="designPreview"></div>
+        </div>
+
         <div class="card">
           <h2>연차 현황 (입사일 기준 · 자동 차감)</h2>
           <div class="desc">법정 연차는 입사일로 자동 계산됩니다(입사 1년 미만은 매월 1일씩 최대 11일, 1년 이상은 15일 + 근속 2년마다 1일, 최대 25일). 홈 캘린더에서 "🌴 연차 입력"으로 등록하면 <b>사용</b>에 자동 반영되어 잔여가 차감됩니다. 이월·선사용 등은 "내역/조정"에서 +/− 일수로 수정하세요. 반차는 0.5일, 반반차는 0.25일입니다.</div>
@@ -627,6 +727,25 @@
         <div class="card">
           <div class="cert-sheet" id="certPreview">직원을 선택해 주세요.</div>
         </div>
+      </div>
+
+      <!-- ===================== 인사 서류 ===================== -->
+      <div id="tab-docs" class="tab-panel hidden">
+        <div class="card no-print">
+          <h2>인사 서류 제작</h2>
+          <div class="desc">근로계약서(정규직·연봉제·기간제), 경력증명서, 퇴직증명서, 사직서, 휴가원, 연차사용촉진 통지서, 근로자명부를 만들어 인쇄하거나 PDF로 저장합니다. 직원 정보와 근로조건이 자동으로 채워집니다.</div>
+          <div class="grid2">
+            <div><label class="field">서류 종류</label><select id="docTypeSelect" onchange="onDocTypeChange()"></select></div>
+            <div id="docEmpWrap"><label class="field">직원 선택</label><select id="docEmpSelect" onchange="onDocEmpChange()"></select></div>
+          </div>
+          <div id="docOptions"></div>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn green" onclick="printDoc()">인쇄 / PDF 저장</button>
+            <button class="btn ghost" onclick="const e=dSelEmp(); if(e) openTermsModal(e.id); else alert('직원을 선택해 주세요.')">근로조건 수정</button>
+          </div>
+          <div class="small-note">인쇄 창에서 "배경 그래픽" 옵션은 꺼도 되며, 크롬/엣지에서 용지 A4 · 여백 "기본"으로 두면 가장 정확합니다. 계약서는 페이지가 자동으로 나뉩니다.</div>
+        </div>
+        <div class="card"><div class="doc-wrap"><div id="docPreview">서류 종류와 직원을 선택해 주세요.</div></div></div>
       </div>
 
       <!-- ===================== 비용결산 ===================== -->
@@ -758,7 +877,7 @@ function doLogout(){ hrLogout().then(()=>location.href='index.html'); }
 /* ---------------------- 탭 전환 ---------------------- */
 const TAB_TITLES = {
   home:'홈 (생일 캘린더)', company:'회사 설정 & QR', employees:'직원 관리', interview:'면접 결과',
-  payroll:'급여이체 엑셀', leave:'연차 계산기', severance:'퇴직금 계산기', cert:'재직증명서',
+  payroll:'급여이체 엑셀', leave:'연차 계산기', severance:'퇴직금 계산기', cert:'재직증명서', docs:'인사 서류',
   expense:'비용결산'
 };
 function toggleSidebar(){
@@ -786,6 +905,7 @@ document.querySelectorAll('.navitem').forEach(btn=>{
     if(tab==='leave'){ populateEmpSelect('leaveEmpSelect'); renderLeaveCalc(); }
     if(tab==='severance'){ populateEmpSelect('sevEmpSelect'); renderSeverance(); }
     if(tab==='cert'){ populateEmpSelect('certEmpSelect'); renderCert(); }
+    if(tab==='docs') initDocsTab();
     if(tab==='employees') renderEmpTable();
     if(tab==='interview') renderSubmissions();
     if(tab==='expense') initExpenseTab();
@@ -1587,6 +1707,8 @@ function renderEmpTable(){
       <td>${status}</td>
       <td>
         <button class="btn ghost sm" onclick="editEmployee('${emp.id}')">수정</button>
+        <button class="btn ghost sm" onclick="openTermsModal('${emp.id}')">근로조건</button>
+        <button class="btn ghost sm" onclick="gotoDocsFor('${emp.id}','contract')">서류</button>
         <button class="btn danger sm" onclick="deleteEmployee('${emp.id}')">삭제</button>
       </td>`;
     tbody.appendChild(tr);
@@ -1763,6 +1885,7 @@ function maskRRN(birth, gender){
   const yy = String(d.getFullYear()).slice(2);
   const mm = String(d.getMonth()+1).padStart(2,'0');
   const dd = String(d.getDate()).padStart(2,'0');
+  if(gender!=='M' && gender!=='F') return `${yy}${mm}${dd}-*******`;
   const genderCode = gender==='M' ? '1' : '2';
   return `${yy}${mm}${dd}-${genderCode}******`;
 }
@@ -2668,6 +2791,750 @@ async function deleteExpenseUpload(id){
     await renderExpenseList();
   } catch(e){ alert('삭제 실패: '+e.message); console.error(e); }
 }
+</script>
+<script>
+/* =====================================================================
+   인사 서류 센터 — 근로계약서 / 경력증명서 / 퇴직증명서 / 사직서 / 휴가원 /
+   연차사용촉진 통지서 / 근로자명부  +  근로조건 입력  +  설계명부 엑셀 업로드
+   (모든 서류는 인쇄 / PDF 저장 화면으로 출력됩니다)
+   ===================================================================== */
+const DOC_TYPES = {
+  contract:'근로계약서', career:'경력증명서', retire:'퇴직증명서', resign:'사직서',
+  vacation:'휴가원', promo:'연차사용촉진 통지서', roster:'근로자명부'
+};
+const PAY_ITEM_PRESETS = ['기본급','고정연장근로수당','고정야간근로수당','고정휴일근로수당','고정휴일연장근로수당',
+  '연차수당','직책수당','자격수당','식대','차량유지비','연구수당','육아수당','정기상여금','비정기상여금'];
+const PAY_ITEM_DESC = { '식대':'(복리후생)', '차량유지비':'(복리후생)', '육아수당':'(복리후생)', '정기상여금':'(내규에 따름)' };
+
+const dE = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dN = n => Number(n||0).toLocaleString('ko-KR');
+function dKD(s){ if(!s) return ''; const p = String(s).slice(0,10).split('-').map(Number); return p.length<3||isNaN(p[0]) ? '' : `${p[0]}년 ${p[1]}월 ${p[2]}일`; }
+const dU = (v,w) => `<span class="ulb"${w?` style="min-width:${w}mm"`:''}>${(v===0||v)?dE(v):'&nbsp;'}</span>`;
+const dTodayStr = () => dateToYMD(new Date());
+function dGender(g){ return g==='M'?'남':(g==='F'?'여':'-'); }
+function dOv(id){ const el=document.getElementById(id); return el ? el.value : ''; }
+function dOc(id){ const el=document.getElementById(id); return !!(el && el.checked); }
+function dSelEmp(){ return EMPLOYEES.find(e=>e.id===dOv('docEmpSelect')); }
+function dTypeOf(emp){ return emp.emp_type || '연봉제'; }
+function dPayItems(emp){ return Array.isArray(emp.pay_items) ? emp.pay_items.filter(x=>x && x.name) : []; }
+function dOT(emp){ const o = emp.fixed_ot || {}; return { ext:Number(o.ext||0), night:Number(o.night||0), hol:Number(o.hol||0), holext:Number(o.holext||0) }; }
+function dStampImg(){
+  const C = COMPANY||{};
+  if(!C.stamp_image) return '';
+  const sz = C.stamp_size_mm || 24;
+  return `<img src="${C.stamp_image}" class="cert-stamp" style="width:${sz}mm;height:${sz}mm;right:4mm;top:-${(sz/2-3).toFixed(1)}mm;">`;
+}
+function dWeekdaysBetween(a,b,skipWeekend){
+  if(!a||!b||b<a) return 0;
+  let cnt=0; const cur=parseYMD(a), end=parseYMD(b);
+  while(cur<=end){ const w=cur.getDay(); if(!(skipWeekend && (w===0||w===6))) cnt++; cur.setDate(cur.getDate()+1); }
+  return cnt;
+}
+
+/* ---------------------- 탭 초기화 / 옵션 패널 ---------------------- */
+function initDocsTab(){
+  const typeSel = document.getElementById('docTypeSelect');
+  if(!typeSel.options.length){
+    typeSel.innerHTML = Object.entries(DOC_TYPES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+  }
+  const prev = dOv('docEmpSelect');
+  populateEmpSelect('docEmpSelect');
+  if(prev && EMPLOYEES.some(e=>e.id===prev)) document.getElementById('docEmpSelect').value = prev;
+  onDocTypeChange();
+}
+function onDocTypeChange(){
+  const t = dOv('docTypeSelect');
+  const needEmp = !(t==='roster' && dOv('rosterScope')==='all');
+  document.getElementById('docEmpWrap').style.display = (t==='roster' && !needEmp) ? 'none' : '';
+  renderDocOptions();
+}
+function onDocEmpChange(){ renderDocOptions(); }
+
+function termsWarnings(emp){
+  const miss = [];
+  if(!emp.job_desc) miss.push('업무내용');
+  if(!emp.monthly_pay) miss.push('월 급여액');
+  if(!emp.annual_salary) miss.push('연봉 총액');
+  if(!dPayItems(emp).length) miss.push('임금 구성항목');
+  if(!emp.salary_apply_start || !emp.salary_apply_end) miss.push('근로조건 적용기간');
+  if(!emp.work_start || !emp.work_end) miss.push('근로시간');
+  if((emp.emp_type||'')==='기간제' && !emp.contract_end) miss.push('계약 만료일');
+  const sum = dPayItems(emp).reduce((s,x)=>s+Number(x.amount||0),0);
+  const warn = [];
+  if(miss.length) warn.push(`비어 있는 근로조건: <b>${miss.join(', ')}</b> — 계약서에 빈칸으로 나옵니다.`);
+  if(sum && emp.monthly_pay && Math.abs(sum-Number(emp.monthly_pay))>1) warn.push(`임금 구성항목 합계(${dN(sum)}원)가 월 급여액(${dN(emp.monthly_pay)}원)과 다릅니다.`);
+  return warn;
+}
+
+function renderDocOptions(){
+  const t = dOv('docTypeSelect');
+  const emp = dSelEmp();
+  const box = document.getElementById('docOptions');
+  const today = dTodayStr();
+  let h = '';
+  const dateRow = (id,label,val)=>`<div><label class="field">${label}</label><input type="date" id="${id}" value="${val===''?'':(val||today)}" oninput="renderDoc()"></div>`;
+  const textRow = (id,label,val,ph)=>`<div><label class="field">${label}</label><input type="text" id="${id}" value="${dE(val||'')}" placeholder="${dE(ph||'')}" oninput="renderDoc()"></div>`;
+  const chk = (id,label,on)=>`<label style="display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:13.5px;"><input type="checkbox" id="${id}" ${on?'checked':''} onchange="renderDoc()" style="width:auto;margin-top:3px;"> <span>${label}</span></label>`;
+
+  if(t==='roster'){
+    h += `<div class="grid2"><div><label class="field">범위</label>
+      <select id="rosterScope" onchange="onDocTypeChange()"><option value="one" ${dOv('rosterScope')!=='all'?'selected':''}>직원 1명 (개인별 명부)</option><option value="all" ${dOv('rosterScope')==='all'?'selected':''}>전체 직원 (표)</option></select></div>
+      ${dateRow('docDate','작성일',today)}</div>`;
+    if(dOv('rosterScope')!=='all' && emp){
+      h += `<div class="grid2">${textRow('rsReason','퇴직 사유 (퇴사자만)', '', '예: 개인사정')}${textRow('rsLeaveNote','휴직 사항', '', '없음')}</div>
+      <label class="field">이력 (경력·학력 등, 줄바꿈 가능)</label><textarea id="rsHistory" rows="3" oninput="renderDoc()"></textarea>`;
+    }
+  } else if(!emp){
+    box.innerHTML = '<div class="small-note">직원을 먼저 등록해 주세요.</div>';
+    document.getElementById('docPreview').innerHTML = '직원을 선택해 주세요.';
+    return;
+  } else if(t==='contract'){
+    const type = dTypeOf(emp);
+    const ot = dOT(emp);
+    const warn = termsWarnings(emp);
+    h += `<div class="grid3">
+      <div><label class="field">계약 유형</label><select id="cType" onchange="renderDoc()">
+        ${['정규직','연봉제','기간제'].map(x=>`<option ${x===type?'selected':''}>${x}</option>`).join('')}</select></div>
+      ${dateRow('docDate','계약 체결일 (비우면 빈칸)','')}
+      <div></div></div>
+      <div class="grid3">
+        ${textRow('cPayStart','임금산정 시작','당월 1')}${textRow('cPayEnd','임금산정 종료','당월 말')}${textRow('cPayDay','임금 지급일','익월 10')}
+      </div>
+      <label class="field" style="margin-top:10px;">선택 조항</label>
+      ${chk('cProb','제2조 수습기간 조항 포함 (정규직·기간제는 보통 포함)', type!=='연봉제')}
+      <div class="grid2" id="cProbFields">${textRow('cProbMonths','수습 개월 수 (비우면 빈칸)','')}${textRow('cProbPct','수습 중 급여 지급률 % (비우면 빈칸)','')}</div>
+      ${chk('cFixedOT','제3조 고정 시간외근로(연장·야간·휴일) 조항 포함', ot.ext>0||ot.night>0||ot.hol>0||ot.holext>0)}
+      ${chk('cHolClause','제3조 "주6일 중 주1일 고정휴일근로" 동의 조항 포함', false)}
+      ${chk('cAdvLeave','제5조 "연차수당 선지급 동의" 조항 포함', dPayItems(emp).some(x=>/연차/.test(x.name)))}
+      ${chk('cBonus','상여금 조항 포함', true)}
+      ${chk('cPrivacy','개인정보 수집·이용 동의서 포함', true)}`;
+    if(warn.length) h += `<div class="small-note" style="color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;margin-top:8px;">${warn.join('<br>')}</div>`;
+  } else if(t==='career'){
+    h += `<div class="grid3">${textRow('docPurpose','제출용도','', '예: 기관 제출용')}${dateRow('docDate','발급일',today)}${textRow('docJob','담당업무', emp.job_desc||'', '')}</div>`;
+  } else if(t==='retire'){
+    h += `<div class="grid3">${dateRow('docRetireDate','퇴직일', emp.retire_date||today)}${textRow('docReason','퇴직사유','개인사정(자진퇴사)','')}${textRow('docPurpose','제출용도','', '예: 실업급여 신청용')}</div>
+      <div class="grid2">${dateRow('docDate','발급일',today)}<div></div></div>`;
+  } else if(t==='resign'){
+    h += `<div class="grid3">${textRow('docReason','사직 사유','일신상의 사유','')}${dateRow('docWish','퇴사 희망일', today)}${dateRow('docDate','작성일',today)}</div>`;
+  } else if(t==='vacation'){
+    h += `<div class="grid3"><div><label class="field">휴가 구분</label><select id="vKind" onchange="renderDoc()">
+        ${['연차','반차(오전)','반차(오후)','반반차','병가','경조사','공가','기타'].map(x=>`<option>${x}</option>`).join('')}</select></div>
+      ${dateRow('vStart','시작일',today)}${dateRow('vEnd','종료일',today)}</div>
+      <div class="grid3">${textRow('vReason','사유','개인사정','')}${textRow('vContact','비상연락처', emp.phone||'', '')}${textRow('vHand','업무 인수인계자','', '')}</div>
+      <div class="grid2">${dateRow('docDate','신청일',today)}
+      ${chk('vSkipWeekend','일수 계산 시 토·일 제외', true)}</div>`;
+  } else if(t==='promo'){
+    h += `<div class="grid3"><div><label class="field">촉진 차수</label><select id="pStage" onchange="renderDoc()">
+        <option value="1">1차 (사용 시기 지정 요청)</option><option value="2">2차 (사용 시기 지정 통보)</option></select></div>
+      ${dateRow('docDate','통지일',today)}
+      <div><label class="field">미사용 일수 (자동, 수정 가능)</label><input type="number" step="0.25" id="pDays" oninput="renderDoc()"></div></div>
+      <div class="grid2" id="pStage1Box">${dateRow('pDue','회신 기한(통지일+10일)', (()=>{const d=new Date();d.setDate(d.getDate()+10);return dateToYMD(d);})())}<div></div></div>
+      <div id="pStage2Box" class="hidden"><label class="field">회사가 지정한 사용일 (줄바꿈으로 여러 날 입력)</label><textarea id="pDesignated" rows="3" placeholder="예: 2026-12-21, 2026-12-22" oninput="renderDoc()"></textarea></div>
+      <div class="small-note">근로기준법 제61조: 1차는 연차 소멸 6개월 전 기준 10일 이내에, 2차는 소멸 2개월 전까지 서면으로 통지해야 효력이 있습니다. 실제 적용 전 노무사 확인을 권장합니다.</div>`;
+  }
+  box.innerHTML = h;
+  renderDoc();
+}
+
+/* ---------------------- 렌더링 진입점 ---------------------- */
+let DOC_RENDER_SEQ = 0;
+async function renderDoc(){
+  const seq = ++DOC_RENDER_SEQ;
+  const t = dOv('docTypeSelect');
+  const box = document.getElementById('docPreview');
+  const emp = dSelEmp();
+  const probField = document.getElementById('cProbFields');
+  if(probField) probField.style.display = dOc('cProb') ? '' : 'none';
+  if(t==='promo'){
+    const st = dOv('pStage');
+    document.getElementById('pStage1Box')?.classList.toggle('hidden', st==='2');
+    document.getElementById('pStage2Box')?.classList.toggle('hidden', st!=='2');
+  }
+  try{
+    let html = '';
+    if(t==='roster' && dOv('rosterScope')==='all') html = rosterAllHtml();
+    else if(!emp){ box.innerHTML='직원을 선택해 주세요.'; return; }
+    else if(t==='contract') html = contractHtml(emp);
+    else if(t==='career') html = careerHtml(emp);
+    else if(t==='retire') html = retireHtml(emp);
+    else if(t==='resign') html = resignHtml(emp);
+    else if(t==='roster') html = rosterOneHtml(emp);
+    else if(t==='vacation') html = await vacationHtml(emp);
+    else if(t==='promo') html = await promoHtml(emp);
+    if(seq !== DOC_RENDER_SEQ) return;
+    box.innerHTML = html;
+  } catch(e){ console.error(e); box.innerHTML = '서류 생성 중 오류가 발생했습니다: '+dE(e.message); }
+}
+function printDoc(){
+  const t = dOv('docTypeSelect');
+  const old = document.title;
+  const emp = dSelEmp();
+  document.title = `${DOC_TYPES[t]||'서류'}${emp && !(t==='roster'&&dOv('rosterScope')==='all') ? '_'+emp.name : ''}`;
+  window.print();
+  setTimeout(()=>{ document.title = old; }, 500);
+}
+
+/* ---------------------- 공통 조각 ---------------------- */
+function dCompanyBlock(){
+  const C = COMPANY||{};
+  return `<table class="ft"><tr><th>회 사 명</th><td>${dE(C.name||'-')}</td>
+    <th>대 표 자</th><td style="position:relative;">${dE(C.ceo_name||'-')} (인)${dStampImg()}</td></tr>
+    <tr><th>사업자번호</th><td>${dE(C.biz_number||'-')}</td><th>전 화</th><td>${dE(C.phone||'-')}</td></tr>
+    <tr><th>주 소</th><td colspan="3">${dE(C.address||'-')}</td></tr></table>`;
+}
+function dIdTable(emp){
+  return `<table class="ft" style="margin-bottom:8mm;">
+    <tr><th>성 명</th><td>${dE(emp.name)}</td><th>생년월일</th><td>${dE(dKD(emp.birth)||'-')}</td></tr>
+    <tr><th>주 소</th><td colspan="3">${dE(emp.address||'-')}</td></tr></table>`;
+}
+function dSheet(inner){ return `<div class="doc-sheet">${inner}</div>`; }
+
+/* ---------------------- 경력증명서 ---------------------- */
+function careerHtml(emp){
+  const date = dOv('docDate')||dTodayStr();
+  const period = emp.retire_date ? `${dKD(emp.hire_date)} 부터 ${dKD(emp.retire_date)} 까지` : `${dKD(emp.hire_date)} 부터 ${dKD(date)} 현재까지`;
+  return dSheet(`
+    <h3 class="dt">경 력 증 명 서</h3><div class="dsub">CERTIFICATE OF CAREER</div>
+    <table class="ft" style="margin-bottom:6mm;"><tr><th colspan="4" class="sec">1. 인적사항</th></tr>
+      <tr><th>성 명</th><td>${dE(emp.name)}</td><th>생년월일</th><td>${dE(dKD(emp.birth)||'-')}</td></tr>
+      <tr><th>주 소</th><td colspan="3">${dE(emp.address||'-')}</td></tr></table>
+    <table class="ft"><tr><th colspan="4" class="sec">2. 경력사항</th></tr>
+      <tr><th>근무부서</th><td>${dE(emp.department||'-')}</td><th>직 위</th><td>${dE(emp.position||'-')}</td></tr>
+      <tr><th>근무기간</th><td colspan="3">${dE(period)}</td></tr>
+      <tr><th>담당업무</th><td colspan="3">${dE(dOv('docJob')||'-')}</td></tr>
+      <tr><th>제출용도</th><td colspan="3">${dE(dOv('docPurpose')||'기관 제출용')}</td></tr></table>
+    <p class="dstate">위의 사실과 같이 경력을 증명합니다.</p>
+    <p class="ddate">${dE(dKD(date))}</p>
+    ${dCompanyBlock()}`);
+}
+
+/* ---------------------- 퇴직증명서 ---------------------- */
+function retireHtml(emp){
+  const date = dOv('docDate')||dTodayStr();
+  const rd = dOv('docRetireDate') || emp.retire_date || '';
+  return dSheet(`
+    <h3 class="dt">퇴 직 증 명 서</h3><div class="dsub">CERTIFICATE OF RESIGNATION</div>
+    <table class="ft" style="margin-bottom:6mm;"><tr><th colspan="4" class="sec">1. 인적사항</th></tr>
+      <tr><th>성 명</th><td>${dE(emp.name)}</td><th>생년월일</th><td>${dE(dKD(emp.birth)||'-')}</td></tr>
+      <tr><th>주 소</th><td colspan="3">${dE(emp.address||'-')}</td></tr></table>
+    <table class="ft"><tr><th colspan="4" class="sec">2. 퇴직사항</th></tr>
+      <tr><th>근무부서</th><td>${dE(emp.department||'-')}</td><th>직 위</th><td>${dE(emp.position||'-')}</td></tr>
+      <tr><th>입사일</th><td>${dE(dKD(emp.hire_date)||'-')}</td><th>퇴직일</th><td>${dE(dKD(rd)||'-')}</td></tr>
+      <tr><th>재직기간</th><td colspan="3">${dE(dKD(emp.hire_date))} 부터 ${dE(dKD(rd))} 까지</td></tr>
+      <tr><th>퇴직사유</th><td colspan="3">${dE(dOv('docReason')||'-')}</td></tr>
+      <tr><th>제출용도</th><td colspan="3">${dE(dOv('docPurpose')||'기관 제출용')}</td></tr></table>
+    <p class="dstate">위의 사실과 같이 퇴직하였음을 증명합니다.</p>
+    <p class="ddate">${dE(dKD(date))}</p>
+    ${dCompanyBlock()}`);
+}
+
+/* ---------------------- 사직서 ---------------------- */
+function resignHtml(emp){
+  const date = dOv('docDate')||dTodayStr();
+  const C = COMPANY||{};
+  return dSheet(`
+    <h3 class="dt">사 직 서</h3><div class="dsub">LETTER OF RESIGNATION</div>
+    <table class="ft" style="margin-bottom:8mm;">
+      <tr><th>소 속</th><td>${dE(emp.department||'-')}</td><th>직 위</th><td>${dE(emp.position||'-')}</td></tr>
+      <tr><th>성 명</th><td>${dE(emp.name)}</td><th>입사일</th><td>${dE(dKD(emp.hire_date)||'-')}</td></tr>
+      <tr><th>사직 사유</th><td colspan="3" style="height:28mm;">${dE(dOv('docReason')||'')}</td></tr>
+      <tr><th>퇴사 희망일</th><td colspan="3">${dE(dKD(dOv('docWish')))}</td></tr></table>
+    <p class="dstate" style="text-align:left;">본인은 위와 같은 사유로 사직하고자 하오니 허락하여 주시기 바랍니다.<br>
+      아울러 퇴직 전까지 맡은 업무의 인수인계를 성실히 이행하고, 재직 중 취득한 회사의 영업 및 기술상 비밀과 고객 정보를 퇴직 후에도 누설하지 않을 것을 서약합니다.</p>
+    <p class="ddate">${dE(dKD(date))}</p>
+    <p style="text-align:right;font-size:13pt;margin:0 0 14mm;">신청인 &nbsp; ${dE(emp.name)} &nbsp; (인)</p>
+    <p style="font-size:14pt;font-weight:700;margin:0;">${dE(C.name||'')} 대표 ${dE(C.ceo_name||'')} 귀하</p>`);
+}
+
+/* ---------------------- 휴가원 ---------------------- */
+async function vacationHtml(emp){
+  const kind = dOv('vKind')||'연차';
+  const start = dOv('vStart')||dTodayStr(), end = dOv('vEnd')||start;
+  let days;
+  if(kind==='반차(오전)'||kind==='반차(오후)') days = 0.5;
+  else if(kind==='반반차') days = 0.25;
+  else days = dWeekdaysBetween(start,end,dOc('vSkipWeekend'));
+  const isAnnual = ['연차','반차(오전)','반차(오후)','반반차'].includes(kind);
+  let remainTxt = '-';
+  if(isAnnual && !emp.retire_date){
+    try{
+      const [usage, adjusts] = await Promise.all([hrListLeaveUsageByEmployee(emp.id), hrListLeaveAdjusts()]);
+      const s = leaveSummary(emp, null, usage, adjusts);
+      remainTxt = `신청 전 ${fmtDays(s.remain)}일 → 승인 시 ${fmtDays(s.remain - days)}일 (연차 기간 ${s.start} ~ ${s.endIncl})`;
+    } catch(e){ remainTxt = '-'; }
+  }
+  const date = dOv('docDate')||dTodayStr();
+  const period = start===end ? dKD(start) : `${dKD(start)} ~ ${dKD(end)}`;
+  return dSheet(`
+    <table class="appr"><tr><th rowspan="2" style="width:12mm;">결<br>재</th><th>담 당</th><th>팀 장</th><th>대 표</th></tr><tr><td style="height:16mm;"></td><td></td><td></td></tr></table>
+    <h3 class="dt" style="margin-top:4mm;">휴 가 원</h3><div class="dsub">LEAVE REQUEST</div>
+    <table class="ft" style="margin-bottom:8mm;">
+      <tr><th>소 속</th><td>${dE(emp.department||'-')}</td><th>직 위</th><td>${dE(emp.position||'-')}</td></tr>
+      <tr><th>성 명</th><td>${dE(emp.name)}</td><th>비상연락처</th><td>${dE(dOv('vContact')||'-')}</td></tr>
+      <tr><th>휴가 구분</th><td>${dE(kind)}</td><th>일 수</th><td>${fmtDays(days)}일</td></tr>
+      <tr><th>휴가 기간</th><td colspan="3">${dE(period)}</td></tr>
+      <tr><th>사 유</th><td colspan="3" style="height:22mm;">${dE(dOv('vReason')||'')}</td></tr>
+      <tr><th>업무 인수인계자</th><td colspan="3">${dE(dOv('vHand')||'')}</td></tr>
+      <tr><th>잔여 연차</th><td colspan="3">${dE(remainTxt)}</td></tr></table>
+    <p class="dstate">위와 같이 휴가를 신청하오니 승인하여 주시기 바랍니다.</p>
+    <p class="ddate">${dE(dKD(date))}</p>
+    <p style="text-align:right;font-size:13pt;margin:0;">신청인 &nbsp; ${dE(emp.name)} &nbsp; (인)</p>`);
+}
+
+/* ---------------------- 연차사용촉진 통지서 ---------------------- */
+async function promoHtml(emp){
+  const stage = dOv('pStage')||'1';
+  const date = dOv('docDate')||dTodayStr();
+  const [usage, adjusts] = await Promise.all([hrListLeaveUsageByEmployee(emp.id), hrListLeaveAdjusts()]);
+  const s = leaveSummary(emp, null, usage, adjusts);
+  const daysEl = document.getElementById('pDays');
+  if(daysEl && daysEl.dataset.auto!==s.start+emp.id){ daysEl.value = fmtDays(Math.max(s.remain,0)); daysEl.dataset.auto = s.start+emp.id; }
+  const remain = daysEl && daysEl.value!=='' ? Number(daysEl.value) : Math.max(s.remain,0);
+  const C = COMPANY||{};
+  const head = `<table class="ft" style="margin-bottom:6mm;">
+      <tr><th>수 신</th><td>${dE(emp.name)} (${dE(emp.department||'-')} / ${dE(emp.position||'-')})</td><th>통지일</th><td>${dE(dKD(date))}</td></tr>
+      <tr><th>연차 기간</th><td colspan="3">${dE(dKD(s.start))} ~ ${dE(dKD(s.endIncl))} (입사일 기준)</td></tr>
+      <tr><th>발생 연차</th><td>${fmtDays(s.accrued + s.adjust)}일</td><th>사용 연차</th><td>${fmtDays(s.used)}일</td></tr>
+      <tr><th>미사용 연차</th><td colspan="3"><b>${fmtDays(remain)}일</b></td></tr></table>`;
+  let body, title;
+  if(stage==='1'){
+    title = '연차유급휴가 사용 촉진 통지서 (1차)';
+    const due = dOv('pDue');
+    body = `${head}
+      <p class="dpara">귀하의 연차유급휴가 미사용 일수는 위와 같습니다. 회사는 근로기준법 제61조 제1항에 따라 위 미사용 연차유급휴가의 사용을 촉진하고자 하오니,
+      <b>이 통지를 받은 날부터 10일 이내(${dE(dKD(due))}까지)</b> 미사용 연차를 언제 사용할지 사용 시기를 정하여 회사에 서면으로 통보하여 주시기 바랍니다.</p>
+      <p class="dpara">위 기한 내에 사용 시기를 통보하지 않을 경우, 회사가 사용 시기를 지정하여 다시 서면으로 통보할 수 있습니다.</p>
+      <table class="ft" style="margin:6mm 0;"><tr><th colspan="2" class="sec">연차 사용 계획서 (근로자 작성)</th></tr>
+        <tr><th>사용 예정일</th><td style="height:26mm;"></td></tr>
+        <tr><th>비 고</th><td style="height:12mm;"></td></tr></table>`;
+  } else {
+    title = '연차유급휴가 사용 시기 지정 통보서 (2차)';
+    const des = (dOv('pDesignated')||'').split('\n').map(x=>x.trim()).filter(Boolean);
+    body = `${head}
+      <p class="dpara">회사는 근로기준법 제61조 제1항에 따라 미사용 연차유급휴가의 사용을 촉진하기 위하여 귀하에게 사용 시기를 정하여 통보할 것을 서면으로 요구하였으나,
+      귀하가 정해진 기간 내에 사용 시기를 통보하지 않았으므로 <b>회사가 아래와 같이 연차유급휴가 사용 시기를 지정</b>하여 통보합니다.</p>
+      <table class="ft" style="margin:6mm 0;"><tr><th colspan="2" class="sec">회사 지정 사용일</th></tr>
+        <tr><th>지정 사용일</th><td style="height:26mm;">${des.length ? des.map(dE).join('<br>') : ''}</td></tr></table>
+      <p class="dpara">지정된 날짜에 출근하지 않고 휴가를 사용하시기 바라며, 그 날 근로를 제공하더라도 연차 사용으로 처리합니다. 위 지정일에 사용하지 않은 연차는 소멸되며, 회사는 이에 대한 금전 보상 의무가 없음을 알려드립니다.</p>`;
+  }
+  return dSheet(`
+    <h3 class="dt" style="font-size:17pt;letter-spacing:.05em;">${title}</h3><div class="dsub">NOTICE OF ANNUAL LEAVE USE</div>
+    ${body}
+    <p class="ddate" style="margin-top:8mm;">${dE(dKD(date))}</p>
+    <p style="text-align:center;font-size:13pt;position:relative;margin:0 0 8mm;">${dE(C.name||'')} 대표 ${dE(C.ceo_name||'')} (인)${dStampImg().replace('right:4mm;','right:30%;')}</p>
+    <p style="font-size:11pt;margin:0;">위 통지서를 수령하였음을 확인합니다. &nbsp;&nbsp; 수령일: &nbsp;&nbsp;&nbsp;&nbsp;년 &nbsp;&nbsp;월 &nbsp;&nbsp;일 &nbsp;&nbsp;&nbsp; 근로자: ${dE(emp.name)} (인)</p>`);
+}
+
+/* ---------------------- 근로자명부 ---------------------- */
+function rosterOneHtml(emp){
+  const date = dOv('docDate')||dTodayStr();
+  const C = COMPANY||{};
+  const hist = (dOv('rsHistory')||'').split('\n').filter(x=>x.trim()).map(dE).join('<br>');
+  return dSheet(`
+    <h3 class="dt">근 로 자 명 부</h3><div class="dsub">${dE(C.name||'')}</div>
+    <table class="ft">
+      <tr><th>성 명</th><td>${dE(emp.name)}</td><th>성 별</th><td>${dGender(emp.gender)}</td></tr>
+      <tr><th>생년월일</th><td>${dE(dKD(emp.birth)||'-')}</td><th>연락처</th><td>${dE(emp.phone||'-')}</td></tr>
+      <tr><th>주 소</th><td colspan="3">${dE(emp.address||'-')}</td></tr>
+      <tr><th>부 서</th><td>${dE(emp.department||'-')}</td><th>직 위</th><td>${dE(emp.position||'-')}</td></tr>
+      <tr><th>종사 업무</th><td colspan="3">${dE(emp.job_desc||'-')}</td></tr>
+      <tr><th>고용(계약) 연월일</th><td>${dE(dKD(emp.hire_date)||'-')}</td><th>계약 유형</th><td>${dE(dTypeOf(emp))}${emp.contract_end?` (~ ${dE(dKD(emp.contract_end))})`:''}</td></tr>
+      <tr><th>퇴직 연월일</th><td>${dE(dKD(emp.retire_date)||'')}</td><th>퇴직 사유</th><td>${dE(dOv('rsReason')||'')}</td></tr>
+      <tr><th>휴직 사항</th><td colspan="3">${dE(dOv('rsLeaveNote')||'')}</td></tr>
+      <tr><th>이 력</th><td colspan="3" style="height:60mm;vertical-align:top;">${hist}</td></tr></table>
+    <p class="small" style="margin-top:6mm;font-size:10pt;color:#555;">※ 근로기준법 제41조에 따른 근로자 명부 (작성일: ${dE(dKD(date))})</p>`);
+}
+function rosterAllHtml(){
+  const date = dOv('docDate')||dTodayStr();
+  const C = COMPANY||{};
+  const rows = EMPLOYEES.map((e,i)=>`<tr><td>${i+1}</td><td>${dE(e.name)}</td><td>${dGender(e.gender)}</td><td>${dE(e.birth||'')}</td>
+    <td style="text-align:left;">${dE(e.address||'')}</td><td>${dE([e.department,e.position].filter(Boolean).join(' / '))}</td>
+    <td>${dE(e.hire_date||'')}</td><td>${dE(e.retire_date||'')}</td></tr>`).join('');
+  return dSheet(`
+    <h3 class="dt">근 로 자 명 부</h3><div class="dsub">${dE(C.name||'')} — ${dE(dKD(date))} 기준</div>
+    <table class="ft grid"><thead><tr><th style="width:8mm;">No</th><th>성명</th><th style="width:10mm;">성별</th><th>생년월일</th><th>주소</th><th>부서/직위</th><th>입사일</th><th>퇴직일</th></tr></thead>
+    <tbody>${rows}</tbody></table>`);
+}
+
+/* ---------------------- 근로계약서 ---------------------- */
+function contractHtml(emp){
+  const C = COMPANY||{};
+  const type = dOv('cType') || dTypeOf(emp);
+  const isTerm = type==='기간제';
+  const prob = dOc('cProb'), fixedOT = dOc('cFixedOT'), holClause = dOc('cHolClause');
+  const advLeave = dOc('cAdvLeave'), bonus = dOc('cBonus'), privacy = dOc('cPrivacy');
+  const ot = dOT(emp);
+  const items = dPayItems(emp);
+  const date = dOv('docDate');
+  const it = (arr)=>arr.map((t,i)=>`<div class="it"><span>${i+1}.</span><div>${t}</div></div>`).join('');
+  const sub = (t)=>`<div class="it2">${t}</div>`;
+  const rows = []; let n = 0;
+  const art = (title, body)=>{ n++; rows.push(`<tr><td class="lb">(제${n}조)<br>${title}</td><td class="bd">${body}</td></tr>`); };
+
+  /* 제1조 */
+  art('근무장소 및<br>업무내용', it([
+    `乙의 근무장소는 ${dU(C.name?C.name+' 사업장':'',50)} 내로 하며, 업무내용은 ${dU(emp.job_desc||'',46)} 로 한다.`,
+    '위 1항에도 불구하고 甲이 필요하다고 인정할 경우 乙의 의견을 들어 근무장소 및 업무내용을 변경할 수 있다.'
+  ]));
+  /* 제2조 */
+  const probItems = [
+    `근로계약일로부터 ${dU(dOv('cProbMonths'),14)}개월은 수습(시용)기간으로 하며, 동 기간 중의 월 급여는 제5조 임금의 ${dU(dOv('cProbPct'),12)}%을 지급한다.`,
+    '甲은 수습기간 중 乙의 업무능력, 성실도, 적격성, 인품 등을 평가하여 본채용여부를 결정할 수 있다.'
+  ];
+  const probCheck = `<div style="margin-top:2mm;text-align:right;">수습기간 적용여부 &nbsp;□적용 ※ 동의자 성명: ${dU('',24)}(인) , &nbsp;□비적용</div>`;
+  const applyItems = [
+    `본 근로계약서에 따른 근로조건(임금 및 근로시간 등)은 ${dU(dKD(emp.salary_apply_start),42)} 부터 ${dU(dKD(emp.salary_apply_end),42)} 까지 적용한다.`,
+    '전항에 따른 기간이 도과했음에도 새로이 근로계약을 갱신하지 않을 경우 동일조건으로 갱신 간주한다.'
+  ];
+  if(prob && type!=='연봉제') art('수습기간', it(probItems)+probCheck);
+  else if(prob) art('수습기간 및<br>근로조건<br>적용기간', it([...applyItems, ...probItems])+probCheck);
+  else art('근로조건<br>적용기간', it(applyItems));
+  /* 제3조 */
+  const hoursLine = `乙의 소정근로시간은 ${dU(emp.work_start||'',20)} 부터 ${dU(emp.work_end||'',20)} 까지로 한다.` +
+    (emp.work_days ? ` (근무일: ${dE(emp.work_days)})` : '') +
+    (emp.saturday_work ? `<br>토요일 ${dE(emp.saturday_work)}: ${dU(emp.sat_start||'',16)} 부터 ${dU(emp.sat_end||'',16)} 까지` : '');
+  const h3 = [hoursLine, '제1항에도 불구하고, 회사의 사정에 따라 특정 주의 소정근로일을 변경할 수 있으며 乙은 이에 동의한다.'];
+  if(fixedOT){
+    const parts = [];
+    if(ot.ext) parts.push(`고정연장근로 월 ${ot.ext}시간`);
+    if(ot.night) parts.push(`고정야간근로 월 ${ot.night}시간`);
+    if(ot.hol) parts.push(`고정휴일근로 월 ${ot.hol}시간`);
+    if(ot.holext) parts.push(`고정휴일연장근로 월 ${ot.holext}시간`);
+    h3.push(`乙은 제1항의 소정근로시간 외에 업무 특성상 연장, 야간 및 휴일 근로가 발생할 경우 연장, 야간, 휴일 근로함에 동의하며, 아래의 고정 시간외근로를 수행한다.${sub(parts.length? '- '+parts.join(' / ') : '- '+dU('',60))}`);
+  }
+  h3.push('乙은 업무상 필요에 의해 연장, 야간, 휴일 근로는 반드시 甲의 승인을 요하며, 승인을 득한 근로에 대하여만 수당을 지급한다.');
+  if(holClause) h3.push(`乙은 제1항의 주6일 중 주1일은 고정휴일근로로 10시~ 22시까지 제공함에 동의한다. &nbsp;□적용 동의자 성명: ${dU('',20)}(인)`);
+  art('근로시간', it(h3));
+  /* 제4조 */
+  art('휴게시간', `<div style="padding:0 1mm;">乙의 휴게시간은 ${dU(emp.break_time||'',40)} 을 부여한다.<br>다만, 상기의 휴게시간은 업무의 진행상황 등을 고려하여 변경될 수 있다.</div>`);
+  /* 제5조 임금 */
+  const payGrid = items.length ? (()=>{
+    let g = '<table class="pg">';
+    for(let i=0;i<items.length;i+=2){
+      const cell = (x)=> x ? `<td class="pn">${dE(x.name)}</td><td class="pa">${dN(x.amount)} 원<div class="pd">${dE(PAY_ITEM_DESC[x.name]||'')}</div></td>` : '<td></td><td></td>';
+      g += `<tr>${cell(items[i])}${cell(items[i+1])}</tr>`;
+    }
+    return g+'</table>';
+  })() : `<div class="pd">(임금 구성항목을 입력하면 이곳에 표시됩니다)</div>`;
+  const names = items.map(x=>x.name).join(', ');
+  const wage = [
+    `임금항목은 ${dE(names||'기본급 등')} 등으로 구성한다.`,
+    '연장, 야간 및 휴일근로에 대한 법정가산수당은 근로기준법에 정한 바에 따라 지급한다.',
+    '임금은 임금지급기일에 4대보험료, 근로소득세 등을 공제한 뒤 乙이 정한 예금통장에 입금(또는 현금지급)한다.',
+    `임금산정기간은 ${dE(dOv('cPayStart')||'당월 1')}일부터 ${dE(dOv('cPayEnd')||'당월 말')}일까지로 하며 ${dE(dOv('cPayDay')||'익월 10')}일에 지급 한다.`,
+    '결근, 휴직 등 乙의 귀책사유로 인하여 근로를 제공하지 못할 경우, 그 기간만큼 임금을 일할 계산하여 지급하지 아니한다.'
+  ];
+  if(advLeave) wage.push('乙은 월급여에 연차수당을 선지급함에 동의하며, 甲은 乙의 자유로운 연차사용을 제한하지 아니한다.' + `<div style="text-align:right;">동의자 성명: ${dU('',26)}(인)</div>`);
+  art('임 금', `<div class="wh"><span>○ 연봉 총액 <b>${emp.annual_salary?dN(emp.annual_salary):dU('',30)}</b> 원</span><span>○ 월 급여액 <b>${emp.monthly_pay?dN(emp.monthly_pay):dU('',30)}</b> 원</span></div>
+    <div style="margin:2mm 0 1mm;">□ 월 급여액 및 연봉 구성항목</div>${payGrid}<div style="margin-top:2mm;">${it(wage)}</div>`);
+  /* 이하 */
+  if(bonus) art('상 여 금', '甲은 경영성과에 따라 지급일 현재 재직 중인 자에 한하여 상여금을 지급할 수 있다.');
+  art('휴 일', `乙이 만근할 경우 ${dU(emp.weekly_holiday||'',14)} 요일을 유급주휴일로 부여한다.<br>제3조 2항에 따라 주의 소정근로일이 변경될경우 유급주휴일도 변동될수 있다.`);
+  art('연차휴가', '甲은 乙에게 근로기준법에 따른 연차휴가를 부여하되, 근로자대표와의 서면합의로 특정일을 연차로 대체할 수 있다.');
+  art('복무규정', it(['乙은 甲의 복무수칙을 준수 하여야 한다.','乙은 최선을 다하여 甲의 업무지시에 응해야 하며, 이 계약에 의하여 부과된 업무를 성실히 수행하여야 한다.']));
+  art('근로계약<br>해지사유', it([
+    '근로 성적 또는 능률이 불량한 자로서 취업이 부당하다고 인정되며, 개선의 가망이 전혀 없을 때',
+    '출근 상황이 불량하여 월 3회 이상 징계 처분을 받았거나 연이어 5일 이상 무단결근한 때',
+    '신체 또는 정신상 병으로 직무를 감당할 수 없다고 인정될 때',
+    '고의 또는 중대한 사유로 회사에 손해를 끼쳤거나 명예를 손상시켰을 때',
+    '업무의 축소, 폐쇄 및 영업부진 등 경영상 이유에 의하여 감원이 필요하다고 인정된 때',
+    '정기 또는 임시 건강진단 결과 취업 부적격자로 판정된 때',
+    '채용결격사유가 발견되었을 때 혹은 학력, 경력을 이력서에 누락시키거나 허위기재 등 부정한 방법으로 채용되었을 때',
+    '형사상의 유죄 판결이 확정 되었을 때',
+    '규칙을 위반하여 직장 내 질서를 문란케 할 때',
+    '회사의 승낙 없이 타 직업에 종사할 때',
+    '정당한 사유 없이 지시에 불복종하거나 노무 제공 불이행 등 기타 전 각 호에 준하는 부득이한 사유가 있을 때'
+  ]));
+  art('손해배상', '乙은 본인의 귀책사유로 인하여 甲의 재산상의 손해를 끼쳤을 경우에는 그 손해액을 배상하여야 한다.');
+  art('비밀유지', '乙은 계약기간 중은 물론 계약 종료 후에도 甲의 영업 및 기술과 관련된 비밀, 고객에 대한 개인정보 등 본 계약과 관련하여 취득한 일체의 정보를 타인 및 타 영업장에 누설하거나 영업활동의 자료로 삼아서는 아니되며, 이를 위반하여 甲 또는 제3자에게 재산상 손해가 발생한 경우 이를 배상하여야 하며, 모든 민사·형사상의 책임을 진다.');
+  art('분쟁 해결', '이 계약으로 인한 법적 분쟁의 관할은 甲의 관할 지방법원 소재지로 한다.');
+  art('법령과의<br>관계', '이 계약에서 정하지 않은 사항에 대해서는 취업규칙 등 사규 및 기타 노동관계법에 정하는 바에 따른다.');
+  if(privacy) rows.push(`<tr><td class="lb">개인정보<br>수집·이용에<br>대한 동의</td><td class="bd">
+    <table class="pv"><tr><th>정보의 수집·이용 목적</th><td>당사의 인적자원관리</td></tr>
+    <tr><th>개인정보의 항목</th><td>1. 성명, 주민번호, 가족사항<br>2. 주소, 이메일, 휴대전화번호 등 연락처<br>3. 학력, 근무경력<br>4. 기타 근로와 관련된 개인정보</td></tr>
+    <tr><th>보유 및 이용기간</th><td>근로관계가 유지되는 기간 및 근로기준법 42조에 따라 필요한 기간</td></tr></table>
+    <div style="margin-top:2mm;">◇ 甲은 개인정보를 다른 목적으로 이용하거나 제3자에게 제공하지 않습니다.<br>◇ 乙은 개인정보의 수집 또는 이용에 동의하지 않을 권리가 있습니다. 다만, 개인정보의 수집 및 이용 동의를 거부한 때에는 불이익이 있을 수 있습니다.<br>위 내용을 충분히 숙지하고 개인정보의 수집 및 이용에 대하여 동의합니다.
+    <div style="text-align:right;">□ 동의 &nbsp; □ 동의하지 않음</div></div></td></tr>`);
+
+  const titleType = isTerm ? '기간제' : '정규직';
+  const startLine = isTerm
+    ? `${dU(dKD(emp.hire_date),38)} 부터 ${dU(dKD(emp.contract_end),38)} 까지`
+    : `${dU(dKD(emp.hire_date),38)} 부터 기간의 정함이 없는`;
+  const dateLine = date ? dKD(date) : '년 &nbsp;&nbsp;&nbsp;&nbsp; 월 &nbsp;&nbsp;&nbsp;&nbsp; 일';
+
+  return dSheet(`
+    <h3 class="dt" style="font-size:20pt;letter-spacing:.12em;">근 로 계 약 서</h3><div class="dsub" style="margin-bottom:4mm;">&lt;${titleType}&gt;</div>
+    <table class="ct">
+      <tr><td class="lb" rowspan="2">사용자<br>(甲)</td><th class="k">상 호</th><td>${dE(C.name||'')}</td><th class="k">대 표</th><td>${dE(C.ceo_name||'')}</td></tr>
+      <tr><th class="k">주 소</th><td colspan="3">${dE(C.address||'')}</td></tr>
+      <tr><td class="lb" rowspan="2">근로자<br>(乙)</td><th class="k">성 명</th><td>${dE(emp.name)}</td><th class="k">생년월일</th><td>${dE(dKD(emp.birth))}</td></tr>
+      <tr><th class="k">주 소</th><td>${dE(emp.address||'')}</td><th class="k">전화번호</th><td>${dE(emp.phone||'')}</td></tr>
+    </table>
+    <p style="margin:3mm 0 1mm;">甲과 乙은 ${startLine} 근로계약을 체결하고,<br>이에 따라 아래의 근로조건을 성실히 이행할 것을 약정한다.</p>
+    <div style="text-align:center;font-weight:700;margin:1mm 0 2mm;">- 아 &nbsp; 래 -</div>
+    <table class="ct"><tr><td class="lb">부 서</td><td class="bd" style="width:40%;">${dE(emp.department||'')}</td><td class="lb" style="width:20mm;">직 책</td><td class="bd">${dE(emp.position||'')}</td></tr></table>
+    <table class="ct" style="border-top:none;">${rows.join('')}</table>
+    <div style="text-align:center;margin:6mm 0 3mm;font-size:11pt;">${dateLine}</div>
+    <table class="sg"><tr><th rowspan="2">甲 (사용자)</th><th>대 표</th><td>${dE(C.ceo_name||'')}</td><td style="position:relative;width:24mm;text-align:center;">(인)${dStampImg().replace('right:4mm;','right:2mm;')}</td>
+      <th rowspan="2">乙 (근로자)</th><th>성 명</th><td>${dE(emp.name)}</td><td style="width:24mm;text-align:center;">(인)</td></tr><tr><th>상 호</th><td colspan="2">${dE(C.name||'')}</td><th>주 소</th><td colspan="2">${dE(emp.address||'')}</td></tr></table>
+    <p style="margin:3mm 0 0;font-size:10pt;">* 근로계약서를 교부받았음을 확인합니다. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (인)</p>`);
+}
+
+/* =====================================================================
+   근로조건 입력 모달
+   ===================================================================== */
+let TM_ITEMS = [];
+function openTermsModal(id){
+  const emp = EMPLOYEES.find(e=>e.id===id);
+  if(!emp) return;
+  const set = (k,v)=>{ document.getElementById(k).value = (v==null?'':v); };
+  document.getElementById('termsTitle').textContent = `${emp.name} 근로조건`;
+  set('tmEmpId', emp.id);
+  set('tmType', emp.emp_type||'연봉제');
+  set('tmJob', emp.job_desc);
+  set('tmMonths', emp.contract_months);
+  set('tmContractEnd', emp.contract_end);
+  set('tmApplyStart', emp.salary_apply_start);
+  set('tmApplyEnd', emp.salary_apply_end);
+  set('tmWorkDays', emp.work_days||'월-금');
+  set('tmSatWork', emp.saturday_work);
+  set('tmStart', emp.work_start||'09:00');
+  set('tmEnd', emp.work_end||'18:00');
+  set('tmSatStart', emp.sat_start);
+  set('tmSatEnd', emp.sat_end);
+  set('tmBreak', emp.break_time||'13:00~14:00');
+  set('tmWeeklyHoliday', emp.weekly_holiday||'일');
+  set('tmAnnual', emp.annual_salary);
+  set('tmMonthly', emp.monthly_pay);
+  const ot = dOT(emp);
+  set('tmOtExt', ot.ext||''); set('tmOtNight', ot.night||''); set('tmOtHol', ot.hol||''); set('tmOtHolExt', ot.holext||'');
+  TM_ITEMS = dPayItems(emp).map(x=>({name:x.name, amount:Number(x.amount||0)}));
+  document.getElementById('tmPreset').innerHTML = '<option value="">+ 항목 추가…</option>' + PAY_ITEM_PRESETS.map(p=>`<option>${p}</option>`).join('') + '<option value="__custom">직접 입력…</option>';
+  renderTmItems();
+  document.getElementById('termsModal').classList.remove('hidden');
+}
+function closeTermsModal(){ document.getElementById('termsModal').classList.add('hidden'); }
+function tmAddItem(sel){
+  let name = sel.value; sel.value = '';
+  if(!name) return;
+  if(name==='__custom'){ name = (prompt('항목 이름을 입력하세요') || '').trim(); if(!name) return; }
+  TM_ITEMS.push({name, amount:0});
+  renderTmItems();
+}
+function renderTmItems(){
+  const box = document.getElementById('tmItems');
+  box.innerHTML = TM_ITEMS.map((x,i)=>`<div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto;gap:6px;margin-bottom:6px;">
+    <input type="text" value="${dE(x.name)}" oninput="TM_ITEMS[${i}].name=this.value">
+    <input type="number" value="${x.amount||''}" placeholder="금액(원)" oninput="TM_ITEMS[${i}].amount=Number(this.value||0);updateTmSum()">
+    <button class="btn danger sm" onclick="TM_ITEMS.splice(${i},1);renderTmItems()">✕</button></div>`).join('') || '<div class="small-note">항목이 없습니다. 아래에서 추가해 주세요.</div>';
+  updateTmSum();
+}
+function updateTmSum(){
+  const sum = TM_ITEMS.reduce((s,x)=>s+Number(x.amount||0),0);
+  const monthly = Number(document.getElementById('tmMonthly').value||0);
+  const el = document.getElementById('tmSum');
+  const ok = !monthly || Math.abs(sum-monthly)<=1;
+  el.innerHTML = `구성항목 합계 <b>${dN(sum)}원</b>` + (monthly ? (ok ? ' · 월 급여액과 일치 ✓' : ` · <span style="color:var(--warn)">월 급여액과 ${dN(Math.abs(sum-monthly))}원 차이</span>`) : '');
+}
+function tmFillAnnual(){
+  const m = Number(document.getElementById('tmMonthly').value||0);
+  const a = document.getElementById('tmAnnual');
+  if(m && !a.value) a.value = m*12;
+  updateTmSum();
+}
+async function saveTerms(){
+  const g = id => document.getElementById(id).value.trim();
+  const num = id => { const v = g(id); return v==='' ? null : Number(v); };
+  const payload = {
+    id: g('tmEmpId'),
+    emp_type: g('tmType') || null,
+    job_desc: g('tmJob') || null,
+    contract_months: num('tmMonths'),
+    contract_end: g('tmContractEnd') || null,
+    salary_apply_start: g('tmApplyStart') || null,
+    salary_apply_end: g('tmApplyEnd') || null,
+    work_days: g('tmWorkDays') || null,
+    saturday_work: g('tmSatWork') || null,
+    work_start: g('tmStart') || null,
+    work_end: g('tmEnd') || null,
+    sat_start: g('tmSatStart') || null,
+    sat_end: g('tmSatEnd') || null,
+    break_time: g('tmBreak') || null,
+    weekly_holiday: g('tmWeeklyHoliday') || null,
+    annual_salary: num('tmAnnual'),
+    monthly_pay: num('tmMonthly'),
+    fixed_ot: { ext:Number(g('tmOtExt')||0), night:Number(g('tmOtNight')||0), hol:Number(g('tmOtHol')||0), holext:Number(g('tmOtHolExt')||0) },
+    pay_items: TM_ITEMS.filter(x=>x.name.trim()).map(x=>({name:x.name.trim(), amount:Number(x.amount||0)}))
+  };
+  try{
+    await hrSaveEmployee(payload);
+    await refreshEmployees();
+    closeTermsModal();
+    renderEmpTable();
+    if(!document.getElementById('tab-docs').classList.contains('hidden')) renderDocOptions();
+  } catch(e){
+    const hint = /column|schema/i.test(e.message||'') ? '\n\n※ Supabase에서 hr_work_terms.sql을 먼저 실행했는지 확인해 주세요.' : '';
+    alert('저장 실패: '+e.message+hint); console.error(e);
+  }
+}
+function gotoDocsFor(id, type){
+  document.querySelector('.navitem[data-tab="docs"]').click();
+  setTimeout(()=>{
+    if(id){ document.getElementById('docEmpSelect').value = id; }
+    if(type){ document.getElementById('docTypeSelect').value = type; }
+    onDocTypeChange();
+  }, 0);
+}
+
+/* =====================================================================
+   설계명부 엑셀 업로드 (주민등록번호 열은 읽자마자 버립니다)
+   ===================================================================== */
+let DESIGN_PREVIEW = [];
+const dCol = c => XLSX.utils.decode_col(c);
+function dxDate(v){
+  if(v==null || v==='') return null;
+  if(typeof v==='number'){
+    if(v<20000) return null;
+    const d = new Date(Date.UTC(1899,11,30) + Math.round(v)*86400000);
+    return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth()+1)}-${pad2(d.getUTCDate())}`;
+  }
+  const s = String(v).trim();
+  let m = s.match(/(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일/);
+  if(m) return `${m[1]}-${pad2(m[2])}-${pad2(m[3])}`;
+  m = s.match(/(\d{4})[-./](\d{1,2})[-./](\d{1,2})/);
+  if(m) return `${m[1]}-${pad2(m[2])}-${pad2(m[3])}`;
+  return null;
+}
+function dxTime(v){
+  if(v==null || v==='') return null;
+  if(typeof v==='number'){
+    const f = v - Math.floor(v);
+    if(f<=0) return null;
+    const mins = Math.round(f*1440);
+    return `${pad2(Math.floor(mins/60)%24)}:${pad2(mins%60)}`;
+  }
+  const m = String(v).match(/(\d{1,2}):(\d{2})/);
+  return m ? `${pad2(m[1])}:${m[2]}` : null;
+}
+const dxStr = v => (v==null || v===0 || v==='0') ? null : (String(v).replace(/\s+/g,' ').trim() || null);
+const dxNum = v => (typeof v==='number' && isFinite(v)) ? v : (v!=null && v!=='' && !isNaN(Number(v)) ? Number(v) : null);
+
+function parseDesignWorkbook(wb){
+  const ws = wb.Sheets['설계명부'] || wb.Sheets[wb.SheetNames[0]];
+  // 주민등록번호 열(I)은 파싱 전에 즉시 삭제 — 어떤 경로로도 사용/저장하지 않습니다.
+  Object.keys(ws).forEach(k=>{ if(/^I\d+$/.test(k)) delete ws[k]; });
+  const aoa = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null});
+  const hdr = String((aoa[4]||[])[dCol('B')]||'').replace(/\s/g,'');
+  if(!hdr.includes('성명')) throw new Error('"설계명부" 양식을 찾지 못했습니다. (5행 B열이 "성명"이어야 합니다)');
+  const cell = (r,c)=> r[dCol(c)];
+  const itemCols = [];
+  for(let c=dCol('AM'); c<=dCol('BF'); c++){
+    let name = (aoa[5]||[])[c] || (aoa[4]||[])[c];
+    if(!name) continue;
+    name = String(name).replace(/\([^)]*\)/g,'').replace(/\s+/g,'').trim();
+    if(name) itemCols.push([c,name]);
+  }
+  const out = [];
+  for(let i=6;i<aoa.length;i++){
+    const r = aoa[i]; if(!r) continue;
+    const name = cell(r,'B'); if(typeof name!=='string' || !name.trim() || /합계|총계/.test(name)) continue;
+    const isTermFlag = String(cell(r,'G')||'').trim().toUpperCase()==='O';
+    const applyStart = dxDate(cell(r,'N')), applyEnd = dxDate(cell(r,'O'));
+    const pay_items = itemCols.map(([c,nm])=>({name:nm, amount:Math.round((dxNum(r[c])||0))})).filter(x=>x.amount>0);
+    const satWork = dxStr(cell(r,'V'));
+    out.push({
+      name: name.trim(),
+      department: dxStr(cell(r,'D')), position: dxStr(cell(r,'E')), job_desc: dxStr(cell(r,'F')),
+      birth: dxDate(cell(r,'J')), hire_date: dxDate(cell(r,'K')), retire_date: dxDate(cell(r,'M')),
+      address: dxStr(cell(r,'P')), phone: dxStr(cell(r,'Q')),
+      emp_type: isTermFlag ? '기간제' : ((applyStart||applyEnd) ? '연봉제' : '정규직'),
+      contract_months: dxNum(cell(r,'H')), contract_end: dxDate(cell(r,'L')),
+      salary_apply_start: applyStart, salary_apply_end: applyEnd,
+      work_days: dxStr(cell(r,'U')), saturday_work: satWork,
+      work_start: dxTime(cell(r,'W')), work_end: dxTime(cell(r,'X')),
+      sat_start: dxTime(cell(r,'Y')), sat_end: dxTime(cell(r,'Z')),
+      break_time: dxStr(cell(r,'AA')),
+      annual_salary: dxNum(cell(r,'AJ')) ? Math.round(dxNum(cell(r,'AJ'))) : null,
+      monthly_pay: dxNum(cell(r,'AI')) ? Math.round(dxNum(cell(r,'AI'))) : null,
+      fixed_ot: { ext:dxNum(cell(r,'AC'))||0, night:dxNum(cell(r,'AD'))||0, hol:dxNum(cell(r,'AE'))||0, holext:dxNum(cell(r,'AF'))||0 },
+      pay_items
+    });
+  }
+  return out;
+}
+async function onDesignFile(inp){
+  const f = inp.files && inp.files[0]; if(!f) return;
+  const note = document.getElementById('designMsg');
+  try{
+    const buf = await f.arrayBuffer();
+    const wb = XLSX.read(buf, {type:'array'});
+    const rows = parseDesignWorkbook(wb);
+    if(!rows.length){ note.textContent = '읽을 직원 행이 없습니다.'; return; }
+    DESIGN_PREVIEW = rows.map(r=>{
+      const ex = EMPLOYEES.find(e=>e.name.trim()===r.name);
+      const problem = (!ex && !r.hire_date) ? '입사일 없음 — 신규 등록 불가' : '';
+      return { r, ex, problem, apply: !problem };
+    });
+    renderDesignPreview();
+  } catch(e){ note.textContent = '엑셀을 읽지 못했습니다: '+e.message; console.error(e); }
+  inp.value = '';
+}
+function renderDesignPreview(){
+  const box = document.getElementById('designPreview');
+  const nNew = DESIGN_PREVIEW.filter(x=>x.apply && !x.ex).length, nUpd = DESIGN_PREVIEW.filter(x=>x.apply && x.ex).length;
+  box.innerHTML = `<div style="overflow-x:auto;"><table><thead><tr><th>적용</th><th>이름</th><th>구분</th><th>계약유형</th><th>연봉 총액</th><th>월 급여액</th><th>구성항목</th><th>비고</th></tr></thead><tbody>` +
+    DESIGN_PREVIEW.map((x,i)=>`<tr><td><input type="checkbox" ${x.apply?'checked':''} ${x.problem?'disabled':''} onchange="DESIGN_PREVIEW[${i}].apply=this.checked;renderDesignSummary()" style="width:auto;"></td>
+      <td>${dE(x.r.name)}</td><td>${x.ex?'<span class="pill active">기존 직원 업데이트</span>':'<span class="pill review">신규 등록</span>'}</td>
+      <td>${dE(x.r.emp_type)}</td><td>${x.r.annual_salary?dN(x.r.annual_salary):'-'}</td><td>${x.r.monthly_pay?dN(x.r.monthly_pay):'-'}</td>
+      <td>${x.r.pay_items.length}개</td><td style="color:var(--warn)">${dE(x.problem)}${x.r.retire_date?` 퇴사 ${dE(x.r.retire_date)}`:''}</td></tr>`).join('') +
+    `</tbody></table></div><div class="small-note" id="designSummary"></div>
+    <div style="margin-top:10px;"><button class="btn primary" onclick="applyDesign()">선택한 직원 적용</button> <button class="btn ghost" onclick="DESIGN_PREVIEW=[];document.getElementById('designPreview').innerHTML=''">취소</button></div>`;
+  renderDesignSummary();
+}
+function renderDesignSummary(){
+  const nNew = DESIGN_PREVIEW.filter(x=>x.apply && !x.ex).length, nUpd = DESIGN_PREVIEW.filter(x=>x.apply && x.ex).length;
+  const el = document.getElementById('designSummary');
+  if(el) el.textContent = `신규 등록 ${nNew}명 · 기존 직원 업데이트 ${nUpd}명이 적용됩니다. 기존 직원의 이름·실수령급여·은행/계좌는 건드리지 않고, 비어 있던 기본정보(부서·직책·주소·연락처·생년월일·입사일·퇴사일)만 채우며 근로조건은 엑셀 값으로 갱신합니다.`;
+}
+async function applyDesign(){
+  const targets = DESIGN_PREVIEW.filter(x=>x.apply);
+  if(!targets.length){ alert('적용할 직원이 없습니다.'); return; }
+  let ok=0, fail=[];
+  for(const x of targets){
+    const r = x.r;
+    const terms = {
+      emp_type:r.emp_type, job_desc:r.job_desc, contract_months:r.contract_months, contract_end:r.contract_end,
+      salary_apply_start:r.salary_apply_start, salary_apply_end:r.salary_apply_end, work_days:r.work_days,
+      saturday_work:r.saturday_work, work_start:r.work_start, work_end:r.work_end, sat_start:r.sat_start, sat_end:r.sat_end,
+      break_time:r.break_time, annual_salary:r.annual_salary, monthly_pay:r.monthly_pay, fixed_ot:r.fixed_ot
+    };
+    if(r.pay_items.length) terms.pay_items = r.pay_items;
+    Object.keys(terms).forEach(k=>{ if(terms[k]===null || terms[k]===undefined) delete terms[k]; });
+    try{
+      if(x.ex){
+        const e = x.ex, fill = {};
+        ['department','position','address','phone'].forEach(k=>{ if(!e[k] && r[k]) fill[k]=r[k]; });
+        if(!e.birth && r.birth) fill.birth = r.birth;
+        if(!e.retire_date && r.retire_date) fill.retire_date = r.retire_date;
+        await hrSaveEmployee({ id:e.id, ...fill, ...terms });
+      } else {
+        await hrSaveEmployee({ name:r.name, department:r.department||'', position:r.position||'', address:r.address||'', phone:r.phone||'',
+          birth:r.birth, hire_date:r.hire_date, retire_date:r.retire_date, salary:0, allowance:0, ...terms });
+      }
+      ok++;
+    } catch(e){ fail.push(`${r.name}: ${e.message}`); console.error(e); }
+  }
+  await refreshEmployees();
+  renderEmpTable();
+  DESIGN_PREVIEW = [];
+  document.getElementById('designPreview').innerHTML = '';
+  let msg = `${ok}명 적용 완료.`;
+  if(fail.length) msg += `\n실패 ${fail.length}건:\n`+fail.slice(0,5).join('\n') + (/column|schema/i.test(fail[0])?'\n\n※ Supabase에서 hr_work_terms.sql을 먼저 실행했는지 확인해 주세요.':'');
+  msg += '\n\n※ 신규 등록 직원은 실수령급여·은행·계좌·성별이 비어 있습니다. (주민등록번호는 읽지 않았습니다) 직원 관리에서 보완해 주세요.';
+  document.getElementById('designMsg').textContent = msg.split('\n')[0];
+  alert(msg);
+}
+
 </script>
 </body>
 </html>

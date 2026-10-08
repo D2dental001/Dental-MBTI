@@ -4,7 +4,7 @@
 //  2) 앱 껍데기(HTML/아이콘)를 가볍게 캐싱해 오프라인에서도 화면이 완전히 깨지지 않도록
 // Supabase API 요청 등 데이터 통신은 캐싱하지 않고 항상 네트워크로 보냅니다.
 
-const CACHE_NAME = 'hr-os-shell-v7';
+const CACHE_NAME = 'hr-os-shell-v8';
 const SHELL_FILES = [
   'hr-dashboard.html',
   'manifest.webmanifest',
