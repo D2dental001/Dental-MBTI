@@ -57,7 +57,7 @@
   }
   .topbar h1{font-size:18px;margin:0;}
   .topbar .meta{font-size:12.5px;color:var(--muted);}
-  .content{padding:28px 32px 90px;max-width:1080px;}
+  .content{padding:28px 32px 90px;max-width:1360px;}
 
   .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 10px rgba(20,27,51,.04);}
   .card h2{font-size:16px;margin:0 0 4px;}
@@ -110,6 +110,11 @@
 
   table{width:100%;border-collapse:collapse;font-size:13.5px;}
   th,td{border-bottom:1px solid var(--border);padding:11px 10px;text-align:left;}
+  .wide-table th,.wide-table td{white-space:nowrap;}
+  .emp-list th,.emp-list td{padding:10px 7px;}
+  .emp-list td:last-child .btn{padding:6px 9px;font-size:12px;margin-right:2px;}
+  .emp-list td:nth-child(4){white-space:normal;min-width:190px;}
+  .wide-table{min-width:900px;}
   th{background:#f7f9fd;color:var(--muted);font-size:12px;font-weight:700;}
   tr:hover td{background:#fafbfe;}
 
@@ -624,7 +629,7 @@
         <div class="card">
           <h2>직원 목록</h2>
           <div style="overflow-x:auto;">
-          <table>
+          <table class="wide-table emp-list">
             <thead><tr>
               <th>이름</th><th>부서/직위</th><th>연락처</th><th>은행/계좌</th>
               <th>실수령급여</th><th>기타수당</th><th>입사일</th><th>상태</th><th></th>
@@ -646,7 +651,7 @@
           <h2>연차 현황 (입사일 기준 · 자동 차감)</h2>
           <div class="desc">법정 연차는 입사일로 자동 계산됩니다(입사 1년 미만은 매월 1일씩 최대 11일, 1년 이상은 15일 + 근속 2년마다 1일, 최대 25일). 홈 캘린더에서 "🌴 연차 입력"으로 등록하면 <b>사용</b>에 자동 반영되어 잔여가 차감됩니다. 이월·선사용 등은 "내역/조정"에서 +/− 일수로 수정하세요. 반차는 0.5일, 반반차는 0.25일입니다.</div>
           <div style="overflow-x:auto;">
-          <table>
+          <table class="wide-table">
             <thead><tr>
               <th>이름</th><th>입사일</th><th>현재 연차 기간</th><th>법정 발생</th><th>조정</th><th>사용(예정 포함)</th><th>잔여</th><th></th>
             </tr></thead>
