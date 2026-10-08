@@ -249,7 +249,7 @@ async function hrListSchedulesByMonth(year, month){
 
   // 이 달에 있는 일반 일정 + 이 달 이전에 시작한 반복 일정을 한 번에 가져옵니다.
   let { data, error } = await hrsb.from('hr_schedule').select('*')
-    .or(`and(schedule_date.gte.${startStr},schedule_date.lte.${endStr}),and(repeat_type.neq.none,schedule_date.lte.${endStr})`);
+    .or(`and(schedule_date.gte.${startStr},schedule_date.lte.${endStr}),and(end_date.gte.${startStr},schedule_date.lte.${endStr}),and(repeat_type.neq.none,schedule_date.lte.${endStr})`);
   if(error){
     // 반복 일정용 SQL(hr_schedule_repeat.sql)을 아직 실행하지 않은 경우를 대비한 예전 방식 조회
     console.warn('[hrListSchedulesByMonth] 반복 컬럼 없음 — 일반 조회로 대체', error);
@@ -263,6 +263,17 @@ async function hrListSchedulesByMonth(year, month){
   (data || []).forEach(r=>{
     const rt = r.repeat_type || 'none';
     if(rt === 'none'){
+      if(r.end_date && r.end_date > r.schedule_date){
+        // 기간 일정: 이 달에 걸친 날짜마다 한 건씩 펼칩니다.
+        const from = r.schedule_date > startStr ? r.schedule_date : startStr;
+        const to = r.end_date < endStr ? r.end_date : endStr;
+        for(let cur = new Date(from+'T00:00:00'); ; cur.setDate(cur.getDate()+1)){
+          const ds = `${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`;
+          if(ds > to) break;
+          out.push({ ...r, schedule_date: ds, master_date: r.schedule_date, is_recurring: false });
+        }
+        return;
+      }
       if(r.schedule_date >= startStr && r.schedule_date <= endStr){
         out.push({ ...r, master_date: r.schedule_date, is_recurring: false });
       }
@@ -282,17 +293,43 @@ async function hrListSchedulesByMonth(year, month){
   out.sort((a,b)=> a.schedule_date.localeCompare(b.schedule_date) || (a.start_time||'99:99').localeCompare(b.start_time||'99:99'));
   return out;
 }
+// 새 컬럼(repeat_*, end_date)이 아직 DB에 없을 때: 기본값(반복 없음/기간 없음)이면 그 필드만 빼고 다시 저장해서
+// SQL을 실행하기 전에도 일반 일정은 저장되게 합니다. 반복/기간을 실제로 쓰는 경우에는 오류를 그대로 알립니다.
+function hrStripDefaultScheduleFields(fields){
+  const f = { ...fields };
+  if(f.repeat_type === 'none' || f.repeat_type === undefined) delete f.repeat_type;
+  else return null;
+  if(!f.repeat_until) delete f.repeat_until; else return null;
+  if(!f.end_date) delete f.end_date; else return null;
+  delete f.exdates;
+  return f;
+}
+function hrIsMissingColumn(error){ return !!error && /schema cache|column|repeat_|end_date|exdates/i.test(error.message||''); }
 async function hrCreateSchedule(fields){
   const { data: { user } } = await hrsb.auth.getUser();
   if(!user) throw new Error('로그인이 필요합니다.');
-  const { data, error } = await hrsb.from('hr_schedule')
-    .insert({ ...fields, created_by: user.id, created_by_email: user.email }).select().single();
+  const row = { ...fields, created_by: user.id, created_by_email: user.email };
+  let { data, error } = await hrsb.from('hr_schedule').insert(row).select().single();
+  if(error && hrIsMissingColumn(error)){
+    const stripped = hrStripDefaultScheduleFields(fields);
+    if(stripped){
+      ({ data, error } = await hrsb.from('hr_schedule')
+        .insert({ ...stripped, created_by: user.id, created_by_email: user.email }).select().single());
+    }
+  }
   if(error) throw error;
   return data;
 }
 async function hrUpdateSchedule(id, fields){
-  const { error } = await hrsb.from('hr_schedule')
+  let { error } = await hrsb.from('hr_schedule')
     .update({ ...fields, updated_at: new Date().toISOString() }).eq('id', id);
+  if(error && hrIsMissingColumn(error)){
+    const stripped = hrStripDefaultScheduleFields(fields);
+    if(stripped){
+      ({ error } = await hrsb.from('hr_schedule')
+        .update({ ...stripped, updated_at: new Date().toISOString() }).eq('id', id));
+    }
+  }
   if(error) throw error;
 }
 async function hrDeleteSchedule(id){

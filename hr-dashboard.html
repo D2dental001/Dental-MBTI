@@ -425,8 +425,15 @@
             <div id="scheduleAddForm" class="hidden" style="margin-top:14px;">
               <label class="field">제목</label>
               <input type="text" id="schedTitle" placeholder="예: 정기 회의">
-              <label class="field">시간 (선택)</label>
-              <input type="time" id="schedTime">
+              <div class="grid2">
+                <div><label class="field">시작일</label><input type="date" id="schedStartDate" onchange="onSchedRepeatChange()"></div>
+                <div id="schedEndWrap"><label class="field">종료일 (장기 일정이면 입력)</label><input type="date" id="schedEndDate"></div>
+              </div>
+              <label class="field">시간 (선택 · 30분 단위)</label>
+              <div class="grid2">
+                <select id="schedHour"><option value="">시간 없음</option></select>
+                <select id="schedMin"><option value="00">00분</option><option value="30">30분</option></select>
+              </div>
               <label class="field">반복</label>
               <select id="schedRepeat" onchange="onSchedRepeatChange()">
                 <option value="none">반복 없음</option>
@@ -1062,6 +1069,7 @@ function renderScheduleExistingList(){
         ${s.start_time ? `<span class="sched-item-time">${s.start_time}</span>` : ''}
       </div>
       ${repeatLabel ? `<div class="small-note" style="margin-top:2px;">${repeatLabel}${untilNote}</div>` : ''}
+      ${s.end_date ? `<div class="small-note" style="margin-top:2px;">📅 기간: ${s.master_date} ~ ${s.end_date}</div>` : ''}
       ${s.content ? `<div class="sched-item-content">${s.content.replace(/</g,'&lt;')}</div>` : ''}
       ${s.created_by_email ? `<div class="small-note" style="margin-top:4px;">입력: ${s.created_by_email}</div>` : ''}
       <div class="sched-item-actions">
@@ -1075,6 +1083,29 @@ function renderScheduleExistingList(){
 function onSchedRepeatChange(){
   const v = document.getElementById('schedRepeat').value;
   document.getElementById('schedRepeatUntilWrap').classList.toggle('hidden', v==='none');
+  document.getElementById('schedEndWrap').style.opacity = v==='none' ? '1' : '.4';
+  document.getElementById('schedEndDate').disabled = v!=='none';
+  if(v!=='none') document.getElementById('schedEndDate').value = '';
+}
+function initSchedHourOptions(){
+  const sel = document.getElementById('schedHour');
+  if(sel.options.length>1) return;
+  for(let h=0;h<24;h++){
+    const o = document.createElement('option');
+    o.value = String(h).padStart(2,'0');
+    o.textContent = (h<12 ? '오전 ' : '오후 ') + (h%12===0 ? 12 : h%12) + '시 (' + o.value + ')';
+    sel.appendChild(o);
+  }
+}
+function setSchedTime(t){
+  initSchedHourOptions();
+  const m = (t||'').match(/^(\d{1,2}):(\d{2})/);
+  document.getElementById('schedHour').value = m ? String(Number(m[1])).padStart(2,'0') : '';
+  document.getElementById('schedMin').value = (m && Number(m[2])>=30) ? '30' : '00';
+}
+function getSchedTime(){
+  const h = document.getElementById('schedHour').value;
+  return h ? `${h}:${document.getElementById('schedMin').value}` : '';
 }
 function renderColorSwatches(selected){
   const grid = document.getElementById('schedColorGrid');
@@ -1089,7 +1120,9 @@ function selectScheduleColor(c){
 function openScheduleAddForm(){
   editingScheduleId = null;
   document.getElementById('schedTitle').value = '';
-  document.getElementById('schedTime').value = '';
+  setSchedTime('');
+  { const { y, m, d } = scheduleModalYMD; document.getElementById('schedStartDate').value = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+  document.getElementById('schedEndDate').value = '';
   document.getElementById('schedContent').value = '';
   document.getElementById('schedRepeat').value = 'none';
   document.getElementById('schedRepeatUntil').value = '';
@@ -1111,7 +1144,9 @@ function startEditSchedule(id){
   if(!s) return;
   editingScheduleId = id;
   document.getElementById('schedTitle').value = s.title || '';
-  document.getElementById('schedTime').value = s.start_time || '';
+  setSchedTime(s.start_time);
+  document.getElementById('schedStartDate').value = s.is_recurring ? s.schedule_date : (s.master_date || s.schedule_date);
+  document.getElementById('schedEndDate').value = s.end_date || '';
   document.getElementById('schedContent').value = s.content || '';
   document.getElementById('schedRepeat').value = s.repeat_type || 'none';
   document.getElementById('schedRepeatUntil').value = s.repeat_until || '';
@@ -1124,14 +1159,17 @@ function startEditSchedule(id){
 }
 async function saveNewSchedule(){
   const title = document.getElementById('schedTitle').value.trim();
-  const time = document.getElementById('schedTime').value;
+  const time = getSchedTime();
   const content = document.getElementById('schedContent').value.trim();
   const color = document.getElementById('schedColorGrid').dataset.selected || SCHEDULE_COLORS[0];
   const repeat_type = document.getElementById('schedRepeat').value;
   const repeat_until = (repeat_type!=='none' && document.getElementById('schedRepeatUntil').value) || null;
   if(!title){ alert('일정 제목을 입력해 주세요.'); return; }
   const { y, m, d } = scheduleModalYMD;
-  const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const dateStr = document.getElementById('schedStartDate').value || `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const end_date = (repeat_type==='none' && document.getElementById('schedEndDate').value) || null;
+  if(end_date && end_date < dateStr){ alert('종료일이 시작일보다 앞설 수 없습니다.'); return; }
+  if(end_date === dateStr) { /* 하루짜리는 기간 없음으로 저장 */ }
   if(repeat_until && repeat_until < dateStr){ alert('반복 종료일이 일정 날짜보다 앞설 수 없습니다.'); return; }
   try{
     if(editingScheduleId){
@@ -1140,15 +1178,15 @@ async function saveNewSchedule(){
       // (단, 반복을 '없음'으로 바꾸면 지금 보고 있는 날짜의 단일 일정이 됩니다.)
       const keepAnchor = orig && orig.is_recurring && repeat_type !== 'none';
       const schedule_date = keepAnchor ? orig.master_date : dateStr;
-      await hrUpdateSchedule(editingScheduleId, { schedule_date, start_time: time||null, title, content, color, repeat_type, repeat_until });
+      await hrUpdateSchedule(editingScheduleId, { schedule_date, start_time: time||null, title, content, color, repeat_type, repeat_until, end_date: (end_date && end_date!==dateStr) ? end_date : null });
     } else {
-      await hrCreateSchedule({ schedule_date: dateStr, start_time: time||null, title, content, color, repeat_type, repeat_until });
+      await hrCreateSchedule({ schedule_date: dateStr, start_time: time||null, title, content, color, repeat_type, repeat_until, end_date: (end_date && end_date!==dateStr) ? end_date : null });
     }
     closeScheduleAddForm();
     await renderCalendar();
     renderScheduleExistingList();
   } catch(e){
-    const hint = /repeat_|exdates|schema cache|column/i.test(e.message||'') ? '\n(반복 일정용 SQL(hr_schedule_repeat.sql)을 Supabase에서 아직 실행하지 않았다면 먼저 실행해 주세요.)' : '';
+    const hint = /repeat_|exdates|end_date|schema cache|column/i.test(e.message||'') ? '\n(반복/기간 일정을 쓰려면 Supabase SQL Editor에서 hr_schedule_v2.sql을 먼저 한 번 실행해 주세요.)' : '';
     alert('일정 저장 실패: '+e.message+hint); console.error(e);
   }
 }
