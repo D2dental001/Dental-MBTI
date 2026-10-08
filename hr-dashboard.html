@@ -341,6 +341,17 @@
               <input type="text" id="schedTitle" placeholder="예: 정기 회의">
               <label class="field">시간 (선택)</label>
               <input type="time" id="schedTime">
+              <label class="field">반복</label>
+              <select id="schedRepeat" onchange="onSchedRepeatChange()">
+                <option value="none">반복 없음</option>
+                <option value="monthly">매월 (같은 날짜에 반복)</option>
+                <option value="yearly">매년 (같은 날짜에 반복)</option>
+              </select>
+              <div id="schedRepeatUntilWrap" class="hidden">
+                <label class="field">반복 종료일 (선택 — 비워두면 계속 반복)</label>
+                <input type="date" id="schedRepeatUntil">
+              </div>
+              <div class="small-note hidden" id="schedRepeatEditNote" style="margin:-6px 0 12px;">반복 일정을 수정하면 모든 반복 날짜에 함께 적용됩니다.</div>
               <label class="field">내용</label>
               <textarea id="schedContent" rows="3" placeholder="상세 내용을 입력하세요" style="resize:vertical;"></textarea>
               <label class="field">표시 색깔</label>
@@ -804,20 +815,33 @@ function renderScheduleExistingList(){
     box.innerHTML = '<div class="sched-empty">이 날짜에 등록된 일정이 없습니다.</div>';
     return;
   }
-  box.innerHTML = list.map(s=>`
+  box.innerHTML = list.map(s=>{
+    const repeatLabel = s.repeat_type==='monthly' ? '🔁 매월 반복' : (s.repeat_type==='yearly' ? '🔁 매년 반복' : '');
+    const untilNote = (repeatLabel && s.repeat_until) ? ` · ${s.repeat_until}까지` : '';
+    const delButtons = s.is_recurring
+      ? `<button class="btn danger sm" onclick="deleteScheduleOccurrence('${s.id}','${s.schedule_date}')">이 날짜만 삭제</button>
+         <button class="btn danger sm" onclick="deleteScheduleItem('${s.id}', true)">전체 반복 삭제</button>`
+      : `<button class="btn danger sm" onclick="deleteScheduleItem('${s.id}')">삭제</button>`;
+    return `
     <div class="sched-item">
       <div class="sched-item-head">
         <span class="sched-color-dot" style="background:${s.color}"></span>
         <span class="sched-item-title">${s.title}</span>
         ${s.start_time ? `<span class="sched-item-time">${s.start_time}</span>` : ''}
       </div>
+      ${repeatLabel ? `<div class="small-note" style="margin-top:2px;">${repeatLabel}${untilNote}</div>` : ''}
       ${s.content ? `<div class="sched-item-content">${s.content.replace(/</g,'&lt;')}</div>` : ''}
       ${s.created_by_email ? `<div class="small-note" style="margin-top:4px;">입력: ${s.created_by_email}</div>` : ''}
       <div class="sched-item-actions">
         <button class="btn ghost sm" onclick="startEditSchedule('${s.id}')">수정</button>
-        <button class="btn danger sm" onclick="deleteScheduleItem('${s.id}')">삭제</button>
+        ${delButtons}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+}
+function onSchedRepeatChange(){
+  const v = document.getElementById('schedRepeat').value;
+  document.getElementById('schedRepeatUntilWrap').classList.toggle('hidden', v==='none');
 }
 function renderColorSwatches(selected){
   const grid = document.getElementById('schedColorGrid');

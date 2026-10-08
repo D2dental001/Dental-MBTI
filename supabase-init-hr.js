@@ -235,16 +235,52 @@ async function hrDeleteExpenseUpload(id){
 // year: 숫자(예: 2026), month: 1~12. 해당 달에 속하는 일정 전체를 가져옵니다.
 // owner_id가 아니라 RLS 규칙(활성 admin 계정이면 모두 접근 가능)으로 공유되므로
 // 다른 관리자가 입력한 일정도 함께 보입니다.
+//
+// 반복 일정(매월/매년)은 첫 일정 1건만 저장되어 있으므로, 여기서 그 달의 해당 날짜로 펼쳐서
+// 돌려줍니다. 돌려주는 각 항목의 schedule_date는 "그 달에 표시될 날짜"이고,
+//   master_date  = 원래(첫) 일정 날짜
+//   is_recurring = 반복 일정 여부
+// 가 추가됩니다. 31일 같은 날짜가 없는 달에는 그 달의 말일에 표시합니다.
 async function hrListSchedulesByMonth(year, month){
   const mm = String(month).padStart(2,'0');
   const startStr = `${year}-${mm}-01`;
   const lastDay = new Date(year, month, 0).getDate();
   const endStr = `${year}-${mm}-${String(lastDay).padStart(2,'0')}`;
-  const { data, error } = await hrsb.from('hr_schedule').select('*')
-    .gte('schedule_date', startStr).lte('schedule_date', endStr)
-    .order('start_time', { ascending: true, nullsFirst: false });
-  if(error){ console.error('[hrListSchedulesByMonth]', error); return []; }
-  return data || [];
+
+  // 이 달에 있는 일반 일정 + 이 달 이전에 시작한 반복 일정을 한 번에 가져옵니다.
+  let { data, error } = await hrsb.from('hr_schedule').select('*')
+    .or(`and(schedule_date.gte.${startStr},schedule_date.lte.${endStr}),and(repeat_type.neq.none,schedule_date.lte.${endStr})`);
+  if(error){
+    // 반복 일정용 SQL(hr_schedule_repeat.sql)을 아직 실행하지 않은 경우를 대비한 예전 방식 조회
+    console.warn('[hrListSchedulesByMonth] 반복 컬럼 없음 — 일반 조회로 대체', error);
+    const fb = await hrsb.from('hr_schedule').select('*')
+      .gte('schedule_date', startStr).lte('schedule_date', endStr);
+    if(fb.error){ console.error('[hrListSchedulesByMonth]', fb.error); return []; }
+    data = fb.data;
+  }
+
+  const out = [];
+  (data || []).forEach(r=>{
+    const rt = r.repeat_type || 'none';
+    if(rt === 'none'){
+      if(r.schedule_date >= startStr && r.schedule_date <= endStr){
+        out.push({ ...r, master_date: r.schedule_date, is_recurring: false });
+      }
+      return;
+    }
+    const [ay, am, ad] = r.schedule_date.split('-').map(Number);
+    const inRange = (rt === 'monthly')
+      ? (year > ay || (year === ay && month >= am))
+      : (month === am && year >= ay);
+    if(!inRange) return;
+    const dateStr = `${year}-${mm}-${String(Math.min(ad, lastDay)).padStart(2,'0')}`;
+    if(dateStr < r.schedule_date) return;
+    if(r.repeat_until && dateStr > r.repeat_until) return;
+    if((r.exdates || []).includes(dateStr)) return;
+    out.push({ ...r, schedule_date: dateStr, master_date: r.schedule_date, is_recurring: true });
+  });
+  out.sort((a,b)=> a.schedule_date.localeCompare(b.schedule_date) || (a.start_time||'99:99').localeCompare(b.start_time||'99:99'));
+  return out;
 }
 async function hrCreateSchedule(fields){
   const { data: { user } } = await hrsb.auth.getUser();
