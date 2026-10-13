@@ -784,27 +784,23 @@
       <!-- ===================== 외주디자인 ===================== -->
       <div id="tab-outsource" class="tab-panel hidden">
         <div class="card no-print">
-          <h2>AI 정산 PDF로 자동 계산 <span class="pill active">추천</span></h2>
-          <div class="desc">AI 정산 프로그램에서 내려받은 <b>PDF</b>를 올리면 케이스(환자)별로 <b>치식 1·2·3번 = 전치, 그 외 = 구치</b>로 나눕니다. <b>커스텀</b>은 커스텀어버트먼트 설계가 필요한 임플란트만 세며, 같은 환자·같은 접수일에 <b>Customized Abutment</b> 건(라임·올어버트먼트 등)이 있으면 커스텀, 없으면 기성·어벗레벨로 봅니다. 이를 판별하려면 DENTIQUBE <b>접수 관리 &gt; 외주 관리</b> 목록(모든 외주 기공소, 접수일 기준 기간)을 전체 선택해 복사한 뒤 아래에 붙여넣어 주세요. 접수일도 여기서 읽어 옵니다.</div>
+          <h2>수기 메모 + AI 정산 PDF로 자동 계산 <span class="pill active">추천</span></h2>
+          <div class="desc">외주 디자이너에게 보낸 <b>수기 메모</b>(날짜별 <b>지르 · 템 · 커스텀</b>)를 붙여넣고 AI 정산 <b>PDF</b>를 함께 올리면, 메모의 환자별 개수를 PDF 케이스와 대조합니다. 메모의 날짜가 접수일이 되고, 지르+템 합계가 PDF 수량과 맞는지 확인하며, PDF 치식으로 <b>1·2·3번 = 전치, 그 외 = 구치</b>를 나눕니다. 커스텀은 메모의 숫자를 그대로 씁니다. <b>이름만 있는 "-리메이크" 줄은 정산에서 제외</b>합니다. PDF 없이도 메모만으로 저장할 수 있지만 그러면 전치/구치를 구분할 수 없습니다.</div>
           <div class="grid3">
             <div><label class="field">정산 월 (접수일 기준)</label><input type="month" id="osSettleMonth"></div>
             <div><label class="field">지급 대상 (명세서에 표시될 이름)</label><input type="text" id="osPayee" value="디자인외주"></div>
-            <div><label class="field">PDF의 외주 기공소명</label><input type="text" id="osDesignerLab" value="디자인외주"></div>
-          </div>
-          <div class="grid2">
             <div><label class="field">AI 정산 PDF</label><input type="file" id="osPdfFile" accept="application/pdf,.pdf"></div>
-            <div><label class="field">&nbsp;</label><label style="display:flex;gap:6px;align-items:center;font-size:13px;"><input type="checkbox" id="osIncRework" checked onchange="osRenderCases()" style="width:auto;margin:0;"> 재작업 건도 정산에 포함</label></div>
           </div>
-          <label class="field">사이트 접수 목록 붙여넣기 (커스텀 판별 · 접수일 확인용)</label>
-          <textarea id="osSiteText" rows="5" placeholder="dentiqube.kr 접수 관리 &gt; 외주 관리 화면에서 목록을 전체 선택(Ctrl+A) → 복사(Ctrl+C) → 여기에 붙여넣기. 지금 보이는 페이지가 100건씩이라 페이지를 나눠 여러 번 붙여넣어도 됩니다."></textarea>
-          <div style="margin-top:8px;"><button class="btn primary" onclick="osAnalyzeCases()">PDF 분석</button></div>
+          <label class="field">수기 메모 붙여넣기</label>
+          <textarea id="osMemoText" rows="12" placeholder="0907---------------------&#10;           지르  템  커스텀&#10;최연자    0     3    3&#10;김희량    0     4    4&#10;&#10;0910---------------------&#10;최연자-리메이크&#10;강중석    4     0    1"></textarea>
+          <div style="margin-top:8px;"><button class="btn primary" onclick="osAnalyzeCases()">메모와 PDF 비교</button></div>
           <div class="small-note" id="osCaseMsg"></div>
         </div>
 
         <div class="card no-print hidden" id="osCaseCard">
-          <h2>케이스별 분류 확인</h2>
+          <h2>메모 ↔ PDF 대조 결과</h2>
           <div id="osCaseSummary" class="small-note" style="margin-bottom:8px;"></div>
-          <div style="overflow:auto;max-height:70vh;"><table class="wide-table"><thead><tr><th></th><th>접수일</th><th>환자</th><th>치과</th><th>보철물</th><th>치식</th><th>수량</th><th>전치</th><th>구치</th><th>커스텀</th><th>판별</th></tr></thead><tbody id="osCaseBody"></tbody></table></div>
+          <div style="overflow:auto;max-height:70vh;"><table class="wide-table"><thead><tr><th></th><th>접수일</th><th>환자</th><th>PDF 보철물</th><th>PDF 치식</th><th>메모</th><th>전치</th><th>구치</th><th>커스텀</th><th>PDF 대조</th></tr></thead><tbody id="osCaseBody"></tbody></table></div>
           <div class="small-note">숫자는 직접 고칠 수 있습니다. 체크를 풀면 정산에서 제외됩니다. 같은 환자·치식으로 다시 올리면 덮어씁니다.</div>
           <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn primary" onclick="osSaveCases()">이 내용으로 저장</button>
@@ -3941,8 +3937,6 @@ async function initOutsourceTab(){
     document.getElementById('osPricePost').value = p.post;
     document.getElementById('osPriceCustom').value = p.custom;
   }
-  const sm = document.getElementById('osSettleMonth');
-  if(sm && !sm.value){ const d=new Date(); d.setMonth(d.getMonth()-1); sm.value = d.getFullYear()+'-'+osPad(d.getMonth()+1); }
   await osRefreshMonths();
 }
 async function osRefreshMonths(selectMonth){
@@ -4422,117 +4416,132 @@ async function osReadPdf(file){
   return cases;
 }
 
-/* ---------- 사이트(접수 관리) 목록 붙여넣기 읽기 ---------- */
-function osParseSiteList(text){
-  const L = String(text||'').replace(/\r/g,'').replace(/\t/g,'\n').split('\n').map(s=>s.trim()).filter(Boolean);
-  const rows=[];
-  for(let i=0;i<L.length-8;i++){
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(L[i]) || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(L[i+1])) continue;
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(L[i+2])) continue;
-    let k = i+3; if(/^(오전|오후)$/.test(L[k])) k++;
-    const patient=L[k], clinic=L[k+1], doctor=L[k+2], lab=L[k+3];
-    let j=k+4; const pl=[];
-    while(j<L.length && L[j]!=='+' && pl.length<8){ pl.push(L[j]); j++; }
-    const prosth = pl.join(' ').replace(/\[[^\]]*\]/g,'').replace(/\s+/g,' ').trim();
-    // 치식 칸: + ... + + ... +  (플러스 4개) 다음 토큰이 수량
-    let plus=0, q=j;
-    while(q<L.length && plus<4){ if(L[q]==='+') plus++; q++; }
-    // '+' 가 한 토큰에 붙어 있는 경우 대비 — 4번째 '+' 이후 첫 숫자
-    const qty = parseInt(L[q],10) || 0;
-    rows.push({ received:L[i], patient:patient.replace(/\s/g,''), clinic, lab, prosth, qty, rework:/재\s*작\s*업|리\s*메\s*이\s*크|remake/i.test(prosth) });
-    i = q;
-  }
-  return rows;
+
+/* ---------- 수기 메모 읽기 ----------
+   0907---------------------
+              지르  템  커스텀
+   최연자    0     3    3
+   최연자-리메이크            ← 개수 없이 이름만 있으면 리메이크(정산 제외)
+*/
+function osParseMemo(text, ym){
+  const year = ym ? Number(ym.slice(0,4)) : new Date().getFullYear();
+  const entries = [], warnings = [];
+  let date = null;
+  String(text||'').replace(/\r/g,'').split('\n').forEach((raw, idx)=>{
+    const line = raw.replace(/[　 ]/g,' ').trim();
+    if(!line) return;
+    const dm = line.match(/^(\d{2})(\d{2})(?=\D|$)/);
+    if(dm && Number(dm[1])>=1 && Number(dm[1])<=12 && Number(dm[2])>=1 && Number(dm[2])<=31 && !/\d\s+\d/.test(line.slice(0,12))){
+      date = `${year}-${dm[1]}-${dm[2]}`; return;
+    }
+    if(/^총\s*\d+\s*케이스/.test(line) || /^(지르|템|커스텀)(\s|$)/.test(line) || /^[-=_\s]+$/.test(line)) return;
+    let m = line.match(/^(.+?)\s*[-–]?\s*(리메이크|재작업)\s*$/);
+    if(m){ entries.push({ date, patient:m[1].replace(/[\s-]+$/,''), rework:true, line:idx+1 }); return; }
+    m = line.match(/^([^\d\s][^\d]*?)\s+(\d+)\s+(\d+)\s+(\d+)\s*$/);
+    if(m){
+      if(!date){ warnings.push(`${idx+1}번째 줄: 날짜(0907 형식) 앞에 있는 내용이라 건너뛰었습니다 — ${line}`); return; }
+      entries.push({ date, patient:m[1].trim(), jireu:+m[2], tem:+m[3], custom:+m[4], units:+m[2]+(+m[3]), rework:false, line:idx+1 }); return;
+    }
+    warnings.push(`${idx+1}번째 줄을 이해하지 못했습니다 — ${line}`);
+  });
+  return { entries, warnings };
 }
 
-/* ---------- PDF 케이스 + 사이트 목록 결합 → 전치/구치/커스텀 ---------- */
+/* ---------- 메모 ↔ PDF 대조 ---------- */
 const osNorm = s => String(s||'').replace(/\s/g,'').toLowerCase();
-function osClinicMatch(a,b){ a=osNorm(a); b=osNorm(b); return !a||!b||a===b||a.includes(b)||b.includes(a); }
-function osBuildCases(pdfCases, site, designerLab){
-  const siteRows = site || [];
-  const used = new Set();
-  const out = pdfCases.map(c=>{
-    const t = osTeethCount(c.teethLines);
-    const isImplant = /implant/i.test(c.prosth);
-    const o = { ...c, teeth:c.teethLines.join(' / '), ant:t.ant, post:t.post, units:t.units,
-      isImplant, received:null, custom:0, cstatus:'none', include:true,
-      unitWarn: t.units!==c.qty };
-    if(siteRows.length){
-      // 같은 환자·치과·보철물·수량인 디자인외주 행에서 접수일을 찾는다
-      const cands = siteRows.map((r,i)=>({r,i})).filter(({r,i})=>!used.has(i) && r.patient===c.patient && osClinicMatch(r.clinic,c.clinic)
-        && osNorm(r.lab).includes(osNorm(designerLab)) && osNorm(r.prosth)===osNorm(c.prosth) && r.qty===c.qty);
-      const hit = cands[0] || siteRows.map((r,i)=>({r,i})).find(({r,i})=>!used.has(i) && r.patient===c.patient && osClinicMatch(r.clinic,c.clinic) && osNorm(r.lab).includes(osNorm(designerLab)) && osNorm(r.prosth).replace(/\(.*?\)/g,'')===osNorm(c.prosth).replace(/\(.*?\)/g,''));
-      if(hit){ used.add(hit.i); o.received = hit.r.received; }
+const osBaseName = s => String(s||'').replace(/\s/g,'').replace(/[A-Za-z]$/,'');   // 이용재B → 이용재
+function osSolve(entries, cases){
+  // entries: [{u,z,t}] / cases: [{q,kind,rework}] → 가장 그럴듯한 배정(entries 별 case 인덱스 배열, 못 맞추면 null)
+  const n = cases.length;
+  let best = null, bestScore = -1e12, count = 0;
+  const subsets = (avail, target)=>{
+    const out = [];
+    const rec = (i, sum, pick)=>{
+      if(sum===target){ out.push(pick.slice()); return; }
+      if(sum>target || i>=avail.length) return;
+      for(let k=i;k<avail.length;k++){ pick.push(avail[k]); rec(k+1, sum+cases[avail[k]].q, pick); pick.pop(); }
+    };
+    rec(0,0,[]); return out;
+  };
+  const go = (ei, used, assign, penalty)=>{
+    if(count>5000) return; count++;
+    if(ei===entries.length){
+      let left = 0, diff = 0;
+      cases.forEach((c,i)=>{ if(!used.has(i) && c.rework) left++; });
+      assign.forEach((a,i)=>{ if(!a) return; const z=a.reduce((s,k)=>s+(cases[k].kind==='Z'?cases[k].q:0),0), t=a.reduce((s,k)=>s+(cases[k].kind==='T'?cases[k].q:0),0); diff += Math.abs(entries[i].z-z)+Math.abs(entries[i].t-t); });
+      const score = -penalty*100000 + left*1000 - diff;
+      if(score>bestScore){ bestScore = score; best = assign.slice(); }
+      return;
     }
-    return o;
-  });
-  // 커스텀 판별
-  const groups = new Map();
-  out.forEach(o=>{
-    if(!o.isImplant){ o.cstatus='none'; return; }
-    if(/\+\s*기성|어벗\s*레벨|abutment\s*level/i.test(o.prosth)){ o.cstatus='ready'; o.custom=0; return; }   // 기성 / 어벗레벨
-    const key = o.patient+'|'+osNorm(o.clinic)+'|'+(o.received||'');
-    if(!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(o);
-  });
-  groups.forEach((rows,key)=>{
-    const [pat,,rec] = key.split('|');
-    let comp = 0, hasSite = false;
-    if(siteRows.length){
-      siteRows.forEach(r=>{
-        if(r.patient!==pat) return;
-        if(rec && r.received!==rec) return;
-        if(osNorm(r.lab).includes(osNorm(designerLab))) return;
-        if(/custom(ized)?\s*abutment/i.test(r.prosth) && !/zir/i.test(r.prosth)){ comp += r.qty; hasSite = true; }
-      });
-    }
-    let left = comp;
-    rows.forEach(o=>{
-      const explicit = /\+\s*custom/i.test(o.prosth);
-      if(siteRows.length){
-        if(hasSite){
-          const n = Math.min(left, o.units||o.qty);
-          o.custom = n; left -= n; o.cstatus = n>0 ? 'companion' : 'none';
-          if(explicit && n===0){ o.custom = o.units||o.qty; o.cstatus='explicit'; }
-        } else if(explicit){ o.custom = o.units||o.qty; o.cstatus='explicit'; }
-        else { o.custom = 0; o.cstatus = 'ready?'; }       // 사이트에 커스텀 건 없음 → 기성/어벗레벨로 판단
-      } else {
-        if(explicit){ o.custom = o.units||o.qty; o.cstatus='explicit'; }
-        else { o.custom = 0; o.cstatus = 'unknown'; }       // 사이트 목록이 없으면 판별 불가
-      }
+    const avail = []; for(let i=0;i<n;i++) if(!used.has(i)) avail.push(i);
+    subsets(avail, entries[ei].u).forEach(sub=>{
+      const u2 = new Set(used); sub.forEach(k=>u2.add(k));
+      go(ei+1, u2, assign.concat([sub]), penalty);
+    });
+    go(ei+1, used, assign.concat([null]), penalty+1);
+  };
+  go(0,new Set(),[],0);
+  return best || entries.map(()=>null);
+}
+function osMatchMemo(memoEntries, pdfCases){
+  const byP = new Map();
+  pdfCases.forEach(c=>{ const k = osBaseName(c.patient); if(!byP.has(k)) byP.set(k, []); byP.get(k).push(c); });
+  const out = [], reworkRows = [];
+  const names = [...new Set(memoEntries.map(e=>osBaseName(e.patient)))];
+  names.forEach(nm=>{
+    const mine = memoEntries.filter(e=>osBaseName(e.patient)===nm);
+    const bill = mine.filter(e=>!e.rework);
+    mine.filter(e=>e.rework).forEach(e=>reworkRows.push(e));
+    const cs = (byP.get(nm)||[]).map(c=>({ c, q:c.qty, kind:/temp/i.test(c.prosth)?'T':'Z', rework:c.rework }));
+    const asg = osSolve(bill.map(e=>({ u:e.units, z:e.jireu, t:e.tem })), cs);
+    bill.forEach((e,i)=>{
+      const picked = (asg[i]||[]).map(k=>cs[k].c);
+      let ant=0, post=0;
+      picked.forEach(c=>{ ant+=c.ant; post+=c.post; });
+      const row = { date:e.date, patient:e.patient, jireu:e.jireu, tem:e.tem, units:e.units, custom:e.custom, include:true, cases:picked,
+        teeth: picked.map(c=>c.teeth).join(' , '), prosth: picked.map(c=>c.prosth.replace(/\(ModelLess\)/,'').trim()).join(' + '),
+        completed: picked.length ? picked[0].completed : null, status:'ok', ant, post };
+      if(!picked.length){ row.status = (byP.get(nm)||[]).length ? 'nomatch' : 'nopdf'; row.ant = 0; row.post = e.units; }
+      else if(ant+post !== e.units){ row.status='diff'; }
+      if(e.custom > e.units) row.status = 'custom';
+      picked.forEach(c=>c.__used = true);
+      out.push(row);
     });
   });
-  return out;
+  // 메모 순서(날짜·줄 순)로 정렬
+  out.sort((a,b)=> a.date===b.date ? 0 : (a.date<b.date?-1:1));
+  const unused = pdfCases.filter(c=>!c.__used);
+  return { rows: out, rework: reworkRows, unused };
 }
 
 /* ---------- 화면 ---------- */
-const OS_CSTATUS = {
-  none:      ['pill retired','커스텀 없음'],
-  ready:     ['pill retired','기성(+기성)'],
-  'ready?':  ['pill retired','기성/어벗레벨(커스텀 건 없음)'],
-  companion: ['pill active','커스텀 설계(어버트먼트 건 확인)'],
-  explicit:  ['pill active','커스텀(+Custom 표기)'],
-  unknown:   ['pill review','확인 필요(사이트 목록 필요)'],
-  manual:    ['pill review','직접 수정']
+const OS_ST = {
+  ok:      ['pill active','PDF와 일치'],
+  diff:    ['pill review','수량 불일치'],
+  nomatch: ['pill review','PDF 케이스를 못 맞춤'],
+  nopdf:   ['pill review','PDF에 없음'],
+  custom:  ['pill review','커스텀이 수량보다 큼']
 };
 async function osAnalyzeCases(){
   const msg = document.getElementById('osCaseMsg');
   const f = document.getElementById('osPdfFile').files[0];
-  if(!f){ msg.textContent = 'AI 정산 PDF 파일을 선택해 주세요.'; return; }
-  msg.textContent = 'PDF를 읽는 중…';
+  const memoText = document.getElementById('osMemoText').value;
+  const ym = document.getElementById('osSettleMonth').value;
+  if(!/^\d{4}-\d{2}$/.test(ym)){ msg.textContent = '정산 월을 먼저 선택해 주세요.'; return; }
+  if(!memoText.trim()){ msg.textContent = '수기 메모(날짜별 지르/템/커스텀)를 붙여넣어 주세요.'; return; }
+  const memo = osParseMemo(memoText, ym);
+  if(!memo.entries.length){ msg.textContent = '메모에서 인식된 줄이 없습니다. 0907----- 같은 날짜 줄과 "이름 지르 템 커스텀" 줄이 필요합니다.'; return; }
+  let pdf = [];
   try{
-    const designerLab = (document.getElementById('osDesignerLab').value||'디자인외주').trim();
-    let pdf = await osReadPdf(f);
-    pdf = pdf.filter(c=>c.patient && c.qty>0);
-    if(!pdf.length){ msg.textContent = 'PDF에서 케이스를 찾지 못했습니다. AI 정산 프로그램에서 내려받은 PDF가 맞는지 확인해 주세요.'; return; }
-    const site = osParseSiteList(document.getElementById('osSiteText').value);
-    OS_CASES = { rows: osBuildCases(pdf, site, designerLab), siteCount: site.length, designerLab };
+    if(f){ msg.textContent = 'PDF를 읽는 중…'; pdf = (await osReadPdf(f)).filter(c=>c.patient && c.qty>0).map(c=>{ const t=osTeethCount(c.teethLines); return { ...c, teeth:c.teethLines.join(' / '), ant:t.ant, post:t.post, units:t.units }; }); }
+    const res = osMatchMemo(memo.entries, pdf);
+    OS_CASES = { ...res, warnings: memo.warnings, hasPdf: !!f, pdfCount: pdf.length };
     msg.textContent = '';
     osRenderCases();
   }catch(e){ console.error(e); msg.textContent = '분석 실패: '+e.message; }
 }
 function osCaseTotals(){
-  const inc = OS_CASES.rows.filter(r=>r.include && (document.getElementById('osIncRework').checked || !r.rework));
+  const inc = OS_CASES.rows.filter(r=>r.include);
   const t = { n:inc.length, ant:0, post:0, custom:0 };
   inc.forEach(r=>{ t.ant+=r.ant; t.post+=r.post; t.custom+=r.custom; });
   return { t, inc };
@@ -4544,37 +4553,40 @@ function osRenderCases(){
   const pr = osCurrentPriceInputs();
   const rows = OS_CASES.rows;
   document.getElementById('osCaseBody').innerHTML = rows.map((r,i)=>{
-    const st = OS_CSTATUS[r.cstatus] || OS_CSTATUS.none;
-    const warn = r.unitWarn ? `<span class="pill review" title="치식에서 센 개수 ${r.units}개와 수량 ${r.qty}개가 다릅니다">수량 확인</span> ` : '';
+    const st = OS_ST[r.status] || OS_ST.ok;
+    const sum = r.ant + r.post;
     return `<tr class="${r.include?'':'dim'}">
       <td><input type="checkbox" ${r.include?'checked':''} onchange="OS_CASES.rows[${i}].include=this.checked;osRenderCases()" style="width:auto;margin:0;"></td>
-      <td>${osEsc(r.received||r.completed)}${r.received?'':' <span class="small-note">(완성일)</span>'}</td>
-      <td>${osEsc(r.patient)}</td><td class="small-note">${osEsc(r.clinic)}</td>
-      <td>${osEsc(r.prosth)}${r.rework?' ':''}</td><td>${osEsc(r.teeth)}</td><td>${r.qty}</td>
+      <td>${osEsc(r.date)}</td><td>${osEsc(r.patient)}</td>
+      <td class="small-note">${osEsc(r.prosth)||'-'}</td><td>${osEsc(r.teeth)||'-'}</td>
+      <td class="small-note">지르 ${r.jireu} · 템 ${r.tem}</td>
       <td><input type="number" min="0" value="${r.ant}" style="width:56px;margin:0;" onchange="osCaseEdit(${i},'ant',this.value)"></td>
       <td><input type="number" min="0" value="${r.post}" style="width:56px;margin:0;" onchange="osCaseEdit(${i},'post',this.value)"></td>
       <td><input type="number" min="0" value="${r.custom}" style="width:56px;margin:0;" onchange="osCaseEdit(${i},'custom',this.value)"></td>
-      <td>${warn}<span class="${st[0]}">${st[1]}</span></td></tr>`;
+      <td><span class="${st[0]}">${st[1]}</span>${(r.status==='diff'||r.status==='ok') && sum!==r.units ? ` <span class="small-note">메모 ${r.units}개 / 전+구 ${sum}</span>`:''}</td></tr>`;
   }).join('');
   const { t } = osCaseTotals();
   const gross = t.ant*pr.ant + t.post*pr.post + t.custom*pr.custom;
   const w = osWithholding(gross, false);
-  const unk = rows.filter(r=>r.cstatus==='unknown').length;
+  const bad = rows.filter(r=>r.status!=='ok').length;
   let html = `<b>${t.n}건</b> · 전치 ${t.ant} · 구치 ${t.post} · 커스텀 ${t.custom} → 지급총액 <b>${osFmt(gross)}원</b> (세전) · 실지급 약 ${osFmt(w.net)}원`;
-  if(unk) html += `<br><span style="color:#b45309;">⚠ 임플란트 ${unk}건은 커스텀 여부를 알 수 없어 0으로 두었습니다. 아래 "사이트 목록"을 붙여넣고 다시 분석하면 자동으로 판별됩니다.</span>`;
-  if(OS_CASES.siteCount) html += `<br><span class="small-note">사이트 목록 ${OS_CASES.siteCount}행을 읽었고, ${rows.filter(r=>r.received).length}/${rows.length}건의 접수일을 찾았습니다.</span>`;
-  const noRecv = rows.filter(r=>!r.received).length;
-  if(OS_CASES.siteCount && noRecv) html += `<br><span class="small-note">접수일을 못 찾은 ${noRecv}건은 완성일로 표시했습니다(정산 월은 위에서 고른 월로 저장).</span>`;
+  html += `<br><span class="small-note">메모 ${rows.length}건 중 PDF와 일치 ${rows.length-bad}건`+(OS_CASES.rework.length?` · 리메이크 ${OS_CASES.rework.length}건은 정산 제외`:'')+`</span>`;
+  if(bad) html += `<br><span style="color:#b45309;">⚠ ${bad}건은 PDF와 맞지 않습니다(오른쪽 판별 칸). PDF에 없는 건은 메모의 개수를 구치로 임시 반영했으니 전치/구치를 직접 고쳐 주세요.</span>`;
+  if(!OS_CASES.hasPdf) html += `<br><span style="color:#b45309;">⚠ PDF 없이 분석해서 전치/구치를 알 수 없습니다. 전부 구치로 임시 반영했습니다.</span>`;
+  if(OS_CASES.unused.length){
+    const names = [...new Set(OS_CASES.unused.map(c=>c.patient))];
+    html += `<br><span class="small-note">PDF에는 있지만 메모에 없는 케이스 ${OS_CASES.unused.length}건(${osEsc(names.slice(0,12).join(', '))}${names.length>12?' 외':''})은 정산에 넣지 않았습니다.</span>`;
+  }
+  if(OS_CASES.warnings.length) html += `<br><span class="small-note">${OS_CASES.warnings.map(osEsc).join('<br>')}</span>`;
   document.getElementById('osCaseSummary').innerHTML = html;
 }
 function osCaseEdit(i, k, v){
   const r = OS_CASES.rows[i]; r[k] = Math.max(0, parseInt(v,10)||0);
-  if(k==='custom') r.cstatus='manual';
+  if(k==='ant'||k==='post'){ if(r.status!=='ok') {} }
   osRenderCases();
 }
 function osCancelCases(){ OS_CASES=null; document.getElementById('osCaseCard').classList.add('hidden'); }
 
-function osCaseKey(r){ return [r.patient, osNorm(r.clinic), osNorm(r.prosth), osNorm(r.teeth), r.completed].join('|'); }
 async function osSaveCases(){
   if(!OS_CASES) return;
   const ym = document.getElementById('osSettleMonth').value;
@@ -4582,14 +4594,16 @@ async function osSaveCases(){
   const payee = document.getElementById('osPayee').value.trim();
   if(!payee){ alert('지급 대상(외주 디자이너 이름)을 입력해 주세요.'); return; }
   const inc = osCaseTotals().inc;
-  if(!inc.length){ alert('저장할 케이스가 없습니다.'); return; }
+  if(!inc.length){ alert('저장할 내용이 없습니다.'); return; }
   const lastDay = new Date(Number(ym.slice(0,4)), Number(ym.slice(5,7)), 0).getDate();
   const clamp = d => (d && d.slice(0,7)===ym) ? d : `${ym}-${osPad(lastDay)}`;
-  const rows = inc.map(r=>({
-    payee, year_month:ym, work_date: clamp(r.received || r.completed), received_date: r.received||null, completed_date: r.completed,
-    patient:r.patient, clinic:r.clinic, prosth:r.prosth, teeth:r.teeth, qty:r.qty, is_rework:r.rework,
-    cnt_ant:r.ant, cnt_post:r.post, cnt_custom:r.custom, custom_src:r.cstatus, case_key: ym+'|'+osCaseKey(r)
-  }));
+  const seq = new Map();
+  const rows = inc.map(r=>{
+    const k = r.date+'|'+r.patient; const n = (seq.get(k)||0)+1; seq.set(k,n);
+    return { payee, year_month:ym, work_date:clamp(r.date), received_date:r.date, completed_date:r.completed||null,
+      patient:r.patient, clinic:(r.cases[0]&&r.cases[0].clinic)||null, prosth:r.prosth||null, teeth:r.teeth||null, qty:r.units, is_rework:false,
+      cnt_ant:r.ant, cnt_post:r.post, cnt_custom:r.custom, custom_src:'memo', case_key: ym+'|'+k+'|'+n };
+  });
   try{
     await hrUpsertOutsourceCases(rows);
     await osRecomputeEntries(ym, payee);
@@ -4601,6 +4615,7 @@ async function osSaveCases(){
     alert('저장 실패: '+e.message+hint); console.error(e);
   }
 }
+
 /* 일별 합계(hr_outsource_entries)를 이 달 저장된 케이스 전체로 다시 계산 → 월 정산/급여명세서에 그대로 반영 */
 async function osRecomputeEntries(ym, payee){
   const all = (await hrListOutsourceCasesByMonth(ym)).filter(c=>c.payee===payee);
