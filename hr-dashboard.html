@@ -176,6 +176,19 @@
   .emp-total-row td{background:#f7f9fd;border-top:2px solid var(--border);}
 
 
+
+  /* ---------- 비용결산 검색 / 증감% / 그래프, 외주디자인 ---------- */
+  mark{background:#fff0a8;color:inherit;border-radius:3px;padding:0 1px;}
+  .dl{font-size:11.5px;font-weight:700;white-space:nowrap;}
+  .dl.up{color:#b42323;} .dl.down{color:#006300;} .dl.flat,.dl.na{color:var(--muted);}
+  .cmp-table td div:nth-child(2){margin-top:2px;}
+  .chart-card{border:1px solid var(--border);border-radius:14px;padding:14px 16px 8px;margin-top:16px;background:#fcfcfb;}
+  .chart-title{font-weight:700;font-size:14px;margin-bottom:6px;}
+  .chart-svg{width:100%;height:auto;display:block;}
+  .chart-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:2px 0 6px;font-size:12px;color:#52514e;}
+  .chart-legend .lg{display:inline-flex;align-items:center;gap:6px;}
+  .chart-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;}
+
   /* ---------- 인사 서류 (계약서 등) ---------- */
   .doc-wrap{overflow-x:auto;}
   .doc-sheet{width:210mm;box-sizing:border-box;margin:0 auto;padding:14mm;background:#fff;border:1px solid var(--border);box-shadow:0 2px 14px rgba(20,27,51,.06);position:relative;color:#111;font-size:10.5pt;line-height:1.55;font-family:'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif;}
@@ -189,6 +202,7 @@
   .ft th{background:#f3f4f6;width:28mm;text-align:center;font-weight:700;}
   .ft th.sec{background:#e9edf3;text-align:left;width:auto;}
   .ft.grid th,.ft.grid td{padding:2mm 2mm;font-size:9.5pt;text-align:center;width:auto;}
+  .ft.grid.compact th,.ft.grid.compact td{padding:1.2mm 2mm;font-size:9pt;}
   .appr{margin-left:auto;border-collapse:collapse;}
   .appr th,.appr td{border:1px solid #222;width:22mm;text-align:center;font-size:10pt;padding:1mm;background:#fff;}
   .ct{width:100%;border-collapse:collapse;table-layout:auto;}
@@ -300,6 +314,12 @@
        전부 없애서 종이 2장째로 넘어가는 현상을 막습니다. */
     @page{ size:A4; margin:0; }
     body, html{ margin:0; padding:0; }
+    #tab-outsource.tab-panel{ margin:0; padding:0; }
+    #tab-outsource .card{ margin:0 !important; }
+    #tab-outsource .doc-wrap{ overflow:visible; }
+    #tab-outsource .doc-sheet{ border:none; box-shadow:none; margin:0; width:210mm; height:296mm; padding:14mm 16mm; box-sizing:border-box; overflow:hidden; zoom:1; }
+    #tab-outsource .os-sheet{ break-after:page; page-break-after:always; }
+    #tab-outsource .os-sheet:last-child{ break-after:auto; page-break-after:auto; }
     #tab-docs.tab-panel{ margin:0; padding:0; }
     #tab-docs .card{ margin:0 !important; }
     #tab-docs .doc-wrap{ overflow:visible; }
@@ -343,6 +363,7 @@
 
       <div class="navlabel">재무</div>
       <div class="navitem" data-tab="expense"><span class="dot"></span>비용결산</div>
+      <div class="navitem" data-tab="outsource"><span class="dot"></span>외주디자인</div>
     </div>
 
     <div class="logout" onclick="location.href='index.html'">← 메인 관리자 메뉴로</div>
@@ -760,6 +781,86 @@
         <div class="card"><div class="doc-wrap"><div id="docPreview">서류 종류와 직원을 선택해 주세요.</div></div></div>
       </div>
 
+      <!-- ===================== 외주디자인 ===================== -->
+      <div id="tab-outsource" class="tab-panel hidden">
+        <div class="card no-print">
+          <h2>외주 디자인 작업 업로드</h2>
+          <div class="desc">외주 디자이너에게 보낸 작업 폼을 그대로 붙여넣으세요. <b>0907-----</b> 같은 줄은 날짜(9월 7일)로, <b>이름 전치 구치 커스텀</b> 줄은 작업 개수로 인식합니다. 단가 줄(지르(전) 6000원 …)이 있으면 단가도 자동으로 읽습니다. 날짜가 여러 개여도 한 번에 붙여넣을 수 있고, 같은 날짜·같은 작업자를 다시 올리면 새 값으로 덮어씁니다.</div>
+          <div class="grid3">
+            <div><label class="field">지르(전) 전치 단가</label><input type="number" id="osPriceAnt" placeholder="6000"></div>
+            <div><label class="field">지르(구) 구치 단가</label><input type="number" id="osPricePost" placeholder="4000"></div>
+            <div><label class="field">커스텀 단가</label><input type="number" id="osPriceCustom" placeholder="2000"></div>
+          </div>
+          <div class="grid2">
+            <div><label class="field">연도 (날짜에 연도가 없을 때)</label><select id="osYear"></select></div>
+            <div><label class="field">또는 텍스트 파일(.txt) 불러오기</label><input type="file" accept=".txt,.csv,text/plain" onchange="osLoadTextFile(this)"></div>
+          </div>
+          <label class="field">작업 내역 붙여넣기</label>
+          <textarea id="osPaste" rows="11" placeholder="지르(전) 6000원&#10;지르(구) 4000원&#10;커스텀 2000원&#10;&#10;0907---------------------&#10;               전치  구치  커스텀&#10;최연자    0         3        3&#10;김희량    0         4         4"></textarea>
+          <div style="margin-top:8px;"><button class="btn primary" onclick="osAnalyzePaste()">내용 확인</button></div>
+          <div class="small-note" id="osParseMsg"></div>
+        </div>
+
+        <div class="card no-print hidden" id="osReviewCard">
+          <h2>업로드 내용 확인 <span class="pill review" id="osReviewCount"></span></h2>
+          <div style="overflow-x:auto;"><table class="wide-table"><thead><tr><th>날짜</th><th>작업자</th><th>전치</th><th>구치</th><th>커스텀</th><th>금액(세전)</th><th>상태</th></tr></thead><tbody id="osReviewBody"></tbody></table></div>
+          <div class="small-note" id="osReviewWarn"></div>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn primary" onclick="osConfirmSave()">저장하기</button>
+            <button class="btn ghost" onclick="osCancelReview()">취소 (저장하지 않음)</button>
+          </div>
+        </div>
+
+        <div class="card no-print">
+          <h2>월별 정산 · 급여명세서</h2>
+          <div class="toolbar">
+            <label class="field" style="margin:0;">연도-월</label>
+            <select id="osMonthSelect" onchange="osRenderMonth()" style="width:auto;margin-bottom:0;"></select>
+            <label class="field" style="margin:0;">지급일</label>
+            <input type="date" id="osPayDate" onchange="this.dataset.touched=1" style="width:auto;margin-bottom:0;">
+            <label style="display:flex;gap:6px;align-items:center;font-size:13px;white-space:nowrap;"><input type="checkbox" id="osSkipSmall" onchange="osRenderMonth()" style="width:auto;margin:0;"> 소득세 1,000원 미만 소액부징수</label>
+          </div>
+          <div class="small-note" id="osPeriodNote" style="margin:0 0 10px;"></div>
+          <div id="osMonthSummary"></div>
+          <div style="overflow-x:auto;"><table class="wide-table"><thead><tr><th>작업자</th><th>전치</th><th>구치</th><th>커스텀</th><th>지급총액(세전)</th><th>원천징수 3.3%</th><th>실지급액</th><th></th></tr></thead><tbody id="osWorkerBody"></tbody></table></div>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn green" onclick="osShowStatements(null)">이 달 전체 급여명세서 만들기</button>
+            <button class="btn ghost" onclick="osExportMonth()">엑셀로 내보내기</button>
+            <button class="btn danger" onclick="osDeleteMonth()">이 달 내역 전체 삭제</button>
+          </div>
+          <div class="small-note">정산 기준은 매월 1일 ~ 말일이며, 지급총액에서 소득세 3%와 지방소득세 0.3%(원 미만 절사)만 공제해 실지급액을 계산합니다.</div>
+        </div>
+
+        <div class="card no-print">
+          <h2>일별 작업 내역 (수정 / 삭제 / 추가)</h2>
+          <div class="toolbar">
+            <label class="field" style="margin:0;">작업자</label>
+            <select id="osDailyWorker" onchange="osRenderDaily()" style="width:auto;margin-bottom:0;"></select>
+          </div>
+          <div class="toolbar">
+            <input type="date" id="osAddDate" style="width:auto;margin-bottom:0;">
+            <input type="text" id="osAddName" list="osAddWorkerList" placeholder="작업자 이름" style="width:130px;margin-bottom:0;">
+            <datalist id="osAddWorkerList"></datalist>
+            <input type="number" id="osAddAnt" placeholder="전치" min="0" style="width:80px;margin-bottom:0;">
+            <input type="number" id="osAddPost" placeholder="구치" min="0" style="width:80px;margin-bottom:0;">
+            <input type="number" id="osAddCustom" placeholder="커스텀" min="0" style="width:90px;margin-bottom:0;">
+            <button class="btn green sm" onclick="osManualAdd()">+ 직접 추가</button>
+          </div>
+          <div style="overflow-x:auto;"><table class="wide-table"><thead><tr><th>날짜</th><th>작업자</th><th>전치</th><th>구치</th><th>커스텀</th><th>금액(세전)</th><th>단가(전/구/커)</th><th></th></tr></thead><tbody id="osDailyBody"></tbody></table></div>
+        </div>
+
+        <div class="card hidden" id="osStatementCard">
+          <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+            <h2 id="osStatementTitle" style="margin:0;">급여명세서</h2>
+            <div style="display:flex;gap:8px;">
+              <button class="btn green" onclick="osPrintStatements()">인쇄 / PDF 저장</button>
+              <button class="btn ghost" onclick="document.getElementById('osStatementCard').classList.add('hidden');OS_SHOWN=null;">닫기</button>
+            </div>
+          </div>
+          <div class="doc-wrap"><div id="osStatementArea"></div></div>
+        </div>
+      </div>
+
       <!-- ===================== 비용결산 ===================== -->
       <div id="tab-expense" class="tab-panel hidden">
         <div class="card">
@@ -834,6 +935,12 @@
             <button class="btn ghost sm" onclick="exportExpenseList()">엑셀로 내보내기</button>
             <button class="btn danger sm" id="expenseBulkDeleteBtn" onclick="bulkDeleteExpenseRows()" disabled>선택 삭제 (0건)</button>
           </div>
+          <div class="toolbar" style="margin-top:-2px;">
+            <input type="search" id="expenseSearch" placeholder="🔍 거래내용·항목·분류·금액·날짜 검색 (일부 글자만 입력해도 됩니다)" oninput="onExpenseSearchInput()" style="flex:1;min-width:220px;margin-bottom:0;">
+            <label style="display:flex;gap:6px;align-items:center;font-size:13px;white-space:nowrap;"><input type="checkbox" id="expenseSearchAll" onchange="onExpenseSearchInput()" style="width:auto;margin:0;"> 모든 월에서 검색</label>
+            <button class="btn ghost sm" onclick="clearExpenseSearch()">검색 지우기</button>
+          </div>
+          <div class="small-note" id="expenseSearchSummary" style="margin:0 0 10px;"></div>
           <div class="exp-summary" id="expenseAccountSubtotals"></div>
           <div style="overflow-x:auto;">
           <table>
@@ -844,11 +951,12 @@
         </div>
 
         <div class="card">
-          <h2>기간 비교</h2>
+          <h2>기간 비교 · 증감률 · 그래프</h2>
           <div class="toolbar">
             <button class="btn ghost sm" onclick="renderExpenseCompare(3)">최근 3개월</button>
             <button class="btn ghost sm" onclick="renderExpenseCompare(6)">최근 6개월</button>
-            <button class="btn ghost sm" onclick="renderExpenseCompare('year')">연도 전체</button>
+            <button class="btn ghost sm" onclick="renderExpenseCompare(12)">최근 1년</button>
+            <button class="btn ghost sm" onclick="renderExpenseCompare('year')">올해 전체</button>
           </div>
           <div id="expenseCompareView"></div>
         </div>
@@ -890,7 +998,7 @@ function doLogout(){ hrLogout().then(()=>location.href='index.html'); }
 const TAB_TITLES = {
   home:'홈 (생일 캘린더)', company:'회사 설정 & QR', employees:'직원 관리', interview:'면접 결과',
   payroll:'급여이체 엑셀', leave:'연차 계산기', severance:'퇴직금 계산기', cert:'재직증명서', docs:'인사 서류',
-  expense:'비용결산'
+  expense:'비용결산', outsource:'외주디자인'
 };
 function toggleSidebar(){
   const sb = document.getElementById('sidebarEl');
@@ -921,6 +1029,7 @@ document.querySelectorAll('.navitem').forEach(btn=>{
     if(tab==='employees') renderEmpTable();
     if(tab==='interview') renderSubmissions();
     if(tab==='expense') initExpenseTab();
+    if(tab==='outsource') initOutsourceTab();
   });
 });
 
@@ -2538,49 +2647,6 @@ async function renderExpenseMonth(){
   renderExpenseGroups(records, document.getElementById('expenseMonthGroups'));
 }
 
-async function renderExpenseCompare(kind){
-  const box = document.getElementById('expenseCompareView');
-  let months;
-  if(kind==='year'){
-    const y = new Date().getFullYear();
-    months = EXPENSE_MONTHS.filter(m=>m.startsWith(String(y)));
-  } else {
-    months = EXPENSE_MONTHS.slice(0, kind);
-  }
-  if(!months || months.length===0){
-    box.innerHTML = '<div class="small-note">비교할 저장된 데이터가 없습니다.</div>';
-    return;
-  }
-  box.innerHTML = '불러오는 중...';
-  const records = await hrListExpenseRecordsByMonths(months);
-  const cats = {};
-  records.forEach(r=>{
-    const g = r.major_category || '미분류';
-    if(!cats[g]) cats[g] = {};
-    cats[g][r.year_month] = (cats[g][r.year_month]||0) + Number(r.amount_out||0) - Number(r.amount_in||0);
-  });
-  const monthsSorted = [...months].sort();
-  const catNames = Object.keys(cats).sort();
-  const colTotals = {}; monthsSorted.forEach(m=>colTotals[m]=0);
-  let grand = 0;
-  let rowsHtml = '';
-  catNames.forEach(g=>{
-    let rowTotal = 0;
-    const tds = monthsSorted.map(m=>{
-      const v = cats[g][m] || 0;
-      rowTotal += v; colTotals[m] += v;
-      return `<td>${fmtWon2(v)}</td>`;
-    }).join('');
-    grand += rowTotal;
-    rowsHtml += `<tr><td>${g}</td>${tds}<td style="font-weight:700;">${fmtWon2(rowTotal)}</td></tr>`;
-  });
-  rowsHtml += `<tr class="emp-total-row"><td style="font-weight:700;">합계</td>${
-    monthsSorted.map(m=>`<td style="font-weight:700;">${fmtWon2(colTotals[m])}</td>`).join('')
-  }<td style="font-weight:700;">${fmtWon2(grand)}</td></tr>`;
-  const thead = `<tr><th>대분류</th>${monthsSorted.map(m=>`<th>${m}</th>`).join('')}<th>합계</th></tr>`;
-  box.innerHTML = `<div style="overflow-x:auto;"><table><thead>${thead}</thead><tbody>${rowsHtml}</tbody></table></div>`;
-}
-
 /* ---------------------- 결산확인리스트 (통장별 조회 + 수정/추가/삭제) ---------------------- */
 function renderAccountSubtotals(allRecords){
   const box = document.getElementById('expenseAccountSubtotals');
@@ -2596,43 +2662,6 @@ function renderAccountSubtotals(allRecords){
 }
 
 function fmtDateInput(d){ return new Date(d).toISOString().slice(0,10); }
-
-async function renderExpenseList(){
-  const m = document.getElementById('expenseListMonthSelect').value;
-  const accFilter = document.getElementById('expenseListAccountFilter').value;
-  const tbody = document.getElementById('expenseListBody');
-  if(!m){
-    tbody.innerHTML = '<tr><td colspan="9" class="small-note">저장된 데이터가 없습니다. 위에서 거래내역 엑셀을 업로드하거나 "거래 수동 추가"로 입력해 주세요.</td></tr>';
-    document.getElementById('expenseAccountSubtotals').innerHTML = '';
-    return;
-  }
-  tbody.innerHTML = '<tr><td colspan="9">불러오는 중...</td></tr>';
-  const allRecords = await hrListExpenseRecordsByMonths([m]);
-  renderAccountSubtotals(allRecords);
-  const records = accFilter ? allRecords.filter(r=>r.account_label===accFilter) : allRecords;
-  EXPENSE_LIST_CACHE = records;
-  EXPENSE_SELECTED_IDS.clear();
-  updateExpenseBulkDeleteBtn();
-  if(records.length===0){
-    tbody.innerHTML = '<tr><td colspan="9" class="small-note">해당 조건의 거래내역이 없습니다.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = records.map(r=>`
-    <tr data-id="${r.id}">
-      <td><input type="checkbox" class="expenseRowCheck" data-id="${r.id}" onchange="onExpenseRowCheckChange()"></td>
-      <td>${new Date(r.txn_date).toLocaleDateString('ko-KR')}</td>
-      <td>${r.account_label||'-'}</td>
-      <td>${r.major_category||'-'}</td>
-      <td>${r.item_name||'-'}</td>
-      <td>${r.payee_name||'-'}</td>
-      <td>${r.amount_out?fmtWon2(r.amount_out):'-'}</td>
-      <td>${r.amount_in?fmtWon2(r.amount_in):'-'}</td>
-      <td>
-        <button class="btn ghost sm" onclick="editExpenseRow('${r.id}')">수정</button>
-        <button class="btn danger sm" onclick="deleteExpenseRow('${r.id}')">삭제</button>
-      </td>
-    </tr>`).join('');
-}
 
 /* ---------------------- 결산확인리스트 체크박스 선택 / 전체 삭제 ---------------------- */
 let EXPENSE_SELECTED_IDS = new Set();
@@ -3576,6 +3605,664 @@ async function applyDesign(){
   msg += '\n\n※ 신규 등록 직원은 실수령급여·은행·계좌·성별이 비어 있습니다. (주민등록번호는 읽지 않았습니다) 직원 관리에서 보완해 주세요.';
   document.getElementById('designMsg').textContent = msg.split('\n')[0];
   alert(msg);
+}
+
+</script>
+<script>
+/* =====================================================================
+   비용결산 보완 — (1) 거래내역 부분 검색  (2) 기간 비교: 전월 대비 증감% + 그래프
+   ===================================================================== */
+const EXP_COLORS = ['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#898781']; // 6번째는 "기타"(회색)
+const xE = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const xWon = n => Number(n||0).toLocaleString('ko-KR')+'원';
+function xShort(n){
+  const a = Math.abs(n), s = n<0 ? '-' : '';
+  if(a>=1e8) return s+(a/1e8).toFixed(a>=1e9?0:1).replace(/\.0$/,'')+'억';
+  if(a>=1e4) return s+Math.round(a/1e4).toLocaleString('ko-KR')+'만';
+  return s+Math.round(a).toLocaleString('ko-KR');
+}
+
+/* ---------------------- 1) 거래내역 검색 ---------------------- */
+let EXPENSE_RAW = [];        // 지금 불러와 있는 거래 (선택한 월, 또는 "모든 월에서 검색" 시 전체)
+let EXPENSE_RAW_KEY = '';
+let EXPENSE_SEARCH_TIMER = null;
+
+function onExpenseSearchInput(){
+  clearTimeout(EXPENSE_SEARCH_TIMER);
+  EXPENSE_SEARCH_TIMER = setTimeout(()=>{
+    const q = (document.getElementById('expenseSearch').value||'').trim();
+    const wantAll = document.getElementById('expenseSearchAll').checked && !!q;
+    const key = wantAll ? 'ALL' : document.getElementById('expenseListMonthSelect').value;
+    if(key !== EXPENSE_RAW_KEY) renderExpenseList(); else renderExpenseListView();
+  }, 120);
+}
+function clearExpenseSearch(){
+  document.getElementById('expenseSearch').value = '';
+  onExpenseSearchInput();
+}
+function expenseHaystack(r){
+  const d = r.txn_date ? String(r.txn_date).slice(0,10) : '';
+  const [yy,mm,dd] = d.split('-');
+  const parts = [d, d.replace(/-/g,''), (mm?`${Number(mm)}월 ${Number(dd)}일`:''), (mm?`${Number(mm)}/${Number(dd)}`:''),
+    r.account_label, r.major_category, r.item_name, r.payee_name,
+    r.amount_out ? String(r.amount_out) : '', r.amount_out ? Number(r.amount_out).toLocaleString('ko-KR') : '',
+    r.amount_in ? String(r.amount_in) : '', r.amount_in ? Number(r.amount_in).toLocaleString('ko-KR') : ''];
+  return parts.filter(Boolean).join(' | ').toLowerCase();
+}
+function expenseTokens(){
+  return (document.getElementById('expenseSearch').value||'').toLowerCase().split(/\s+/).filter(Boolean);
+}
+function xHighlight(text, tokens){
+  const s = String(text==null?'':text);
+  if(!s) return '-';
+  if(!tokens.length) return xE(s);
+  const re = new RegExp('('+tokens.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')','gi');
+  return s.split(re).map((p,i)=> i%2 ? `<mark>${xE(p)}</mark>` : xE(p)).join('');
+}
+
+async function renderExpenseList(){
+  const m = document.getElementById('expenseListMonthSelect').value;
+  const tbody = document.getElementById('expenseListBody');
+  const q = (document.getElementById('expenseSearch').value||'').trim();
+  const wantAll = document.getElementById('expenseSearchAll').checked && !!q;
+  if(!m && !wantAll){
+    EXPENSE_RAW = []; EXPENSE_RAW_KEY = '';
+    tbody.innerHTML = '<tr><td colspan="9" class="small-note">저장된 데이터가 없습니다. 위에서 거래내역 엑셀을 업로드하거나 "거래 수동 추가"로 입력해 주세요.</td></tr>';
+    document.getElementById('expenseAccountSubtotals').innerHTML = '';
+    document.getElementById('expenseSearchSummary').textContent = '';
+    return;
+  }
+  tbody.innerHTML = '<tr><td colspan="9">불러오는 중...</td></tr>';
+  EXPENSE_RAW_KEY = wantAll ? 'ALL' : m;
+  EXPENSE_RAW = await hrListExpenseRecordsByMonths(wantAll ? EXPENSE_MONTHS : [m]);
+  renderExpenseListView();
+}
+
+function renderExpenseListView(){
+  const tbody = document.getElementById('expenseListBody');
+  const accFilter = document.getElementById('expenseListAccountFilter').value;
+  const tokens = expenseTokens();
+  const isAll = EXPENSE_RAW_KEY === 'ALL';
+  if(!isAll) renderAccountSubtotals(EXPENSE_RAW); else document.getElementById('expenseAccountSubtotals').innerHTML = '';
+  let records = accFilter ? EXPENSE_RAW.filter(r=>r.account_label===accFilter) : EXPENSE_RAW;
+  if(tokens.length) records = records.filter(r=>{ const h = expenseHaystack(r); return tokens.every(t=>h.includes(t)); });
+  EXPENSE_LIST_CACHE = records;
+  EXPENSE_SELECTED_IDS.clear();
+  updateExpenseBulkDeleteBtn();
+  const sum = document.getElementById('expenseSearchSummary');
+  if(tokens.length){
+    const out = records.reduce((s,r)=>s+Number(r.amount_out||0),0), inn = records.reduce((s,r)=>s+Number(r.amount_in||0),0);
+    sum.innerHTML = `${isAll?'<b>전체 월</b>에서 ':''}검색 결과 <b>${records.length}건</b> · 출금 합계 <b>${xWon(out)}</b>${inn?` · 입금 합계 <b>${xWon(inn)}</b>`:''}`;
+  } else sum.textContent = '';
+  if(records.length===0){
+    tbody.innerHTML = `<tr><td colspan="9" class="small-note">${tokens.length?'검색 결과가 없습니다.':'해당 조건의 거래내역이 없습니다.'}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = records.map(r=>`
+    <tr data-id="${r.id}">
+      <td><input type="checkbox" class="expenseRowCheck" data-id="${r.id}" onchange="onExpenseRowCheckChange()"></td>
+      <td>${new Date(r.txn_date).toLocaleDateString('ko-KR')}</td>
+      <td>${xHighlight(r.account_label, tokens)}</td>
+      <td>${xHighlight(r.major_category, tokens)}</td>
+      <td>${xHighlight(r.item_name, tokens)}</td>
+      <td>${xHighlight(r.payee_name, tokens)}</td>
+      <td>${r.amount_out?xHighlight(Number(r.amount_out).toLocaleString('ko-KR')+'원', tokens):'-'}</td>
+      <td>${r.amount_in?xHighlight(Number(r.amount_in).toLocaleString('ko-KR')+'원', tokens):'-'}</td>
+      <td>
+        <button class="btn ghost sm" onclick="editExpenseRow('${r.id}')">수정</button>
+        <button class="btn danger sm" onclick="deleteExpenseRow('${r.id}')">삭제</button>
+      </td>
+    </tr>`).join('');
+}
+
+/* ---------------------- 2) 기간 비교: 증감% + 그래프 ---------------------- */
+let EXP_CMP = null; // { months:[asc], cats:{분류:{월:값}}, totals:{월:값} }
+
+function pctChange(cur, prev){
+  if(prev===undefined || prev===null || prev===0) return null;
+  return (cur-prev)/Math.abs(prev)*100;
+}
+// 비용 기준: 늘어나면 ▲(주의색), 줄면 ▼(좋음색). 색만으로 구분하지 않고 화살표+부호를 함께 표시합니다.
+function deltaHtml(p){
+  if(p===null || !isFinite(p)) return '<span class="dl na">–</span>';
+  if(Math.abs(p) < 0.05) return '<span class="dl flat">■ 0.0%</span>';
+  return p>0 ? `<span class="dl up">▲ ${p.toFixed(1)}%</span>` : `<span class="dl down">▼ ${Math.abs(p).toFixed(1)}%</span>`;
+}
+function cmgr(first, last, steps){
+  if(!(steps>0) || !(first>0) || !(last>0)) return null;
+  return (Math.pow(last/first, 1/steps)-1)*100;
+}
+
+async function renderExpenseCompare(kind){
+  const box = document.getElementById('expenseCompareView');
+  let months;
+  if(kind==='year'){
+    const y = new Date().getFullYear();
+    months = EXPENSE_MONTHS.filter(m=>m.startsWith(String(y)));
+  } else months = EXPENSE_MONTHS.slice(0, kind);
+  if(!months || months.length===0){ box.innerHTML = '<div class="small-note">비교할 저장된 데이터가 없습니다.</div>'; return; }
+  box.innerHTML = '불러오는 중...';
+  const records = await hrListExpenseRecordsByMonths(months);
+  const asc = [...months].sort();
+  const cats = {}, totals = {};
+  asc.forEach(m=>totals[m]=0);
+  records.forEach(r=>{
+    const g = r.major_category || '미분류';
+    const v = Number(r.amount_out||0) - Number(r.amount_in||0);
+    (cats[g] = cats[g] || {})[r.year_month] = ((cats[g]||{})[r.year_month]||0) + v;
+    totals[r.year_month] = (totals[r.year_month]||0) + v;
+  });
+  EXP_CMP = { months: asc, cats, totals };
+  const catNames = Object.keys(cats).sort((a,b)=> sumObj(cats[b]) - sumObj(cats[a]));
+
+  // 요약 박스
+  const tArr = asc.map(m=>totals[m]||0);
+  const grand = tArr.reduce((s,v)=>s+v,0);
+  const last = tArr[tArr.length-1], prev = tArr.length>1 ? tArr[tArr.length-2] : null;
+  const avgG = cmgr(tArr[0], last, tArr.length-1);
+  const kpi = `<div class="exp-summary">
+    <div class="box"><div class="lbl">기간 총지출 (${asc.length}개월)</div><div class="val">${xWon(grand)}</div></div>
+    <div class="box"><div class="lbl">월 평균</div><div class="val">${xWon(Math.round(grand/asc.length))}</div></div>
+    <div class="box"><div class="lbl">${asc[asc.length-1]} 전월 대비</div><div class="val">${deltaHtml(prev===null?null:pctChange(last,prev))}</div></div>
+    <div class="box"><div class="lbl">월평균 증감률</div><div class="val">${deltaHtml(avgG)}</div></div></div>`;
+
+  // 표: 각 월 금액 + 전월 대비 %
+  let rowsHtml = '';
+  const rowHtml = (name, byMonth, strong)=>{
+    const vals = asc.map(m=>byMonth[m]||0);
+    const tot = vals.reduce((s,v)=>s+v,0);
+    const g = cmgr(vals[0], vals[vals.length-1], vals.length-1);
+    const tds = vals.map((v,i)=>`<td><div>${fmtWon2(v)}</div><div>${i===0 ? '<span class="dl na">–</span>' : deltaHtml(pctChange(v, vals[i-1]))}</div></td>`).join('');
+    return `<tr${strong?' class="emp-total-row"':''}><td style="font-weight:${strong?700:500};">${xE(name)}</td>${tds}<td style="font-weight:700;"><div>${fmtWon2(tot)}</div></td><td>${deltaHtml(g)}</td></tr>`;
+  };
+  catNames.forEach(g=>{ rowsHtml += rowHtml(g, cats[g], false); });
+  rowsHtml += rowHtml('합계', totals, true);
+  const thead = `<tr><th>대분류</th>${asc.map(m=>`<th>${m}</th>`).join('')}<th>합계</th><th>월평균 증감률</th></tr>`;
+
+  const defCat = catNames[0] || '';
+  box.innerHTML = `${kpi}
+    <div style="overflow-x:auto;"><table class="wide-table cmp-table"><thead>${thead}</thead><tbody>${rowsHtml}</tbody></table></div>
+    <div class="small-note">각 금액 아래 %는 <b>전월 대비</b> 증감률입니다 (▲ 증가 · ▼ 감소). 월평균 증감률은 첫 달에서 마지막 달까지를 복리로 환산한 값이며, 저장된 달끼리 비교합니다.</div>
+    <div class="chart-card"><div class="chart-title">월별 총지출 추이 <span class="small-note">(막대 위: 전월 대비 %)</span></div>${barSvg(asc, tArr, EXP_COLORS[0], true)}</div>
+    <div class="chart-card"><div class="chart-title">대분류별 구성 <span class="small-note">(상위 5개 + 기타)</span></div>${stackSvgHtml(asc, cats, catNames)}</div>
+    <div class="chart-card"><div class="chart-title" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">분류별 추이
+      <select id="expCatPick" onchange="renderExpCatChart()" style="width:auto;margin:0;">${catNames.map(c=>`<option ${c===defCat?'selected':''}>${xE(c)}</option>`).join('')}</select></div>
+      <div id="expCatChart"></div></div>`;
+  renderExpCatChart();
+}
+function sumObj(o){ return Object.values(o||{}).reduce((s,v)=>s+v,0); }
+function renderExpCatChart(){
+  const sel = document.getElementById('expCatPick'); const el = document.getElementById('expCatChart');
+  if(!sel || !el || !EXP_CMP) return;
+  const g = sel.value;
+  const vals = EXP_CMP.months.map(m=>(EXP_CMP.cats[g]||{})[m]||0);
+  el.innerHTML = barSvg(EXP_CMP.months, vals, EXP_COLORS[1], true);
+}
+
+/* ----- 막대 그래프 (SVG) : 얇은 막대, 위쪽만 4px 라운드, 가로 격자선은 옅게, 막대 위에 금액·증감% ----- */
+function barSvg(labels, values, color, showDelta){
+  const W = 720, H = 260, L = 8, R = 8, T = 34, B = 30;
+  const n = labels.length, pw = W-L-R, ph = H-T-B;
+  const maxV = Math.max(1, ...values.map(v=>Math.max(v,0)));
+  const nice = niceMax(maxV);
+  const slot = pw/n, bw = Math.min(46, slot*0.58);
+  let g = '';
+  for(let i=0;i<=3;i++){
+    const y = T + ph - ph*i/3;
+    g += `<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="${i===0?'#c3c2b7':'#e1e0d9'}" stroke-width="1"/>`;
+    if(i>0) g += `<text x="${L+2}" y="${y-4}" font-size="10" fill="#898781">${xShort(nice*i/3)}</text>`;
+  }
+  values.forEach((v,i)=>{
+    const x = L + slot*i + (slot-bw)/2;
+    const h = Math.max(0, v)/nice*ph, y = T+ph-h;
+    const r = Math.min(4, h);
+    const d = h<=0 ? '' : `M${x},${T+ph} L${x},${y+r} Q${x},${y} ${x+r},${y} L${x+bw-r},${y} Q${x+bw},${y} ${x+bw},${y+r} L${x+bw},${T+ph} Z`;
+    const p = i>0 ? pctChange(v, values[i-1]) : null;
+    const tip = `${labels[i]}: ${xWon(v)}` + (p!==null ? ` (전월 대비 ${p>0?'+':''}${p.toFixed(1)}%)` : '');
+    g += `<g><title>${xE(tip)}</title>${d?`<path d="${d}" fill="${color}"/>`:''}<rect x="${x-6}" y="${T}" width="${bw+12}" height="${ph}" fill="transparent"/></g>`;
+    g += `<text x="${x+bw/2}" y="${H-10}" font-size="11" text-anchor="middle" fill="#52514e">${xE(labels[i].slice(2))}</text>`;
+    g += `<text x="${x+bw/2}" y="${Math.max(y-16, 12)}" font-size="11" text-anchor="middle" fill="#0b0b0b" font-weight="700">${xShort(v)}</text>`;
+    if(showDelta && p!==null){
+      const col = p>0 ? '#b42323' : (p<0 ? '#006300' : '#52514e');
+      g += `<text x="${x+bw/2}" y="${Math.max(y-3, 24)}" font-size="10" text-anchor="middle" fill="${col}">${p>0?'▲':(p<0?'▼':'■')}${Math.abs(p).toFixed(1)}%</text>`;
+    }
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" class="chart-svg" role="img" aria-label="월별 막대 그래프">${g}</svg>`;
+}
+function niceMax(v){
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  const f = v/p;
+  return (f<=1 ? 1 : f<=2 ? 2 : f<=3 ? 3 : f<=5 ? 5 : 10) * p;
+}
+/* ----- 누적(구성) 막대 : 상위 5개 분류 + 기타. 조각 사이 2px 간격, 범례 항상 표시 ----- */
+function stackSvgHtml(months, cats, catNames){
+  const top = catNames.slice(0,5), rest = catNames.slice(5);
+  const series = top.map((c,i)=>({ name:c, color:EXP_COLORS[i], vals: months.map(m=>Math.max(0,(cats[c]||{})[m]||0)) }));
+  if(rest.length) series.push({ name:'기타', color:EXP_COLORS[5], vals: months.map(m=>rest.reduce((s,c)=>s+Math.max(0,(cats[c]||{})[m]||0),0)) });
+  const W = 720, H = 280, L = 8, R = 8, T = 22, B = 30;
+  const n = months.length, pw = W-L-R, ph = H-T-B;
+  const sums = months.map((_,i)=>series.reduce((s,x)=>s+x.vals[i],0));
+  const nice = niceMax(Math.max(1,...sums));
+  const slot = pw/n, bw = Math.min(46, slot*0.58);
+  let g = '';
+  for(let i=0;i<=3;i++){
+    const y = T + ph - ph*i/3;
+    g += `<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="${i===0?'#c3c2b7':'#e1e0d9'}"/>`;
+    if(i>0) g += `<text x="${L+2}" y="${y-4}" font-size="10" fill="#898781">${xShort(nice*i/3)}</text>`;
+  }
+  months.forEach((m,i)=>{
+    const x = L + slot*i + (slot-bw)/2; let yBase = T+ph;
+    series.forEach((s,si)=>{
+      const h = s.vals[i]/nice*ph; if(h<=0) return;
+      const y = yBase-h;
+      g += `<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${s.color}" stroke="#fcfcfb" stroke-width="2"><title>${xE(m+' · '+s.name+': '+xWon(s.vals[i]))}</title></rect>`;
+      yBase = y;
+    });
+    g += `<text x="${x+bw/2}" y="${H-10}" font-size="11" text-anchor="middle" fill="#52514e">${xE(m.slice(2))}</text>`;
+    g += `<text x="${x+bw/2}" y="${Math.max(yBase-5,12)}" font-size="11" text-anchor="middle" fill="#0b0b0b" font-weight="700">${xShort(sums[i])}</text>`;
+  });
+  const legend = series.map(s=>`<span class="lg"><i style="background:${s.color}"></i>${xE(s.name)}</span>`).join('');
+  return `<div class="chart-legend">${legend}</div><svg viewBox="0 0 ${W} ${H}" class="chart-svg" role="img" aria-label="대분류별 누적 막대 그래프">${g}</svg>`;
+}
+
+</script>
+<script>
+/* =====================================================================
+   외주 디자인 — 작업 내역 붙여넣기 업로드 → 월별 저장 → 작업자별 급여명세서(3.3% 원천징수) 출력
+   ===================================================================== */
+const OS_KINDS = [
+  { key:'ant',    cnt:'cnt_ant',    price:'price_ant',    label:'지르(전) · 전치' },
+  { key:'post',   cnt:'cnt_post',   price:'price_post',   label:'지르(구) · 구치' },
+  { key:'custom', cnt:'cnt_custom', price:'price_custom', label:'커스텀' }
+];
+const OS_DEFAULT_PRICE = { ant:6000, post:4000, custom:2000 };
+let OS_MONTHS = [];
+let OS_ROWS = [];      // 선택한 월의 저장된 작업 내역
+let OS_PARSED = null;  // 업로드 확인 대기 중인 내용
+
+const osNum = v => Number(v||0);
+const osFmt = n => Number(n||0).toLocaleString('ko-KR');
+const osPad = n => String(n).padStart(2,'0');
+function osEntryAmount(r){ return osNum(r.cnt_ant)*osNum(r.price_ant) + osNum(r.cnt_post)*osNum(r.price_post) + osNum(r.cnt_custom)*osNum(r.price_custom); }
+
+/* 원천징수: 소득세 3% + 지방소득세(소득세의 10% = 0.3%), 각각 원 미만 절사 */
+function osWithholding(gross, skipSmall){
+  let tax = Math.floor(gross*0.03);
+  if(skipSmall && tax < 1000) tax = 0;
+  const local = Math.floor(tax*0.1);
+  return { tax, local, total: tax+local, net: gross - tax - local };
+}
+
+/* ---------------------- 탭 초기화 ---------------------- */
+async function initOutsourceTab(){
+  const sel = document.getElementById('osYear');
+  if(!sel.options.length){
+    const y = new Date().getFullYear();
+    for(let i=y+1;i>=y-3;i--){ const o=document.createElement('option'); o.value=i; o.textContent=i+'년'; if(i===y) o.selected=true; sel.appendChild(o); }
+  }
+  const lp = await hrLatestOutsourcePrices();
+  const p = lp ? { ant:lp.price_ant, post:lp.price_post, custom:lp.price_custom } : OS_DEFAULT_PRICE;
+  if(!document.getElementById('osPriceAnt').value){
+    document.getElementById('osPriceAnt').value = p.ant;
+    document.getElementById('osPricePost').value = p.post;
+    document.getElementById('osPriceCustom').value = p.custom;
+  }
+  await osRefreshMonths();
+}
+async function osRefreshMonths(selectMonth){
+  OS_MONTHS = await hrListOutsourceMonths();
+  const sel = document.getElementById('osMonthSelect');
+  const cur = selectMonth || sel.value;
+  sel.innerHTML = OS_MONTHS.map(m=>`<option value="${m}">${m}</option>`).join('');
+  if(cur && OS_MONTHS.includes(cur)) sel.value = cur;
+  await osRenderMonth();
+}
+
+/* ---------------------- 붙여넣기 파싱 ---------------------- */
+function osParseText(text, baseYear, defPrices){
+  const prices = { ant:null, post:null, custom:null };
+  let order = ['ant','post','custom'];
+  let curDate = null;
+  const rows = [], warnings = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const limit = new Date(today); limit.setDate(limit.getDate()+60);
+  const mkDate = (mm,dd,yy)=>{
+    mm = Number(mm); dd = Number(dd);
+    if(mm<1||mm>12||dd<1||dd>31) return null;
+    let y = yy ? Number(yy) : Number(baseYear);
+    let d = new Date(y, mm-1, dd);
+    if(d.getMonth()!==mm-1) return null;
+    if(!yy && d > limit){ y -= 1; d = new Date(y, mm-1, dd); }  // 아직 오지 않은 먼 미래 날짜면 작년으로 간주
+    return `${d.getFullYear()}-${osPad(d.getMonth()+1)}-${osPad(d.getDate())}`;
+  };
+  String(text||'').replace(/\r/g,'').split('\n').forEach((raw, idx)=>{
+    const line = raw.replace(/[ 　]/g,' ').trim();
+    if(!line) return;
+    // 단가 줄: 지르(전) 6000원 / 지르(구) 4000원 / 커스텀 2000원
+    let mp = false, m;
+    if((m = line.match(/지르\s*\(?\s*전\s*\)?\s*[:=]?\s*([\d,]+)/))){ prices.ant = Number(m[1].replace(/,/g,'')); mp = true; }
+    if((m = line.match(/지르\s*\(?\s*구\s*\)?\s*[:=]?\s*([\d,]+)/))){ prices.post = Number(m[1].replace(/,/g,'')); mp = true; }
+    if((m = line.match(/^커스텀\s*[:=]?\s*([\d,]+)\s*원?\s*$/))){ prices.custom = Number(m[1].replace(/,/g,'')); mp = true; }
+    if(mp) return;
+    // 머리글 줄: 전치 구치 커스텀 (열 순서 인식)
+    if(/전치|구치|커스텀/.test(line) && !/\d/.test(line)){
+      const pos = [['ant',line.indexOf('전치')],['post',line.indexOf('구치')],['custom',line.indexOf('커스텀')]].filter(x=>x[1]>=0).sort((a,b)=>a[1]-b[1]).map(x=>x[0]);
+      if(pos.length===3) order = pos;
+      return;
+    }
+    // 날짜 줄
+    let dm = line.match(/^(\d{2})(\d{2})(?!\d)\s*[-–—_=~*.]*\s*$/);
+    if(dm){ const d = mkDate(dm[1],dm[2]); if(d){ curDate = d; return; } }
+    dm = line.match(/(\d{4})[-./](\d{1,2})[-./](\d{1,2})/);
+    if(dm){ const d = mkDate(dm[2],dm[3],dm[1]); if(d){ curDate = d; return; } }
+    dm = line.match(/^(\d{1,2})\s*월\s*(\d{1,2})\s*일?\s*[-–—_=~*:]*$/) || line.match(/^(\d{1,2})[\/.](\d{1,2})\s*[-–—_=~*:]*$/);
+    if(dm){ const d = mkDate(dm[1],dm[2]); if(d){ curDate = d; return; } }
+    // 작업자 줄: 이름 + 숫자 3개
+    const wm = line.match(/^(.*?[^\d\s,])[\s,]+(\d+)[\s,]+(\d+)[\s,]+(\d+)$/);
+    if(wm){
+      if(!curDate){ warnings.push(`${idx+1}행 "${line}" — 위에 날짜 줄(예: 0907-----)이 없어 건너뜀`); return; }
+      const nums = [Number(wm[2]),Number(wm[3]),Number(wm[4])];
+      const cnt = {}; order.forEach((k,i)=>cnt[k]=nums[i]);
+      rows.push({ work_date:curDate, worker_name:wm[1].trim(), cnt_ant:cnt.ant, cnt_post:cnt.post, cnt_custom:cnt.custom });
+      return;
+    }
+    if(/^[-–—_=~*.\s]+$/.test(line)) return;
+    warnings.push(`${idx+1}행 "${line}" — 인식하지 못해 건너뜀`);
+  });
+  // 같은 날짜+작업자가 붙여넣기 안에 여러 번이면 마지막 값만 사용
+  const seen = new Map();
+  rows.forEach(r=>{ const k = r.work_date+'|'+r.worker_name; if(seen.has(k)) warnings.push(`${r.work_date} ${r.worker_name} — 중복 입력, 마지막 값을 사용`); seen.set(k, r); });
+  const uniq = [...seen.values()];
+  const zero = uniq.filter(r=>!r.cnt_ant && !r.cnt_post && !r.cnt_custom).length;
+  const finalRows = uniq.filter(r=>r.cnt_ant || r.cnt_post || r.cnt_custom);
+  return { rows: finalRows, warnings, prices, zeroSkipped: zero };
+}
+
+function osCurrentPriceInputs(){
+  return { ant: osNum(document.getElementById('osPriceAnt').value), post: osNum(document.getElementById('osPricePost').value), custom: osNum(document.getElementById('osPriceCustom').value) };
+}
+function osLoadTextFile(inp){
+  const f = inp.files && inp.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = ()=>{ document.getElementById('osPaste').value = String(rd.result||''); inp.value=''; osAnalyzePaste(); };
+  rd.readAsText(f, 'utf-8');
+}
+async function osAnalyzePaste(){
+  const msg = document.getElementById('osParseMsg');
+  const text = document.getElementById('osPaste').value;
+  if(!text.trim()){ msg.textContent = '작업 내역을 붙여넣어 주세요.'; return; }
+  const parsed = osParseText(text, document.getElementById('osYear').value, osCurrentPriceInputs());
+  if(parsed.prices.ant!=null) document.getElementById('osPriceAnt').value = parsed.prices.ant;
+  if(parsed.prices.post!=null) document.getElementById('osPricePost').value = parsed.prices.post;
+  if(parsed.prices.custom!=null) document.getElementById('osPriceCustom').value = parsed.prices.custom;
+  const pr = osCurrentPriceInputs();
+  if(!parsed.rows.length){
+    msg.innerHTML = '인식된 작업 내역이 없습니다.' + (parsed.warnings.length ? '<br>'+parsed.warnings.map(osEsc).join('<br>') : '');
+    document.getElementById('osReviewCard').classList.add('hidden'); OS_PARSED = null; return;
+  }
+  parsed.rows.forEach(r=>{ r.price_ant = pr.ant; r.price_post = pr.post; r.price_custom = pr.custom; r.year_month = r.work_date.slice(0,7); });
+  const dates = parsed.rows.map(r=>r.work_date).sort();
+  const existing = await hrListOutsourceBetween(dates[0], dates[dates.length-1]);
+  parsed.rows.forEach(r=>{
+    const ex = existing.find(e=>e.work_date===r.work_date && e.worker_name===r.worker_name);
+    r.existing = ex || null;
+    r.same = !!ex && ex.cnt_ant===r.cnt_ant && ex.cnt_post===r.cnt_post && ex.cnt_custom===r.cnt_custom
+      && ex.price_ant===r.price_ant && ex.price_post===r.price_post && ex.price_custom===r.price_custom;
+  });
+  OS_PARSED = parsed;
+  osRenderReview();
+  msg.textContent = '';
+}
+const osEsc = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function osRenderReview(){
+  const p = OS_PARSED; const card = document.getElementById('osReviewCard');
+  if(!p){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  const tot = p.rows.reduce((s,r)=>s+osEntryAmount(r),0);
+  const nNew = p.rows.filter(r=>!r.existing).length, nOver = p.rows.filter(r=>r.existing && !r.same).length, nSame = p.rows.filter(r=>r.same).length;
+  document.getElementById('osReviewCount').textContent = `신규 ${nNew}건 · 덮어쓰기 ${nOver}건` + (nSame ? ` · 동일 ${nSame}건` : '');
+  document.getElementById('osReviewBody').innerHTML = p.rows.map(r=>{
+    const st = !r.existing ? '<span class="pill active">신규</span>'
+      : (r.same ? '<span class="pill retired">동일</span>' : `<span class="pill review">덮어쓰기</span> <span class="small-note">기존 ${r.existing.cnt_ant}/${r.existing.cnt_post}/${r.existing.cnt_custom}</span>`);
+    return `<tr><td>${r.work_date}</td><td>${osEsc(r.worker_name)}</td><td>${r.cnt_ant}</td><td>${r.cnt_post}</td><td>${r.cnt_custom}</td><td>${osFmt(osEntryAmount(r))}원</td><td>${st}</td></tr>`;
+  }).join('') + `<tr class="emp-total-row"><td colspan="5" style="text-align:right;font-weight:700;">합계 (세전)</td><td style="font-weight:700;">${osFmt(tot)}원</td><td></td></tr>`;
+  const w = [];
+  if(p.warnings.length) w.push('확인이 필요한 줄:<br>'+p.warnings.map(osEsc).join('<br>'));
+  if(p.zeroSkipped) w.push(`작업 개수가 모두 0인 ${p.zeroSkipped}건은 저장하지 않습니다.`);
+  const months = [...new Set(p.rows.map(r=>r.year_month))];
+  w.push(`저장되는 월: ${months.join(', ')} · 단가 전치 ${osFmt(p.rows[0].price_ant)}원 / 구치 ${osFmt(p.rows[0].price_post)}원 / 커스텀 ${osFmt(p.rows[0].price_custom)}원`);
+  document.getElementById('osReviewWarn').innerHTML = w.join('<br>');
+}
+function osCancelReview(){ OS_PARSED = null; document.getElementById('osReviewCard').classList.add('hidden'); }
+async function osConfirmSave(){
+  if(!OS_PARSED || !OS_PARSED.rows.length) return;
+  const rows = OS_PARSED.rows.filter(r=>!r.same).map(r=>({
+    work_date:r.work_date, year_month:r.year_month, worker_name:r.worker_name,
+    cnt_ant:r.cnt_ant, cnt_post:r.cnt_post, cnt_custom:r.cnt_custom,
+    price_ant:r.price_ant, price_post:r.price_post, price_custom:r.price_custom }));
+  if(!rows.length){ alert('모두 이미 저장된 동일한 내용입니다.'); osCancelReview(); return; }
+  try{
+    await hrUpsertOutsourceEntries(rows);
+    const month = rows.map(r=>r.year_month).sort().pop();
+    osCancelReview();
+    document.getElementById('osPaste').value = '';
+    document.getElementById('osParseMsg').textContent = `${rows.length}건 저장했습니다.`;
+    await osRefreshMonths(month);
+  } catch(e){
+    const hint = /relation|schema cache|does not exist/i.test(e.message||'') ? '\n\n※ Supabase에서 hr_outsource.sql을 먼저 실행했는지 확인해 주세요.' : '';
+    alert('저장 실패: '+e.message+hint); console.error(e);
+  }
+}
+
+/* ---------------------- 월별 현황 ---------------------- */
+function osGroupByWorker(rows){
+  const by = new Map();
+  rows.forEach(r=>{
+    if(!by.has(r.worker_name)) by.set(r.worker_name, []);
+    by.get(r.worker_name).push(r);
+  });
+  return [...by.entries()].sort((a,b)=>a[0].localeCompare(b[0],'ko')).map(([name, list])=>{
+    // 구분+단가별로 묶어서 수량을 합산 (단가가 달라졌어도 따로 계산)
+    const lines = new Map();
+    list.forEach(r=>OS_KINDS.forEach(k=>{
+      const q = osNum(r[k.cnt]); if(!q) return;
+      const key = k.key+'|'+osNum(r[k.price]);
+      if(!lines.has(key)) lines.set(key, { kind:k, price:osNum(r[k.price]), qty:0 });
+      lines.get(key).qty += q;
+    }));
+    const lineArr = [...lines.values()].sort((a,b)=>OS_KINDS.indexOf(a.kind)-OS_KINDS.indexOf(b.kind) || b.price-a.price);
+    const gross = lineArr.reduce((s,l)=>s+l.qty*l.price,0);
+    const qty = {}; OS_KINDS.forEach(k=>qty[k.key]=list.reduce((s,r)=>s+osNum(r[k.cnt]),0));
+    return { name, list, lines: lineArr, gross, qty };
+  });
+}
+function osSkipSmall(){ return document.getElementById('osSkipSmall').checked; }
+
+async function osRenderMonth(){
+  const ym = document.getElementById('osMonthSelect').value;
+  const sumBox = document.getElementById('osMonthSummary');
+  const body = document.getElementById('osWorkerBody');
+  if(!ym){
+    OS_ROWS = [];
+    sumBox.innerHTML = '<div class="small-note">저장된 데이터가 없습니다. 위에서 작업 내역을 붙여넣어 저장해 주세요.</div>';
+    body.innerHTML = '<tr><td colspan="9" class="small-note">저장된 데이터가 없습니다.</td></tr>';
+    document.getElementById('osDailyBody').innerHTML = '<tr><td colspan="8" class="small-note">저장된 데이터가 없습니다.</td></tr>';
+    return;
+  }
+  OS_ROWS = await hrListOutsourceByMonth(ym);
+  const [y,m] = ym.split('-').map(Number);
+  const last = new Date(y, m, 0).getDate();
+  document.getElementById('osPeriodNote').textContent = `정산 기간: ${y}년 ${m}월 1일 ~ ${m}월 ${last}일`;
+  if(!document.getElementById('osPayDate').dataset.touched){
+    const ny = m===12 ? y+1 : y, nm = m===12 ? 1 : m+1;
+    document.getElementById('osPayDate').value = `${ny}-${osPad(nm)}-10`;
+  }
+  const groups = osGroupByWorker(OS_ROWS);
+  const skip = osSkipSmall();
+  let G = 0, T = 0, N = 0; const Q = { ant:0, post:0, custom:0 };
+  const rowsHtml = groups.map(g=>{
+    const w = osWithholding(g.gross, skip);
+    G += g.gross; T += w.total; N += w.net; OS_KINDS.forEach(k=>Q[k.key]+=g.qty[k.key]);
+    return `<tr><td>${osEsc(g.name)}</td><td>${g.qty.ant}</td><td>${g.qty.post}</td><td>${g.qty.custom}</td>
+      <td>${osFmt(g.gross)}원</td><td>${osFmt(w.total)}원</td><td><b>${osFmt(w.net)}원</b></td>
+      <td><button class="btn primary sm" onclick="osShowStatements(${JSON.stringify(g.name).replace(/"/g,'&quot;')})">명세서</button></td></tr>`;
+  }).join('');
+  body.innerHTML = rowsHtml + `<tr class="emp-total-row"><td style="font-weight:700;">합계</td><td style="font-weight:700;">${Q.ant}</td><td style="font-weight:700;">${Q.post}</td><td style="font-weight:700;">${Q.custom}</td>
+    <td style="font-weight:700;">${osFmt(G)}원</td><td style="font-weight:700;">${osFmt(T)}원</td><td style="font-weight:700;">${osFmt(N)}원</td><td></td></tr>`;
+  sumBox.innerHTML = `<div class="exp-summary">
+    <div class="box"><div class="lbl">${ym} 지급 총액 (세전)</div><div class="val">${osFmt(G)}원</div></div>
+    <div class="box"><div class="lbl">원천징수 3.3%</div><div class="val">${osFmt(T)}원</div></div>
+    <div class="box"><div class="lbl">실제 지급액</div><div class="val">${osFmt(N)}원</div></div>
+    <div class="box"><div class="lbl">작업자 / 작업일수</div><div class="val">${groups.length}명 / ${new Set(OS_ROWS.map(r=>r.work_date)).size}일</div></div></div>`;
+  osRenderDaily();
+  // 이미 열려 있는 명세서가 있으면 새 값으로 갱신
+  if(OS_SHOWN) osShowStatements(OS_SHOWN === '__ALL__' ? null : OS_SHOWN, true);
+}
+
+/* ---------------------- 일별 내역 (수정/삭제/수동 추가) ---------------------- */
+function osRenderDaily(){
+  const filterSel = document.getElementById('osDailyWorker');
+  const names = [...new Set(OS_ROWS.map(r=>r.worker_name))].sort((a,b)=>a.localeCompare(b,'ko'));
+  const curF = filterSel.value;
+  filterSel.innerHTML = '<option value="">전체 작업자</option>' + names.map(n=>`<option>${osEsc(n)}</option>`).join('');
+  if(names.includes(curF)) filterSel.value = curF;
+  document.getElementById('osAddWorkerList').innerHTML = names.map(n=>`<option value="${osEsc(n)}">`).join('');
+  const f = filterSel.value;
+  const rows = OS_ROWS.filter(r=>!f || r.worker_name===f);
+  const body = document.getElementById('osDailyBody');
+  if(!rows.length){ body.innerHTML = '<tr><td colspan="8" class="small-note">내역이 없습니다.</td></tr>'; return; }
+  body.innerHTML = rows.map(r=>`<tr data-id="${r.id}">
+    <td>${r.work_date}</td><td>${osEsc(r.worker_name)}</td><td>${r.cnt_ant}</td><td>${r.cnt_post}</td><td>${r.cnt_custom}</td>
+    <td>${osFmt(osEntryAmount(r))}원</td>
+    <td class="small-note">${osFmt(r.price_ant)}/${osFmt(r.price_post)}/${osFmt(r.price_custom)}</td>
+    <td><button class="btn ghost sm" onclick="osEditRow('${r.id}')">수정</button> <button class="btn danger sm" onclick="osDeleteRow('${r.id}')">삭제</button></td></tr>`).join('');
+}
+function osEditRow(id){
+  const r = OS_ROWS.find(x=>x.id===id); const tr = document.querySelector(`#osDailyBody tr[data-id="${id}"]`);
+  if(!r || !tr) return;
+  const inp = (k,v)=>`<input type="number" min="0" id="osEd_${k}" value="${v}" style="width:70px;margin:0;">`;
+  tr.innerHTML = `<td>${r.work_date}</td><td>${osEsc(r.worker_name)}</td><td>${inp('ant',r.cnt_ant)}</td><td>${inp('post',r.cnt_post)}</td><td>${inp('custom',r.cnt_custom)}</td><td colspan="2"></td>
+    <td><button class="btn primary sm" onclick="osSaveRow('${id}')">저장</button> <button class="btn ghost sm" onclick="osRenderDaily()">취소</button></td>`;
+}
+async function osSaveRow(id){
+  const v = k => Math.max(0, Math.floor(osNum(document.getElementById('osEd_'+k).value)));
+  try{ await hrUpdateOutsourceEntry(id, { cnt_ant:v('ant'), cnt_post:v('post'), cnt_custom:v('custom') }); await osRenderMonth(); }
+  catch(e){ alert('저장 실패: '+e.message); }
+}
+async function osDeleteRow(id){
+  if(!confirm('이 작업 내역을 삭제하시겠습니까?')) return;
+  try{ await hrDeleteOutsourceEntries([id]); await osRefreshMonths(); } catch(e){ alert('삭제 실패: '+e.message); }
+}
+async function osDeleteMonth(){
+  const ym = document.getElementById('osMonthSelect').value;
+  if(!ym || !OS_ROWS.length) return;
+  if(!confirm(`${ym} 월의 작업 내역 ${OS_ROWS.length}건을 모두 삭제하시겠습니까? (되돌릴 수 없습니다)`)) return;
+  try{ await hrDeleteOutsourceEntries(OS_ROWS.map(r=>r.id)); OS_SHOWN = null; document.getElementById('osStatementCard').classList.add('hidden'); await osRefreshMonths(); }
+  catch(e){ alert('삭제 실패: '+e.message); }
+}
+async function osManualAdd(){
+  const date = document.getElementById('osAddDate').value, name = document.getElementById('osAddName').value.trim();
+  const v = id => Math.max(0, Math.floor(osNum(document.getElementById(id).value)));
+  if(!date || !name){ alert('날짜와 작업자 이름을 입력해 주세요.'); return; }
+  const pr = osCurrentPriceInputs();
+  try{
+    await hrUpsertOutsourceEntries([{ work_date:date, year_month:date.slice(0,7), worker_name:name,
+      cnt_ant:v('osAddAnt'), cnt_post:v('osAddPost'), cnt_custom:v('osAddCustom'),
+      price_ant:pr.ant, price_post:pr.post, price_custom:pr.custom }]);
+    ['osAddAnt','osAddPost','osAddCustom'].forEach(i=>document.getElementById(i).value='');
+    await osRefreshMonths(date.slice(0,7));
+  } catch(e){ alert('추가 실패: '+e.message); }
+}
+function osExportMonth(){
+  const ym = document.getElementById('osMonthSelect').value;
+  if(!ym || !OS_ROWS.length){ alert('내보낼 데이터가 없습니다.'); return; }
+  const skip = osSkipSmall();
+  const groups = osGroupByWorker(OS_ROWS);
+  const s1 = groups.map(g=>{ const w = osWithholding(g.gross, skip);
+    return { '작업자':g.name, '전치(지르전)':g.qty.ant, '구치(지르구)':g.qty.post, '커스텀':g.qty.custom, '지급총액(세전)':g.gross, '소득세(3%)':w.tax, '지방소득세(0.3%)':w.local, '실지급액':w.net }; });
+  const s2 = OS_ROWS.map(r=>({ '날짜':r.work_date, '작업자':r.worker_name, '전치':r.cnt_ant, '구치':r.cnt_post, '커스텀':r.cnt_custom,
+    '전치단가':r.price_ant, '구치단가':r.price_post, '커스텀단가':r.price_custom, '금액':osEntryAmount(r) }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(s1), '작업자별 정산');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(s2), '일별 내역');
+  XLSX.writeFile(wb, `외주디자인_${ym}.xlsx`);
+}
+
+/* ---------------------- 급여명세서 ---------------------- */
+let OS_SHOWN = null; // 현재 화면에 열려 있는 명세서 대상 (작업자 이름 또는 '__ALL__')
+function osShowStatements(name, keepScroll){
+  const groups = osGroupByWorker(OS_ROWS);
+  const list = name ? groups.filter(g=>g.name===name) : groups;
+  if(!list.length){ alert('명세서를 만들 내역이 없습니다.'); return; }
+  OS_SHOWN = name || '__ALL__';
+  const ym = document.getElementById('osMonthSelect').value;
+  const [y,m] = ym.split('-').map(Number);
+  const last = new Date(y, m, 0).getDate();
+  const payDate = document.getElementById('osPayDate').value;
+  const C = COMPANY || {};
+  const kd = s => { if(!s) return '&nbsp;&nbsp;&nbsp;&nbsp;년 &nbsp;&nbsp;월 &nbsp;&nbsp;일'; const p=s.split('-').map(Number); return `${p[0]}년 ${p[1]}월 ${p[2]}일`; };
+  const today = new Date(); const issue = `${today.getFullYear()}-${osPad(today.getMonth()+1)}-${osPad(today.getDate())}`;
+  const skip = osSkipSmall();
+  const sheets = list.map(g=>{
+    const w = osWithholding(g.gross, skip);
+    const lineRows = g.lines.length ? g.lines.map(l=>`<tr><td style="text-align:left;">${l.kind.label}</td><td>${osFmt(l.price)}원</td><td>${l.qty}</td><td style="text-align:right;">${osFmt(l.qty*l.price)}원</td></tr>`).join('')
+      : '<tr><td colspan="4">작업 내역 없음</td></tr>';
+    const byDate = {}; g.list.forEach(r=>{ byDate[r.work_date] = r; });
+    const dates = Object.keys(byDate).sort();
+    const daily = dates.map(d=>{ const r = byDate[d];
+      return `<tr><td>${Number(d.slice(5,7))}/${Number(d.slice(8,10))}</td><td>${r.cnt_ant||'-'}</td><td>${r.cnt_post||'-'}</td><td>${r.cnt_custom||'-'}</td><td style="text-align:right;">${osFmt(osEntryAmount(r))}원</td></tr>`; }).join('');
+    const dailyTable = `<table class="ft grid compact" style="margin-bottom:6mm;">
+        <thead><tr><th>날짜</th><th>전치</th><th>구치</th><th>커스텀</th><th>소계</th></tr></thead>
+        <tbody>${daily}</tbody>
+        <tfoot><tr><th>합계</th><td>${g.qty.ant}</td><td>${g.qty.post}</td><td>${g.qty.custom}</td><td style="text-align:right;font-weight:700;">${osFmt(g.gross)}원</td></tr></tfoot>
+      </table>`;
+    const detailOnOwnPage = dates.length > 9;   // 날짜가 많으면 일자별 내역은 2쪽으로
+    const note = `<div style="font-size:9pt;color:#555;margin-bottom:8mm;line-height:1.6;">※ 원천징수세액은 지급액의 3%(소득세)와 그 10%(지방소득세, 0.3%)이며 원 미만은 절사합니다.${skip?' 소득세 1,000원 미만은 소액부징수로 공제하지 않습니다.':''}</div>`;
+    const page1 = `<div class="doc-sheet os-sheet">
+      <h3 class="dt" style="font-size:22pt;">급 여 명 세 서</h3>
+      <div class="dsub" style="margin-bottom:6mm;">외주 디자인 용역 · ${y}년 ${m}월분 (사업소득 3.3% 원천징수)</div>
+      <table class="ft" style="margin-bottom:6mm;">
+        <tr><th>성 명</th><td>${osEsc(g.name)}</td><th>지급 구분</th><td>외주 디자인 용역비</td></tr>
+        <tr><th>정산 기간</th><td>${y}년 ${m}월 1일 ~ ${m}월 ${last}일</td><th>지 급 일</th><td>${kd(payDate)}</td></tr>
+        <tr><th>지 급 자</th><td colspan="3">${osEsc(C.name||'')}${C.biz_number?` (사업자번호 ${osEsc(C.biz_number)})`:''}</td></tr>
+      </table>
+      <table class="ft grid" style="margin-bottom:6mm;">
+        <thead><tr><th style="text-align:left;padding-left:4mm;">작업 구분</th><th>단 가</th><th>수 량</th><th>금 액</th></tr></thead>
+        <tbody>${lineRows}</tbody>
+        <tfoot><tr><th colspan="3" style="text-align:right;">지급 총액 (세전)</th><td style="text-align:right;font-weight:700;">${osFmt(g.gross)}원</td></tr></tfoot>
+      </table>
+      <table class="ft" style="margin-bottom:6mm;">
+        <tr><th>소득세 (3%)</th><td style="text-align:right;">${osFmt(w.tax)}원</td></tr>
+        <tr><th>지방소득세 (0.3%)</th><td style="text-align:right;">${osFmt(w.local)}원</td></tr>
+        <tr><th>공제 합계</th><td style="text-align:right;">${osFmt(w.total)}원</td></tr>
+        <tr><th style="background:#e9edf3;">실 지급액</th><td style="text-align:right;font-size:15pt;font-weight:800;">${osFmt(w.net)}원</td></tr>
+      </table>
+      ${detailOnOwnPage ? '' : `<div style="font-size:10pt;font-weight:700;margin:0 0 2mm;">일자별 작업 내역</div>${dailyTable}`}
+      ${note}
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10mm;">
+        <div style="font-size:11pt;">작성일: ${kd(issue)}</div>
+        <div style="text-align:right;font-size:11pt;position:relative;">${osEsc(C.name||'')} 대표 ${osEsc(C.ceo_name||'')} (인)${dStampImg()}</div>
+      </div>
+      <div style="margin-top:10mm;font-size:11pt;">위 금액을 정히 수령하였음을 확인합니다. &nbsp;&nbsp; 수령인: ${osEsc(g.name)} &nbsp; (서명)</div>
+    </div>`;
+    const page2 = detailOnOwnPage ? `<div class="doc-sheet os-sheet">
+      <h3 class="dt" style="font-size:17pt;">일자별 작업 내역</h3>
+      <div class="dsub" style="margin-bottom:5mm;">${osEsc(g.name)} · ${y}년 ${m}월 1일 ~ ${m}월 ${last}일</div>
+      ${dailyTable}
+    </div>` : '';
+    return page1 + page2;
+  }).join('');
+  document.getElementById('osStatementArea').innerHTML = sheets;
+  const card = document.getElementById('osStatementCard');
+  card.classList.remove('hidden');
+  document.getElementById('osStatementTitle').textContent = name ? `${name} 급여명세서` : `${ym} 전체 급여명세서 (${list.length}명)`;
+  if(!keepScroll) card.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+function osPrintStatements(){
+  const old = document.title;
+  document.title = OS_SHOWN && OS_SHOWN!=='__ALL__' ? `급여명세서_${OS_SHOWN}_${document.getElementById('osMonthSelect').value}` : `급여명세서_${document.getElementById('osMonthSelect').value}`;
+  window.print();
+  setTimeout(()=>{ document.title = old; }, 500);
 }
 
 </script>

@@ -379,3 +379,48 @@ async function hrUpsertLeaveAdjust(fields){
     .upsert({ ...fields, updated_at: new Date().toISOString() }, { onConflict: 'employee_id,period_start' });
   if(error) throw error;
 }
+
+/* ---------------------- 외주 디자인 작업 내역 (외주 알바 급여명세서) ---------------------- */
+async function hrListOutsourceMonths(){
+  const { data, error } = await hrsb.from('hr_outsource_entries').select('year_month').order('year_month', { ascending:false });
+  if(error){ console.error('[hrListOutsourceMonths]', error); return []; }
+  return [...new Set((data||[]).map(d=>d.year_month))];
+}
+async function hrListOutsourceByMonth(ym){
+  const { data, error } = await hrsb.from('hr_outsource_entries').select('*').eq('year_month', ym)
+    .order('work_date', { ascending:true }).order('worker_name', { ascending:true });
+  if(error){ console.error('[hrListOutsourceByMonth]', error); return []; }
+  return data;
+}
+async function hrListOutsourceBetween(fromStr, toStr){
+  const { data, error } = await hrsb.from('hr_outsource_entries').select('*')
+    .gte('work_date', fromStr).lte('work_date', toStr);
+  if(error){ console.error('[hrListOutsourceBetween]', error); return []; }
+  return data;
+}
+async function hrLatestOutsourcePrices(){
+  const { data, error } = await hrsb.from('hr_outsource_entries')
+    .select('price_ant,price_post,price_custom').order('work_date', { ascending:false }).limit(1);
+  if(error || !data || !data[0]) return null;
+  return data[0];
+}
+// 같은 날짜 + 같은 작업자는 새 값으로 덮어씁니다.
+async function hrUpsertOutsourceEntries(rows){
+  if(!rows || rows.length===0) return [];
+  const { data: { user } } = await hrsb.auth.getUser();
+  if(!user) throw new Error('로그인이 필요합니다.');
+  const withUser = rows.map(r=>({ ...r, created_by: user.id, created_by_email: user.email, updated_at: new Date().toISOString() }));
+  const { data, error } = await hrsb.from('hr_outsource_entries')
+    .upsert(withUser, { onConflict: 'work_date,worker_name' }).select();
+  if(error) throw error;
+  return data || [];
+}
+async function hrUpdateOutsourceEntry(id, fields){
+  const { error } = await hrsb.from('hr_outsource_entries').update({ ...fields, updated_at: new Date().toISOString() }).eq('id', id);
+  if(error) throw error;
+}
+async function hrDeleteOutsourceEntries(ids){
+  if(!ids || ids.length===0) return;
+  const { error } = await hrsb.from('hr_outsource_entries').delete().in('id', ids);
+  if(error) throw error;
+}
