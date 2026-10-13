@@ -784,7 +784,36 @@
       <!-- ===================== 외주디자인 ===================== -->
       <div id="tab-outsource" class="tab-panel hidden">
         <div class="card no-print">
-          <h2>외주 디자인 작업 업로드</h2>
+          <h2>AI 정산 PDF로 자동 계산 <span class="pill active">추천</span></h2>
+          <div class="desc">AI 정산 프로그램에서 내려받은 <b>PDF</b>를 올리면 케이스(환자)별로 <b>치식 1·2·3번 = 전치, 그 외 = 구치</b>로 나눕니다. <b>커스텀</b>은 커스텀어버트먼트 설계가 필요한 임플란트만 세며, 같은 환자·같은 접수일에 <b>Customized Abutment</b> 건(라임·올어버트먼트 등)이 있으면 커스텀, 없으면 기성·어벗레벨로 봅니다. 이를 판별하려면 DENTIQUBE <b>접수 관리 &gt; 외주 관리</b> 목록(모든 외주 기공소, 접수일 기준 기간)을 전체 선택해 복사한 뒤 아래에 붙여넣어 주세요. 접수일도 여기서 읽어 옵니다.</div>
+          <div class="grid3">
+            <div><label class="field">정산 월 (접수일 기준)</label><input type="month" id="osSettleMonth"></div>
+            <div><label class="field">지급 대상 (명세서에 표시될 이름)</label><input type="text" id="osPayee" value="디자인외주"></div>
+            <div><label class="field">PDF의 외주 기공소명</label><input type="text" id="osDesignerLab" value="디자인외주"></div>
+          </div>
+          <div class="grid2">
+            <div><label class="field">AI 정산 PDF</label><input type="file" id="osPdfFile" accept="application/pdf,.pdf"></div>
+            <div><label class="field">&nbsp;</label><label style="display:flex;gap:6px;align-items:center;font-size:13px;"><input type="checkbox" id="osIncRework" checked onchange="osRenderCases()" style="width:auto;margin:0;"> 재작업 건도 정산에 포함</label></div>
+          </div>
+          <label class="field">사이트 접수 목록 붙여넣기 (커스텀 판별 · 접수일 확인용)</label>
+          <textarea id="osSiteText" rows="5" placeholder="dentiqube.kr 접수 관리 &gt; 외주 관리 화면에서 목록을 전체 선택(Ctrl+A) → 복사(Ctrl+C) → 여기에 붙여넣기. 지금 보이는 페이지가 100건씩이라 페이지를 나눠 여러 번 붙여넣어도 됩니다."></textarea>
+          <div style="margin-top:8px;"><button class="btn primary" onclick="osAnalyzeCases()">PDF 분석</button></div>
+          <div class="small-note" id="osCaseMsg"></div>
+        </div>
+
+        <div class="card no-print hidden" id="osCaseCard">
+          <h2>케이스별 분류 확인</h2>
+          <div id="osCaseSummary" class="small-note" style="margin-bottom:8px;"></div>
+          <div style="overflow:auto;max-height:70vh;"><table class="wide-table"><thead><tr><th></th><th>접수일</th><th>환자</th><th>치과</th><th>보철물</th><th>치식</th><th>수량</th><th>전치</th><th>구치</th><th>커스텀</th><th>판별</th></tr></thead><tbody id="osCaseBody"></tbody></table></div>
+          <div class="small-note">숫자는 직접 고칠 수 있습니다. 체크를 풀면 정산에서 제외됩니다. 같은 환자·치식으로 다시 올리면 덮어씁니다.</div>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn primary" onclick="osSaveCases()">이 내용으로 저장</button>
+            <button class="btn ghost" onclick="osCancelCases()">취소</button>
+          </div>
+        </div>
+
+        <div class="card no-print">
+          <h2>직접 붙여넣기 (간단 입력)</h2>
           <div class="desc">외주 디자이너에게 보낸 작업 폼을 그대로 붙여넣으세요. <b>0907-----</b> 같은 줄은 날짜(9월 7일)로, <b>이름 전치 구치 커스텀</b> 줄은 작업 개수로 인식합니다. 단가 줄(지르(전) 6000원 …)이 있으면 단가도 자동으로 읽습니다. 날짜가 여러 개여도 한 번에 붙여넣을 수 있고, 같은 날짜·같은 작업자를 다시 올리면 새 값으로 덮어씁니다.</div>
           <div class="grid3">
             <div><label class="field">지르(전) 전치 단가</label><input type="number" id="osPriceAnt" placeholder="6000"></div>
@@ -847,6 +876,11 @@
             <button class="btn green sm" onclick="osManualAdd()">+ 직접 추가</button>
           </div>
           <div style="overflow-x:auto;"><table class="wide-table"><thead><tr><th>날짜</th><th>작업자</th><th>전치</th><th>구치</th><th>커스텀</th><th>금액(세전)</th><th>단가(전/구/커)</th><th></th></tr></thead><tbody id="osDailyBody"></tbody></table></div>
+        </div>
+
+        <div class="card no-print">
+          <h2>케이스별 상세 <span class="pill review" id="osCaseListCount"></span></h2>
+          <div style="overflow-x:auto;"><table class="wide-table"><thead><tr><th>접수일</th><th>환자</th><th>치과</th><th>보철물</th><th>치식</th><th>전치</th><th>구치</th><th>커스텀</th><th></th></tr></thead><tbody id="osCaseListBody"></tbody></table></div>
         </div>
 
         <div class="card hidden" id="osStatementCard">
@@ -3907,6 +3941,8 @@ async function initOutsourceTab(){
     document.getElementById('osPricePost').value = p.post;
     document.getElementById('osPriceCustom').value = p.custom;
   }
+  const sm = document.getElementById('osSettleMonth');
+  if(sm && !sm.value){ const d=new Date(); d.setMonth(d.getMonth()-1); sm.value = d.getFullYear()+'-'+osPad(d.getMonth()+1); }
   await osRefreshMonths();
 }
 async function osRefreshMonths(selectMonth){
@@ -4080,6 +4116,7 @@ function osSkipSmall(){ return document.getElementById('osSkipSmall').checked; }
 
 async function osRenderMonth(){
   const ym = document.getElementById('osMonthSelect').value;
+  setTimeout(()=>{ try{ osRenderCaseList(); }catch(e){} },0);
   const sumBox = document.getElementById('osMonthSummary');
   const body = document.getElementById('osWorkerBody');
   if(!ym){
@@ -4263,6 +4300,334 @@ function osPrintStatements(){
   document.title = OS_SHOWN && OS_SHOWN!=='__ALL__' ? `급여명세서_${OS_SHOWN}_${document.getElementById('osMonthSelect').value}` : `급여명세서_${document.getElementById('osMonthSelect').value}`;
   window.print();
   setTimeout(()=>{ document.title = old; }, 500);
+}
+
+/* ======================================================================
+   외주 디자인 강화 — AI 정산 PDF + 사이트(접수 목록) → 케이스별 전치/구치/커스텀 자동 계산
+   · 치식 1,2,3번 = 전치, 그 외 = 구치
+   · 커스텀 = 커스텀어버트먼트 설계가 필요한 임플란트 (같은 환자·같은 접수일에 'Customized Abutment' 건이 있는 경우,
+              또는 보철물명에 +Custom). 기성(+기성)·어벗레벨은 커스텀 없음.
+   ====================================================================== */
+let OS_CASES = null;
+const PDFJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+const PDFJS_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+function osLoadScript(src){
+  return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('PDF 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.')); document.head.appendChild(s); });
+}
+async function osEnsurePdfJs(){
+  if(window.pdfjsLib && window.pdfjsLib.__ready) return;
+  if(!window.pdfjsLib) await osLoadScript(PDFJS_URL);
+  try{
+    const txt = await (await fetch(PDFJS_WORKER)).text();
+    pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([txt], {type:'text/javascript'}));
+  }catch(e){ pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER; }
+  pdfjsLib.__ready = true;
+}
+
+/* 치식 문자열 → 전치/구치 개수. 'x' 는 브릿지의 중간 치아(퐁틱)이며 인접 번호로 번호를 추정한다. */
+function osTeethCount(lines){
+  let ant=0, post=0, units=0;
+  const put = n => { units++; if(n>=1 && n<=3) ant++; else post++; };
+  for(const line of lines){
+    const halves = String(line).trim().split(/\s+/).filter(Boolean);
+    halves.forEach((h,hi)=>{
+      const ch = h.replace(/[^0-9xX]/g,'').toLowerCase().split('');
+      if(!ch.length) return;
+      const digs = ch.filter(c=>c!=='x').map(Number);
+      let desc;
+      if(digs.length>=2) desc = digs[0] > digs[digs.length-1];
+      else desc = (halves.length>=2 ? hi===0 : false);
+      const nums = ch.map(c=>c==='x'?null:Number(c));
+      for(let i=0;i<nums.length;i++){
+        if(nums[i]!==null) continue;
+        let prev=null, next=null;
+        for(let j=i-1;j>=0;j--) if(nums[j]!==null){ prev=nums[j]; break; }
+        for(let j=i+1;j<nums.length;j++) if(nums[j]!==null){ next=nums[j]; break; }
+        let v;
+        if(prev!==null && next!==null) v = Math.round((prev+next)/2);
+        else if(prev!==null) v = desc ? prev-1 : prev+1;
+        else if(next!==null) v = desc ? next+1 : next-1;
+        else v = 1;
+        nums[i] = Math.min(8, Math.max(1, v));
+      }
+      nums.forEach(put);
+    });
+  }
+  return { ant, post, units };
+}
+
+/* ---------- PDF 읽기 (pdf.js 위치 정보로 표를 복원) ---------- */
+function osJoinItems(items){
+  items = items.slice().sort((a,b)=>a.x-b.x);
+  let s='', end=null;
+  for(const it of items){
+    if(end!==null && it.x-end > 2.2) s += ' ';
+    s += it.str; end = it.x + (it.w||0);
+  }
+  return s.replace(/[\u0000-\u001f​]/g,'').trim();
+}
+async function osReadPdf(file){
+  await osEnsurePdfJs();
+  const buf = await file.arrayBuffer();
+  const doc = await pdfjsLib.getDocument({ data:new Uint8Array(buf) }).promise;
+  const cases = [];
+  for(let pn=1; pn<=doc.numPages; pn++){
+    const page = await doc.getPage(pn);
+    const tc = await page.getTextContent();
+    const items = tc.items.filter(i=>i.str!=='' && i.str.trim()!=='').map(i=>({ str:i.str, x:i.transform[4], y:i.transform[5], w:i.width }));
+    // 줄 단위(같은 y)로 묶어 날짜(완성일)로 시작하는 줄 = 행 기준점
+    const dateItems = items.filter(i=>i.x<75);
+    const ys = [...new Set(dateItems.map(i=>Math.round(i.y)))];
+    const anchors = [];
+    ys.forEach(y=>{
+      const t = osJoinItems(dateItems.filter(i=>Math.abs(i.y-y)<3)).replace(/\s/g,'');
+      const m = t.match(/(\d{4})-(\d{2})-(\d{2})/);
+      if(m) anchors.push({ y, date:m[0] });
+    });
+    anchors.sort((a,b)=>b.y-a.y);
+    if(!anchors.length) continue;
+    const COL = x => x<78?'date' : x<185?'clinic' : x<300?'lab' : x<345?'patient' : x<490?'prosth' : x<560?'teeth' : 'qty';
+    const buckets = anchors.map(()=>({ clinic:[], lab:[], patient:[], prosth:[], teeth:[], qty:[] }));
+    items.forEach(it=>{
+      if(it.y > anchors[0].y + 25) return;        // 머리글 / 요약줄
+      let bi=0, best=1e9;
+      anchors.forEach((a,i)=>{ const d=Math.abs(a.y-it.y); if(d<best){best=d;bi=i;} });
+      let c = COL(it.x); if(c==='date') return;
+      if(c==='prosth' && it.x>=440 && /^[0-9xX]+$/.test(it.str.trim())) c='teeth';   // 치식이 보철물명 칸 쪽으로 길게 번진 경우
+      buckets[bi][c].push(it);
+    });
+    anchors.forEach((a,i)=>{
+      const b = buckets[i];
+      const lineOf = arr => {   // y 별 줄 → 위에서 아래
+        const ysx = [...new Set(arr.map(x=>Math.round(x.y)))].sort((p,q)=>q-p);
+        const out=[]; ysx.forEach(y=>{ const t=osJoinItems(arr.filter(x=>Math.round(x.y)===y)); if(t) out.push(t); });
+        return out;
+      };
+      const prosthLines = lineOf(b.prosth);
+      const prosth = prosthLines.join(' ').replace(/\s+/g,' ').replace(/\( /g,'(').replace(/ \)/g,')');
+      const qty = parseInt(lineOf(b.qty).join('').replace(/\D/g,''),10) || 0;
+      cases.push({
+        completed: a.date,
+        clinic: lineOf(b.clinic).join(' '),
+        lab: lineOf(b.lab).join(''),
+        patient: lineOf(b.patient).join('').replace(/\s/g,''),
+        prosth,
+        teethLines: lineOf(b.teeth),
+        qty,
+        rework: /재\s*작\s*업|리\s*메\s*이\s*크|remake/i.test(prosth)
+      });
+    });
+  }
+  return cases;
+}
+
+/* ---------- 사이트(접수 관리) 목록 붙여넣기 읽기 ---------- */
+function osParseSiteList(text){
+  const L = String(text||'').replace(/\r/g,'').replace(/\t/g,'\n').split('\n').map(s=>s.trim()).filter(Boolean);
+  const rows=[];
+  for(let i=0;i<L.length-8;i++){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(L[i]) || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(L[i+1])) continue;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(L[i+2])) continue;
+    let k = i+3; if(/^(오전|오후)$/.test(L[k])) k++;
+    const patient=L[k], clinic=L[k+1], doctor=L[k+2], lab=L[k+3];
+    let j=k+4; const pl=[];
+    while(j<L.length && L[j]!=='+' && pl.length<8){ pl.push(L[j]); j++; }
+    const prosth = pl.join(' ').replace(/\[[^\]]*\]/g,'').replace(/\s+/g,' ').trim();
+    // 치식 칸: + ... + + ... +  (플러스 4개) 다음 토큰이 수량
+    let plus=0, q=j;
+    while(q<L.length && plus<4){ if(L[q]==='+') plus++; q++; }
+    // '+' 가 한 토큰에 붙어 있는 경우 대비 — 4번째 '+' 이후 첫 숫자
+    const qty = parseInt(L[q],10) || 0;
+    rows.push({ received:L[i], patient:patient.replace(/\s/g,''), clinic, lab, prosth, qty, rework:/재\s*작\s*업|리\s*메\s*이\s*크|remake/i.test(prosth) });
+    i = q;
+  }
+  return rows;
+}
+
+/* ---------- PDF 케이스 + 사이트 목록 결합 → 전치/구치/커스텀 ---------- */
+const osNorm = s => String(s||'').replace(/\s/g,'').toLowerCase();
+function osClinicMatch(a,b){ a=osNorm(a); b=osNorm(b); return !a||!b||a===b||a.includes(b)||b.includes(a); }
+function osBuildCases(pdfCases, site, designerLab){
+  const siteRows = site || [];
+  const used = new Set();
+  const out = pdfCases.map(c=>{
+    const t = osTeethCount(c.teethLines);
+    const isImplant = /implant/i.test(c.prosth);
+    const o = { ...c, teeth:c.teethLines.join(' / '), ant:t.ant, post:t.post, units:t.units,
+      isImplant, received:null, custom:0, cstatus:'none', include:true,
+      unitWarn: t.units!==c.qty };
+    if(siteRows.length){
+      // 같은 환자·치과·보철물·수량인 디자인외주 행에서 접수일을 찾는다
+      const cands = siteRows.map((r,i)=>({r,i})).filter(({r,i})=>!used.has(i) && r.patient===c.patient && osClinicMatch(r.clinic,c.clinic)
+        && osNorm(r.lab).includes(osNorm(designerLab)) && osNorm(r.prosth)===osNorm(c.prosth) && r.qty===c.qty);
+      const hit = cands[0] || siteRows.map((r,i)=>({r,i})).find(({r,i})=>!used.has(i) && r.patient===c.patient && osClinicMatch(r.clinic,c.clinic) && osNorm(r.lab).includes(osNorm(designerLab)) && osNorm(r.prosth).replace(/\(.*?\)/g,'')===osNorm(c.prosth).replace(/\(.*?\)/g,''));
+      if(hit){ used.add(hit.i); o.received = hit.r.received; }
+    }
+    return o;
+  });
+  // 커스텀 판별
+  const groups = new Map();
+  out.forEach(o=>{
+    if(!o.isImplant){ o.cstatus='none'; return; }
+    if(/\+\s*기성|어벗\s*레벨|abutment\s*level/i.test(o.prosth)){ o.cstatus='ready'; o.custom=0; return; }   // 기성 / 어벗레벨
+    const key = o.patient+'|'+osNorm(o.clinic)+'|'+(o.received||'');
+    if(!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(o);
+  });
+  groups.forEach((rows,key)=>{
+    const [pat,,rec] = key.split('|');
+    let comp = 0, hasSite = false;
+    if(siteRows.length){
+      siteRows.forEach(r=>{
+        if(r.patient!==pat) return;
+        if(rec && r.received!==rec) return;
+        if(osNorm(r.lab).includes(osNorm(designerLab))) return;
+        if(/custom(ized)?\s*abutment/i.test(r.prosth) && !/zir/i.test(r.prosth)){ comp += r.qty; hasSite = true; }
+      });
+    }
+    let left = comp;
+    rows.forEach(o=>{
+      const explicit = /\+\s*custom/i.test(o.prosth);
+      if(siteRows.length){
+        if(hasSite){
+          const n = Math.min(left, o.units||o.qty);
+          o.custom = n; left -= n; o.cstatus = n>0 ? 'companion' : 'none';
+          if(explicit && n===0){ o.custom = o.units||o.qty; o.cstatus='explicit'; }
+        } else if(explicit){ o.custom = o.units||o.qty; o.cstatus='explicit'; }
+        else { o.custom = 0; o.cstatus = 'ready?'; }       // 사이트에 커스텀 건 없음 → 기성/어벗레벨로 판단
+      } else {
+        if(explicit){ o.custom = o.units||o.qty; o.cstatus='explicit'; }
+        else { o.custom = 0; o.cstatus = 'unknown'; }       // 사이트 목록이 없으면 판별 불가
+      }
+    });
+  });
+  return out;
+}
+
+/* ---------- 화면 ---------- */
+const OS_CSTATUS = {
+  none:      ['pill retired','커스텀 없음'],
+  ready:     ['pill retired','기성(+기성)'],
+  'ready?':  ['pill retired','기성/어벗레벨(커스텀 건 없음)'],
+  companion: ['pill active','커스텀 설계(어버트먼트 건 확인)'],
+  explicit:  ['pill active','커스텀(+Custom 표기)'],
+  unknown:   ['pill review','확인 필요(사이트 목록 필요)'],
+  manual:    ['pill review','직접 수정']
+};
+async function osAnalyzeCases(){
+  const msg = document.getElementById('osCaseMsg');
+  const f = document.getElementById('osPdfFile').files[0];
+  if(!f){ msg.textContent = 'AI 정산 PDF 파일을 선택해 주세요.'; return; }
+  msg.textContent = 'PDF를 읽는 중…';
+  try{
+    const designerLab = (document.getElementById('osDesignerLab').value||'디자인외주').trim();
+    let pdf = await osReadPdf(f);
+    pdf = pdf.filter(c=>c.patient && c.qty>0);
+    if(!pdf.length){ msg.textContent = 'PDF에서 케이스를 찾지 못했습니다. AI 정산 프로그램에서 내려받은 PDF가 맞는지 확인해 주세요.'; return; }
+    const site = osParseSiteList(document.getElementById('osSiteText').value);
+    OS_CASES = { rows: osBuildCases(pdf, site, designerLab), siteCount: site.length, designerLab };
+    msg.textContent = '';
+    osRenderCases();
+  }catch(e){ console.error(e); msg.textContent = '분석 실패: '+e.message; }
+}
+function osCaseTotals(){
+  const inc = OS_CASES.rows.filter(r=>r.include && (document.getElementById('osIncRework').checked || !r.rework));
+  const t = { n:inc.length, ant:0, post:0, custom:0 };
+  inc.forEach(r=>{ t.ant+=r.ant; t.post+=r.post; t.custom+=r.custom; });
+  return { t, inc };
+}
+function osRenderCases(){
+  const card = document.getElementById('osCaseCard');
+  if(!OS_CASES){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  const pr = osCurrentPriceInputs();
+  const rows = OS_CASES.rows;
+  document.getElementById('osCaseBody').innerHTML = rows.map((r,i)=>{
+    const st = OS_CSTATUS[r.cstatus] || OS_CSTATUS.none;
+    const warn = r.unitWarn ? `<span class="pill review" title="치식에서 센 개수 ${r.units}개와 수량 ${r.qty}개가 다릅니다">수량 확인</span> ` : '';
+    return `<tr class="${r.include?'':'dim'}">
+      <td><input type="checkbox" ${r.include?'checked':''} onchange="OS_CASES.rows[${i}].include=this.checked;osRenderCases()" style="width:auto;margin:0;"></td>
+      <td>${osEsc(r.received||r.completed)}${r.received?'':' <span class="small-note">(완성일)</span>'}</td>
+      <td>${osEsc(r.patient)}</td><td class="small-note">${osEsc(r.clinic)}</td>
+      <td>${osEsc(r.prosth)}${r.rework?' ':''}</td><td>${osEsc(r.teeth)}</td><td>${r.qty}</td>
+      <td><input type="number" min="0" value="${r.ant}" style="width:56px;margin:0;" onchange="osCaseEdit(${i},'ant',this.value)"></td>
+      <td><input type="number" min="0" value="${r.post}" style="width:56px;margin:0;" onchange="osCaseEdit(${i},'post',this.value)"></td>
+      <td><input type="number" min="0" value="${r.custom}" style="width:56px;margin:0;" onchange="osCaseEdit(${i},'custom',this.value)"></td>
+      <td>${warn}<span class="${st[0]}">${st[1]}</span></td></tr>`;
+  }).join('');
+  const { t } = osCaseTotals();
+  const gross = t.ant*pr.ant + t.post*pr.post + t.custom*pr.custom;
+  const w = osWithholding(gross, false);
+  const unk = rows.filter(r=>r.cstatus==='unknown').length;
+  let html = `<b>${t.n}건</b> · 전치 ${t.ant} · 구치 ${t.post} · 커스텀 ${t.custom} → 지급총액 <b>${osFmt(gross)}원</b> (세전) · 실지급 약 ${osFmt(w.net)}원`;
+  if(unk) html += `<br><span style="color:#b45309;">⚠ 임플란트 ${unk}건은 커스텀 여부를 알 수 없어 0으로 두었습니다. 아래 "사이트 목록"을 붙여넣고 다시 분석하면 자동으로 판별됩니다.</span>`;
+  if(OS_CASES.siteCount) html += `<br><span class="small-note">사이트 목록 ${OS_CASES.siteCount}행을 읽었고, ${rows.filter(r=>r.received).length}/${rows.length}건의 접수일을 찾았습니다.</span>`;
+  const noRecv = rows.filter(r=>!r.received).length;
+  if(OS_CASES.siteCount && noRecv) html += `<br><span class="small-note">접수일을 못 찾은 ${noRecv}건은 완성일로 표시했습니다(정산 월은 위에서 고른 월로 저장).</span>`;
+  document.getElementById('osCaseSummary').innerHTML = html;
+}
+function osCaseEdit(i, k, v){
+  const r = OS_CASES.rows[i]; r[k] = Math.max(0, parseInt(v,10)||0);
+  if(k==='custom') r.cstatus='manual';
+  osRenderCases();
+}
+function osCancelCases(){ OS_CASES=null; document.getElementById('osCaseCard').classList.add('hidden'); }
+
+function osCaseKey(r){ return [r.patient, osNorm(r.clinic), osNorm(r.prosth), osNorm(r.teeth), r.completed].join('|'); }
+async function osSaveCases(){
+  if(!OS_CASES) return;
+  const ym = document.getElementById('osSettleMonth').value;
+  if(!/^\d{4}-\d{2}$/.test(ym)){ alert('정산 월(접수일 기준)을 선택해 주세요.'); return; }
+  const payee = document.getElementById('osPayee').value.trim();
+  if(!payee){ alert('지급 대상(외주 디자이너 이름)을 입력해 주세요.'); return; }
+  const inc = osCaseTotals().inc;
+  if(!inc.length){ alert('저장할 케이스가 없습니다.'); return; }
+  const lastDay = new Date(Number(ym.slice(0,4)), Number(ym.slice(5,7)), 0).getDate();
+  const clamp = d => (d && d.slice(0,7)===ym) ? d : `${ym}-${osPad(lastDay)}`;
+  const rows = inc.map(r=>({
+    payee, year_month:ym, work_date: clamp(r.received || r.completed), received_date: r.received||null, completed_date: r.completed,
+    patient:r.patient, clinic:r.clinic, prosth:r.prosth, teeth:r.teeth, qty:r.qty, is_rework:r.rework,
+    cnt_ant:r.ant, cnt_post:r.post, cnt_custom:r.custom, custom_src:r.cstatus, case_key: ym+'|'+osCaseKey(r)
+  }));
+  try{
+    await hrUpsertOutsourceCases(rows);
+    await osRecomputeEntries(ym, payee);
+    osCancelCases();
+    document.getElementById('osCaseMsg').textContent = `${rows.length}건을 ${ym} 정산으로 저장했습니다.`;
+    await osRefreshMonths(ym);
+  }catch(e){
+    const hint = /relation|schema cache|does not exist/i.test(e.message||'') ? '\n\n※ Supabase에서 hr_outsource_cases.sql을 먼저 실행했는지 확인해 주세요.' : '';
+    alert('저장 실패: '+e.message+hint); console.error(e);
+  }
+}
+/* 일별 합계(hr_outsource_entries)를 이 달 저장된 케이스 전체로 다시 계산 → 월 정산/급여명세서에 그대로 반영 */
+async function osRecomputeEntries(ym, payee){
+  const all = (await hrListOutsourceCasesByMonth(ym)).filter(c=>c.payee===payee);
+  const pr = osCurrentPriceInputs();
+  const existing = (await hrListOutsourceByMonth(ym)).filter(e=>e.worker_name===payee);
+  const byDay = new Map();
+  all.forEach(c=>{
+    const e = byDay.get(c.work_date) || { work_date:c.work_date, year_month:ym, worker_name:payee, cnt_ant:0, cnt_post:0, cnt_custom:0, price_ant:pr.ant, price_post:pr.post, price_custom:pr.custom };
+    e.cnt_ant+=c.cnt_ant; e.cnt_post+=c.cnt_post; e.cnt_custom+=c.cnt_custom; byDay.set(c.work_date, e);
+  });
+  const keepPrice = new Map(existing.map(e=>[e.work_date,e]));
+  byDay.forEach((e,d)=>{ const ex=keepPrice.get(d); if(ex){ e.price_ant=ex.price_ant; e.price_post=ex.price_post; e.price_custom=ex.price_custom; } });
+  if(byDay.size) await hrUpsertOutsourceEntries([...byDay.values()]);
+  const stale = existing.filter(e=>!byDay.has(e.work_date)).map(e=>e.id);
+  if(stale.length) await hrDeleteOutsourceEntries(stale);
+}
+async function osRenderCaseList(){
+  const ym = document.getElementById('osMonthSelect').value;
+  const body = document.getElementById('osCaseListBody'); if(!body) return;
+  const rows = ym ? await hrListOutsourceCasesByMonth(ym) : [];
+  document.getElementById('osCaseListCount').textContent = rows.length ? `${rows.length}건` : '';
+  body.innerHTML = rows.length ? rows.map(c=>`<tr><td>${c.received_date||c.completed_date||c.work_date}</td><td>${osEsc(c.patient)}</td><td class="small-note">${osEsc(c.clinic)}</td><td>${osEsc(c.prosth)}</td><td>${osEsc(c.teeth)}</td><td>${c.cnt_ant}</td><td>${c.cnt_post}</td><td>${c.cnt_custom}</td><td><button class="btn danger sm" onclick="osDeleteCase('${c.id}')">삭제</button></td></tr>`).join('')
+    : '<tr><td colspan="9" class="small-note">이 달에 저장된 케이스 상세가 없습니다.</td></tr>';
+}
+async function osDeleteCase(id){
+  if(!confirm('이 케이스를 삭제할까요? (일별 합계는 PDF를 다시 저장할 때 갱신됩니다)')) return;
+  try{ const ym=document.getElementById('osMonthSelect').value; const c=(await hrListOutsourceCasesByMonth(ym)).find(x=>x.id===id); await hrDeleteOutsourceCases([id]); if(c) await osRecomputeEntries(ym,c.payee); await osRefreshMonths(ym); }catch(e){ alert('삭제 실패: '+e.message); }
 }
 
 </script>

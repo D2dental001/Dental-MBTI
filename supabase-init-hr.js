@@ -424,3 +424,24 @@ async function hrDeleteOutsourceEntries(ids){
   const { error } = await hrsb.from('hr_outsource_entries').delete().in('id', ids);
   if(error) throw error;
 }
+
+/* ---------- 외주디자인: 케이스 단위 상세 ---------- */
+async function hrUpsertOutsourceCases(rows){
+  if(!rows || !rows.length) return [];
+  const { data: { user } } = await hrsb.auth.getUser();
+  if(!user) throw new Error('로그인이 필요합니다.');
+  const withUser = rows.map(r=>({ ...r, created_by:user.id, updated_at:new Date().toISOString() }));
+  const { data, error } = await hrsb.from('hr_outsource_cases').upsert(withUser, { onConflict:'case_key' }).select();
+  if(error) throw error;
+  return data || [];
+}
+async function hrListOutsourceCasesByMonth(ym){
+  const { data, error } = await hrsb.from('hr_outsource_cases').select('*').eq('year_month', ym).order('work_date').order('patient');
+  if(error){ console.error('[hrListOutsourceCasesByMonth]', error); return []; }
+  return data || [];
+}
+async function hrDeleteOutsourceCases(ids){
+  if(!ids || !ids.length) return;
+  const { error } = await hrsb.from('hr_outsource_cases').delete().in('id', ids);
+  if(error) throw error;
+}
