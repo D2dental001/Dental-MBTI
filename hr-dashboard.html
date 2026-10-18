@@ -4221,7 +4221,7 @@ function osExportMonth(){
 
 /* ---------------------- 급여명세서 ---------------------- */
 let OS_SHOWN = null; // 현재 화면에 열려 있는 명세서 대상 (작업자 이름 또는 '__ALL__')
-function osShowStatements(name, keepScroll){
+async function osShowStatements(name, keepScroll){
   const groups = osGroupByWorker(OS_ROWS);
   const list = name ? groups.filter(g=>g.name===name) : groups;
   if(!list.length){ alert('명세서를 만들 내역이 없습니다.'); return; }
@@ -4231,6 +4231,8 @@ function osShowStatements(name, keepScroll){
   const last = new Date(y, m, 0).getDate();
   const payDate = document.getElementById('osPayDate').value;
   const C = COMPANY || {};
+  let monthCases = [];
+  try{ monthCases = await hrListOutsourceCasesByMonth(ym); }catch(e){ monthCases = []; }
   const kd = s => { if(!s) return '&nbsp;&nbsp;&nbsp;&nbsp;년 &nbsp;&nbsp;월 &nbsp;&nbsp;일'; const p=s.split('-').map(Number); return `${p[0]}년 ${p[1]}월 ${p[2]}일`; };
   const today = new Date(); const issue = `${today.getFullYear()}-${osPad(today.getMonth()+1)}-${osPad(today.getDate())}`;
   const skip = osSkipSmall();
@@ -4247,7 +4249,8 @@ function osShowStatements(name, keepScroll){
         <tbody>${daily}</tbody>
         <tfoot><tr><th>합계</th><td>${g.qty.ant}</td><td>${g.qty.post}</td><td>${g.qty.custom}</td><td style="text-align:right;font-weight:700;">${osFmt(g.gross)}원</td></tr></tfoot>
       </table>`;
-    const detailOnOwnPage = dates.length > 9;   // 날짜가 많으면 일자별 내역은 2쪽으로
+    const cs = monthCases.filter(c=>c.payee===g.name).sort((x,y2)=> (x.received_date||x.work_date)===(y2.received_date||y2.work_date) ? String(x.patient).localeCompare(String(y2.patient),'ko') : ((x.received_date||x.work_date)<(y2.received_date||y2.work_date)?-1:1));
+    const detailOnOwnPage = cs.length>0 || dates.length > 9;   // 케이스 상세가 있거나 날짜가 많으면 일자별 내역은 2쪽 이후로
     const note = `<div style="font-size:9pt;color:#555;margin-bottom:8mm;line-height:1.6;">※ 원천징수세액은 지급액의 3%(소득세)와 그 10%(지방소득세, 0.3%)이며 원 미만은 절사합니다.${skip?' 소득세 1,000원 미만은 소액부징수로 공제하지 않습니다.':''}</div>`;
     const page1 = `<div class="doc-sheet os-sheet">
       <h3 class="dt" style="font-size:22pt;">급 여 명 세 서</h3>
@@ -4276,11 +4279,38 @@ function osShowStatements(name, keepScroll){
       </div>
       <div style="margin-top:10mm;font-size:11pt;">위 금액을 정히 수령하였음을 확인합니다. &nbsp;&nbsp; 수령인: ${osEsc(g.name)} &nbsp; (서명)</div>
     </div>`;
-    const page2 = detailOnOwnPage ? `<div class="doc-sheet os-sheet">
+    let page2 = '';
+    if(cs.length){
+      // 환자·치과·치식이 보이는 케이스별 상세 (여러 쪽)
+      const PER = 33;
+      const amtOf = c => (c.cnt_ant||0)*osNum((byDate[c.work_date]||{}).price_ant||OS_DEFAULT_PRICE.ant) + (c.cnt_post||0)*osNum((byDate[c.work_date]||{}).price_post||OS_DEFAULT_PRICE.post) + (c.cnt_custom||0)*osNum((byDate[c.work_date]||{}).price_custom||OS_DEFAULT_PRICE.custom);
+      const sh = n => String(n||'').replace(/(치과의원|치과병원|치과)$/,'');
+      const pages = []; for(let i=0;i<cs.length;i+=PER) pages.push(cs.slice(i,i+PER));
+      const tot = cs.reduce((a,c)=>({ant:a.ant+c.cnt_ant,post:a.post+c.cnt_post,custom:a.custom+c.cnt_custom,amt:a.amt+amtOf(c)}),{ant:0,post:0,custom:0,amt:0});
+      page2 = pages.map((pg,pi)=>{
+        let prevDate = null;
+        const body = pg.map(c=>{
+          const d = c.received_date||c.work_date; const dl = `${Number(d.slice(5,7))}/${Number(d.slice(8,10))}`;
+          const show = d!==prevDate; prevDate = d;
+          return `<tr><td>${show?dl:''}</td><td style="text-align:left;">${osEsc(c.patient)}</td><td style="text-align:left;">${osEsc(sh(c.clinic))}</td><td style="text-align:left;">${osEsc(c.teeth||'')}</td><td>${c.cnt_ant||'-'}</td><td>${c.cnt_post||'-'}</td><td>${c.cnt_custom||'-'}</td><td style="text-align:right;">${osFmt(amtOf(c))}원</td></tr>`;
+        }).join('');
+        const foot = pi===pages.length-1 ? `<tfoot><tr><th colspan="4">합계 (${cs.length}건)</th><td>${tot.ant}</td><td>${tot.post}</td><td>${tot.custom}</td><td style="text-align:right;font-weight:700;">${osFmt(tot.amt)}원</td></tr></tfoot>` : '';
+        return `<div class="doc-sheet os-sheet">
+          <h3 class="dt" style="font-size:16pt;">작업 상세 내역 <span style="font-size:10pt;font-weight:400;">(${pi+1}/${pages.length})</span></h3>
+          <div class="dsub" style="margin-bottom:4mm;">${osEsc(g.name)} · ${y}년 ${m}월 1일 ~ ${m}월 ${last}일 · 접수일 기준</div>
+          <table class="ft grid compact" style="font-size:8.5pt;">
+            <thead><tr><th style="width:11mm;">접수일</th><th>환자명</th><th>치과명</th><th>치식</th><th style="width:11mm;">전치</th><th style="width:11mm;">구치</th><th style="width:13mm;">커스텀</th><th style="width:22mm;">금액</th></tr></thead>
+            <tbody>${body}</tbody>${foot}
+          </table>
+        </div>`;
+      }).join('');
+    } else if(detailOnOwnPage){
+      page2 = `<div class="doc-sheet os-sheet">
       <h3 class="dt" style="font-size:17pt;">일자별 작업 내역</h3>
       <div class="dsub" style="margin-bottom:5mm;">${osEsc(g.name)} · ${y}년 ${m}월 1일 ~ ${m}월 ${last}일</div>
       ${dailyTable}
-    </div>` : '';
+    </div>`;
+    }
     return page1 + page2;
   }).join('');
   document.getElementById('osStatementArea').innerHTML = sheets;
