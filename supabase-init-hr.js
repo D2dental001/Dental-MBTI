@@ -445,3 +445,9 @@ async function hrDeleteOutsourceCases(ids){
   const { error } = await hrsb.from('hr_outsource_cases').delete().in('id', ids);
   if(error) throw error;
 }
+
+async function hrDeleteOutsourceCasesByKeys(keys){
+  if(!keys || !keys.length) return;
+  const { error } = await hrsb.from('hr_outsource_cases').delete().in('case_key', keys);
+  if(error) throw error;
+}
