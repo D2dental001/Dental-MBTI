@@ -2135,6 +2135,25 @@ function verdictClass(v){
   if(v.startsWith('CAUTION')) return 'caution';
   return 'review';
 }
+function verdictInfo(v){
+  v = v||'';
+  if(v.startsWith('PASS')) return {cls:'pass', label:'✔ 통과', desc:'모든 영역이 기준 이상이고 응답에도 이상이 없습니다.'};
+  if(v.indexOf('응답신뢰도')>=0) return {cls:'caution', label:'✖ 응답 신뢰도 의심', desc:'지나치게 완벽하게 답했거나 답이 일관되지 않습니다. 점수를 그대로 믿지 말고 면접에서 직접 확인하세요.'};
+  if(v.startsWith('CAUTION')) return {cls:'caution', label:'✖ 적합성 주의', desc:'여러 영역의 점수가 낮습니다. 면접에서 해당 영역을 꼭 확인하세요.'};
+  if(v.startsWith('REVIEW')) return {cls:'review', label:'▲ 일부 확인 필요', desc:'점수가 낮은 영역이 있습니다. 아래 표시된 영역을 면접에서 물어보세요.'};
+  return {cls:'review', label:v||'-', desc:''};
+}
+function dimLevel(p){
+  if(p>=70) return {t:'우수', c:'#17a673', bg:'#e6f7ef'};
+  if(p>=40) return {t:'보통', c:'#b3720a', bg:'#fff4e0'};
+  return {t:'낮음', c:'#e5484d', bg:'#fdecec'};
+}
+function sdLevel(n){
+  if(n==null) return {t:'-', c:'#6b7280', bg:'#f1f2f6', note:''};
+  if(n>=80) return {t:'재확인 필요', c:'#e5484d', bg:'#fdecec', note:'지나치게 완벽한 답변입니다'};
+  if(n>=60) return {t:'다소 방어적', c:'#b3720a', bg:'#fff4e0', note:'좋게 보이려는 경향이 약간 있습니다'};
+  return {t:'양호', c:'#17a673', bg:'#e6f7ef', note:'솔직하게 답한 것으로 보입니다'};
+}
 async function renderSubmissions(){
   const list = document.getElementById('submissionList');
   list.innerHTML = '불러오는 중...';
@@ -2143,24 +2162,38 @@ async function renderSubmissions(){
   list.innerHTML = '';
   subs.forEach(s=>{
     const dims = s.dim_scores || {};
+    const vi = verdictInfo(s.verdict);
+    const sd = sdLevel(s.sd_index);
     const dimHtml = Object.keys(DIM_META).map(d=>{
       const pct = dims[d] ?? 0;
-      return `<div class="dim-row"><div class="dim-head"><span>${DIM_META[d].label}</span><span>${pct}점</span></div>
+      const lv = dimLevel(pct);
+      return `<div class="dim-row"><div class="dim-head"><span>${DIM_META[d].label}</span>
+          <span>${pct}점 <span class="pill" style="margin-left:6px;background:${lv.bg};color:${lv.c};">${lv.t}</span></span></div>
         <div class="dim-bar-track"><div class="dim-bar-fill" style="width:${pct}%;background:${DIM_META[d].color}"></div></div></div>`;
     }).join('');
+    const incon = s.inconsistency===true ? '<span style="color:#e5484d;font-weight:700;">답변 일관성 낮음(성의 없는 응답 가능)</span>' : (s.inconsistency===false ? '답변 일관성 정상' : '');
     const div = document.createElement('div');
     div.className='sub-card';
     div.innerHTML = `
       <div class="sub-head">
         <div>
           <span class="name">${s.candidate_name}</span>
-          <span class="pill ${verdictClass(s.verdict)}" style="margin-left:8px;">${s.verdict||'-'}</span>
+          <span class="pill ${vi.cls}" style="margin-left:8px;font-size:12px;">${vi.label}</span>
         </div>
-        <div class="sub-meta">${new Date(s.submitted_at).toLocaleString('ko-KR')} · 응답신뢰도 ${s.sd_index??'-'}점</div>
+        <div class="sub-meta">${new Date(s.submitted_at).toLocaleString('ko-KR')}</div>
       </div>
-      <div style="margin-top:12px;">${dimHtml}</div>
+      ${vi.desc?`<div class="small-note" style="margin-top:8px;">${vi.desc}</div>`:''}
+      <div style="margin-top:12px;padding:10px 12px;border-radius:10px;background:${sd.bg};">
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;">
+          <span>응답 솔직도 점검 <span style="font-weight:400;color:#6b7280;">(과장 응답 지수 · 낮을수록 좋음)</span></span>
+          <span style="color:${sd.c};">${s.sd_index??'-'}/100 · ${sd.t}</span>
+        </div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">${sd.note}${incon?' · '+incon:''}</div>
+      </div>
+      <div style="margin:14px 0 8px;font-size:12px;color:#6b7280;">영역별 점수 (높을수록 좋음 · 70 이상 우수 / 40 미만 낮음)</div>
+      <div>${dimHtml}</div>
       <div style="margin-top:10px;display:flex;gap:8px;">
-        <button class="btn ghost sm" onclick="toggleReviewed(${s.id}, ${!s.reviewed})">${s.reviewed?'확인취소':'확인함으로 표시'}</button>
+        <button class="btn ghost sm" onclick="toggleReviewed(${s.id}, ${!s.reviewed})">${s.reviewed?'확인 취소':'확인함으로 표시'}</button>
         <button class="btn danger sm" onclick="removeSubmission(${s.id})">삭제</button>
       </div>
     `;
