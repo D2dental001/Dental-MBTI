@@ -142,7 +142,7 @@ details{border-top:1px solid #eee;padding:14px 0}details summary{cursor:pointer;
 <div class="ebar">
 <button class="btn" id="btnBack">← 목록</button>
 <div class="ti"><b><span id="edTitle"></span><span id="dirty" hidden>저장 안 됨</span></b><small><span id="edTheme"></span> · <button id="btnTitle">이름 변경</button></small></div>
-<span class="ehelp">섹션에 마우스를 올리면 <b>편집 · ↑ · ↓ · 숨기기 · 복제 · 삭제</b> 도구가 나옵니다. 글자·사진은 화면에서 바로 클릭해도 수정됩니다.</span>
+<span class="ehelp">섹션에 마우스를 올리면 <b>편집 · ↑ · ↓ · 숨기기 · 복제 · 삭제</b>, 상단 메뉴에 올리면 <b>메뉴 편집 · 메뉴 추가</b> 도구가 나옵니다. 글자·사진은 화면에서 바로 클릭해도 수정됩니다.</span>
 <button class="btn" id="btnOpen">새 창 미리보기</button>
 <button class="btn" id="btnReset" title="기본 샘플로 되돌리기">↺ 샘플로 되돌리기</button>
 </div>
@@ -1014,7 +1014,7 @@ ${(d.items||[]).map((_,n)=>`<div class="row rv"><div class="ph">${R.i(`items/${n
   },
   chrome:(S,body,ctx)=>`
 <header class="hd"><div class="wrap"><a href="#top" class="logo">${S.t('name')}<small>${S.t('nameEn')}</small></a>
-<nav>${ctx.nav.map(n=>`<a href="${n.href}">${esc(n.label)}</a>`).join('')}</nav>
+<nav>${navHTML(ctx)}</nav>
 <a href="#" class="cta" data-modal="mform">${S.t('g_cta')}</a><button class="nav-tg" aria-label="메뉴">☰</button></div></header>
 <main id="top">${body}</main>
 <div class="modal" id="mform"><div><button class="x" type="button">×</button><h3>${S.t('g_cta')}</h3>${formHTML(ctx.site,S,{select:true})}</div></div>
@@ -1064,7 +1064,7 @@ BLOCKDEFS.premium = {
   },
   chrome:(S,body,ctx)=>`
 <header class="hd"><div class="wrap"><a href="#top" class="logo">${S.t('nameEn')}</a>
-<nav>${ctx.nav.map(n=>`<a href="${n.href}">${esc(n.label)}</a>`).join('')}</nav><button class="nav-tg" aria-label="메뉴">☰</button></div></header>
+<nav>${navHTML(ctx)}</nav><button class="nav-tg" aria-label="메뉴">☰</button></div></header>
 <main id="top">${body}</main>
 <footer class="ft"><div class="wrap">${S.t('name')} · ${S.t('biz')}</div></footer>
 <button class="fab" data-modal="mform" type="button">상담<br>신청</button>
@@ -1106,7 +1106,7 @@ BLOCKDEFS.d2 = {
   },
   chrome:(S,body,ctx)=>`
 <header class="hd"><div class="wrap"><a href="#top" class="logo"><span class="mk">${S.t('d_mark')}</span><span class="nm">${S.t('name')}</span></a>
-<nav>${ctx.nav.map(n=>`<a href="${n.href}">${esc(n.label)}</a>`).join('')}</nav><button class="nav-tg" aria-label="메뉴">☰</button></div></header>
+<nav>${navHTML(ctx)}</nav><button class="nav-tg" aria-label="메뉴">☰</button></div></header>
 <nav class="side">${ctx.all.map(n=>`<a href="${n.href}" aria-label="${esc(n.label)}"></a>`).join('')}</nav>
 <main id="top">${body}</main>`
 };
@@ -1144,7 +1144,7 @@ BLOCKDEFS.network = {
   chrome:(S,body,ctx)=>`
 <div class="util"><div class="wrap"><span>${S.t('n_util')}</span><div><a href="${ctx.go('quick')}">빠른예약</a><a href="${S.v('kakao')||'#'}">카톡상담</a><a href="${ctx.go('quick')}">비용상담</a><b style="margin-left:18px">${S.t('phone')}</b></div></div></div>
 <header class="hd"><div class="wrap"><a href="#top" class="logo"><i>${S.t('d_mark')}</i>${S.t('name')}</a>
-<nav>${ctx.nav.map(n=>`<a href="${n.href}">${esc(n.label)}</a>`).join('')}</nav>
+<nav>${navHTML(ctx)}</nav>
 <a class="call" href="tel:${S.v('phone')}">${ic('phone')}${S.t('phone')}</a><button class="nav-tg" aria-label="메뉴">☰</button></div></header>
 <main id="top">${body}</main>
 <footer class="ft"><div class="wrap"><b>${S.t('name')}</b>${S.t('biz')}</div></footer>
@@ -1180,7 +1180,7 @@ BLOCKDEFS.local = {
   },
   chrome:(S,body,ctx)=>`
 <header class="hd"><div class="wrap"><a href="#top" class="logo">${ic('tooth')}${S.t('name')}</a>
-<nav>${ctx.nav.map(n=>`<a href="${n.href}">${esc(n.label)}</a>`).join('')}</nav>
+<nav>${navHTML(ctx)}</nav>
 <a class="tel" href="tel:${S.v('phone')}">${ic('phone')}<span>${S.t('phone')}</span></a><button class="nav-tg" aria-label="메뉴">☰</button></div></header>
 <main id="top">${body}</main>
 <footer class="ft"><div class="wrap"><b>${S.t('name')}</b>${S.t('biz')}</div></footer>`
@@ -1211,7 +1211,7 @@ function blockFromFlat(theme, type, flat){
   return data;
 }
 function migrateContent(theme, flat){
-  if (flat && flat.v === 2) return flat;
+  if (flat && flat.v === 2) return ensureNav(flat, theme);
   const base = DEFAULTS[theme]();                // 예전 샘플(기본값)
   const src = { ...base, ...(flat || {}) };      // 예전에 수정한 내용 우선
   const site = {};
@@ -1222,7 +1222,7 @@ function migrateContent(theme, flat){
   if (theme === 'premium') site.p_form_t = src.p_form_t || '1:1 상담 신청';
   if (theme === 'd2') site.d_mark = src.d_mark || 'D2';
   const blocks = BLOCKDEFS[theme].layout.map(type => ({ id: bid(), type, hidden: false, data: blockFromFlat(theme, type, src) }));
-  return { v: 2, site, blocks };
+  return ensureNav({ v: 2, site, blocks }, theme, true);
 }
 function defaultContent(theme){ return migrateContent(theme, {}); }
 function newBlockData(theme, type){
@@ -1237,6 +1237,72 @@ function firstImage(content){
   (content.blocks || []).filter(b => !b.hidden).forEach(b => walk(b.data));
   return found;
 }
+
+/* ---------- 상단 메뉴 (메인 메뉴 + 소메뉴) ----------
+   site.nav = [{ label, href, children:[{label, href}] }]
+   href: '#b-<블록ID>' (페이지 안 블록) · '#top' · 'https://...' 외부 링크 · 'tel:...' */
+const SUBMENU_SAMPLES = { d2:'services', local:'services', premium:'services', network:'clinics' };
+function ensureNav(content, theme, isNew){
+  if (Array.isArray(content.site.nav)) return content;
+  const vis = content.blocks.filter(b => !b.hidden && (b.data.menu || '').trim());
+  content.site.nav = vis.map(b => {
+    const item = { label: b.data.menu.trim(), href: '#b-' + b.id, children: [] };
+    // 진료과목 메뉴에는 예시 소메뉴를 넣어 둡니다
+    if (isNew && SUBMENU_SAMPLES[theme] === b.type){
+      const its = (b.data.items || []).slice(0, 4);
+      item.children = its.map(it => ({ label: String(it.t || it.k || '').split('\n')[0].trim() || '세부 메뉴', href: '#b-' + b.id }));
+    }
+    return item;
+  });
+  return content;
+}
+function resolveNav(content, mode){
+  const ok = href => {
+    if (!href) return '#top';
+    if (href.startsWith('#b-')){ const b = content.blocks.find(x => '#b-' + x.id === href); if (!b || (b.hidden && mode === 'export')) return null; }
+    return href;
+  };
+  const ext = h => /^https?:/i.test(h);
+  return (content.site.nav || []).map(n => {
+    const kids = (n.children || []).map(c => ({ label: c.label || '', href: ok(c.href), ext: ext(c.href || '') })).filter(c => c.label && c.href);
+    let href = ok(n.href);
+    if (!href && kids.length) href = kids[0].href;
+    return { label: n.label || '', href, ext: ext(n.href || ''), children: kids };
+  }).filter(n => n.label && n.href);
+}
+function navHTML(ctx){
+  const a = (n, cls) => `<a href="${esc(n.href)}"${cls ? ` class="${cls}"` : ''}${n.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(n.label)}</a>`;
+  return ctx.nav.map(n => n.children.length
+    ? `<div class="mi has-sub">${a(n, 'mi-a')}<div class="sub"><div class="sub-in">${n.children.map(c => a(c)).join('')}</div></div></div>`
+    : a(n)).join('');
+}
+const NAV_CSS = `
+.hd nav .mi{position:relative;display:flex;align-items:center}
+.hd nav .mi.has-sub>.mi-a:after{content:'';display:inline-block;width:6px;height:6px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg);margin:0 0 3px 7px;opacity:.7}
+.hd nav .sub{position:absolute;top:100%;left:50%;transform:translateX(-50%);padding-top:14px;display:none;z-index:80}
+.hd nav .mi:hover .sub,.hd nav .mi:focus-within .sub{display:block}
+.hd nav .sub-in{background:#fff;border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.16);padding:8px;min-width:180px;display:grid}
+.hd nav .sub a{display:block;padding:10px 14px;border-radius:6px;color:#222!important;font-size:14px;font-weight:500;letter-spacing:0;text-transform:none;white-space:nowrap;opacity:1}
+.hd nav .sub a:hover{background:#f4f1ec;color:var(--pc)!important}
+@media(max-width:900px){body.nav-open .hd nav .mi{display:block}body.nav-open .hd nav .sub{position:static;display:block;transform:none;padding:6px 0 0 14px}
+body.nav-open .hd nav .sub-in{box-shadow:none;background:none;padding:0;min-width:0}body.nav-open .hd nav .sub a{color:inherit!important;opacity:.75;padding:6px 0}
+body.nav-open .hd nav .mi.has-sub>.mi-a:after{display:none}}`;
+
+/* 공통 블록: 진료 과목 상세 (소메뉴 연결용) */
+COMMON_BLOCKS.c_treat = { label:'진료 과목 상세', desc:'사진·설명·특징 목록으로 한 가지 진료를 자세히 소개 (진료과목 소메뉴 연결용)',
+  fields:[F.menu(''), F.img('img','사진'), F.text('lab','작은 제목'), F.text('t','진료 이름'), F.area('d','설명',{rows:4}), F.area('pts','특징 (한 줄에 하나씩)',{rows:4}), F.text('btn','버튼 글자'), F.text('side','사진 위치 (left / right)')],
+  defaults: () => ({ menu:'', img:'asset:implant', lab:'TREATMENT', t:'임플란트', d:'정밀한 3D 진단과 네비게이션 가이드로\n안전하고 오래 쓰는 임플란트를 식립합니다.', pts:'3D CT 정밀 진단\n가이드 수술로 최소 절개\n분야별 전문의 협진\n체계적인 사후관리', btn:'상담 예약하기', side:'left' }),
+  render: (R, d, S) => `<section class="cb cb-treat${d.side === 'right' ? ' rt' : ''}"><div class="wrap"><div class="ph">${R.i('img')}</div><div class="tx"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p>${R.t('d')}</p><ul>${String(d.pts || '').split('\n').filter(x => x.trim()).map(x => `<li>${esc(x)}</li>`).join('')}</ul><a href="tel:${S.v('phone')}">${R.t('btn')}</a></div></div></section>` };
+const TREAT_CSS = `
+.cb-treat .wrap{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center}.cb-treat.rt .ph{order:2}
+.cb-treat .ph img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--r)}
+.cb-treat small{display:block;color:var(--pc);font-weight:800;letter-spacing:.2em;font-size:13px;margin-bottom:10px}
+.cb-treat h2{font-size:clamp(28px,3vw,42px);letter-spacing:-.03em;margin-bottom:18px}.cb-treat p{line-height:1.9;opacity:.8}
+.cb-treat ul{list-style:none;margin:24px 0 30px;display:grid;gap:10px}.cb-treat li{padding-left:28px;position:relative}
+.cb-treat li:before{content:'✓';position:absolute;left:0;top:0;width:20px;height:20px;border-radius:50%;background:var(--pc);color:#fff;font-size:11px;display:grid;place-items:center}
+.cb-treat a{display:inline-block;background:var(--pc);color:#fff;font-weight:700;padding:14px 32px;border-radius:40px}
+@media(max-width:900px){.cb-treat .wrap{grid-template-columns:1fr;gap:28px}.cb-treat.rt .ph{order:0}}`;
+Object.values(BLOCKDEFS).forEach(T => { T.blocks.c_treat = COMMON_BLOCKS.c_treat; });
 
 /* ---------- 공통 스크립트 (블록을 바꿔 끼워도 다시 실행 가능) ---------- */
 const COMMON_JS2 = `
@@ -1277,7 +1343,7 @@ function siteCtx(content, theme, mode){
   const T = BLOCKDEFS[theme];
   return {
     site: content.site,
-    nav: vis.filter(b => (b.data.menu || '').trim()).map(b => ({ href: '#b-' + b.id, label: b.data.menu.trim() })),
+    nav: resolveNav(content, mode),
     all: vis.map(b => ({ href: '#b-' + b.id, label: (b.data.menu || (T.blocks[b.type] || {}).label || '') })),
     go: type => { const b = vis.find(x => x.type === type); return b ? '#b-' + b.id : '#top'; }
   };
@@ -1303,7 +1369,7 @@ ${opt.head || ''}
 <meta name="theme-color" content="${esc(site.color)}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 ${th.fonts || ''}
-<style>:root{--pc:${esc(site.color)};--pc2:${esc(site.color2 || site.color)}}${COMMON_CSS}${th.css}${COMMON_BLOCK_CSS}.blk{scroll-margin-top:72px}.t-d2 .blk{scroll-margin-top:0}.blk.is-hidden{display:none}</style>
+<style>:root{--pc:${esc(site.color)};--pc2:${esc(site.color2 || site.color)}}${COMMON_CSS}${th.css}${COMMON_BLOCK_CSS}${NAV_CSS}${TREAT_CSS}.blk{scroll-margin-top:72px}.t-d2 .blk{scroll-margin-top:0}.blk.is-hidden{display:none}</style>
 </head><body class="t-${theme}">
 ${html}
 ${privacyHTML(site)}
@@ -1482,8 +1548,18 @@ function inserts(){document.querySelectorAll('.ad-insert').forEach(function(x){x
   bl.forEach(function(el,i){el.after(mk(i+1,i===bl.length-1))});
 }
 editable(document);document.querySelectorAll('.blk').forEach(tools);inserts();
+(function(){var nav=document.querySelector('.hd nav');var hd=document.querySelector('.hd');if(!nav||!hd)return;
+  var s2=document.createElement('style');s2.textContent='.hd nav{outline:2px dashed transparent;outline-offset:6px;border-radius:6px;transition:outline-color .15s}.hd:hover nav,.hd.ad-menu-on nav{outline-color:'+A+'}'+
+  '.ad-mtools{position:absolute;z-index:9999;top:100%;right:16px;display:flex;align-items:center;gap:4px;padding:6px;background:rgba(255,255,255,.98);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.2);font:500 13px/1 Pretendard,sans-serif;opacity:0;pointer-events:none;transition:opacity .15s;white-space:nowrap}'+
+  '.hd:hover .ad-mtools{opacity:1;pointer-events:auto}@media(hover:none){.ad-mtools{opacity:1;pointer-events:auto}}';
+  document.head.appendChild(s2);
+  var t=document.createElement('div');t.className='ad-mtools';t.contentEditable='false';
+  t.innerHTML='<span class="ad-tag">상단 메뉴</span><button type="button" class="ad-tb strong" data-m="edit">메뉴 편집</button><button type="button" class="ad-tb" data-m="add">＋ 메뉴 추가</button>';
+  t.addEventListener('click',function(e){var x=e.target.closest('[data-m]');if(!x)return;e.preventDefault();e.stopPropagation();parent.postMessage({t:'menu',add:x.dataset.m==='add'},'*')});
+  if(getComputedStyle(hd).position==='static')hd.style.position='relative';hd.appendChild(t);
+})();
 document.addEventListener('click',function(e){
-  if(e.target.closest('.ad-tools,.ad-insert'))return;
+  if(e.target.closest('.ad-tools,.ad-insert,.ad-mtools'))return;
   var a=e.target.closest('a');
   if(a){e.preventDefault();var h=a.getAttribute('href')||'';
     if(h.charAt(0)==='#'&&h.length>1&&!e.target.closest('[data-k]')){var t=null;try{t=document.querySelector(h)}catch(x){}if(t)t.scrollIntoView({behavior:'smooth',block:'start'});document.body.classList.remove('nav-open')}}
@@ -1509,6 +1585,7 @@ window.addEventListener('message', e=>{
   if (d.t==='pick'){ pickImage(async url=>{ setPath(cur.content, d.k, url); markDirty(); post({t:'img',k:d.k,src:toSrc(url)}); syncDrawerField(d.k, url); }); }
   if (d.t==='blk') blockAction(d.id, d.act);
   if (d.t==='insert') openPicker(d.index);
+  if (d.t==='menu') openMenuEditor(!!d.add);
 });
 
 /* ---------- 블록 동작 ---------- */
@@ -1519,7 +1596,7 @@ async function blockAction(id, act){
   if (drawer) closeDrawer(true);
   if (act==='up' && i>0) [bl[i-1], bl[i]] = [bl[i], bl[i-1]];
   if (act==='down' && i<bl.length-1) [bl[i+1], bl[i]] = [bl[i], bl[i+1]];
-  if (act==='hide'){ bl[i].hidden = !bl[i].hidden; toast(bl[i].hidden ? `"${label}" 블록을 숨겼습니다. 실제 홈페이지와 상단 메뉴에서 빠집니다.` : `"${label}" 블록을 다시 보이게 했습니다.`); }
+  if (act==='hide'){ bl[i].hidden = !bl[i].hidden; toast(bl[i].hidden ? `"${label}" 블록을 숨겼습니다. 내려받는 홈페이지에서 빠집니다.` : `"${label}" 블록을 다시 보이게 했습니다.`); }
   if (act==='dup'){ const c = clone(bl[i]); c.id = bid(); bl.splice(i+1, 0, c); toast(`"${label}" 블록을 복제했습니다.`); }
   if (act==='del'){ if (!confirm(`"${label}" 블록을 삭제할까요?\n저장 후에는 되살릴 수 없습니다.`)) return; bl.splice(i,1); toast(`"${label}" 블록을 삭제했습니다.`); }
   markDirty(); renderPreview(true); await savePF(true);
@@ -1576,7 +1653,7 @@ function openBlockEditor(id, scroll){
   let t; const live = () => { markDirty(); clearTimeout(t); t = setTimeout(()=>liveBlock(id), 120); };
   const body = document.createElement('div');
   body.appendChild(hEl(`<p class="dr-desc">${esc(def.desc||'')}</p>`));
-  body.appendChild(buildForm(def.fields, b.data, 'b/'+id+'/', live));
+  body.appendChild(buildForm(def.fields.filter(f=>f.key!=='menu'), b.data, 'b/'+id+'/', live));
   openDrawer({ title: def.label + ' 편집', sub:'입력하는 대로 화면에 바로 반영됩니다. [저장]을 누르면 포트폴리오에 저장됩니다.', body, blockId:id,
     onSave: async () => { renderPreview(true); return await savePF(); },
     onCancel: () => { const i = cur.content.blocks.findIndex(x=>x.id===id); if (i>=0){ cur.content.blocks[i] = snap; liveBlock(id); } } });
@@ -1591,6 +1668,47 @@ function openSiteEditor(){
   openDrawer({ title:'기본 정보', sub:'병원 공통 정보', body,
     onSave: async () => { renderPreview(true); return await savePF(); },
     onCancel: () => { cur.content.site = snap; renderPreview(true); } });
+}
+
+/* ---------- 상단 메뉴 편집 (메인 메뉴 + 소메뉴) ---------- */
+const MENU_FIELDS = [
+  F.list('nav','메인 메뉴','메인 메뉴',0,[
+    F.text('label','메뉴 이름'),
+    {key:'href', label:'연결할 곳', type:'target'},
+    F.list('children','소메뉴','소메뉴',0,[F.text('label','소메뉴 이름'),{key:'href',label:'연결할 곳',type:'target'}],{max:12,fresh:()=>({label:'새 소메뉴',href:'#top'})})
+  ],{max:10,fresh:()=>({label:'새 메뉴',href:'#top',children:[]})})
+];
+function openMenuEditor(addNew){
+  if (!editOn) setEdit(true);
+  const site = cur.content.site; if (!Array.isArray(site.nav)) site.nav = [];
+  const snap = clone(site.nav);
+  if (addNew && site.nav.length < 10) site.nav.push({ label:'새 메뉴', href:'#top', children:[] });
+  let t; const live = () => { markDirty(); clearTimeout(t); t = setTimeout(()=>renderPreview(true), 450); };
+  const body = document.createElement('div');
+  body.appendChild(hEl(`<p class="dr-desc"><b>메인 메뉴</b>를 추가하고, 메뉴마다 <b>소메뉴</b>를 넣을 수 있습니다. 예) 진료과목 → 임플란트 · 치아교정 · 라미네이트<br>각 메뉴의 <b>연결할 곳</b>에서 이동할 블록(섹션)이나 외부 링크를 고르세요. 진료별 소개가 필요하면 <b>＋ 블록 추가 → 진료 과목 상세</b> 블록을 만든 뒤 연결하면 됩니다.</p>`));
+  const form = buildForm(MENU_FIELDS, site, 's/', live);
+  body.appendChild(form);
+  if (addNew){ const its = form.querySelectorAll(':scope .dr-list > .items > .it'); const last = its[its.length-1]; if (last) last.querySelector('.it-tg').click(); live(); }
+  openDrawer({ title:'상단 메뉴 편집', sub:'메뉴에 마우스를 올리면 소메뉴가 펼쳐집니다. 모바일에서는 들여쓰기 목록으로 보입니다.', body,
+    onSave: async () => { renderPreview(true); return await savePF(); },
+    onCancel: () => { site.nav = snap; renderPreview(true); } });
+}
+function targetOptions(){
+  const T = BLOCKDEFS[cur.theme];
+  const clean = v => typeof v === 'string' && v && !/^(asset:|https?:|data:|#)/.test(v) && !/^(left|right)$/.test(v) ? v.split('\n')[0].slice(0,40) : '';
+  const firstText = d => {
+    const keys = Object.keys(d);
+    const pick = keys.find(k => k === 't' && clean(d[k])) || keys.find(k => /(^title$|_t$|h1$|_n$|^sig_name$)/.test(k) && clean(d[k]));
+    if (pick) return clean(d[pick]);
+    const arr = Object.values(d).find(v => Array.isArray(v) && v[0]); if (arr){ const x = arr[0]; const v = clean(x.t) || clean(x.n) || clean(x.label); if (v) return v; }
+    for (const v of Object.values(d)) if (clean(v)) return clean(v);
+    return ''; };
+  const opts = [['#top','맨 위 (첫 화면)']];
+  cur.content.blocks.forEach((b,i) => {
+    const lab = (T.blocks[b.type]||{}).label || b.type, ft = firstText(Object.fromEntries(Object.entries(b.data).filter(([k])=>k!=='menu')));
+    opts.push(['#b-'+b.id, `${i+1}. ${lab}${ft ? ' — ' + ft : ''}${b.hidden ? ' (숨김)' : ''}`]);
+  });
+  return opts;
 }
 
 /* ---------- 폼 빌더 ---------- */
@@ -1614,6 +1732,13 @@ function buildField(f, data, prefix, onChange){
   } else if (f.type === 'select'){
     el = hEl(`<div class="dr-field" data-path="${esc(path)}"><label for="${id}">${esc(f.label)}</label><select id="${id}">${f.options.map(([v,l])=>`<option value="${v}">${esc(l)}</option>`).join('')}</select></div>`);
     const s = el.querySelector('select'); s.value = val || f.options[0][0]; s.onchange = () => write(s.value);
+  } else if (f.type === 'target'){
+    const opts = targetOptions(), v = val || '#top', known = opts.some(o=>o[0]===v);
+    el = hEl(`<div class="dr-field" data-path="${esc(path)}"><label for="${id}">${esc(f.label)}</label><select id="${id}">${opts.map(([o,l])=>`<option value="${esc(o)}">${esc(l)}</option>`).join('')}<option value="__url">외부 링크 직접 입력 (예: 네이버 예약, 블로그)</option></select><input type="text" placeholder="https://" style="margin-top:6px"></div>`);
+    const sel = el.querySelector('select'), url = el.querySelector('input');
+    sel.value = known ? v : '__url'; url.value = known ? '' : v; url.hidden = known;
+    sel.onchange = () => { if (sel.value === '__url'){ url.hidden = false; url.focus(); write(url.value || ''); } else { url.hidden = true; write(sel.value); } };
+    url.oninput = () => write(url.value.trim());
   } else if (f.type === 'image'){
     el = hEl(`<div class="dr-field" data-path="${esc(path)}" data-kind="image"><label>${esc(f.label)}</label><div class="img-row"><div class="thumb">${val?`<img src="${toSrc(val)}" alt="">`:'<span>사진 없음</span>'}</div><div class="img-btns"><button type="button" class="dbtn" data-up>사진 변경</button><button type="button" class="dbtn ghost" data-rm>사진 삭제</button><small>사진은 자동으로 최적화되어 저장됩니다.</small></div></div></div>`);
     const th = el.querySelector('.thumb');
@@ -1630,7 +1755,7 @@ function buildList(f, data, prefix, onChange){
   const arr = data[f.key], max = f.max || 12;
   const el = hEl(`<div class="dr-list"><div class="dr-list-head"><b>${esc(f.label)}</b><span class="cnt"></span></div><div class="items"></div><button type="button" class="dbtn add">＋ ${esc(f.itemLabel)} 추가</button></div>`);
   const items = el.querySelector('.items'); let open = -1;
-  const summary = it => { const k = f.item.find(x=>x.type==='text'||x.type==='textarea'); return k ? String(it[k.key]||'').split('\n')[0] : ''; };
+  const summary = it => { const k = f.item.find(x=>x.type==='text'||x.type==='textarea'); const sub = Array.isArray(it.children) && it.children.length ? `  (소메뉴 ${it.children.length}개)` : ''; return k ? String(it[k.key]||'').split('\n')[0] + sub : ''; };
   const thumbOf = it => { const k = f.item.find(x=>x.type==='image'); return k && it[k.key] ? toSrc(it[k.key]) : ''; };
   const draw = () => {
     el.querySelector('.cnt').textContent = `${arr.length}개`;
@@ -1651,7 +1776,7 @@ function buildList(f, data, prefix, onChange){
   };
   el.querySelector('.add').onclick = () => {
     if (arr.length >= max) return;
-    const tpl = arr.length ? clone(arr[arr.length-1]) : Object.fromEntries(f.item.map(x=>[x.key, x.dflt ? x.dflt(0) : (x.def ?? '')]));
+    const tpl = f.fresh ? f.fresh() : arr.length ? clone(arr[arr.length-1]) : Object.fromEntries(f.item.map(x=>[x.key, x.type==='list' ? [] : x.dflt ? x.dflt(0) : (x.def ?? '')]));
     arr.push(tpl); open = arr.length-1; draw(); onChange();
   };
   draw();
