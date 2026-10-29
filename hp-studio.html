@@ -89,6 +89,29 @@ body.dr-open .adbar{left:calc(50% - 230px)}
 .pick{border:1px solid var(--line);background:#fff;border-radius:10px;padding:14px;text-align:left;display:grid;gap:5px}.pick:hover{border-color:#ff7828;background:#fff8f2}.pick b{font-size:14px}.pick span{font-size:12px;color:var(--mut);line-height:1.5}
 @media(max-width:1100px){.ehelp{display:none}}
 @media(max-width:900px){body.dr-open #stage{padding-right:16px}.adbar{left:0;right:0;transform:none;bottom:0;border-radius:0;overflow-x:auto}body.dr-open .adbar{left:0}.ad-page,.ad-badge{display:none}}
+
+.search{border:1px solid var(--line);border-radius:9px;padding:9px 14px;font:inherit;font-size:14px;min-width:260px;background:#fff}
+.search:focus{outline:2px solid var(--gold);border-color:transparent}
+.empty{grid-column:1/-1;text-align:center;color:var(--mut);padding:60px 0}
+.badge.share{left:auto;right:12px;background:#ff7828;color:#fff}
+.acts .pv{color:#c2560a;border-color:#f3c9a6;background:#fff7ef}
+.pvbtn{background:#ff7828!important;border-color:#ff7828!important;color:#fff!important;font-weight:800}
+.pvwrap{position:fixed;inset:0;z-index:400;background:#141210;display:none;flex-direction:column}.pvwrap.on{display:flex}
+.pvbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#1d1a18;color:#fff;flex-wrap:wrap}
+.pvt{display:flex;flex-direction:column;margin-right:auto;min-width:0}.pvt b{font-size:15px}.pvt small{font-size:12px;color:#bdb3a9}
+#pvDevs{display:flex;background:#2b2724;border-radius:9px;padding:3px}#pvDevs button{border:0;background:none;padding:7px 12px;border-radius:7px;font-size:13px;font-weight:700;color:#bdb3a9}#pvDevs button.on{background:#fff;color:#1d1a18}
+.pvstage{flex:1;min-height:0;display:flex;justify-content:center;align-items:stretch;padding:14px;overflow:auto}
+.pvframe{width:100%;background:#fff;border-radius:6px;overflow:hidden;transition:width .3s}
+.pvwrap[data-dev=tablet] .pvframe{width:820px;max-width:100%}
+.pvwrap[data-dev=mobile] .pvframe{width:390px;height:min(844px,100%);align-self:center;border-radius:32px;border:11px solid #000;box-shadow:0 0 0 2px #444}
+#pvFrame{width:100%;height:100%;border:0;display:block}
+body.pv-open{overflow:hidden}
+#shareModal{z-index:500}
+.sh{max-width:640px!important}.shbox{background:#faf8f5;border:1px dashed var(--line);border-radius:10px;padding:22px;text-align:center;color:var(--mut);margin-bottom:14px}
+.btn.big{width:100%;padding:14px;font-size:15px}.shrow{display:flex;gap:8px}.shrow input{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:11px 12px;font:13px/1.4 monospace;background:#faf8f5}
+.shnote{margin-top:12px;background:#fff6ea;border:1px solid #f4dbb5;border-radius:9px;padding:10px 12px;font-size:13px;color:#7a4e1d!important}
+.shinfo{margin:16px 0 0 18px;font-size:13px;color:#6d655d;line-height:1.9}.shact{display:flex;justify-content:space-between;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}.btn.del{color:#c0392b}
+@media(max-width:700px){.search{min-width:0;width:100%}}
 /* guide */
 #guide .main{max-width:1000px}
 /* modal */
@@ -132,9 +155,9 @@ details{border-top:1px solid #eee;padding:14px 0}details summary{cursor:pointer;
 
 <section id="list" class="view"><div class="main">
 <div class="lh"><div><h1>포트폴리오</h1><p>디자인 시안을 저장해 두고, 병원마다 복제해서 사진과 문구만 바꿔 홈페이지를 만듭니다.</p></div>
-<div class="r"><span class="cnt" id="cnt">0 / 20</span><button class="btn" id="btnBackup">전체 백업</button><button class="btn" id="btnRestore">백업 불러오기</button><button class="btn pri" id="btnNew" onclick="openNew()">＋ 새 포트폴리오</button></div></div>
+<div class="r"><input id="q" class="search" type="search" placeholder="🔍 치과명·포트폴리오 이름 검색"><span class="cnt" id="cnt">전체 0개</span><button class="btn" id="btnBackup">전체 백업</button><button class="btn" id="btnRestore">백업 불러오기</button><button class="btn pri" id="btnNew" onclick="openNew()">＋ 새 포트폴리오</button></div></div>
 <div id="grid"></div>
-<div class="help"><b>사용 순서</b> ① 마음에 드는 디자인을 <b>[복제]</b> → ② <b>[편집하기]</b>에서 병원 정보 입력, 글자·사진 클릭해서 수정 → ③ <b>[포트폴리오에 저장]</b> → ④ <b>[홈페이지 파일 다운로드]</b> → ⑤ <b>배포 가이드</b>대로 Cloudflare에 올리기<br>
+<div class="help"><b>사용 순서</b> ① 마음에 드는 디자인을 <b>[복제]</b>해서 치과별 포트폴리오를 만들고 (개수 제한 없음) → ② <b>[편집하기]</b>에서 병원 정보 입력, 글자·사진 클릭해서 수정 → ③ <b>[포트폴리오에 저장]</b> → ④ <b>[홈페이지 파일 다운로드]</b> → ⑤ <b>배포 가이드</b>대로 Cloudflare에 올리기<br>
 <b>저장 위치</b> 포트폴리오와 교체한 사진은 DENTAL MBTI 서버(Supabase)에 저장되어 <b>어느 PC에서 로그인해도 똑같이</b> 보입니다. 필요하면 <b>[전체 백업]</b>으로 파일 백업도 받을 수 있습니다.</div>
 </div></section>
 
@@ -143,7 +166,8 @@ details{border-top:1px solid #eee;padding:14px 0}details summary{cursor:pointer;
 <button class="btn" id="btnBack">← 목록</button>
 <div class="ti"><b><span id="edTitle"></span><span id="dirty" hidden>저장 안 됨</span></b><small><span id="edTheme"></span> · <button id="btnTitle">이름 변경</button></small></div>
 <span class="ehelp">섹션에 마우스를 올리면 <b>편집 · ↑ · ↓ · 숨기기 · 복제 · 삭제</b>, 상단 메뉴에 올리면 <b>메뉴 편집 · 메뉴 추가</b> 도구가 나옵니다. 글자·사진은 화면에서 바로 클릭해도 수정됩니다.</span>
-<button class="btn" id="btnOpen">새 창 미리보기</button>
+<button class="btn pvbtn" id="btnPreview">👁 미리보기</button>
+<button class="btn" id="btnShare">🔗 공유 링크</button>
 <button class="btn" id="btnReset" title="기본 샘플로 되돌리기">↺ 샘플로 되돌리기</button>
 </div>
 <div id="stage" data-dev="pc"><div class="frame"><iframe id="pv" title="홈페이지 미리보기"></iframe></div></div>
@@ -167,6 +191,19 @@ details{border-top:1px solid #eee;padding:14px 0}details summary{cursor:pointer;
 
 <div class="modal" id="newModal"><div><button class="close" aria-label="닫기">×</button><h2>새 포트폴리오 — 디자인 선택</h2><p>기본 디자인을 고르면 샘플 내용이 채워진 새 포트폴리오가 만들어집니다.</p><div id="newGrid"></div></div></div>
 <div class="modal" id="pickModal"><div><button class="close" aria-label="닫기">×</button><h2>추가할 블록 고르기</h2><p>고른 블록이 그 자리에 들어가고, 오른쪽 편집 창이 열립니다.</p><div id="pickBody"></div></div></div>
+<div class="pvwrap" id="pvModal" data-dev="pc" role="dialog" aria-label="홈페이지 미리보기">
+  <div class="pvbar"><div class="pvt"><b id="pvTitle"></b><small id="pvSub"></small></div>
+    <div id="pvDevs"><button data-d="pc" class="on">🖥 PC</button><button data-d="tablet">태블릿</button><button data-d="mobile">📱 모바일</button></div>
+    <button class="ad-btn" id="pvNew">새 창으로 열기</button><button class="ad-btn gold" id="pvShare">🔗 공유 링크</button><button class="ad-btn primary" id="pvClose">✕ 닫기</button></div>
+  <div class="pvstage"><div class="pvframe"><iframe id="pvFrame" title="완성 홈페이지 미리보기"></iframe></div></div>
+</div>
+<div class="modal" id="shareModal"><div class="sh"><button class="close" aria-label="닫기">×</button><h2>🔗 공유 링크</h2><p><b id="shTitle"></b> — 로그인 없이 누구나 볼 수 있는 미리보기 주소입니다. 원장님께 카카오톡·문자로 보내세요.</p>
+  <div id="shOff"><div class="shbox">아직 공유 링크가 없습니다.</div><button class="btn pri big" id="shCreate">공유 링크 만들기</button></div>
+  <div id="shOn" hidden><div class="shrow"><input id="shUrl" readonly><button class="btn pri" id="shCopy">복사</button><button class="btn" id="shOpen">열어보기</button></div>
+    <p class="shnote" id="shNote" hidden>⚠ 저장하지 않은 수정 내용이 있습니다. 링크에는 <b>저장된 내용</b>만 보입니다. <button class="btn" id="shSave">지금 저장</button></p>
+    <ul class="shinfo"><li>포트폴리오를 수정하고 <b>저장</b>하면 같은 링크에 바로 반영됩니다.</li><li>숨긴 블록은 링크에 보이지 않습니다.</li><li>링크는 추측할 수 없는 고유 주소이며, 검색엔진에는 노출되지 않습니다.</li></ul>
+    <div class="shact"><button class="btn" id="shRegen">링크 새로 만들기</button><button class="btn del" id="shStop">공유 끄기</button></div></div>
+</div></div>
 <input type="file" id="file" accept="image/*" hidden><input type="file" id="jfile" accept=".json,application/json" hidden>
 <div id="toast"></div>
 <script>/* ===== 디투 홈페이지 템플릿 — 디자인 렌더러 =====
@@ -1379,15 +1416,14 @@ ${opt.tail || ''}
 }
 </script>
 <script>/* ===== 홈페이지 템플릿 스튜디오 v2 — 블록 편집기 (디투덴탈 편집모드 방식) ===== */
-const MAX_PF = 20;
 const $ = (s, el=document) => el.querySelector(s);
 const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const hEl = html => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
 
 /* ---------- 저장소 (Supabase) ---------- */
 const HP_BUCKET = 'hp-images';
-const toRow = p => ({ id:p.id, title:p.title, theme:p.theme, sort_order:p.order, content:p.content, created_at:p.created, updated_at:p.updated });
-const fromRow = r => ({ id:r.id, title:r.title, theme:r.theme, order:r.sort_order, content:r.content, created:r.created_at, updated:r.updated_at });
+const toRow = p => ({ id:p.id, title:p.title, theme:p.theme, sort_order:p.order, content:p.content, created_at:p.created, updated_at:p.updated, share_token:p.share_token||null, share_on:!!p.share_on });
+const fromRow = r => ({ id:r.id, title:r.title, theme:r.theme, order:r.sort_order, content:r.content, created:r.created_at, updated:r.updated_at, share_token:r.share_token||null, share_on:!!r.share_on });
 const DB = {
   async all(){ const { data, error } = await sb.from('hp_portfolios').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true}); if (error) throw error; return data.map(fromRow); },
   async put(p){ const { error } = await sb.from('hp_portfolios').upsert(toRow(p)); if (error) throw error; },
@@ -1416,27 +1452,32 @@ function show(view){
 /* ---------- 목록 ---------- */
 async function renderList(){
   list = await DB.all();
-  $('#cnt').textContent = `${list.length} / ${MAX_PF}`;
-  $('#btnNew').disabled = list.length >= MAX_PF;
-  $('#grid').innerHTML = list.map(p=>{
+  drawList();
+}
+function drawList(){
+  const q = ($('#q') && $('#q').value || '').trim().toLowerCase();
+  const shown = list.filter(p => { if (!q) return true; const c = p.content || {}; const nm = (c.site && c.site.name) || c.name || ''; return (p.title + ' ' + nm).toLowerCase().includes(q); });
+  $('#cnt').textContent = q ? `${shown.length} / 전체 ${list.length}개` : `전체 ${list.length}개`;
+  $('#grid').innerHTML = shown.map(p=>{
     const th = THEMES[p.theme];
     const c = p.content && p.content.v === 2 ? p.content : migrateContent(p.theme, p.content);
     const img = toSrc(firstImage(c));
     return `<article class="card">
-      <div class="thumb" data-edit="${p.id}">${img?`<img src="${img}" alt="">`:''}<span class="badge">${th.label}</span><span class="nm">${esc(c.site.name)}</span></div>
+      <div class="thumb" data-edit="${p.id}">${img?`<img src="${img}" alt="">`:''}<span class="badge">${th.label}</span>${p.share_on?'<span class="badge share">🔗 공유 중</span>':''}<span class="nm">${esc(c.site.name)}</span></div>
       <div class="meta"><b title="${esc(p.title)}">${esc(p.title)}</b><small>${th.ref} · 블록 ${c.blocks.length}개 · 수정 ${fdate(p.updated)}</small></div>
-      <div class="acts"><button class="pri" data-edit="${p.id}">편집하기</button><button data-dup="${p.id}">복제</button><button data-ren="${p.id}">이름변경</button><button class="del" data-del="${p.id}">삭제</button></div>
+      <div class="acts"><button class="pri" data-edit="${p.id}">편집하기</button><button class="pv" data-pv="${p.id}">👁 미리보기</button><button data-dup="${p.id}">복제</button><button data-ren="${p.id}">이름변경</button><button class="del" data-del="${p.id}">삭제</button></div>
     </article>`;
-  }).join('') + (list.length < MAX_PF ? `<button class="card add" id="addCard"><span>＋</span>새 포트폴리오 만들기<small>${MAX_PF-list.length}개 더 저장할 수 있습니다</small></button>` : '');
+  }).join('') + (q ? '' : `<button class="card add" id="addCard"><span>＋</span>새 포트폴리오 만들기<small>치과별로 제한 없이 만들 수 있습니다</small></button>`)
+    + (q && !shown.length ? `<p class="empty">"${esc(q)}" 검색 결과가 없습니다.</p>` : '');
 }
 $('#grid').addEventListener('click', async e=>{
-  const t = e.target.closest('[data-edit],[data-dup],[data-del],[data-ren],#addCard'); if(!t) return;
+  const t = e.target.closest('[data-edit],[data-dup],[data-del],[data-ren],[data-pv],#addCard'); if(!t) return;
+  if (t.dataset.pv){ const p = list.find(x=>x.id===t.dataset.pv); return openPreview(p); }
   if (t.id==='addCard') return openNew();
   if (t.dataset.edit) return openEditor(t.dataset.edit);
   const p = list.find(x=>x.id===(t.dataset.dup||t.dataset.del||t.dataset.ren));
   if (t.dataset.dup){
-    if (list.length>=MAX_PF) return toast('포트폴리오는 최대 20개까지 저장할 수 있습니다.');
-    const cp = clone(p); cp.id=uid(); cp.title=p.title+' (복사본)'; cp.order=Math.max(...list.map(x=>x.order))+1; cp.created=cp.updated=now();
+    const cp = clone(p); cp.id=uid(); cp.share_token=null; cp.share_on=false; cp.title=p.title+' (복사본)'; cp.order=Math.max(...list.map(x=>x.order))+1; cp.created=cp.updated=now();
     if(await safe(()=>DB.put(cp))){ toast('복제했습니다.'); renderList(); }
   } else if (t.dataset.ren){
     const n = prompt('포트폴리오 이름', p.title); if(!n) return; p.title=n.trim(); p.updated=now(); if(await safe(()=>DB.put(p))) renderList();
@@ -1446,7 +1487,6 @@ $('#grid').addEventListener('click', async e=>{
   }
 });
 function openNew(){
-  if (list.length>=MAX_PF) return toast('포트폴리오는 최대 20개까지 저장할 수 있습니다.');
   $('#newGrid').innerHTML = Object.entries(THEMES).map(([k,t])=>`<button data-th="${k}"><img src="${toSrc(firstImage(defaultContent(k)))}" alt=""><b>${t.label}</b><small>${t.ref}</small></button>`).join('');
   $('#newModal').classList.add('on');
 }
@@ -1857,6 +1897,66 @@ function readme(c){
   return `${c.name} 홈페이지 파일\r\n========================\r\n\r\n[폴더 구성]\r\n- index.html : 홈페이지 본문 (이 파일이 첫 화면입니다)\r\n- images/ : 홈페이지에 쓰인 사진\r\n- deploy-guide.html : 인터넷에 올리는 방법 (더블클릭해서 보세요)\r\n- portfolio-backup.json : 스튜디오에서 다시 불러와 수정할 때 쓰는 백업 파일\r\n\r\n[가장 빠른 배포]\r\n1) zip을 압축 해제하면 나오는 homepage 폴더를 사용합니다.\r\n2) Cloudflare 로그인 > Workers & Pages > 만들기 > Pages > 에셋 업로드(Direct Upload)\r\n3) 프로젝트 이름(영문) 입력 > 이 폴더를 끌어다 놓기 > 배포\r\n4) 자세한 내용은 deploy-guide.html 참고\r\n`;
 }
 
+/* ---------- 미리보기 (영업용: 완성된 홈페이지 모습) ---------- */
+let pvItem = null;
+function previewSiteHTML(content, theme){
+  return renderSite(content, theme, 'edit', {}, { head:'<script>window.__EDIT=false<\/script>', tail:`<script>${PREVIEW_RUNTIME}<\/script>` });
+}
+function openPreview(item){
+  // item: 목록의 포트폴리오(저장본) 또는 편집 중인 cur(수정 중 내용 포함)
+  pvItem = item;
+  const content = item.content && item.content.v === 2 ? item.content : migrateContent(item.theme, item.content);
+  $('#pvTitle').textContent = item.title;
+  $('#pvSub').textContent = (item === cur && dirty) ? '저장 전 수정 내용까지 반영된 미리보기입니다.' : '완성된 홈페이지 모습입니다. 메뉴·슬라이드·버튼이 실제처럼 동작합니다.';
+  $('#pvFrame').srcdoc = previewSiteHTML(content, item.theme);
+  setPvDev($('#pvModal').dataset.dev || 'pc');
+  $('#pvModal').classList.add('on'); document.body.classList.add('pv-open');
+}
+function closePreview(){ $('#pvModal').classList.remove('on'); document.body.classList.remove('pv-open'); $('#pvFrame').srcdoc = ''; pvItem = null; }
+function setPvDev(d){ $('#pvModal').dataset.dev = d; $$('#pvDevs button').forEach(b=>b.classList.toggle('on', b.dataset.d===d)); }
+$('#pvDevs').addEventListener('click', e=>{ const b=e.target.closest('[data-d]'); if(b) setPvDev(b.dataset.d); });
+$('#pvClose').onclick = closePreview;
+$('#pvNew').onclick = ()=>{ if(!pvItem) return; const content = pvItem.content.v===2 ? pvItem.content : migrateContent(pvItem.theme, pvItem.content);
+  const w=window.open('','_blank'); if(!w) return toast('팝업이 차단되었습니다.');
+  w.document.write(renderSite(content,pvItem.theme,'edit',{},{head:`<base href="${location.href.replace(/[^/]*$/,'')}">`,tail:`<script>${PREVIEW_RUNTIME}<\/script>`})); w.document.close(); };
+$('#pvShare').onclick = ()=>{ if(pvItem) openShare(pvItem); };
+$('#btnPreview').onclick = ()=>{ if(cur) openPreview(cur); };
+
+/* ---------- 공유 링크 (로그인 없이 원장님이 볼 수 있는 주소) ---------- */
+const shareUrl = tok => location.href.replace(/[^/]*$/, '') + 'hp-view.html?p=' + encodeURIComponent(tok);
+const newToken = () => { const a = new Uint8Array(16); crypto.getRandomValues(a); return [...a].map(x=>x.toString(36).padStart(2,'0')).join('').slice(0,24); };
+let shareItem = null;
+function drawShare(){
+  const p = shareItem, on = !!(p.share_on && p.share_token);
+  $('#shTitle').textContent = p.title;
+  $('#shOn').hidden = !on; $('#shOff').hidden = on;
+  if (on) $('#shUrl').value = shareUrl(p.share_token);
+  $('#shNote').hidden = !(cur && cur.id === p.id && dirty);
+}
+function openShare(p){ shareItem = p; drawShare(); $('#shareModal').classList.add('on'); }
+async function setShare(on, regen){
+  const p = shareItem;
+  if (on && (!p.share_token || regen)) p.share_token = newToken();
+  p.share_on = on;
+  const row = list.find(x=>x.id===p.id);
+  const target = (cur && cur.id === p.id) ? cur : row;
+  if (target && target !== p){ target.share_token = p.share_token; target.share_on = p.share_on; }
+  try {
+    const { error } = await sb.from('hp_portfolios').update({ share_token:p.share_token, share_on:p.share_on }).eq('id', p.id);
+    if (error) throw error;
+  } catch(e){ toast('공유 설정 실패: '+(e.message||e)+' — hp_studio_v2.sql 을 실행했는지 확인하세요.'); return; }
+  if (row){ row.share_token = p.share_token; row.share_on = p.share_on; }
+  drawShare(); if (document.body.dataset.view==='list') drawList();
+  toast(on ? (regen ? '새 링크를 만들었습니다. 예전 링크는 더 이상 열리지 않습니다.' : '공유 링크를 만들었습니다.') : '공유를 껐습니다. 링크로 더 이상 볼 수 없습니다.');
+}
+$('#shCreate').onclick = ()=>setShare(true);
+$('#shStop').onclick = ()=>{ if(confirm('공유를 끌까요? 보낸 링크로 더 이상 볼 수 없습니다.')) setShare(false); };
+$('#shRegen').onclick = ()=>{ if(confirm('링크를 새로 만들까요? 예전에 보낸 링크는 더 이상 열리지 않습니다.')) setShare(true, true); };
+$('#shCopy').onclick = async ()=>{ const u=$('#shUrl').value; try{ await navigator.clipboard.writeText(u); toast('링크를 복사했습니다. 카카오톡·문자에 붙여넣어 보내세요.'); }catch(e){ $('#shUrl').select(); document.execCommand('copy'); toast('링크를 복사했습니다.'); } };
+$('#shOpen').onclick = ()=>window.open($('#shUrl').value, '_blank');
+$('#shSave').onclick = async ()=>{ if (await savePF()) drawShare(); };
+$('#btnShare').onclick = ()=>{ if(cur) openShare(cur); };
+
 /* ---------- 하단 관리자 바 / 상단 ---------- */
 function setDevice(d){ device=d; $('#stage').dataset.dev=d; $$('#devs button').forEach(b=>b.classList.toggle('on',b.dataset.d===d)); }
 $('#devs').addEventListener('click', e=>{ const b=e.target.closest('[data-d]'); if(b) setDevice(b.dataset.d); });
@@ -1864,11 +1964,10 @@ function setEdit(on){ editOn = on; $('#editSw').checked = on; document.body.clas
 $('#editSw').onchange = e => setEdit(e.target.checked);
 $('#barSite').onclick = () => { if (!editOn) setEdit(true); openSiteEditor(); };
 $('#btnBack').onclick = ()=>{ if(dirty && !confirm('저장하지 않은 수정 내용이 있습니다.\n저장하지 않고 목록으로 갈까요?')) return; closeDrawer(true); cur=null; show('list'); renderList(); };
-$('#btnOpen').onclick = ()=>{ const w=window.open('','_blank'); if(!w) return toast('팝업이 차단되었습니다.'); w.document.write(renderSite(cur.content,cur.theme,'edit',{},{head:`<base href="${location.href.replace(/[^/]*$/,'')}">`,tail:`<script>${PREVIEW_RUNTIME}<\/script>`})); w.document.close(); };
 $('#btnTitle').onclick = ()=>{ const n=prompt('포트폴리오 이름', cur.title); if(!n) return; cur.title=n.trim(); $('#edTitle').textContent=cur.title; $('#barPage').textContent='현재: '+cur.title; markDirty(); };
 $('#btnReset').onclick = ()=>{ if(!confirm('이 포트폴리오를 기본 샘플 내용으로 되돌릴까요?\n(블록·사진·문구 수정 내용이 모두 사라집니다. 저장 전까지는 목록으로 나가면 취소됩니다)')) return; closeDrawer(true); cur.content = defaultContent(cur.theme); markDirty(); renderPreview(); };
 window.addEventListener('beforeunload', e=>{ if(dirty){ e.preventDefault(); e.returnValue=''; } });
-document.addEventListener('keydown', e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='s'&&cur){ e.preventDefault(); savePF(); } if(e.key==='Escape'){ $$('.modal.on').forEach(m=>m.classList.remove('on')); } });
+document.addEventListener('keydown', e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='s'&&cur){ e.preventDefault(); savePF(); } if(e.key==='Escape'){ if($('#pvModal').classList.contains('on')) closePreview(); $$('.modal.on').forEach(m=>m.classList.remove('on')); } });
 
 /* ---------- 백업 / 불러오기 ---------- */
 $('#btnBackup').onclick = async ()=>{ const all=await DB.all(); download(new Blob([JSON.stringify({app:'d2-hp-studio',v:2,at:now(),items:all})],{type:'application/json'}), `D2-HP-Studio_backup_${new Date().toISOString().slice(0,10)}.json`); toast('전체 백업 파일을 다운로드했습니다.'); };
@@ -1883,7 +1982,6 @@ $('#jfile').addEventListener('change', async ()=>{
     for (const it of items){
       if (!THEMES[it.theme]) continue;
       const ex = cur_.find(x=>x.id===it.id);
-      if (!ex && cur_.length+added>=MAX_PF){ toast('20개 한도를 넘어 일부만 불러왔습니다.'); break; }
       if (!ex) added++;
       await DB.put({...it, id: /^[0-9a-f-]{36}$/i.test(it.id)?it.id:uid(), order: ex?ex.order:(cur_.length+added)});
     }
@@ -1894,6 +1992,8 @@ $('#jfile').addEventListener('change', async ()=>{
 function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('on'),3400); }
 $$('.tabs button').forEach(b=>b.onclick=()=>{ if(document.body.dataset.view==='editor' && dirty && !confirm('저장하지 않은 수정 내용이 있습니다. 이동할까요?')) return; if(b.dataset.v==='list'){cur=null;renderList();} show(b.dataset.v); });
 async function safe(fn){ try { await fn(); return true; } catch(e){ console.error(e); toast('처리 실패: '+(e.message||e)); return false; } }
+
+$('#q').addEventListener('input', drawList);
 
 /* ---------- 시작: 관리자만 입장 ---------- */
 (async ()=>{
