@@ -380,6 +380,23 @@ async function hrUpsertLeaveAdjust(fields){
   if(error) throw error;
 }
 
+/* ---------------------- 직원 연차 신청 (링크로 접수 → 관리자 승인) ---------------------- */
+async function hrListLeaveRequests(status){
+  let q = hrsb.from('hr_leave_requests').select('*');
+  if(status) q = q.eq('status', status);
+  const { data, error } = await q.order('leave_date', { ascending: true });
+  if(error) throw error;
+  return data || [];
+}
+async function hrDecideLeaveRequests(ids, status){
+  if(!ids || ids.length===0) return;
+  const { data: { user } } = await hrsb.auth.getUser();
+  const { error } = await hrsb.from('hr_leave_requests')
+    .update({ status, decided_at: new Date().toISOString(), decided_by_email: user ? user.email : null })
+    .in('id', ids);
+  if(error) throw error;
+}
+
 /* ---------------------- 외주 디자인 작업 내역 (외주 알바 급여명세서) ---------------------- */
 async function hrListOutsourceMonths(){
   const { data, error } = await hrsb.from('hr_outsource_entries').select('year_month').order('year_month', { ascending:false });

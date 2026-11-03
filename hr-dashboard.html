@@ -427,6 +427,14 @@
                 <option value="반차">반차 (0.5일)</option>
                 <option value="반반차">반반차 (0.25일)</option>
               </select>
+              <div id="leaveHalfRow" class="hidden">
+                <label class="field">반차 시간대</label>
+                <select id="leaveHalf">
+                  <option value="오전">오전반차</option>
+                  <option value="오후">오후반차</option>
+                  <option value="">구분 안 함</option>
+                </select>
+              </div>
               <div class="grid2">
                 <div><label class="field">시작일</label><input type="date" id="leaveStart" onchange="onLeaveDateChange()"></div>
                 <div><label class="field">종료일 (연차만 여러 날 가능)</label><input type="date" id="leaveEnd" onchange="updateLeavePreview()"></div>
@@ -675,6 +683,22 @@
           <div id="designPreview"></div>
         </div>
 
+        <div class="card no-print" id="leaveReqCard">
+          <h2>📲 직원 연차 신청 링크 &amp; 승인</h2>
+          <div class="desc">신청 받을 월을 고르고 링크를 직원들에게 보내세요. 직원은 모바일에서 <b>이름·연락처</b>(직원 정보와 일치해야 입장)를 입력한 뒤 달력에서 연차/오전반차/오후반차를 선택해 신청합니다. 신청은 아래 <b>승인 대기</b>에 쌓이고, 승인하면 연차 사용으로 자동 반영됩니다.</div>
+          <div class="grid2">
+            <div><label class="field">신청 받을 월</label><input type="month" id="leaveReqMonth" onchange="renderLeaveReqLink()"></div>
+            <div><label class="field">직원에게 보낼 링크</label><input type="text" id="leaveReqLink" readonly onclick="this.select()"></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+            <button class="btn primary sm" onclick="copyLeaveReqLink()">링크 복사</button>
+            <button class="btn ghost sm" onclick="shareLeaveReqLink()">공유하기</button>
+          </div>
+          <div class="small-note" id="leaveReqLinkMsg"></div>
+          <h3 style="margin:18px 0 8px;font-size:15px;">승인 대기 <span id="leaveReqCount" class="small-note"></span></h3>
+          <div id="leaveReqList"></div>
+        </div>
+
         <div class="card">
           <h2>연차 현황 (입사일 기준 · 자동 차감)</h2>
           <div class="desc">법정 연차는 입사일로 자동 계산됩니다(입사 1년 미만은 매월 1일씩 최대 11일, 1년 이상은 15일 + 근속 2년마다 1일, 최대 25일). 홈 캘린더에서 "🌴 연차 입력"으로 등록하면 <b>사용</b>에 자동 반영되어 잔여가 차감됩니다. 이월·선사용 등은 "내역/조정"에서 +/− 일수로 수정하세요. 반차는 0.5일, 반반차는 0.25일입니다.</div>
@@ -728,9 +752,10 @@
           <select id="leaveEmpSelect" onchange="renderLeaveCalc()"></select>
           <div class="grid2">
             <div><label class="field">기준일 (연차 산정 기준)</label><input type="date" id="leaveAsOf" onchange="renderLeaveCalc()"></div>
-            <div><label class="field">이미 사용한 연차일수</label><input type="number" id="leaveUsed" value="0" onchange="renderLeaveCalc()"></div>
+            <div><label class="field">이미 사용한 연차일수 (캘린더·직원 신청 기록 자동 반영, 수정 가능)</label><input type="number" id="leaveUsed" value="0" step="0.25" onchange="renderLeaveCalc({noAuto:true})"></div>
           </div>
           <div id="leaveResult"></div>
+          <div id="leaveMonthly"></div>
         </div>
       </div>
 
@@ -1057,7 +1082,7 @@ document.querySelectorAll('.navitem').forEach(btn=>{
     if(tab==='severance'){ populateEmpSelect('sevEmpSelect'); renderSeverance(); }
     if(tab==='cert'){ populateEmpSelect('certEmpSelect'); renderCert(); }
     if(tab==='docs') initDocsTab();
-    if(tab==='employees') renderEmpTable();
+    if(tab==='employees'){ renderEmpTable(); renderLeaveRequests(); }
     if(tab==='interview') renderSubmissions();
     if(tab==='expense') initExpenseTab();
     if(tab==='outsource') initOutsourceTab();
@@ -1134,7 +1159,7 @@ async function renderCalendar(){
     const maxShow = 3;
     const leaves = LEAVE_BY_DAY[d] || [];
     const tagItems = [
-      ...leaves.map(l=>`<span class="cal-sched-tag" style="background:${LEAVE_COLOR}">${LEAVE_ICON[l.kind]||'🌴'}${leaveEmpName(l.employee_id).slice(0,3)}</span>`),
+      ...leaves.map(l=>`<span class="cal-sched-tag" style="background:${LEAVE_COLOR}">${LEAVE_ICON[l.kind]||'🌴'}${leaveEmpName(l.employee_id).slice(0,3)}${l.half?'('+l.half+')':''}</span>`),
       ...scheds.map(s=>`<span class="cal-sched-tag" style="background:${s.color}">${(s.title||'').slice(0,4)}</span>`)
     ];
     let schedHtml = tagItems.slice(0, maxShow).join('');
@@ -1184,7 +1209,7 @@ function renderScheduleExistingList(){
     <div class="sched-item">
       <div class="sched-item-head">
         <span class="sched-color-dot" style="background:${LEAVE_COLOR}"></span>
-        <span class="sched-item-title">${LEAVE_ICON[l.kind]||'🌴'} ${leaveEmpName(l.employee_id)} · ${l.kind}</span>
+        <span class="sched-item-title">${LEAVE_ICON[l.kind]||'🌴'} ${leaveEmpName(l.employee_id)} · ${leaveLabel(l)}</span>
         <span class="sched-item-time">${fmtDays(l.days)}일</span>
       </div>
       ${l.memo ? `<div class="sched-item-content">${escHtmlLeave(l.memo)}</div>` : ''}
@@ -1370,6 +1395,7 @@ function addYearsYMD(str, n){ const [y,m,d] = str.split('-').map(Number); return
 function prevDayYMD(str){ const dt = parseYMD(str); dt.setDate(dt.getDate()-1); return dateToYMD(dt); }
 function fmtDays(n){ return String(Number(Number(n||0).toFixed(2))); }
 function escHtmlLeave(s){ return String(s||'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function leaveLabel(r){ return (r.kind==='반차' && r.half) ? (r.half+'반차') : r.kind; }
 function leaveEmpName(id){ const e = EMPLOYEES.find(x=>x.id===id); return e ? e.name : '(삭제된 직원)'; }
 
 // asOf 날짜가 속한 연차 기간 번호(0=입사 첫 해, 1=1년 근속 후 첫 기간, ...)
@@ -1414,6 +1440,8 @@ function openLeaveForm(){
   const { y, m, d } = scheduleModalYMD;
   const dateStr = `${y}-${pad2(m+1)}-${pad2(d)}`;
   document.getElementById('leaveKind').value = '연차';
+  document.getElementById('leaveHalfRow').classList.add('hidden');
+  document.getElementById('leaveHalf').value = '오전';
   document.getElementById('leaveStart').value = dateStr;
   document.getElementById('leaveEnd').value = dateStr;
   document.getElementById('leaveStart').disabled = false;
@@ -1432,6 +1460,7 @@ function closeLeaveForm(){
 }
 function onLeaveKindChange(){
   const kind = document.getElementById('leaveKind').value;
+  document.getElementById('leaveHalfRow').classList.toggle('hidden', kind !== '반차');
   if(kind !== '연차'){
     document.getElementById('leaveEnd').value = document.getElementById('leaveStart').value;
   }
@@ -1475,6 +1504,7 @@ async function saveLeave(){
   const kind = document.getElementById('leaveKind').value;
   const days = LEAVE_KINDS[kind];
   const memo = document.getElementById('leaveMemo').value.trim() || null;
+  const half = kind === '반차' ? (document.getElementById('leaveHalf').value || null) : null;
   try{
     if(editingLeaveId){
       // 기존 기록의 구분/메모만 수정 (직원·날짜는 바꾸지 않습니다)
@@ -1484,7 +1514,9 @@ async function saveLeave(){
       const others = (LEAVE_BY_DAY[d]||[]).filter(x=>x.employee_id===row.employee_id && x.id!==row.id)
         .reduce((s,x)=>s+Number(x.days||0), 0);
       if(others + days > 1){ alert('같은 직원의 하루 연차 합계가 1일을 넘을 수 없습니다.'); return; }
-      await hrUpdateLeaveUsage(row.id, { kind, days, memo });
+      const fields = { kind, days, memo };
+      if(half || row.half) fields.half = half;   // half 컬럼은 오전/오후를 쓸 때만 건드립니다
+      await hrUpdateLeaveUsage(row.id, fields);
     } else {
       const empId = document.getElementById('leaveEmpSel').value;
       if(!empId){ alert('직원을 선택해 주세요.'); return; }
@@ -1509,7 +1541,7 @@ async function saveLeave(){
         const ok = confirm(`${emp.name} 직원의 현재 연차 기간(${sum.start} ~ ${sum.endIncl}) 잔여는 ${fmtDays(sum.remain)}일인데, ${fmtDays(willUse)}일을 입력하면 ${fmtDays(sum.remain - willUse)}일(마이너스)이 됩니다.\n그래도 저장하시겠습니까?`);
         if(!ok) return;
       }
-      await hrCreateLeaveUsage(okDates.map(dt=>({ employee_id: empId, leave_date: dt, kind, days, memo })));
+      await hrCreateLeaveUsage(okDates.map(dt=>{ const o = { employee_id: empId, leave_date: dt, kind, days, memo }; if(half) o.half = half; return o; }));
       if(skipped.length) alert(`이미 입력되어 있어 제외된 날짜: ${skipped.join(', ')}`);
     }
     closeLeaveForm();
@@ -1529,6 +1561,8 @@ function startEditLeave(id){
   sel.innerHTML = `<option value="${row.employee_id}">${leaveEmpName(row.employee_id)}</option>`;
   sel.disabled = true;
   document.getElementById('leaveKind').value = row.kind;
+  document.getElementById('leaveHalfRow').classList.toggle('hidden', row.kind !== '반차');
+  document.getElementById('leaveHalf').value = row.half || '';
   document.getElementById('leaveStart').value = row.leave_date;
   document.getElementById('leaveEnd').value = row.leave_date;
   document.getElementById('leaveStart').disabled = true;
@@ -1622,7 +1656,7 @@ function renderLeaveDetail(){
     : rows.map(r=>`
       <div class="sched-item">
         <div class="sched-item-head">
-          <span class="sched-item-title">${r.leave_date} · ${LEAVE_ICON[r.kind]||''} ${r.kind}</span>
+          <span class="sched-item-title">${r.leave_date} · ${LEAVE_ICON[r.kind]||''} ${leaveLabel(r)}</span>
           <span class="sched-item-time">${fmtDays(r.days)}일${r.leave_date>today?' · 예정':''}</span>
         </div>
         ${r.memo ? `<div class="sched-item-content">${escHtmlLeave(r.memo)}</div>` : ''}
@@ -2008,11 +2042,20 @@ function calcAnnualLeaveEntitlement(hireDateStr, asOfStr){
   }
   return Math.min(15 + Math.floor((years-1)/2), 25);
 }
-function renderLeaveCalc(){
+async function renderLeaveCalc(opts){
   const emp = EMPLOYEES.find(e=>e.id===document.getElementById('leaveEmpSelect').value);
   const box = document.getElementById('leaveResult');
-  if(!emp){ box.innerHTML=''; return; }
+  if(!emp){ box.innerHTML=''; const mb = document.getElementById('leaveMonthly'); if(mb) mb.innerHTML=''; return; }
   const asOf = document.getElementById('leaveAsOf').value || new Date().toISOString().slice(0,10);
+  // 캘린더/직원 신청으로 기록된 연차 사용일수를 자동으로 불러옵니다 (직접 수정도 가능)
+  if(!(opts && opts.noAuto)){
+    try{
+      const [usage, adjusts] = await Promise.all([hrListLeaveUsageByEmployee(emp.id), hrListLeaveAdjusts()]);
+      const sm = leaveSummary(emp, null, usage, adjusts, asOf);
+      document.getElementById('leaveUsed').value = fmtDays(sm.used);
+      renderLeaveMonthly(emp, sm, usage);
+    } catch(e){ console.error(e); }
+  }
   const used = Number(document.getElementById('leaveUsed').value||0);
   const entitlement = calcAnnualLeaveEntitlement(emp.hire_date, asOf);
   const unused = Math.max(entitlement-used, 0);
@@ -2027,6 +2070,119 @@ function renderLeaveCalc(){
       <div>통상시급: ${fmtWon(Math.round(hourlyWage))} · 통상일급(8시간): ${fmtWon(Math.round(dailyWage))}</div>
       <div style="margin-top:8px;">예상 연차수당 합계: <b class="big">${fmtWon(allowance)}</b></div>
     </div>`;
+}
+
+
+/* ---------------------- 직원 연차 신청 링크 / 승인 대기 ---------------------- */
+let LEAVE_REQS = [];
+function leaveReqKindLabel(k){ return k; }
+function renderLeaveReqLink(){
+  const mEl = document.getElementById('leaveReqMonth');
+  if(!mEl.value){ const n = new Date(); mEl.value = n.getFullYear()+'-'+pad2(n.getMonth()+1); }
+  const el = document.getElementById('leaveReqLink');
+  if(!COMPANY || !COMPANY.share_token){ el.value = ''; document.getElementById('leaveReqLinkMsg').textContent = '먼저 "회사 설정 & QR"에서 회사 정보를 저장해 주세요.'; return; }
+  const base = location.href.replace(/hr-dashboard\.html.*$/, 'leave-request.html');
+  el.value = base + '?token=' + COMPANY.share_token + '&m=' + mEl.value;
+  document.getElementById('leaveReqLinkMsg').textContent = '';
+}
+async function copyLeaveReqLink(){
+  const el = document.getElementById('leaveReqLink');
+  if(!el.value){ renderLeaveReqLink(); if(!el.value) return; }
+  try{ await navigator.clipboard.writeText(el.value); document.getElementById('leaveReqLinkMsg').textContent = '링크가 복사되었습니다. 단톡방에 붙여넣어 보내세요.'; }
+  catch(e){ el.select(); document.execCommand && document.execCommand('copy'); document.getElementById('leaveReqLinkMsg').textContent = '링크를 복사했습니다.'; }
+}
+async function shareLeaveReqLink(){
+  const el = document.getElementById('leaveReqLink');
+  if(!el.value) return;
+  const m = document.getElementById('leaveReqMonth').value;
+  if(navigator.share){ try{ await navigator.share({ title: m+' 연차 신청', text: m+' 연차 신청 링크입니다.', url: el.value }); }catch(e){} }
+  else copyLeaveReqLink();
+}
+async function renderLeaveRequests(){
+  renderLeaveReqLink();
+  const box = document.getElementById('leaveReqList'); if(!box) return;
+  try{
+    LEAVE_REQS = await hrListLeaveRequests('pending');
+  }catch(e){
+    box.innerHTML = '<div class="small-note">연차 신청 목록을 불러오지 못했습니다. 연차 신청용 SQL(hr_leave_portal.sql)을 Supabase에서 아직 실행하지 않았다면 먼저 실행해 주세요.</div>';
+    document.getElementById('leaveReqCount').textContent = ''; console.error(e); return;
+  }
+  document.getElementById('leaveReqCount').textContent = LEAVE_REQS.length ? `(${LEAVE_REQS.length}건)` : '';
+  if(LEAVE_REQS.length===0){ box.innerHTML = '<div class="small-note">승인 대기 중인 신청이 없습니다.</div>'; return; }
+  const from = new Date(); from.setDate(from.getDate()-430);
+  const [usage, adjusts] = await Promise.all([hrListLeaveUsageFrom(dateToYMD(from)), hrListLeaveAdjusts()]);
+  const byEmp = {};
+  LEAVE_REQS.forEach(r=>{ (byEmp[r.employee_id] = byEmp[r.employee_id] || []).push(r); });
+  const DOWK = ['일','월','화','수','목','금','토'];
+  box.innerHTML = '<div style="margin-bottom:10px;"><button class="btn primary sm" onclick="decideLeaveRequests(LEAVE_REQS.map(r=>r.id),true)">전체 승인</button></div>' +
+    Object.keys(byEmp).map(eid=>{
+      const emp = EMPLOYEES.find(e=>e.id===eid);
+      const rows = byEmp[eid].sort((a,b)=>a.leave_date<b.leave_date?-1:1);
+      const asOf = rows[0].leave_date;
+      let remain = '';
+      if(emp){ const s = leaveSummary(emp, null, usage, adjusts, asOf); remain = ` · 잔여 <b style="color:${s.remain<0?'var(--warn)':'var(--accent2)'}">${fmtDays(s.remain)}일</b>`; }
+      const need = rows.reduce((sum,r)=>sum+(r.kind==='연차'?1:0.5),0);
+      return `<div class="sched-item" style="margin-bottom:10px;">
+        <div class="sched-item-head"><span class="sched-item-title">${escHtmlLeave(emp?emp.name:'(삭제된 직원)')}</span>
+          <span class="sched-item-time">신청 ${fmtDays(need)}일${remain}</span></div>
+        ${rows.map(r=>{ const d=parseYMD(r.leave_date); return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #f0f2f7;flex-wrap:wrap;">
+          <span style="flex:1;min-width:150px;">${d.getMonth()+1}/${d.getDate()}(${DOWK[d.getDay()]}) · <b>${r.kind}</b></span>
+          <button class="btn primary sm" onclick="decideLeaveRequests(['${r.id}'],true)">승인</button>
+          <button class="btn danger sm" onclick="decideLeaveRequests(['${r.id}'],false)">반려</button></div>`; }).join('')}
+      </div>`;
+    }).join('');
+}
+async function decideLeaveRequests(ids, approve){
+  const rows = LEAVE_REQS.filter(r=>ids.includes(r.id));
+  if(rows.length===0) return;
+  if(!approve && !confirm('이 신청을 반려할까요? 직원 화면에는 "반려"로 표시됩니다.')) return;
+  try{
+    const done = [], skipped = [];
+    if(approve){
+      for(const r of rows){
+        const days = r.kind==='연차' ? 1 : 0.5;
+        const sameDay = (await hrListLeaveUsageFrom(r.leave_date, r.leave_date)).filter(u=>u.employee_id===r.employee_id)
+          .reduce((s,u)=>s+Number(u.days||0),0);
+        if(sameDay + days > 1){ skipped.push(`${leaveEmpName(r.employee_id)} ${r.leave_date}`); continue; }
+        const row = { employee_id: r.employee_id, leave_date: r.leave_date, kind: r.kind==='연차'?'연차':'반차', days, memo: '직원 신청(승인)' };
+        if(r.kind!=='연차') row.half = r.kind==='오전반차' ? '오전' : '오후';
+        await hrCreateLeaveUsage([row]);
+        done.push(r.id);
+      }
+      if(done.length) await hrDecideLeaveRequests(done, 'approved');
+      if(skipped.length) alert('이미 같은 날 연차가 입력되어 있어 승인하지 않은 신청:\n'+skipped.join('\n')+'\n(필요하면 반려 처리해 주세요)');
+      await afterLeaveChange();
+    } else {
+      await hrDecideLeaveRequests(rows.map(r=>r.id), 'rejected');
+    }
+    await renderLeaveRequests();
+  } catch(e){ alert('처리 실패: '+e.message); console.error(e); }
+}
+
+
+/* ---------------------- 연차 계산기: 월별 사용 내역 ---------------------- */
+function leaveChipHtml(r){
+  const lab = leaveLabel(r);
+  const col = r.kind==='연차' ? ['#e1f6f4','#0d7d73'] : r.half==='오전' ? ['#eaf0ff','#2f56c9'] : r.half==='오후' ? ['#fff1e0','#b05a00'] : ['#eef0f5','#4a5568'];
+  const d = parseYMD(r.leave_date);
+  return `<span style="display:inline-block;margin:2px 6px 2px 0;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700;background:${col[0]};color:${col[1]};">${d.getDate()}일 ${lab}</span>`;
+}
+function renderLeaveMonthly(emp, s, usage){
+  const box = document.getElementById('leaveMonthly'); if(!box) return;
+  const rows = usage.filter(r=>r.leave_date>=s.start && r.leave_date<s.endEx);
+  const start = parseYMD(s.start);
+  const months = [];
+  for(let i=0;i<12;i++){ const dt = new Date(start.getFullYear(), start.getMonth()+i, 1); months.push(dt.getFullYear()+'-'+pad2(dt.getMonth()+1)); }
+  const today = dateToYMD(new Date());
+  const body = months.map(ym=>{
+    const list = rows.filter(r=>r.leave_date.slice(0,7)===ym);
+    const sum = list.reduce((a,r)=>a+Number(r.days||0),0);
+    return `<tr><td style="white-space:nowrap;">${ym.slice(0,4)}년 ${Number(ym.slice(5))}월</td>
+      <td>${list.length ? list.map(leaveChipHtml).join('') : '<span class="small-note">-</span>'}</td>
+      <td style="white-space:nowrap;text-align:right;">${list.length ? '<b>'+fmtDays(sum)+'일</b>' : ''}</td></tr>`;
+  }).join('');
+  box.innerHTML = `<div style="margin-top:16px;font-weight:700;font-size:14px;">${escHtmlLeave(emp.name)} · 월별 연차 사용 내역 <span class="small-note">(${s.start} ~ ${s.endIncl}, 합계 ${fmtDays(s.used)}일)</span></div>
+    <div style="overflow-x:auto;"><table class="wide-table"><thead><tr><th>월</th><th>사용일 (연차 / 오전반차 / 오후반차)</th><th style="text-align:right;">소계</th></tr></thead><tbody>${body}</tbody></table></div>`;
 }
 
 /* ---------------------- 퇴직금 계산기 ---------------------- */
