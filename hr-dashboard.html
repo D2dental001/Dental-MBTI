@@ -810,7 +810,7 @@
       <div id="tab-outsource" class="tab-panel hidden">
         <div class="card no-print">
           <h2>PDF · 수기 메모 · 직원 청구서 3자 대조 <span class="pill active">추천</span></h2>
-          <div class="desc">세 가지 자료를 서로 비교합니다. ① 덴티큐브 <b>AI 정산 PDF</b>(접수일 기준 — 완성일은 다음 달일 수 있음) ② 외주 디자이너의 <b>청구서 엑셀</b> ③ 내가 적어 둔 <b>수기 메모</b>(날짜별 지르·템·커스텀). 신뢰도는 <b>PDF &gt; 직원 청구서 &gt; 메모</b> 순이라 이 순서대로 자동 선택되고, 다르게 하고 싶은 건은 해당 자료 칸을 눌러 바꿉니다. 선택한 대로 급여명세서가 만들어집니다. 자료는 둘 이상이면 되고(예: PDF + 직원 청구서) 메모는 비워도 됩니다. 전치(1·2·3번)/구치 구분은 PDF 치식을 기준으로 합니다.</div>
+          <div class="desc">세 가지 자료를 서로 비교합니다. ① 덴티큐브 <b>AI 정산 PDF</b>(접수일 기준 — 완성일은 다음 달일 수 있음) ② 외주 디자이너의 <b>청구서 엑셀</b> ③ 내가 적어 둔 <b>수기 메모</b>(날짜별 전치·구치·커스텀). 신뢰도는 <b>PDF &gt; 직원 청구서 &gt; 메모</b> 순이라 이 순서대로 자동 선택되고, 다르게 하고 싶은 건은 해당 자료 칸을 눌러 바꿉니다. 선택한 대로 급여명세서가 만들어집니다. 자료는 둘 이상이면 되고(예: PDF + 직원 청구서) 메모는 비워도 됩니다. 전치(1·2·3번)/구치 구분은 PDF 치식을 기준으로 합니다.</div>
           <div class="grid3">
             <div><label class="field">정산 월 (접수일 기준)</label><input type="month" id="osSettleMonth"></div>
             <div><label class="field">지급 대상 (명세서에 표시될 이름)</label><input type="text" id="osPayee" value="디자인외주"></div>
@@ -818,7 +818,7 @@
           </div>
           <div style="margin-bottom:8px;"><label class="field">② 직원 청구서 엑셀 (.xlsx)</label><input type="file" id="osEmpFile" accept=".xlsx,.xls" onchange="osLoadEmpFile(this)"><div class="small-note" id="osEmpInfo"></div></div>
           <label class="field">③ 수기 메모 붙여넣기 (선택)</label>
-          <textarea id="osMemoText" rows="12" placeholder="0907---------------------&#10;           지르  템  커스텀&#10;최연자    0     3    3&#10;김희량    0     4    4&#10;&#10;0910---------------------&#10;최연자-리메이크&#10;강중석    4     0    1"></textarea>
+          <textarea id="osMemoText" rows="12" placeholder="0907---------------------&#10;           전치  구치  커스텀&#10;최연자    0     3    3&#10;김희량    0     4    4&#10;&#10;0910---------------------&#10;최연자-리메이크&#10;강중석    4     0    1"></textarea>
           <div style="margin-top:8px;"><button class="btn primary" onclick="osAnalyzeCases()">3자 비교하기</button></div>
           <div class="small-note" id="osCaseMsg"></div>
         </div>
@@ -4639,28 +4639,38 @@ async function osReadPdf(file){
 
 /* ---------- 수기 메모 읽기 ----------
    0907---------------------
-              지르  템  커스텀
+              전치  구치  커스텀      ← 새 양식 (머리글이 없어도 이 양식으로 읽음)
    최연자    0     3    3
+   (예전 양식: 머리글이 '지르 템 커스텀' 이면 지르·템으로 읽음)
    최연자-리메이크            ← 개수 없이 이름만 있으면 리메이크(정산 제외)
 */
 function osParseMemo(text, ym){
   const year = ym ? Number(ym.slice(0,4)) : new Date().getFullYear();
   const entries = [], warnings = [];
-  let date = null;
+  let date = null, mode = 'new';   // 기본: 전치 구치 커스텀
   String(text||'').replace(/\r/g,'').split('\n').forEach((raw, idx)=>{
     const line = raw.replace(/[　 ]/g,' ').trim();
     if(!line) return;
     const dm = line.match(/^(\d{2})(\d{2})(?=\D|$)/);
     if(dm && Number(dm[1])>=1 && Number(dm[1])<=12 && Number(dm[2])>=1 && Number(dm[2])<=31 && !/\d\s+\d/.test(line.slice(0,12))){
-      date = `${year}-${dm[1]}-${dm[2]}`; return;
+      date = `${year}-${dm[1]}-${dm[2]}`;
+      if(/지르|템/.test(line)) mode = 'old'; else if(/전치|구치/.test(line)) mode = 'new';   // 날짜 줄 뒤에 머리글이 붙은 경우
+      return;
     }
-    if(/^총\s*\d+\s*케이스/.test(line) || /^(지르|템|커스텀)(\s|$)/.test(line) || /^[-=_\s]+$/.test(line)) return;
+    // 머리글 줄: 전치 구치 커스텀 (새 양식) / 지르 템 커스텀 (예전 양식) — 이후 숫자 줄을 그 양식으로 읽음
+    if(/^(전치|구치|지르|템|커스텀)(\s|$)/.test(line) && !/\d/.test(line)){
+      if(/지르|템/.test(line)) mode = 'old'; else if(/전치|구치/.test(line)) mode = 'new';
+      return;
+    }
+    if(/^총\s*\d+\s*케이스/.test(line) || /^[-=_\s]+$/.test(line)) return;
     let m = line.match(/^(.+?)\s*[-–]?\s*(리메이크|재작업)\s*$/);
     if(m){ entries.push({ date, patient:m[1].replace(/[\s-]+$/,''), rework:true, line:idx+1 }); return; }
     m = line.match(/^([^\d\s][^\d]*?)\s+(\d+)\s+(\d+)\s+(\d+)\s*$/);
     if(m){
       if(!date){ warnings.push(`${idx+1}번째 줄: 날짜(0907 형식) 앞에 있는 내용이라 건너뛰었습니다 — ${line}`); return; }
-      entries.push({ date, patient:m[1].trim(), jireu:+m[2], tem:+m[3], custom:+m[4], units:+m[2]+(+m[3]), rework:false, line:idx+1 }); return;
+      if(mode==='old') entries.push({ date, patient:m[1].trim(), jireu:+m[2], tem:+m[3], custom:+m[4], units:+m[2]+(+m[3]), rework:false, line:idx+1 });
+      else entries.push({ date, patient:m[1].trim(), ant:+m[2], post:+m[3], custom:+m[4], units:+m[2]+(+m[3]), rework:false, hasAP:true, line:idx+1 });
+      return;
     }
     warnings.push(`${idx+1}번째 줄을 이해하지 못했습니다 — ${line}`);
   });
@@ -4691,7 +4701,7 @@ function osSolve(entries, cases, opt){
       cases.forEach((c,i)=>{ if(!used.has(i) && c.rework) left++; });
       assign.forEach((a,i)=>{ if(!a) return; const e=entries[i];
         const z=a.reduce((s,k)=>s+(cases[k].kind==='Z'?cases[k].q:0),0), t=a.reduce((s,k)=>s+(cases[k].kind==='T'?cases[k].q:0),0);
-        diff += Math.abs((e.z||0)-z)+Math.abs((e.t||0)-t);
+        if(e.z!=null || e.t!=null) diff += Math.abs((e.z||0)-z)+Math.abs((e.t||0)-t);
         if(e.a!=null){ const sa=a.reduce((s,k)=>s+cases[k].c.ant,0), sp=a.reduce((s,k)=>s+cases[k].c.post,0); diff += 3*(Math.abs(e.a-sa)+Math.abs(e.p-sp)); }
       });
       const score = -penalty*100000 + (opt.keepRework===false?0:left*1000) - diff;
@@ -4790,7 +4800,7 @@ function osMatch3(memoEntries, pdfCases, emp){
     const par = cs.map((_,i)=>i); const find = x=>par[x]===x?x:(par[x]=find(par[x]));
     const uni = (a,b)=>{ par[find(a)] = find(b); };
     const links = [];   // {type, item, idx:[]}
-    const asgM = osSolve(Mb.map(e=>({u:e.units,z:e.jireu,t:e.tem})), cs);
+    const asgM = osSolve(Mb.map(e=>e.hasAP ? {u:e.units,a:e.ant,p:e.post} : {u:e.units,z:e.jireu,t:e.tem}), cs);
     const usedM = new Set();
     Mb.forEach((e,i)=>{ const idx=asgM[i]||[]; idx.forEach(k=>usedM.add(k)); links.push({ type:'M', item:e, idx }); });
     Mr.forEach(e=>{
@@ -4816,12 +4826,15 @@ function osMatch3(memoEntries, pdfCases, emp){
         rework:g.cases.some(c=>c.rework), teeth:g.cases.map(c=>c.teeth).join(' , '), prosth:g.cases.map(c=>c.prosth.replace(/\(ModelLess\)/,'').trim()).join(' + '), completed:g.cases[0].completed,
         marker: g.cases.some(c=>/\+\s*custom/i.test(c.prosth)) ? 'custom' : (g.cases.some(c=>/\+\s*기성/.test(c.prosth)) ? 'ready' : null),
         clinic:g.cases[0].clinic } : null;
-      const mBill = g.M.length ? { entries:g.M, units:g.M.reduce((s,e)=>s+e.units,0), jireu:g.M.reduce((s,e)=>s+e.jireu,0), tem:g.M.reduce((s,e)=>s+e.tem,0), custom:g.M.reduce((s,e)=>s+e.custom,0), date:g.M[0].date } : null;
+      const mBill = g.M.length ? { entries:g.M, units:g.M.reduce((s,e)=>s+e.units,0), jireu:g.M.reduce((s,e)=>s+(e.jireu||0),0), tem:g.M.reduce((s,e)=>s+(e.tem||0),0), hasAP:g.M.every(e=>e.hasAP), custom:g.M.reduce((s,e)=>s+e.custom,0), date:g.M[0].date } : null;
       const mRw = g.R.length ? { date:g.R[0].date, patient:g.R[0].patient } : null;
       const e = g.E.length ? { rows:g.E, units:g.E.reduce((s,r)=>s+r.units,0), ant:g.E.reduce((s,r)=>s+r.ant,0), post:g.E.reduce((s,r)=>s+r.post,0), custom:g.E.reduce((s,r)=>s+r.custom,0), date:g.E[0].date, teeth:g.E.map(r=>r.teeth).join(' , '), clinic:g.E[0].clinic } : null;
       const cOnly = g.C.length ? { rows:g.C, custom:g.C.reduce((s,r)=>s+r.custom,0), date:g.C[0].date } : null;
       // 메모가 PDF 분류(전/구) 를 따르도록 — 개수가 같을 때만 PDF 의 전/구 분류를 쓰고, 아니면 구치로 임시 반영
-      if(mBill){ if(pdf && pdf.units===mBill.units){ mBill.ant = pdf.ant; mBill.post = pdf.post; } else { mBill.ant = 0; mBill.post = mBill.units; } }
+      if(mBill){
+        if(mBill.hasAP){ mBill.ant = g.M.reduce((s,e)=>s+e.ant,0); mBill.post = g.M.reduce((s,e)=>s+e.post,0); }   // 메모에 전치/구치가 직접 적힌 경우 그대로 사용
+        else if(pdf && pdf.units===mBill.units){ mBill.ant = pdf.ant; mBill.post = pdf.post; } else { mBill.ant = 0; mBill.post = mBill.units; }
+      }
       rows.push(osBuildRow3(nm, pdf, mBill, mRw, e, cOnly, exSet.has(nm)));
     });
   });
@@ -4846,6 +4859,8 @@ function osBuildRow3(nm, pdf, memo, mRw, emp, cOnly, inExNote){
   if(pdf && memo && pdf.units!==memo.units) diffs.push(`개수: PDF ${pdf.units} / 메모 ${memo.units}`);
   if(pdf && emp && pdf.units!==emp.units) diffs.push(`개수: PDF ${pdf.units} / 직원 ${emp.units}`);
   if(pdf && emp && (pdf.ant!==emp.ant || pdf.post!==emp.post) && pdf.units===emp.units) diffs.push(`전/구 분류: PDF ${pdf.ant}/${pdf.post} · 직원 ${emp.ant}/${emp.post}`);
+  if(pdf && memo && memo.hasAP && pdf.units===memo.units && (pdf.ant!==memo.ant || pdf.post!==memo.post)) diffs.push(`전/구 분류: PDF ${pdf.ant}/${pdf.post} · 메모 ${memo.ant}/${memo.post}`);
+  if(memo && emp && memo.hasAP && memo.units===emp.units && (memo.ant!==emp.ant || memo.post!==emp.post)) diffs.push(`전/구 분류: 메모 ${memo.ant}/${memo.post} · 직원 ${emp.ant}/${emp.post}`);
   if(memo && emp && memo.custom!==emp.custom) diffs.push(`커스텀: 메모 ${memo.custom} / 직원 ${emp.custom}`);
   if(pdf && pdf.marker==='custom' && ((memo&&memo.custom===0)||(emp&&emp.custom===0))) diffs.push('PDF는 +Custom 표시');
   if(pdf && pdf.marker==='ready' && ((memo&&memo.custom>0)||(emp&&emp.custom>0))) diffs.push('PDF는 +기성(커스텀 없음) 표시');
@@ -4972,7 +4987,7 @@ function osRenderCases(){
     const inc = r.include===true;
     const P = r.pdf ? `<div>${osEsc(r.pdf.teeth)||'-'} · 전${r.pdf.ant}/구${r.pdf.post}${r.pdf.rework?' <span class="pill review">재작업</span>':''}${r.pdf.marker?` <span class="small-note">(${r.pdf.marker==='custom'?'+Custom':'+기성'})</span>`:''}</div><div class="small-note">${osEsc(r.pdf.prosth)}</div>` : '<span class="small-note">없음</span>';
     const E = r.emp ? `전${r.emp.ant}/구${r.emp.post}/커${r.emp.custom}<div class="small-note">${osMd(r.emp.date)} · ${osEsc(r.emp.teeth)}</div>` : (r.cOnly ? `커스텀 ${r.cOnly.custom}만<div class="small-note">${osMd(r.cOnly.date)}</div>` : '<span class="small-note">없음</span>');
-    const M = r.memo ? `지르${r.memo.jireu}·템${r.memo.tem}·커${r.memo.custom}<div class="small-note">${osMd(r.memo.date)}</div>` : (r.memoRework ? `<span class="pill review">리메이크</span><div class="small-note">${osMd(r.memoRework.date)}</div>` : '<span class="small-note">없음</span>');
+    const M = r.memo ? `${r.memo.hasAP ? `전${r.memo.ant}·구${r.memo.post}` : `지르${r.memo.jireu}·템${r.memo.tem}`}·커${r.memo.custom}<div class="small-note">${osMd(r.memo.date)}</div>` : (r.memoRework ? `<span class="pill review">리메이크</span><div class="small-note">${osMd(r.memoRework.date)}</div>` : '<span class="small-note">없음</span>');
     const appliedSrc = !inc ? null : r.numSrc;
     const pick = `<div style="display:flex;gap:4px;flex-wrap:wrap;"><button class="btn sm ${r.include===true?'primary':'ghost'}" onclick="osChoose(${i},true)">포함</button><button class="btn sm ${r.include===false?'danger':'ghost'}" onclick="osChoose(${i},false)">제외</button></div><div class="small-note" style="margin-top:2px;">${osEsc(r.recWhy)}로 ${r.rec?'포함':'제외'}</div>`;
     const sel = (kind, cur, opts) => `<select style="width:auto;margin:0;font-size:12px;padding:2px;" onchange="osSetSrc(${i},'${kind}',this.value)">${opts.map(([v,l])=>`<option value="${v}" ${String(cur)===v?'selected':''}>${l}</option>`).join('')}</select>`;
