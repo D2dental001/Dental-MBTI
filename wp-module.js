@@ -235,17 +235,20 @@ porcelain: {
 
 };
 
+/* ---- 실무 매뉴얼 (우리 기공소 자료) : 디자인 파트 ---- */
+GUIDES.design.practice = {"sub": "우리 기공소가 직접 정리해 주신 거래처별 기준·공통 규칙·밀링·파라미터 자료입니다. 아래 검색칸에 거래처 이름을 넣으면 해당 내용만 골라 볼 수 있습니다.", "sections": [{"t": "1. 거래처별 설계 기준 (훅 · 홀 · 마진 · 특이사항)", "tag": "client", "rows": [["밸런스", "훅: X\n홀: 위치 안 좋으면 세멘타입으로 제작하고 메모 동봉 (6·7번은 홀 위치가 안 좋아도 SCRP로 제작)\n어벗 마진: 전치 sub / 구치 근원심 EQ·협설 sub (0.3~0.5mm 정도)\n구강스캔: DS코어 부계정(d2@d2dental.co.kr) 또는 하이웍스(주로 하이웍스)\n• 주로 쓰는 스캔바디: 덴티움 수퍼라인, 스트라우만 RC/NC\n• 버컬은 너무 풍융하지 않게, 인접치 교두각과 유사하게 제작\n• 커스텀 디자인 시 홀 없는 쪽에 유지구 형성\n• 스캔데이터가 이상한 경우가 많음 — 조금이라도 이상하면 더블체크(특히 컨택)\n• NR라인: long은 4L, short은 4M으로 제작 (4 사이즈만 사용 중)"], ["박강석", "훅: M.B (브릿지 훅 확인) / 컨택 세게 !!!\n홀: 위치 안 좋으면 문의\n• 언더컷이 조금 있더라도 아답에서 맞추는 기준으로 엠브레져 꽉꽉 막기\n• 센트럴포사는 내리지 말고 어느 정도 채워서 디자인\n• 전치부 커스텀 각도 1도로 디자인 (리텐션 때문)"], ["고성좋은", "훅: X / 컨택 세게 X !!!\n홀: 위치 안 좋으면 문의\n• 전치부는 대부분 풀지르로 제작\n• 기성어벗·어벗레벨로 오는 케이스는 마진을 많이 내려서 디자인 (너무 언더컷이 심하지 않은 선에서, 치은 스캔에서 마진이 보이지 않게끔)"], ["스마일", "훅: X\n홀: 교두나 심하게 버컬로 가지 않는 이상 대부분 그냥 뚫고, 식립 위치가 심하게 안 좋은 경우는 세멘타입으로 제작 후 메모 동봉\n구강스캔: DS코어\n어벗 마진: SUB (0.3~0.5mm 정도)\n• IBS 커스텀으로 들어와도 무조건 기성으로 제작"], ["이스타", "훅: X\n홀: 위치 안 좋으면 문의\n임플란트: 안 써 있으면 네오\n• 싱글 기본\n• 인레이는 바이트 닿게 제작"], ["보타닉", "훅: M.L / 컨택 조금 세게 !!!\n홀: 위치 안 좋으면 cement type으로 제작\n구강스캔: DS코어\n• 보통 OSS 사용\n• 치아 및 교합면을 작게 원하는 경우가 많음\n• PMMA+커스텀이 먼저 나가고 어벗레벨로 지르 완성인 경우가 많음 (의뢰서에 유의사항이 잘 적혀 있고 컨택 타이트를 많이 원하심)"], ["닥터고", "훅: M.L\n홀: 버컬 쪽으로 뚫리거나 걸쳐 있으면 설측에 위치표시홀(직경 0.5mm) / 설측으로 뚫리면 SCRP로 제작\n★ 커스텀 사이즈는 기성처럼 작게. 모양은 둥글지 않고 네모난 쪽으로, 잇몸을 누르지 않게 하고 사이즈가 커지면 안 됨"], ["아는치과", "훅: M.L\n홀: 위치 안 좋으면 문의"], ["연세이로운", "훅: X\n홀: 위치 안 좋으면 문의\n• 디자인 컨펌 시 HTML 형식으로 보내기\n• 프렙라인대로 마진 설정하기\n• 커스텀 마진은 가능한 수프라로(설측은 더 수프라), 프로파일 사이즈는 가능한 5mm를 넘지 않게"], ["상계율", "훅: M.L / 컨택 세게 !!!\n홀: 버컬 쪽으로 뚫리면 cement type, 걸쳐 있으면 설측에 위치표시홀(직경 0.5mm) / 설측으로 뚫리면 SCRP로 제작\n엠브레져: 치간칫솔이 들어가게 (라운드하게 X, '^' 모양으로 확실하게)\n• 버컬 브릿지 연결부위는 싱글처럼 릿지가 살아 있도록, 컨택을 치은 쪽으로 많이 내리지 말 것. 치은 하방은 방방(넓게 열기)하게\n• PFM: 안 적혀 있으면 포세린 바이트\n★ 커스텀 사이즈는 기성처럼 작게, 모양은 네모난 쪽으로 잇몸 안 눌리게, 치아 사이즈도 크지 않도록"], ["원덴탈솔루션", "훅: M.L\n홀: 버컬 교두홀도 치과에 문의 — 거의 SCRP로 진행, 무조건 문의 !!!\n임플란트 종류: OSS만 적어 오면 OSS TS R로 제작 / 스트라우만은 RC·NC\n구강스캔: 트리오스\n• 스트라우만 정품 스캔바디를 사용하기도 함"], ["필립", "훅: M.L\n홀: 위치 안 좋으면 문의"], ["봉담바로선", "훅: D.L\n홀: 위치 안 좋으면 문의"], ["감탄", "훅: M.B\n홀: 위치 안 좋으면 문의\n구강스캔: DEXIS\n• 대합치 삭제가 필요하면 삭제하고 메모 동봉"], ["상도올빼미", "훅: M.B\n홀: 위치 안 좋으면 문의"], ["정준", "훅: M.B\n홀: 위치 안 좋으면 문의"], ["자스민", "훅: M.B (근원심 상관 X) — 브릿지는 훅 달기\n홀: 위치 안 좋으면 문의\n• 싱글 기본"], ["BYC디지털", "훅: M.B\n홀: 위치 안 좋으면 문의\n구강스캔: 트리오스\n• 커스텀은 각지게 디자인"], ["청담수", "훅: 싱글 달기 (위치는 문의해 봐야 함)"], ["연세 행복심은", "훅: 임플란트 — 너치 DB(안 되면 ML), 가로줄 표시(의뢰서 기재) / 자연치 — HOOK DB(안 되면 ML)\n• 너치 적기\n홀: 위치 안 좋으면 문의"], ["연세힐", "훅: M.L"], ["강남예닮", "훅: X"], ["매직키스 (MK)", "훅: D.L (6·7번은 M.L)"], ["미도", "훅: X"], ["동탄 센트럴 아는치과", "훅: L (근원심 상관없음)"], ["목동부부치과", "훅: D.B (사이즈 2mm)\n컨택: 엠브레져 열기 (※ '모든 거래처 엠브레져 막기' 원칙의 예외)\n• 구르브(grooves)는 진하게 하지 말기"], ["루민", "훅: B"], ["용성", "• 전치부 바이트 닿지 않게"]]}, {"t": "2. 거래처 훅(Hook) 위치 한눈에 보기", "tag": "check", "rows": [["훅 없음 (X)", "밸런스 · 스마일 · 이스타 · 연세이로운 · 고성좋은 !!! · 강남예닮 · 미도"], ["M.B", "박강석 !!! · 감탄 · 상도올빼미 · 자스민(브릿지 훅 달기, 근원심 무관) · 청담수 · BYC디지털 · 정준"], ["M.L", "보타닉 !!! · 상계율 !!! · 필립 · 닥터고 · 아는치과 · 원덴탈솔루션 · 연세힐"], ["D.L", "봉담바로선 · 매직키스 (6·7번은 M.L)"], ["D.B", "목동부부치과 (사이즈 2mm)"], ["기타", "연세 행복심은 — 임플란트: 너치 DB(안 되면 ML), 가로줄 의뢰서 기재 / 자연치: HOOK DB(안 되면 ML)\n동탄 센트럴 아는치과 — L (근원심 무관) · 루민 — B"], ["표기 보는 법", "일반적인 치과 약어 기준: M=근심, D=원심, B=협측(버컬), L=설측 / X=훅 없음. '!!!'는 원본 자료에서 특히 강조된 거래처입니다. 거래처 소개에 훅 항목이 따로 없는 곳은 의뢰서를 따릅니다."]]}, {"t": "3. 모든 거래처 공통 작업 기준 (컨택 · 바이트 · 엠브레져 · 폰틱)", "tag": "func", "rows": [["엠브레져", "모든 거래처 엠브레져 막기 (상계율만 치간칫솔 들어가게 열기 / 목동부부치과는 컨택 엠브레져 열기)"], ["폰틱 베이스", "구치부 −0.10 · 전치 −0.15 (베이스를 삭제한 케이스는 0)"], ["러버임프 케이스", "바이트 0.1 (대합치 조정 X)\n컨택 −0.10 (박강석·상계율은 더 세게)"], ["모델리스 케이스", "바이트 0.1 (대합치 조정 X) — 밸런스 맞대합 케이스는 바이트 0\n컨택 −0.07"], ["모델을 만드는 케이스", "인레이 케이스 · PFZ 케이스 · 전치부 케이스 (템포러리는 모델 X)"], ["더블스캔", "비주류 환봉, 석고+커스텀이 섞인 케이스는 무조건 더블스캔으로 진행"], ["홀·어벗 용어", "세멘타입 = 시멘트 유지형 / SCRP = 스크류 유지형 / 위치표시홀 = 설측에 직경 0.5mm 표시홀 (원본 자료 표기 기준)"]]}, {"t": "4. 스캔바디 · 구강스캔 수신 경로", "tag": "func", "rows": [["덴티움 구강용 스캔바디 시스템", "S = 6 / M = 8 / L = 10"], ["실물 스캔바디 종류", "오스템 · 네오 · 위드웰 · 워랜텍 · 웰플러스는 같은 계열로 묶고, 덴티움 · 메가젠 애니원은 같은 계열로 묶습니다."], ["구강스캔 수신 경로", "밸런스 — 하이웍스 오피스(주로) 또는 DS코어 부계정\n스마일 · 보타닉 — DS코어 주계정\n원덴탈솔루션 · BYC디지털 — 트리오스\n감탄 — DEXIS (스캔 연동 쓰리쉐이프)\n치과 포토 전송 — Gmail\n※ 계정 아이디·비밀번호는 보안상 이 화면에 싣지 않았습니다."]]}, {"t": "5. 임플란트 라이브러리 (모델리스 · 러버임프)", "tag": "func", "rows": [["모델리스 — 오스템", "오스템 정품: OST TS SBO CU"], ["모델리스 — 밸런스 덴티움", "DENTIUM SUPERLINE CUSTOM ALL 또는 DENTIUM NRLINE CUSTOM ALL"], ["모델리스 — 밸런스 스트라우만", "RC: 지오메디 BLR (GMS) / NC: 지오메디 BLM (GMS)"], ["러버임프 — 오스템 라인", "지오메디 SURO (미니는 SUM)"], ["러버임프 — 덴티움 라인", "지오메디 DER"], ["러버임프 — 스트라우만", "RC: 지오메디 BLR / NC: 지오메디 BLM"], ["러버임프 — 디오미니", "CV(TeeNu) Dentis SQ v8.1 (M-SB-L)"]]}, {"t": "6. CNC · 외부 밀링 전송 기준", "tag": "func", "rows": [["CNC 업체", "cncustom@naver.com"], ["모델리스 케이스", "모두 CNC로 보냅니다."], ["임프(러버임프) 케이스", "지르+커스텀 케이스라도, 스트라우만 · 오스템 KS 등 기공소 내에서 밀링할 수 없는 케이스만 보냅니다."], ["CNC로 보내는 케이스", "스트라우만 · 덴티움 NR라인 · 워랜텍 · 메가젠 전부 · IBS"], ["기공소 내 밀링 가능", "덴티움 · 오스템 TS 레귤러 · 미니 · 위드웰 · 네오 · 덴티스 · 웰플러스"], ["전송 마감 · 주의", "마감 19시(7시). 5시 넘어 전송하는 건은 메일 제목·내용에 '내일도착 부탁'을 기재합니다.\n스트라우만은 밀링센터 물량에 따라 2~3일 걸릴 수 있으니 가급적 빨리 전송하고, 부득이하면 '내일도착 부탁'을 기재합니다.\n스트라우만 갯수가 많을 때는 따로 이야기해야 합니다."], ["METAL CAP", "마감: 오후 1~3시 사이 (정확한 시간은 문의 필요) · modelless@naver.com\n※ 담당자 연락처는 보안상 이 화면에 싣지 않았습니다. 필요하면 원본 메모를 확인하세요."]]}, {"t": "7. 3Shape 파라미터 설정값 (재료별)", "tag": "func", "rows": [["안내", "아래 값은 3Shape 파라미터 설정값을 '값/값' 형태로 적어 주신 그대로입니다. 각 값이 무엇인지(예: 시멘트갭/추가갭, 단위 µm 등)는 원본에 표기가 없어 그대로 옮겼습니다. 현장 기준에 맞게 항목 이름을 알려주시면 정리해 드립니다."], ["PMMA", "60/80"], ["지르(ZIG)", "60/80"], ["지르 인레이", "40/50"], ["하이브리드", "25/55"], ["기성", "30/50  (케이스에 따라 어떤 것은 빡빡하고 어떤 것은 헐렁함 → 계속 확인)"], ["마진 밀링 안 한 기성", "싱글 15/30 · 브릿지 15/40"], ["PFM", "0.018 (갯수가 하나 늘어날 때마다 +1)\n0.018 / 0.040 / 2.0"], ["석고 임플란트", "싱글 30/50\n브릿지 30/55 → 빡빡했음, 늘려야 함 (40/70)"], ["석고 지대치", "구치 40/60 → 40/70\n전치 21/45"], ["커스텀 원스텝", "싱글: 전치 40/80 · 구치 50/90\n브릿지 40/80"], ["커스텀 투스텝", "싱글 30/50\n브릿지 30/60"]]}, {"t": "8. 외주디자인 정산 메모 양식", "tag": "check", "rows": [["정산 메모 양식", "날짜 줄 아래에 '이름  전치  구치  커스텀' 순서로 적습니다. (OS의 외주디자인 3자 비교가 이 양식을 읽습니다)\n\n1028   전치  구치  커스텀\n이재관   12     13     17\n\n※ 예전 양식(지르·템·커스텀)은 머리글이 '지르 템 커스텀'일 때만 예전 방식으로 읽습니다."]]}]};
+
 /* ---------------------------- 렌더링 ---------------------------- */
 const TAGS = { func:['기능','#3b6bf5','#eaf0ff'], esth:['심미','#b3720a','#fff4e0'], step:['순서','#17a673','#e6f7ef'],
                check:['체크','#7c5cf0','#f1ecff'], fail:['불량','#e5484d','#fdecec'], client:['거래처','#0aa5b0','#e1f6f8'] };
 function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function store(k, v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k, v); }catch(e){ return null; } }
 
-function sectionHtml(partKey, sec, idx){
+function sectionHtml(partKey, sec, idx, openN){
   const tg = TAGS[sec.tag] || TAGS.func;
   let body = '';
   if(sec.rows){
-    body = '<table class="wp-tbl"><tbody>' + sec.rows.map(r=>`<tr><th>${esc(r[0])}</th><td>${esc(r[1])}</td></tr>`).join('') + '</tbody></table>';
+    body = '<table class="wp-tbl wp-pre"><tbody>' + sec.rows.map(r=>`<tr><th>${esc(r[0])}</th><td>${esc(r[1])}</td></tr>`).join('') + '</tbody></table>';
   } else if(sec.tag==='check'){
     body = '<div class="wp-checks">' + sec.list.map((x,i)=>{
       const id = `${partKey}-${idx}-${i}`;
@@ -257,18 +260,23 @@ function sectionHtml(partKey, sec, idx){
   } else {
     body = '<ul class="wp-ul">' + sec.list.map(x=>`<li>${esc(x)}</li>`).join('') + '</ul>';
   }
-  return `<details class="wp-sec" ${idx<3?'open':''}>
+  return `<details class="wp-sec" ${idx<(openN==null?3:openN)?'open':''}>
     <summary><span class="wp-tag" style="color:${tg[1]};background:${tg[2]}">${tg[0]}</span>${esc(sec.t)}</summary>
     <div class="wp-body">${body}</div></details>`;
 }
 
 function panelHtml(key, g){
-  return `
+  const pr = g.practice;
+  const mode = (store('wp_mode_'+key)==='prac' && pr) ? 'prac' : 'basic';
+  const tabs = `<div class="wp-modes" data-key="${key}">
+      <button type="button" class="wp-mode ${mode==='basic'?'on':''}" data-mode="basic">기본 매뉴얼<small>일반 기술 가이드</small></button>
+      <button type="button" class="wp-mode ${mode==='prac'?'on':''}" data-mode="prac">실무 매뉴얼<small>우리 기공소 기준</small></button></div>`;
+  const basic = `
     <div class="card wp-head">
-      <h2 style="margin:0 0 6px;">${esc(g.title)}</h2>
+      <h2 style="margin:0 0 6px;">${esc(g.title)} · 기본 매뉴얼</h2>
       <div class="small-note" style="line-height:1.6;">${esc(g.sub)}</div>
       <div class="wp-flow">${g.flow.map((f,i)=>`<span class="wp-step"><b>${i+1}</b>${esc(f)}</span>`).join('')}</div>
-      <div class="wp-note">※ 수치는 일반적인 참고값입니다. 재료 제조사 지침(IFU)과 거래처 요구가 항상 우선이며, 우리 기공소 기준이 확정되면 이 가이드를 수정합니다.</div>
+      <div class="wp-note">※ 수치는 일반적인 참고값입니다. 재료 제조사 지침(IFU)과 거래처 요구가 항상 우선이며, 우리 기공소 기준은 '실무 매뉴얼'을 따릅니다.</div>
       <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn ghost sm" data-wp-toggle="open">모두 펼치기</button>
         <button class="btn ghost sm" data-wp-toggle="close">모두 접기</button>
@@ -276,9 +284,38 @@ function panelHtml(key, g){
       </div>
     </div>
     <div class="card" style="padding:8px 22px;">${g.sections.map((s,i)=>sectionHtml(key,s,i)).join('')}</div>`;
+  let prac;
+  if(pr){
+    prac = `
+    <div class="card wp-head">
+      <h2 style="margin:0 0 6px;">${esc(g.title)} · 실무 매뉴얼</h2>
+      <div class="small-note" style="line-height:1.6;">${esc(pr.sub)}</div>
+      <div style="margin-top:12px;"><input type="search" class="wp-search" placeholder="거래처 이름이나 키워드로 찾기 (예: 박강석, 훅, 스트라우만)" autocomplete="off"></div>
+      <div class="wp-nores hidden small-note" style="margin-top:8px;">검색 결과가 없습니다.</div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn ghost sm" data-wp-toggle="open">모두 펼치기</button>
+        <button class="btn ghost sm" data-wp-toggle="close">모두 접기</button>
+        <button class="btn ghost sm" onclick="window.print()">인쇄</button>
+      </div>
+    </div>
+    <div class="card" style="padding:8px 22px;">${pr.sections.map((s,i)=>sectionHtml(key,s,i,1)).join('')}</div>`;
+  } else {
+    prac = `<div class="card wp-head"><h2 style="margin:0 0 6px;">${esc(g.title)} · 실무 매뉴얼</h2>
+      <div class="small-note" style="line-height:1.7;">아직 등록된 실무 자료가 없습니다. 이 파트의 거래처별 기준·작업 규칙·메모 등을 주시면 여기에 정리해 넣겠습니다.</div></div>`;
+  }
+  return `${tabs}<div class="wp-view wp-v-basic ${mode==='basic'?'':'hidden'}">${basic}</div><div class="wp-view wp-v-prac ${mode==='prac'?'':'hidden'}">${prac}</div>`;
 }
 
 const CSS = `
+.wp-modes{display:flex;gap:8px;margin-bottom:12px;}
+.wp-mode{flex:1;border:1.5px solid #dfe4f0;background:#fff;border-radius:12px;padding:11px 14px;font-weight:800;font-size:14.5px;color:#4a5573;cursor:pointer;text-align:left;font-family:inherit;}
+.wp-mode small{display:block;font-weight:500;font-size:11.5px;color:#8a94ad;margin-top:2px;}
+.wp-mode.on{border-color:#3b6bf5;background:#eef3ff;color:#2a4fd0;}
+.wp-mode.on small{color:#5b78d6;}
+.wp-search{width:100%;padding:10px 14px;border:1.5px solid #dfe4f0;border-radius:10px;font-size:14px;font-family:inherit;}
+.wp-pre td{white-space:pre-line;}
+.wp-pre th{width:130px;}
+
 .wp-step{display:inline-flex;align-items:center;gap:6px;background:#f3f5fa;border-radius:999px;padding:5px 11px 5px 6px;font-size:12px;font-weight:600;color:#3a4460;margin:4px 6px 0 0;}
 .wp-step b{width:18px;height:18px;border-radius:50%;background:var(--accent,#3b6bf5);color:#fff;font-size:10.5px;display:inline-flex;align-items:center;justify-content:center;}
 .wp-note{margin-top:12px;padding:9px 12px;border-radius:10px;background:#fff8e6;color:#8a5a00;font-size:12px;line-height:1.5;}
@@ -346,7 +383,35 @@ function init(){
     const el = e.target;
     if(el && el.matches && el.matches('.wp-chk input[data-id]')) store('wp_chk_'+el.dataset.id, el.checked?'1':'0');
   });
+  content.addEventListener('input', e=>{
+    const el = e.target;
+    if(!(el && el.matches && el.matches('.wp-search'))) return;
+    const q = el.value.trim().toLowerCase().replace(/\s+/g,'');
+    const view = el.closest('.wp-view'); let any = false;
+    view.querySelectorAll('details.wp-sec').forEach(d=>{
+      let hit = 0;
+      d.querySelectorAll('tr').forEach(tr=>{
+        const ok = !q || tr.textContent.toLowerCase().replace(/\s+/g,'').includes(q);
+        tr.style.display = ok ? '' : 'none'; if(ok) hit++;
+      });
+      d.style.display = (!q || hit) ? '' : 'none';
+      if(q && hit) d.open = true;
+      if(!q) d.open = false;
+      if(hit) any = true;
+    });
+    if(!q){ const f = view.querySelector('details.wp-sec'); if(f) f.open = true; }
+    view.querySelector('.wp-nores').classList.toggle('hidden', any || !q);
+  });
   content.addEventListener('click', e=>{
+    const md = e.target.closest && e.target.closest('.wp-mode');
+    if(md){
+      const bar = md.closest('.wp-modes'); const panel = bar.closest('.tab-panel');
+      bar.querySelectorAll('.wp-mode').forEach(b=>b.classList.toggle('on', b===md));
+      panel.querySelector('.wp-v-basic').classList.toggle('hidden', md.dataset.mode!=='basic');
+      panel.querySelector('.wp-v-prac').classList.toggle('hidden', md.dataset.mode!=='prac');
+      store('wp_mode_'+bar.dataset.key, md.dataset.mode);
+      return;
+    }
     const rs = e.target.closest && e.target.closest('[data-reset]');
     if(rs){
       const pre = rs.dataset.reset;
@@ -355,7 +420,7 @@ function init(){
     }
     const tg = e.target.closest && e.target.closest('[data-wp-toggle]');
     if(tg){
-      const panel = tg.closest('.tab-panel');
+      const panel = tg.closest('.wp-view') || tg.closest('.tab-panel');
       panel.querySelectorAll('details.wp-sec').forEach(d=>{ d.open = tg.dataset.wpToggle==='open'; });
     }
   });
