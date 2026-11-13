@@ -1794,7 +1794,7 @@ ${opt.tail || ''}
    6. BALANCE — 분과협진 종합형 (참고: 판교밸런스치과병원 스타일)
    차콜 헤더 + 골드 포인트 + 딥퍼플 강조, 오른쪽 고정 퀵바, 진료 타일 그리드
 ===================================================================== */
-const BAL_LOGO = `<svg class="bmk" viewBox="0 0 44 44" aria-hidden="true"><path d="M22 2 42 22 22 42 2 22Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22 9 35 22 22 35 9 22Z" fill="none" stroke="currentColor" stroke-width=".8" opacity=".6"/><text x="22" y="26.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="currentColor">D2</text></svg>`;
+const balLogo = (m) => `<svg class="bmk" viewBox="0 0 44 44" aria-hidden="true"><path d="M22 2 42 22 22 42 2 22Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22 9 35 22 22 35 9 22Z" fill="none" stroke="currentColor" stroke-width=".8" opacity=".6"/><text x="22" y="26.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="${String(m||'D2').length>2?8:11}" font-weight="700" fill="currentColor">${esc(m||'D2')}</text></svg>`;
 
 const T_BALANCE = {
   label:'분과협진 종합형', ref:'판교밸런스치과 스타일', ogKey:'img_hero',
@@ -1815,7 +1815,7 @@ const T_BALANCE = {
 .qbar .home{display:block;background:var(--gold);color:#fff;font-weight:800;font-size:13px;padding:8px 0;letter-spacing:.05em}
 .qbar a.q{display:grid;justify-items:center;gap:4px;padding:11px 4px;font-size:11px;color:#555;border-bottom:1px solid #eee;line-height:1.3}.qbar a.q .ic{width:24px;height:24px;color:#444}
 .qbar .blog{font:800 11px/24px Arial;width:30px;height:24px;border-radius:5px;background:#444;color:#fff}
-.qbar .tel{display:block;background:#1d1c1b;color:#fff;padding:12px 4px;border-top:1px solid #333}.qbar .tel small{display:block;font-size:11px;color:#aaa;margin-bottom:4px}.qbar .tel b{display:block;font-size:12.5px;line-height:1.2;letter-spacing:-.02em;white-space:nowrap}
+.qbar .tel{display:block;background:#1d1c1b;color:#fff;padding:12px 4px;border-top:1px solid #333}.qbar .tel small{display:block;font-size:11px;color:#aaa;margin-bottom:4px}.qbar .tel{padding-left:2px;padding-right:2px}.qbar .tel b{display:block;font-size:11px;line-height:1.2;letter-spacing:-.02em;white-space:nowrap}
 .bh{position:relative;height:100vh;min-height:640px;background:#f3f1ee;overflow:hidden}.bh .slide img{width:100%;height:100%;object-fit:cover}
 .bh .slide:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.95) 0%,rgba(255,255,255,.82) 42%,rgba(255,255,255,.12) 74%,transparent)}
 .bh .cap{position:absolute;inset:0;z-index:2;display:flex;align-items:center}
@@ -1880,7 +1880,7 @@ const T_BALANCE = {
 @media(max-width:1100px){.hd nav>a,.hd nav .mi-a{padding:0 14px;font-size:14px}.hd .rb{display:none}}
 @media(max-width:900px){.qbar{display:none}.hd .wrap{height:64px}.bt .grid,.bv .grid,.bf .grid{grid-template-columns:1fr}.bb .grid{grid-template-columns:1fr 1fr}.bf .col+.col{border-left:0;border-top:1px solid var(--line)}
 .bs .wrap{grid-template-columns:1fr}.bs .cform{grid-template-columns:1fr}.bs .cform .agree,.bs .cform button{grid-column:auto;grid-row:auto}.ft .wrap{grid-template-columns:1fr}.ba2 .in{margin:20px}.sec{padding:70px 0}
-.bi .en{letter-spacing:.2em}.bh{height:76vh;min-height:520px}.bh .slide:after{background:rgba(255,255,255,.78)}.bt .tile{height:260px}
+.bi .en{letter-spacing:.2em}.bh .slide img{object-position:80% center}.bh{height:76vh;min-height:520px}.bh .slide:after{background:rgba(255,255,255,.78)}.bt .tile{height:260px}
 .mbar2{display:grid;grid-template-columns:repeat(3,1fr);position:fixed;left:0;right:0;bottom:0;z-index:60;background:#1d1c1b;color:#fff;font-size:13px;text-align:center}.mbar2 a{padding:13px 0}.mbar2 a:first-child{background:var(--pc)}.ft{padding-bottom:90px}}
 `
 };
@@ -1888,7 +1888,7 @@ THEMES.balance = T_BALANCE;
 DEFAULTS.balance = () => ({ ...baseContent(), color:'#4a3460', color2:'#b8975a', phone:'00-0000-0000', bal_phone2:'00-000-0000',
   hours:'월 / 화 / 목   AM 10:00 - PM 08:00\n수 / 금   AM 10:00 - PM 07:00\n토 · 일요일   AM 10:00 - PM 02:00\n점심시간(토/일 없음)   PM 01:30 - PM 02:30',
   metaTitle:'임플란트 · 턱관절 · 치아교정 · 충치치료', biz:'사업자등록번호 000-00-00000 · 대표자 000 · 디투치과병원 서울시 00구 0000로 0000 · TEL 00-0000-0000 · FAX 00-0000-0000',
-  bal_blog:'', bal_book:'', bal_cta:'온라인예약', bal_cta2:'상담신청' });
+  bal_blog:'', bal_book:'', bal_mark:'D2', bal_cta:'온라인예약', bal_cta2:'상담신청' });
 
 const BAL_SLIDES = [
   ['floor','구강악안면외과 + 보철과','어려운 케이스도 One-Stop 진료','분야별 전문의의 협진 진료','대학병원급 협진시스템으로 최상의 의료서비스를 제공합니다'],
@@ -1909,7 +1909,7 @@ const BAL_TILES = [
   ['team','','디투치과의 성장기 아동 치아교정','바른성장 ','바른교정','','kids-ortho']
 ];
 BLOCKDEFS.balance = {
-  siteFields: [F.text('bal_phone2','두 번째 문의전화 (오른쪽 퀵바)'), F.text('bal_cta','상단 버튼 1'), F.text('bal_cta2','상단 버튼 2'), F.text('bal_blog','블로그 링크'), F.text('bal_book','네이버 예약 링크')],
+  siteFields: [F.text('bal_mark','로고 마크 글자 (2~3자)'), F.text('bal_phone2','두 번째 문의전화 (오른쪽 퀵바)'), F.text('bal_cta','상단 버튼 1'), F.text('bal_cta2','상단 버튼 2'), F.text('bal_blog','블로그 링크'), F.text('bal_book','네이버 예약 링크')],
   layout: ['hero','intro','reason','tiles','video','ba','doctors','about','info','sms'],
   blocks: {
     hero: { label:'메인 배너 슬라이드', desc:'라벨 박스 + 얇은 글씨/굵은 글씨의 풀스크린 슬라이드',
@@ -1940,7 +1940,7 @@ BLOCKDEFS.balance = {
     doctors: { label:'의료진', desc:'회색 배경 엠블럼 + 의료진 사진 카드',
       fields:[F.text('en','영문 제목'), F.text('t','제목'), F.list('items','의료진','의료진',3,[F.img('img','사진'),F.text('sp','전문 분야'),F.text('n','이름'),F.text('pos','직함')],{max:12})],
       defaults: () => ({ en:'D2 DENTAL HOSPITAL', t:'분야별 전문의 협진 시스템', items:[['doc2','보철과전문의','홍길동','대표원장'],['doc1','교정과전문의','김철수','원장'],['doc3','보존과전문의','이영희','원장']].map(([a,sp,n,pos])=>({img:'asset:'+a,sp,n,pos})) }),
-      render:(R,d)=>`<section class="sec bd"><div class="wrap">${BAL_LOGO.replace('class="bmk"','class="bmk emb"')}<span class="en">${R.t('en')}</span><h2 class="rv">${R.t('t')}</h2><div class="grid">${(d.items||[]).map((_,n)=>`<div class="card rv">${R.i(`items/${n}/img`)}<span class="sp">${R.t(`items/${n}/sp`)}</span><div class="nm">${R.t(`items/${n}/n`)}<small>${R.t(`items/${n}/pos`)}</small></div></div>`).join('')}</div></div></section>` },
+      render:(R,d,S)=>`<section class="sec bd"><div class="wrap">${balLogo(S.v('bal_mark')).replace('class="bmk"','class="bmk emb"')}<span class="en">${R.t('en')}</span><h2 class="rv">${R.t('t')}</h2><div class="grid">${(d.items||[]).map((_,n)=>`<div class="card rv">${R.i(`items/${n}/img`)}<span class="sp">${R.t(`items/${n}/sp`)}</span><div class="nm">${R.t(`items/${n}/n`)}<small>${R.t(`items/${n}/pos`)}</small></div></div>`).join('')}</div></div></section>` },
     about: { label:'ABOUT 배너', desc:'와이드 사진 위 흰 박스 소개',
       fields:[F.text('en','작은 제목'), F.text('t1','제목 1줄'), F.text('t2','제목 2줄 (굵게)'), F.area('d','설명',{rows:3}), F.text('btn','버튼 글자'), F.link('href'), F.img('img','사진')],
       defaults: () => ({ en:'ABOUT D2', t1:'가장 아름다운 미소는', t2:'건강한 밸런스에서 시작됩니다', d:'치아 하나가 아닌 턱관절과 교합, 얼굴의 균형까지 함께 봅니다.\n분야별 전문의가 한 자리에서 함께 진단하고 치료합니다.', btn:'디투치과 소개', href:'p:pg-greeting', img:'asset:lounge' }),
@@ -1957,7 +1957,7 @@ BLOCKDEFS.balance = {
       render:(R,d,S,ctx)=>`<section class="bs">${ic('chat')}<div class="wrap"><h3>${R.t('t1')} <b>${R.t('t2')}</b></h3>${formHTML(ctx.site,S,{msg:true})}</div></section>` }
   },
   chrome:(S,body,ctx)=>`
-<header class="hd"><div class="wrap"><a href="${ctx.home}" class="logo">${BAL_LOGO}<span><b>${S.t('name')}</b><small>${S.t('nameEn')}</small></span></a>
+<header class="hd"><div class="wrap"><a href="${ctx.home}" class="logo">${balLogo(S.v('bal_mark'))}<span><b>${S.t('name')}</b><small>${S.t('nameEn')}</small></span></a>
 <nav>${navHTML(ctx)}</nav>
 <div class="rb"><a href="${ctx.go('sms')}">${S.t('bal_cta')}</a><a href="${ctx.go('sms')}">${S.t('bal_cta2')}</a></div><button class="nav-tg" aria-label="메뉴">☰</button></div></header>
 <aside class="qbar"><a class="home" href="${ctx.home}">HOME</a>
@@ -1965,7 +1965,7 @@ BLOCKDEFS.balance = {
 <a class="q" href="${S.v('bal_blog')||'#'}"><span class="blog">blog</span>블로그</a><a class="q" href="${S.v('youtube')||'#'}">${ic('play')}유튜브</a>
 <a class="tel" href="tel:${S.v('phone')}"><small>문의전화</small><b>${S.t('phone')}</b></a><a class="tel" href="tel:${S.v('bal_phone2')}"><small>문의전화</small><b>${S.t('bal_phone2')}</b></a></aside>
 <main id="top">${body}</main>
-<footer class="ft"><div class="wrap"><div class="fl">${BAL_LOGO}<div>${S.t('name')}</div></div><div><p class="lk">이용약관 &nbsp;|&nbsp; <a href="#privacy" class="pv-open">개인정보처리방침</a></p><p>${S.t('biz')}</p><p style="margin-top:8px">COPYRIGHT © ${S.t('nameEn')}. ALL RIGHTS RESERVED.</p></div></div></footer>
+<footer class="ft"><div class="wrap"><div class="fl">${balLogo(S.v('bal_mark'))}<div>${S.t('name')}</div></div><div><p class="lk">이용약관 &nbsp;|&nbsp; <a href="#privacy" class="pv-open">개인정보처리방침</a></p><p>${S.t('biz')}</p><p style="margin-top:8px">COPYRIGHT © ${S.t('nameEn')}. ALL RIGHTS RESERVED.</p></div></div></footer>
 <div class="mbar2"><a href="tel:${S.v('phone')}">전화상담</a><a href="${ctx.go('sms')}">빠른상담</a><a href="${ctx.link('p:pg-location')}">오시는길</a></div>`
 };
 
@@ -2093,7 +2093,223 @@ const EXTRA_INFO = {
 };
 
 /* ---------- 샘플 등록 ---------- */
-SEED.push({ theme:'balance', title:'06 분과협진 종합형 (밸런스 스타일)' });
+SEED.push({ theme:'balance', title:'06 분과협진 종합형 (밸런스 스타일)', once:'balance' });
+
+/* =====================================================================
+   7. 신촌 e-스타치과 — 밸런스형 디자인 + 심미(라미네이트·미백) 강조 샘플
+   사진·글: e-스타치과 공식 블로그(blog.naver.com/estarclinic)에서 발췌·재구성
+===================================================================== */
+const ES = n => 'asset:estar/' + n;
+const ES_BA = {
+  lamiA:['무삭제 라미네이트','이를 깎지 않고 앞니 6치 개선','estar/lamiAB','estar/lamiAA'],
+  lamiB:['중절치 2개 무삭제 라미네이트','변색 · 형태 개선','estar/lamiBB','estar/lamiBA'],
+  whiteA:['전문가 치아미백','셰이드 가이드로 확인한 변화','estar/whiteAB','estar/whiteAA'],
+  whiteB:['전문가 치아미백','누런 치아를 한 톤 밝게','estar/whiteBB','estar/whiteBA'],
+  whiteC:['전문가 치아미백','착색된 치아의 밝기 개선','estar/whiteCB','estar/whiteCA'],
+  gum:['레이저 잇몸미백','검은 잇몸을 분홍빛으로','estar/gumB','estar/gumA']
+};
+const esBaItems = keys => keys.map(k => { const [t,d,b,a] = ES_BA[k]; return { t, d, s:d, b:'asset:'+b, a:'asset:'+a }; });
+
+/* 진료 페이지 콘텐츠 (블로그 글 기반) */
+const ES_TX = {
+  laminate: { title:'무삭제 라미네이트', en:'NO-PREP LAMINATE', img:'lamiBA', heroImg:'heroLami', desc:'이를 깎지 않고, 하얗고 고른 치열로',
+    lead:'멀쩡한 치아,\n깎지 않고 예뻐집니다', d:'무삭제 라미네이트는 치아 표면을 삭제하지 않거나 최소화한 상태에서 얇은 세라믹을 붙여 치아의 색상과 모양을 개선하는 심미치료입니다. 25년차 보존과 원장이 치아·잇몸·교합 상태를 꼼꼼히 확인한 뒤 내 치아에 가장 적합한 방법을 결정합니다.',
+    pts:'자연치아 삭제 최소화 또는 생략\n치아 크기 · 모양 · 배열 개선\n미백으로 어려운 변색까지 개선\n자연스러운 투명감과 색상',
+    points:[['shield','자연치아 보존','무조건 깎지 않는 것보다 내 치아에 맞는 방법을 먼저 찾습니다.'],['sparkle','자연스러운 투명감','주변 치아와 어울리는 색과 투명도로 티 나지 않게 완성합니다.'],['won','연말 이벤트','1치아당 40만원(부가세 별도) 특별가로 진행합니다.']],
+    steps:[['정밀 상담','치아 형태·색상·잇몸·교합 상태를 확인합니다.'],['디자인','원하는 미소에 맞춰 크기와 모양을 설계합니다.'],['제작','얇은 세라믹을 정밀하게 제작합니다.'],['부착 · 점검','접착 후 교합을 확인하고 정기 점검합니다.']],
+    faq:[['모든 치아에 무삭제가 가능한가요?','치아가 돌출되어 있거나 배열이 많이 불규칙하면 일부 삭제가 필요할 수 있어, 진단 후 결정합니다.'],['이벤트 가격은 어떻게 되나요?','연말 이벤트로 1치아당 40만원(부가세 별도)에 진행하고 있습니다.'],['수능 끝난 학생도 가능한가요?','치아 성장이 끝난 경우 가능하며, 상담을 통해 적합 여부를 확인해 드립니다.']],
+    ba:['lamiA','lamiB'] },
+  whitening: { title:'전문가 치아미백', en:'PROFESSIONAL WHITENING', img:'whiteFace', heroImg:'heroWhite', desc:'18년, 수만 명의 미백 노하우',
+    lead:'한 톤 밝아진 미소,\n첫인상이 달라집니다', d:'치아미백은 치아를 깎거나 코팅하지 않고, 치아 속에 쌓인 색소만 산화 작용으로 분해해 본래의 밝기를 되찾는 치료입니다. e-스타치과는 18년간 수만 명의 미백 시술로 쌓은 노하우와 검증된 미백제(오스템 뷰티스)를 사용합니다.',
+    pts:'치아 손상 없는 산화 원리\n검증된 고농도 전문가 미백제\nLED 광조사로 시술 시간 단축\n자가 미백 병행으로 효과 유지',
+    points:[['sparkle','18년 노하우','같은 자리에서 수만 명의 미백 시술을 해왔습니다.'],['shield','검증된 미백제','효과를 결정하는 것은 기계보다 미백제입니다.'],['clock','짧은 시술 시간','20분씩 2~3회로 효율적으로 진행합니다.']],
+    steps:[['검진 · 스케일링','치아 표면을 깨끗하게 정리합니다.'],['잇몸 보호','잇몸 보호제를 바르고 미백 젤을 도포합니다.'],['광조사','LED로 미백제 반응을 돕습니다.'],['반복 · 마무리','20~30분 간격으로 원하는 만큼 반복합니다.']],
+    faq:[['미백기계가 좋으면 더 하얘지나요?','아닙니다. 치아를 하얗게 만드는 것은 미백제이며, 기계는 반응을 돕는 보조 장치입니다.'],['미백 후 시린 증상이 있나요?','일시적으로 시릴 수 있지만 대부분 며칠 안에 사라집니다.'],['효과는 얼마나 유지되나요?','생활 습관에 따라 6개월~2년 정도이며, 24~48시간은 착색 음식을 피해주세요.']],
+    ba:['whiteA','whiteB','whiteC'] },
+  'gum-whitening': { title:'레이저 잇몸미백', en:'GUM DEPIGMENTATION', img:'gumA', heroImg:'heroGum', desc:'검게 변한 잇몸을 분홍빛으로',
+    lead:'웃을 때 보이는 잇몸까지\n아름답게', d:'잇몸이 검게 보이는 가장 흔한 원인은 멜라닌 색소침착입니다. 레이저로 색소가 침착된 상피층만 선택적으로 제거하면 출혈과 통증이 적고, 보통 1~2주면 분홍빛 잇몸으로 회복됩니다.',
+    pts:'레이저로 출혈 · 통증 최소화\n1~2주 내 분홍빛 회복\n1~2회 시술로 충분한 효과\n원인별 맞춤 치료',
+    points:[['sparkle','레이저 시술','칼 대신 레이저로 빠르고 편안하게 시술합니다.'],['shield','원인부터 진단','흡연·보철물·잇몸병 등 원인을 먼저 확인합니다.'],['clock','빠른 회복','국소마취 후 짧게 진행하고 회복이 빠릅니다.']],
+    steps:[['원인 진단','파노라마·구강검사로 원인을 확인합니다.'],['마취','국소 마취로 통증을 줄입니다.'],['레이저 시술','색소가 침착된 층만 제거합니다.'],['회복 관리','1~2주 경과를 확인하고 관리법을 안내합니다.']],
+    faq:[['검은 잇몸은 병인가요?','대부분 생리적 색소침착이지만, 갑자기 생기거나 모양이 변하면 검진이 필요합니다.'],['다시 검어질 수 있나요?','흡연을 계속하거나 개인 특성에 따라 재발할 수 있어 금연과 관리가 중요합니다.']],
+    ba:['gum'] },
+  'laminate-repair': { title:'라미네이트 파절 · 재부착', en:'LAMINATE REPAIR', img:'lamiBroken', heroImg:'heroLami', desc:'깨진 라미네이트, 꼭 새로 해야 할까요?',
+    lead:'깨진 라미네이트도\n상태에 맞게 다시', d:'라미네이트가 깨지거나 떨어졌다고 모두 새로 만들 필요는 없습니다. 파절 위치와 범위, 보철물과 남은 치아 상태에 따라 재접착·부분 수리·재제작 중 가장 알맞은 방법을 선택합니다.',
+    pts:'통째로 떨어진 경우 재접착 검토\n작은 파절은 레진으로 부분 수리\n넓은 파절은 재제작\n이갈이 · 교합 원인까지 관리',
+    points:[['tooth','정확한 판단','보철물과 치아 상태를 먼저 확인합니다.'],['won','불필요한 재제작 NO','수리로 충분하면 수리를 권해드립니다.'],['shield','재발 예방','이갈이·교합 문제를 함께 살핍니다.']],
+    steps:[['상태 확인','파절 위치·범위와 치아 상태를 봅니다.'],['방법 결정','재접착·수리·재제작 중 선택합니다.'],['치료','선택한 방법으로 회복합니다.'],['예방 관리','습관과 교합을 점검합니다.']],
+    faq:[['떨어진 라미네이트를 가져가야 하나요?','네, 깨끗하게 보관해 오시면 재사용 가능 여부를 확인해 드립니다.'],['수리하면 티가 나나요?','작은 범위는 자연스럽지만, 색과 투명도가 완전히 같지 않을 수 있어 상담 후 결정합니다.']] },
+  'esthetic-crown': { title:'올세라믹 · 지르코니아', en:'ESTHETIC CROWN', img:'gum', heroImg:'heroLami', desc:'금속 없이 자연치아처럼',
+    lead:'금속 없는 보철로\n잇몸까지 깨끗하게', d:'금속이 들어간 크라운은 잇몸이 내려가면 테두리가 비쳐 잇몸이 검게 보일 수 있습니다. 올세라믹·지르코니아는 자연치아와 비슷한 색과 투명도로 앞니와 어금니 모두 자연스럽게 회복합니다.',
+    pts:'자연치아 같은 색과 투명도\n잇몸 변색 걱정 없는 무금속\n튼튼한 지르코니아\n오래된 금속 보철 교체',
+    points:[['sparkle','자연스러운 색','주변 치아에 맞춰 색을 맞춥니다.'],['shield','무금속','금속 테두리로 인한 잇몸 변색이 없습니다.'],['tooth','튼튼함','강도 높은 지르코니아로 오래 씁니다.']],
+    steps:[['상담 · 색 측정','원하는 모양과 색을 확인합니다.'],['치아 준비','필요한 만큼만 다듬습니다.'],['제작','정밀하게 보철물을 제작합니다.'],['장착','교합을 맞춰 장착합니다.']],
+    faq:[['금니와 무엇이 다른가요?','치아색이라 티가 나지 않고, 금속이 없어 잇몸이 검게 비치지 않습니다.'],['얼마나 쓸 수 있나요?','관리를 잘하시면 10년 이상 사용할 수 있습니다.']] },
+  cervical: { title:'치경부마모증 치료', en:'CERVICAL ABRASION', img:'smile', heroImg:'heroWhite', desc:'시리고 패인 치아 목, 보험 · 비보험 재료 비교',
+    lead:'패인 치아 목,\n시린 이 그냥 두지 마세요', d:'잘못된 칫솔질, 이갈이, 강한 교합력, 산성 음식 등으로 치아 목이 패이면 시린 증상이 생기고 방치하면 신경까지 노출될 수 있습니다. 보험 재료(글래스아이오노머)와 비보험 재료(복합레진)의 장단점을 비교해 맞춤으로 치료합니다.',
+    pts:'시린 증상 빠르게 완화\n보험 재료 · 비보험 재료 선택\n칫솔질 습관 교정\n이갈이 · 교합 점검',
+    points:[['clock','당일 치료','패인 부위를 바로 메워 시림을 줄입니다.'],['won','재료 선택','보험·비보험 재료의 장단점을 비교해 드립니다.'],['shield','원인 관리','칫솔질·이갈이 습관까지 함께 봅니다.']],
+    steps:[['검진','패인 깊이와 시림 정도를 확인합니다.'],['재료 결정','보험·비보험 재료를 선택합니다.'],['충전','패인 부위를 메웁니다.'],['습관 교정','올바른 칫솔질을 안내합니다.']],
+    faq:[['보험 재료와 비보험 재료 차이는요?','보험 재료는 비용 부담이 적고, 비보험 재료는 색이 자연스럽고 강도가 좋습니다.'],['안 하면 어떻게 되나요?','더 깊게 패여 충치나 신경 노출로 이어질 수 있습니다.']] },
+  'root-canal': { title:'신경치료', en:'ROOT CANAL', img:'xrayRc', heroImg:'heroDoc', desc:'보존과 전공 원장이 직접 하는 자연치아 살리기',
+    lead:'뽑기 전에,\n살릴 수 있는지 먼저', d:'신경치료는 염증이 생긴 신경을 제거하고 소독해 자연치아를 지키는 치료입니다. 보존과를 전공한 대표원장이 러버댐과 정밀 근관 기구를 사용해 꼼꼼하게 치료합니다.',
+    pts:'보존과 전공 원장 직접 진료\n러버댐 · 정밀 근관 기구 사용\n여러 번에 나눠 철저한 소독\n치료 후 크라운까지 관리',
+    points:[['tooth','보존과 전공','신경치료 전문인 보존과 원장이 진료합니다.'],['shield','철저한 소독','한 번에 끝내지 않고 염증이 줄어들 때까지 소독합니다.'],['sparkle','자연치아 우선','가능하면 뽑지 않고 살리는 방법을 찾습니다.']],
+    steps:[['진단','엑스레이로 염증 범위를 확인합니다.'],['신경 제거','감염된 신경을 제거합니다.'],['소독 · 충전','근관을 소독하고 밀폐합니다.'],['크라운','깨지지 않도록 보철로 보호합니다.']],
+    faq:[['신경치료는 왜 여러 번 받나요?','염증이 충분히 줄어들 때까지 소독해야 재발을 막을 수 있기 때문입니다.'],['임시재료가 빠졌어요.','세균이 들어갈 수 있으니 그 치아로 씹지 말고 가능한 빨리 내원해 주세요.']] },
+  'retreatment': { title:'재신경치료', en:'RE-TREATMENT', img:'xrayRc', heroImg:'heroDoc', desc:'뿌리 끝 염증이 커도 자연치를 살린 사례',
+    lead:'빼야 한다는 치아,\n다시 한 번 살려봅니다', d:'치아 뿌리 끝 염증이 크다고 바로 발치해야 하는 것은 아닙니다. 보존과 의사로 진료하면서 병소가 상당히 큰 경우에도 재신경치료만으로 잘 회복된 사례를 많이 경험했습니다.',
+    pts:'보존과 의사의 재신경치료\n큰 뿌리 끝 염증도 회복 사례 다수\n발치 전 마지막 기회\n정기 엑스레이로 회복 확인',
+    points:[['tooth','자연치 보존','임플란트 전에 내 치아를 살리는 방법을 먼저 봅니다.'],['shield','정밀 장비','근관 확대 장비와 정밀 기구로 치료합니다.'],['cal','경과 관찰','엑스레이로 뼈가 차오르는 것을 확인합니다.']],
+    steps:[['정밀 진단','염증 크기와 원인을 확인합니다.'],['기존 충전물 제거','이전 치료 재료를 제거합니다.'],['재소독 · 충전','다시 꼼꼼히 소독하고 채웁니다.'],['경과 관찰','회복을 정기적으로 확인합니다.']],
+    faq:[['재신경치료 성공률은요?','원인과 상태에 따라 다르지만, 큰 병소도 회복되는 경우가 많습니다.'],['실패하면 어떻게 하나요?','치근단 절제술이나 발치 후 임플란트를 고려합니다.']] },
+  cavity: { title:'충치 · 인레이', en:'CAVITY & INLAY', img:'inlay', heroImg:'heroDoc', desc:'과잉진료 없이, 꼭 필요한 만큼만',
+    lead:'정직하게 진단하는\n충치치료', d:'치과마다 충치 개수가 다른 이유는 초기 충치를 치료할지 관찰할지에 대한 기준이 다르기 때문입니다. e-스타치과는 멈춘 충치는 관찰하고, 꼭 필요한 치아만 치료합니다.',
+    pts:'초기 충치는 관찰 · 관리\n레진 · 인레이 맞춤 선택\n떨어진 인레이 재부착 검토\n정기 검진으로 조기 발견',
+    points:[['shield','과잉진료 없음','멈춘 충치는 무리하게 치료하지 않습니다.'],['tooth','맞춤 재료','크기와 위치에 맞는 재료를 선택합니다.'],['cal','정기 검진','작을 때 발견하면 치료가 간단합니다.']],
+    steps:[['검진','엑스레이와 육안으로 충치를 확인합니다.'],['치료 결정','관찰할지 치료할지 설명드립니다.'],['치료','충치를 제거하고 메웁니다.'],['관리','정기 검진으로 관리합니다.']],
+    faq:[['치과마다 충치 개수가 다른데 과잉진료인가요?','초기 충치에 대한 판단 기준이 달라서이며, 기준을 자세히 설명해 드립니다.'],['인레이가 떨어졌어요.','상태가 좋으면 다시 붙일 수 있으니 보관해서 내원해 주세요.']] },
+  implant: { title:'임플란트', en:'IMPLANT', img:'scanner', heroImg:'heroDoc', desc:'25년 경력, 필요한 개수만 정확하게',
+    lead:'빠진 개수만큼이 아니라\n꼭 필요한 만큼', d:'빠진 치아 개수만큼 임플란트를 심어야 하는 것은 아닙니다. 3D CT로 잇몸뼈의 양과 위치를 분석해 가장 안전하고 경제적인 개수와 위치를 결정합니다.',
+    pts:'3D CT 정밀 분석\n필요한 개수만 식립\n뼈이식 · 상악동 거상술 가능\n나사풀림 등 사후관리',
+    points:[['implant','정밀 진단','3D CT로 뼈와 신경 위치를 확인합니다.'],['won','합리적 계획','빠진 개수보다 적게 심어도 되는 경우를 찾습니다.'],['shield','사후관리','흔들림·나사풀림도 끝까지 책임집니다.']],
+    steps:[['CT 진단','뼈의 양과 질을 분석합니다.'],['식립','계획한 위치에 정확히 식립합니다.'],['회복','뼈와 단단히 붙을 때까지 기다립니다.'],['보철 · 관리','치아를 연결하고 정기 점검합니다.']],
+    faq:[['3개가 빠졌는데 3개 다 심어야 하나요?','뼈 상태에 따라 2개를 심고 3개 치아를 연결할 수 있습니다.'],['금니·임플란트가 있으면 MRI 촬영이 되나요?','대부분 가능하며, 촬영 전 의료진에게 알려주시면 됩니다.']] },
+  'bone-graft': { title:'뼈이식 · 상악동 거상술', en:'BONE GRAFT', img:'xrayRc', heroImg:'heroDoc', desc:'뼈가 부족해도 임플란트가 가능하도록',
+    lead:'부족한 잇몸뼈,\n채워서 안전하게', d:'잇몸뼈가 부족하면 뼈이식이나 상악동 거상술로 임플란트를 심을 공간을 만듭니다. 3D CT로 상악동 위치와 뼈의 양을 세밀하게 분석하고, 25년차 경력의 풍부한 수술 경험으로 안전하게 진행합니다.',
+    pts:'3D CT 상악동 분석\n자가골 · 동종골 · 이종골 · 합성골\n위 어금니 상악동 거상술\n25년차 수술 경험',
+    points:[['implant','정밀 계획','CT로 뼈의 양과 상악동 위치를 확인합니다.'],['shield','안전한 수술','풍부한 경험으로 합병증을 줄입니다.'],['clock','예측 가능한 치료','기간과 과정을 미리 안내해 드립니다.']],
+    steps:[['CT 분석','뼈의 양과 상악동 위치를 봅니다.'],['뼈이식','부족한 부분에 뼈를 채웁니다.'],['회복','이식한 뼈가 단단해질 때까지 기다립니다.'],['임플란트','안정된 뼈에 식립합니다.']],
+    faq:[['뼈이식은 언제 필요한가요?','발치 후 오래 지났거나 잇몸병으로 뼈가 녹은 경우에 필요합니다.'],['상악동 거상술은 아픈가요?','마취 후 진행하며, 붓기는 며칠 안에 가라앉습니다.']] },
+  wisdom: { title:'사랑니 발치', en:'WISDOM TOOTH', img:'wisdom', heroImg:'heroDoc', desc:'섬세한 여자 원장님이 직접 뽑는 사랑니',
+    lead:'성별보다 중요한 건\n경험과 섬세함', d:'사랑니 발치는 힘으로 빼는 것이 아니라 정확하게 접근하는 것이 중요합니다. 3D CT로 신경과의 거리를 확인하고, 충분한 설명과 함께 섬세하게 발치합니다.',
+    pts:'3D CT로 신경 위치 확인\n매복 사랑니 발치\n발치 후 주의사항 상세 안내\n실비 청구 서류 발급',
+    points:[['shield','안전한 발치','신경 손상 위험을 CT로 미리 확인합니다.'],['chat','친절한 설명','과정과 회복을 자세히 설명합니다.'],['clock','빠른 회복','최소 절개로 붓기를 줄입니다.']],
+    steps:[['CT 촬영','사랑니와 신경 위치를 확인합니다.'],['마취','충분히 마취합니다.'],['발치','섬세하게 발치합니다.'],['관리 안내','식사·지혈 방법을 안내합니다.']],
+    faq:[['여자 원장님이 사랑니를 뽑아도 괜찮을까요?','성별보다 발치 경험과 설명, 치과 시스템이 훨씬 중요합니다.'],['발치 구멍은 언제 없어지나요?','잇몸은 1~2주, 뼈는 3개월 이후 대부분 채워집니다.']] },
+  gum: { title:'잇몸치료 · 스케일링', en:'GUM CARE', img:'scaling', heroImg:'heroWhite', desc:'건강한 잇몸이 아름다운 미소의 시작',
+    lead:'잇몸이 건강해야\n미소도 오래갑니다', d:'잇몸병은 당뇨·심혈관질환 등 전신 건강과도 관련이 있습니다. 연 1회 보험 스케일링과 단계별 잇몸치료로 치아를 지키는 잇몸을 관리합니다.',
+    pts:'연 1회 건강보험 스케일링\n단계별 잇몸치료\n앞니 블랙 트라이앵글 상담\n전신질환 환자 맞춤 관리',
+    points:[['shield','보험 적용','만 19세 이상 연 1회 보험 스케일링이 가능합니다.'],['tooth','단계별 치료','잇몸 상태에 맞춰 단계적으로 치료합니다.'],['cal','정기 관리','3~6개월 간격으로 점검합니다.']],
+    steps:[['검진','잇몸 깊이와 출혈을 확인합니다.'],['스케일링','치석과 세균막을 제거합니다.'],['잇몸치료','깊은 치석까지 정리합니다.'],['유지 관리','정기적으로 점검합니다.']],
+    faq:[['스케일링하면 이가 깎이나요?','아닙니다. 초음파 진동으로 치석만 떨어뜨립니다.'],['잇몸치료는 많이 아픈가요?','마취 후 진행해 대부분 크게 불편하지 않습니다.']] },
+  kids: { title:'소아 · 성장기 진료', en:'KIDS', img:'smile2', heroImg:'heroGum', desc:'영구치가 나는 시기부터 바르게',
+    lead:'아이의 첫 치과,\n즐거운 기억으로', d:'유치가 빠지지 않거나 영구치가 없는 경우, 제1대구치 관리 등 성장기에 꼭 필요한 진료를 친절하게 설명하고 진행합니다.',
+    pts:'영구치 결손 진단\n제1대구치 실란트\n불소 도포\n이앓이 · 성장 상담',
+    points:[['child','친절한 진료','아이 눈높이에 맞춰 설명합니다.'],['shield','예방 중심','실란트·불소로 충치를 막습니다.'],['cal','성장 관리','영구치가 날 때까지 꾸준히 봅니다.']],
+    steps:[['검진','치아와 성장 상태를 확인합니다.'],['예방','불소·실란트로 보호합니다.'],['치료','필요한 치료를 진행합니다.'],['정기 검진','3~6개월마다 확인합니다.']],
+    faq:[['유치가 안 빠지는데 계속 써도 되나요?','영구치가 없는 경우 유치를 최대한 오래 쓰는 것이 좋을 수 있어 검사 후 안내합니다.'],['제1대구치가 왜 중요한가요?','가장 먼저 나고 평생 쓰는 어금니라 충치 예방이 중요합니다.']] },
+  pregnancy: { title:'임산부 치과치료', en:'PREGNANCY CARE', img:'pregnant', heroImg:'heroGum', desc:'임신 · 수유 · 시험관 시술 중에도 안전하게',
+    lead:'엄마와 아기 모두\n안전한 치과치료', d:'임신 중기(4~6개월)에는 대부분의 치과치료가 가능합니다. 필요한 경우 저선량 디지털 엑스레이와 납 차폐복으로 안전하게 진단하고, 필요한 치료는 미루지 않는 것이 좋습니다.',
+    pts:'임신 중기 대부분 치료 가능\n저선량 디지털 엑스레이\n안전한 마취제 사용\n수유 · 시험관 시술 상담',
+    points:[['shield','안전 우선','시기별로 가능한 치료만 진행합니다.'],['chat','충분한 상담','복용약과 상태를 꼼꼼히 확인합니다.'],['cal','시기 조절','급하지 않은 치료는 출산 후로 계획합니다.']],
+    steps:[['상담','임신 주수와 상태를 확인합니다.'],['진단','필요한 검사만 안전하게 합니다.'],['치료','중기에 필요한 치료를 진행합니다.'],['출산 후 관리','미뤄둔 치료를 이어갑니다.']],
+    faq:[['임신 중 마취해도 되나요?','치과 국소마취는 안전한 편이며, 필요한 경우 사용합니다.'],['엑스레이는 괜찮나요?','디지털 장비는 방사선량이 매우 적고 차폐복을 착용해 촬영합니다.']] }
+};
+function esTx(slug, group){
+  const x = ES_TX[slug];
+  const blocks = [
+    blk('c_subhero', { img:ES(x.heroImg), en:x.en, t:x.title, d:x.desc, crumb:`HOME  >  ${group}  >  ${x.title}` }),
+    blk('c_treat', { img:ES(x.img), lab:x.en, t:x.lead.replace('\n',' '), d:x.d, pts:x.pts, btn:'상담 예약하기', side:'left' }),
+    blk('c_points', { lab:'POINT', t:`e-스타치과 ${x.title}, 이런 점이 다릅니다`, s:'', items:x.points.map(([icon,t,d])=>({icon,t,d})) }),
+    blk('c_steps', { lab:'PROCESS', t:`${x.title} 치료 과정`, items:x.steps.map(([t,d])=>({t,d})) })
+  ];
+  if (x.ba) blocks.push(blk('c_ba', { lab:'BEFORE & AFTER', t:`${x.title} 치료 사례`, s:'신촌 e-스타치과에서 실제 치료한 사례입니다', items:esBaItems(x.ba) }));
+  blocks.push(blk('c_faq', { lab:'FAQ', t:`${x.title} 자주 묻는 질문`, items:x.faq.map(([q,a])=>({q,a})) }));
+  blocks.push(blk('c_cta', { t:`${x.title} 상담이 필요하신가요?`, s:'전화 한 통으로 진료 예약과 비용 상담이 가능합니다', btn:'전화 상담하기' }));
+  return { id:'pg-' + slug, slug, title:x.title, blocks };
+}
+function esInfo(slug, title, group){
+  const hero = (img, en, d) => blk('c_subhero', { img:ES(img), en, t:title, d, crumb:`HOME  >  ${group}  >  ${title}` });
+  const greet = { img:ES('doctor'), lab:'GREETING', t:'내 가족이라 생각하고\n따뜻하고 양심적으로 진료합니다',
+    msg:'안녕하세요, 신촌 e-스타치과 대표원장 김소연입니다.\n\n저는 25년차 보존과 전공 치과의사로, 18년째 신촌의 같은 자리에서 환자분들을 만나고 있습니다. 원장 1인이 처음부터 끝까지 책임지고 진료합니다.\n\n여자 원장 특유의 섬세함과 꼼꼼함, 심미안으로 자연치아를 최대한 지키면서 아름다운 미소를 만들어 드리겠습니다.',
+    sign:'신촌 e-스타치과 대표원장 김소연', cr:'치과보존과 전공 · 임상 25년차\n신촌 같은 자리 18년 진료\n1인 원장 책임진료' };
+  const P = {
+    greeting: [hero('heroDoc','GREETING','18년째 같은 자리, 신촌 e-스타치과입니다'), blk('c_greet', greet),
+      blk('c_points',{ lab:'PRINCIPLE', t:'e-스타치과의 진료 원칙', items:[['tooth','자연치아 보존','보존과 전공 원장으로 살릴 수 있는 치아는 먼저 살립니다.'],['shield','양심 진료','멈춘 충치는 관찰하고 꼭 필요한 치료만 권합니다.'],['sparkle','섬세한 심미안','여자 원장의 꼼꼼함으로 자연스러운 미소를 디자인합니다.']].map(([icon,t,d])=>({icon,t,d})) })],
+    doctors: [hero('heroDoc','DOCTOR','대표원장이 처음부터 끝까지 직접 진료합니다'),
+      blk('c_doctors',{ lab:'DOCTOR', t:'1인 원장 책임진료', items:[{ img:ES('doctor'), p:'치과보존과 전공 · 25년차', n:'대표원장 김소연', c:'신촌 e-스타치과 18년 진료\n신경치료 · 재신경치료\n무삭제 라미네이트 · 치아미백' }] })],
+    special: [hero('heroWhite','SPECIAL','e-스타치과가 특별한 이유'),
+      blk('c_points',{ lab:'WHY e-STAR', t:'e-스타치과만의 특별함', items:[['cal','18년 같은 자리','신촌역 현대백화점 옆, 18년째 같은 자리를 지키고 있습니다.'],['tooth','25년차 보존과 원장','자연치아를 살리는 신경치료·재신경치료에 강합니다.'],['sparkle','수만 명의 미백 경험','18년간 수만 명의 미백 시술로 쌓은 노하우가 있습니다.'],['shield','1인 책임진료','상담부터 치료, 사후관리까지 원장이 직접 합니다.']].map(([icon,t,d])=>({icon,t,d})) }),
+      blk('c_treat',{ img:ES('lamiBA'), lab:'SIGNATURE', t:'깎지 않는 아름다움, 무삭제 라미네이트', d:'멀쩡한 치아를 삭제하는 것이 부담스러우셨다면, 치아 표면을 깎지 않고 얇은 세라믹을 붙이는 무삭제 라미네이트를 상담해 보세요. 연말 이벤트로 1치아당 40만원(부가세 별도)에 진행합니다.', pts:'자연치아 삭제 최소화\n자연스러운 투명감\n연말 이벤트 1치아 40만원', btn:'라미네이트 상담', side:'right' }),
+      blk('c_cta',{})],
+    location: [hero('heroGum','LOCATION','신촌역 현대백화점 옆, 신촌로 79 3층'), blk('c_location',{ lab:'LOCATION', t:'진료안내 · 오시는 길' }), blk('c_cta',{ t:'방문 전 예약하시면 대기 없이 진료받으실 수 있습니다', s:'전화 또는 카카오톡으로 편하게 예약하세요', btn:'전화 예약하기' })],
+    cases: [hero('heroLami','BEFORE & AFTER','e-스타치과에서 달라진 미소'), blk('c_ba',{ lab:'CASES', t:'심미치료 전후 사례', s:'무삭제 라미네이트 · 치아미백 · 잇몸미백 실제 사례입니다', items:esBaItems(['lamiA','lamiB','whiteA','whiteB','whiteC','gum']) }), blk('c_cta',{ t:'나도 이렇게 바뀔 수 있을까요?', s:'사진 한 장으로도 상담이 가능합니다', btn:'전화 상담하기' })],
+    reviews: [hero('heroWhite','REVIEW','e-스타치과를 경험한 분들의 이야기'), blk('c_reviews',{ lab:'REVIEW', t:'환자분들이 남겨주신 이야기', items:[
+      ['깎지 않아서 안심','무삭제라 이를 갈아낼 걱정 없이 했는데 앞니가 정말 자연스러워졌어요.','김**님 · 무삭제 라미네이트'],
+      ['한 번에 밝아졌어요','커피를 많이 마셔서 누렇던 치아가 확실히 밝아졌습니다.','이**님 · 치아미백'],
+      ['꼼꼼한 설명','원장님이 엑스레이를 보면서 하나하나 설명해 주셔서 믿음이 갔어요.','박**님 · 재신경치료'],
+      ['빼야 한다던 이를 살렸어요','다른 곳에서 발치하자던 치아를 재신경치료로 살렸습니다.','최**님 · 재신경치료'],
+      ['잇몸색이 달라졌어요','검었던 잇몸이 분홍색이 되니 웃는 게 편해졌어요.','정**님 · 잇몸미백'],
+      ['섬세한 사랑니 발치','생각보다 훨씬 빨리 끝나고 붓기도 적었습니다.','한**님 · 사랑니 발치']].map(([ti,d,n])=>({ti,d,n})) }), blk('c_cta',{})],
+    notice: [hero('heroLami','NOTICE','e-스타치과의 새로운 소식'), blk('c_notice',{ lab:'NOTICE', t:'공지 · 이벤트', items:[['이벤트','무삭제 라미네이트 1치아 40만원 연말 이벤트 (부가세 별도)','2026.11.11'],['이벤트','수능 끝! 수험생 치아미백 상담','2026.11.10'],['공지','11월 진료 일정 안내','2026.11.01'],['공지','추석 연휴 휴진 안내','2026.09.20'],['공지','건강보험 스케일링 연 1회 안내','2026.07.29']].map(([tg,ti,dt])=>({tg,ti,dt})) })],
+    faq: [hero('heroGum','FAQ','자주 묻는 질문을 모았습니다'), blk('c_faq',{ lab:'FAQ', t:'자주 묻는 질문', items:[
+      ['무삭제 라미네이트는 모두 가능한가요?','치아가 돌출되었거나 배열이 많이 불규칙하면 일부 삭제가 필요할 수 있어 진단 후 결정합니다.'],
+      ['미백 효과는 얼마나 가나요?','생활 습관에 따라 6개월~2년 정도이며, 자가 미백을 병행하면 더 오래 유지됩니다.'],
+      ['원장님이 직접 진료하시나요?','네, 대표원장 1인이 상담부터 치료까지 직접 책임지고 진료합니다.'],
+      ['찾아가는 길이 궁금해요.','신촌역 현대백화점 옆 신촌로 79, 3층입니다.'],
+      ['스케일링도 보험이 되나요?','만 19세 이상이면 연 1회 건강보험 스케일링이 가능합니다.']].map(([q,a])=>({q,a})) }), blk('c_cta',{})]
+  };
+  return { id:'pg-' + slug, slug, title, blocks: P[slug] || [hero('heroGum','PAGE','')] };
+}
+const ES_MAP = [
+  { label:'병원소개', children:[['greeting','대표원장 인사말'],['doctors','의료진 소개'],['special','e-스타만의 특별함'],['location','진료안내 · 오시는길']] },
+  { label:'심미치료', children:[['laminate','무삭제 라미네이트'],['whitening','전문가 치아미백'],['gum-whitening','레이저 잇몸미백'],['laminate-repair','라미네이트 파절 · 재부착'],['esthetic-crown','올세라믹 · 지르코니아'],['cervical','치경부마모증 치료']] },
+  { label:'자연치아보존', children:[['root-canal','신경치료'],['retreatment','재신경치료'],['cavity','충치 · 인레이']] },
+  { label:'임플란트', children:[['implant','임플란트'],['bone-graft','뼈이식 · 상악동 거상술']] },
+  { label:'일반진료', children:[['wisdom','사랑니 발치'],['gum','잇몸치료 · 스케일링'],['kids','소아 · 성장기 진료'],['pregnancy','임산부 치과치료']] },
+  { label:'커뮤니티', children:[['cases','치료전후 사진'],['reviews','치료후기'],['notice','공지 · 이벤트'],['faq','자주하는 질문']] }
+];
+
+function estarContent(){
+  const c = defaultContent('balance');
+  Object.assign(c.site, { _seed:'estar', name:'신촌 e-스타치과', nameEn:'e-STAR DENTAL CLINIC', bal_mark:'e★', color:'#24408e', color2:'#b8975a',
+    phone:'00-0000-0000', bal_phone2:'00-000-0000', address:'서울 서대문구 신촌로 79, 3층 (신촌역 현대백화점 옆)', traffic:'2호선 신촌역 하차 · 현대백화점 신촌점 옆 건물 3층',
+    metaTitle:'신촌 치과 · 무삭제 라미네이트 · 치아미백 · 신경치료', metaDesc:'25년차 보존과 전공 여자 대표원장이 1인 책임진료하는 신촌 e-스타치과. 무삭제 라미네이트, 전문가 치아미백, 잇몸미백, 재신경치료.',
+    biz:'신촌 e-스타치과의원 · 대표원장 김소연 · 서울 서대문구 신촌로 79, 3층 · TEL 00-0000-0000', bal_blog:'https://blog.naver.com/estarclinic', bal_cta:'미백 상담', bal_cta2:'라미네이트 상담' });
+  // 메뉴 · 하위 페이지
+  const pages = [], nav = [];
+  ES_MAP.forEach(g => {
+    const kids = g.children.map(([slug, title]) => { const pg = ES_TX[slug] ? esTx(slug, g.label) : esInfo(slug, title, g.label); pg.title = title; pages.push(pg); return { label:title, href:'p:' + pg.id, children:[] }; });
+    nav.push({ label:g.label, href:kids[0].href, children:kids });
+  });
+  c.site.nav = nav;
+  // 홈 화면
+  const home = c.pages[0], by = t => home.blocks.find(b => b.type === t);
+  by('hero').data.slides = [
+    ['heroDoc','보존과 전공 25년차 · 여자 대표원장','18년째 같은 자리, 신촌 e-스타치과','원장이 직접, 끝까지 책임집니다','섬세함과 꼼꼼함, 심미안으로 내 가족처럼 진료합니다'],
+    ['heroLami','무삭제 라미네이트 연말 이벤트','멀쩡한 치아, 깎지 않고','하얗고 고른 치열로','1치아당 40만원 (부가세 별도)'],
+    ['heroWhite','전문가 치아미백','18년, 수만 명의 미백 노하우','한 톤 밝아진 첫인상','검증된 미백제로 치아 손상 없이 하얗게'],
+    ['heroGum','레이저 잇몸미백','웃을 때 보이는 검은 잇몸','분홍빛 잇몸으로','레이저로 출혈과 통증을 줄인 잇몸 색소 제거'],
+    ['heroDoc','자연치아 보존','빼야 한다는 치아도','다시 한 번 살려봅니다','보존과 의사의 신경치료 · 재신경치료']
+  ].map(([img,tag,l1,l2,s]) => ({ img:ES(img), tag, l1, l2, s }));
+  Object.assign(by('intro').data, { t:'신촌 e-스타치과', en:'e-STAR DENTAL CLINIC', s:'아름다운 미소는 건강한 자연치아에서 시작됩니다. 18년째 신촌의 같은 자리에서 진료합니다.' });
+  Object.assign(by('reason').data, { img:ES('heroLami'), sm:'이를 깎지 않는 무삭제 라미네이트\n18년 · 수만 명의 치아미백 노하우', lb:'심미치료는 e-스타!', b1:'보존과 전공 여자 원장의 섬세한 심미안으로', b2:'자연스럽고 하얀 미소를 완성합니다', btn:'심미치료 알아보기', href:'p:pg-laminate' });
+  by('tiles').data.items = [
+    ['lamiBA','','이를 깎지 않고 하얗고 고르게','무삭제 ','라미네이트','1치아당 40만원 연말 이벤트','laminate'],
+    ['whiteFace','box','18년 · 수만 명의 노하우','전문가 ','치아미백','검증된 미백제로 한 톤 밝게','whitening'],
+    ['gumA','light','검은 잇몸을 분홍빛으로','레이저 ','잇몸미백','','gum-whitening'],
+    ['lamiBroken','','깨진 라미네이트, 새로 안 해도 될 수 있어요','라미네이트 ','재부착 · 수리','','laminate-repair'],
+    ['gum','box','금속 없이 자연치아처럼','올세라믹 ','지르코니아','잇몸 변색 걱정 없는 심미 보철','esthetic-crown'],
+    ['smile','light','시리고 패인 치아 목','치경부마모증 ','치료','보험 · 비보험 재료 비교','cervical'],
+    ['xrayRc','','보존과 전공 원장의','자연치아 ','신경치료','빼기 전에 살릴 수 있는지 먼저','root-canal'],
+    ['wisdom','box','섬세한 여자 원장님의','','사랑니 발치','3D CT로 신경 위치 확인','wisdom'],
+    ['scaling','light','건강한 잇몸이 미소의 시작','','잇몸치료 · 스케일링','','gum']
+  ].map(([img,tone,cap,t1,hl,d,s]) => ({ img:ES(img), tone, cap, t1, hl, d, href:'p:pg-'+s }));
+  by('video').hidden = true;
+  Object.assign(by('ba').data, { en:'BEFORE & AFTER', t:'심미치료 전후 사진', items:esBaItems(['lamiA','lamiB','whiteA','gum']).map(x => ({ t:x.t, s:x.d, b:x.b, a:x.a })) });
+  Object.assign(by('doctors').data, { en:'e-STAR DENTAL CLINIC', t:'대표원장 1인 책임진료', items:[{ img:ES('doctor'), sp:'치과보존과 전공 · 25년차', n:'김소연', pos:'대표원장' }] });
+  Object.assign(by('about').data, { en:'ABOUT e-STAR', t1:'18년째 같은 자리에서', t2:'내 가족처럼 진료합니다', d:'신촌역 현대백화점 옆, 18년째 같은 자리를 지키고 있습니다.\n여자 원장 특유의 섬세함과 꼼꼼함, 심미안으로 따뜻하고 양심적으로 진료합니다.', btn:'원장 인사말', href:'p:pg-greeting', img:ES('smile') });
+  Object.assign(by('info').data, { qs:[['답변완료','무삭제 라미네이트 이벤트 문의','2026.11.12'],['답변완료','수능 끝나고 치아미백 하고 싶어요','2026.11.11'],['답변대기','잇몸이 검은데 미백 가능한가요?','2026.11.10'],['답변완료','신경치료 중 임시재료가 빠졌어요','2026.11.03']].map(([st,q,dt])=>({st,q,dt})), kk:'카카오톡 채널 @e스타치과' });
+  // 홈 · 심미 시그니처 블록 추가 (이유 있는 선택 배너 다음)
+  const sig = blk('c_treat',{ img:ES('lamiAA'), lab:'e-STAR SIGNATURE', t:'무삭제 라미네이트 1치아 40만원', d:'치아 모양이나 색상이 마음에 들지 않지만 멀쩡한 치아를 깎는 것이 부담스러우셨나요? 치아 표면을 깎지 않고 얇은 세라믹을 붙여 하얗고 고른 치열을 만들어 드립니다. 수능이 끝난 수험생과 연말을 준비하는 분들을 위한 특별 이벤트입니다.', pts:'이벤트가 1치아 40만원 (부가세 별도)\n자연치아 보존 우선 치료 계획\n개인별 치아 형태 · 색상 맞춤', btn:'라미네이트 상담 예약', side:'right' });
+  const w = blk('c_treat',{ img:ES('whiteFace'), lab:'WHITENING', t:'18년, 수만 명의 미백 노하우', d:'치아를 하얗게 만드는 것은 기계가 아니라 미백제입니다. 검증된 전문가 미백제와 정확한 시술로 치아 손상 없이 본래의 밝기를 되찾아 드립니다.', pts:'치아를 깎거나 코팅하지 않는 산화 원리\n20분씩 2~3회 효율적인 시술\n자가 미백 병행으로 오래 유지', btn:'미백 상담 예약', side:'left' });
+  const ri = home.blocks.findIndex(b => b.type === 'reason');
+  home.blocks.splice(ri + 1, 0, sig, w);
+  c.pages = [home, ...pages];
+  return c;
+}
+SEED.push({ theme:'balance', title:'07 신촌 e-스타치과 (심미 강조 · 밸런스형)', once:'estar', build: estarContent });
 </script>
 <script>/* ===== 홈페이지 템플릿 스튜디오 v2 — 블록 편집기 (디투덴탈 편집모드 방식) ===== */
 const $ = (s, el=document) => el.querySelector(s);
@@ -2116,7 +2332,7 @@ const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx
 const now = () => new Date().toISOString();
 const fdate = s => { const d=new Date(s); return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
 const toSrc = v => !v ? '' : v.startsWith('asset:') ? HP_ASSET_BASE + v.slice(6) + '.webp' : v.startsWith('ph:') ? phSvg(v.slice(3)) : v;
-function newPF(theme, title, order){ return { id:uid(), title, theme, order, created:now(), updated:now(), content:defaultContent(theme) }; }
+function newPF(theme, title, order, content){ return { id:uid(), title, theme, order, created:now(), updated:now(), content:content || defaultContent(theme) }; }
 
 /* ---------- 상태 ---------- */
 let list = [], cur = null, dirty = false, device = 'pc', editOn = true, curPage = 'home';
@@ -2768,7 +2984,7 @@ $('#editSw').onchange = e => setEdit(e.target.checked);
 $('#barSite').onclick = () => { if (!editOn) setEdit(true); openSiteEditor(); };
 $('#btnBack').onclick = ()=>{ if(dirty && !confirm('저장하지 않은 수정 내용이 있습니다.\n저장하지 않고 목록으로 갈까요?')) return; closeDrawer(true); cur=null; show('list'); renderList(); };
 $('#btnTitle').onclick = ()=>{ const n=prompt('포트폴리오 이름', cur.title); if(!n) return; cur.title=n.trim(); $('#edTitle').textContent=cur.title; $('#barPage').textContent='현재: '+cur.title; markDirty(); };
-$('#btnReset').onclick = ()=>{ if(!confirm('이 포트폴리오를 기본 샘플 내용으로 되돌릴까요?\n(블록·사진·문구 수정 내용이 모두 사라집니다. 저장 전까지는 목록으로 나가면 취소됩니다)')) return; closeDrawer(true); cur.content = defaultContent(cur.theme); curPage = 'home'; drawPageSel(); markDirty(); renderPreview(); };
+$('#btnReset').onclick = ()=>{ if(!confirm('이 포트폴리오를 기본 샘플 내용으로 되돌릴까요?\n(블록·사진·문구 수정 내용이 모두 사라집니다. 저장 전까지는 목록으로 나가면 취소됩니다)')) return; closeDrawer(true); const sd = cur.content.site && cur.content.site._seed, sb = sd && SEED.find(x => x.once === sd && x.build); cur.content = sb ? sb.build() : defaultContent(cur.theme); curPage = 'home'; drawPageSel(); markDirty(); renderPreview(); };
 window.addEventListener('beforeunload', e=>{ if(dirty){ e.preventDefault(); e.returnValue=''; } });
 document.addEventListener('keydown', e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='s'&&cur){ e.preventDefault(); savePF(); } if(e.key==='Escape'){ if($('#pvModal').classList.contains('on')) closePreview(); $$('.modal.on').forEach(m=>m.classList.remove('on')); } });
 
@@ -2812,13 +3028,14 @@ $('#q').addEventListener('input', drawList);
     $('#grid').innerHTML = `<div class="err"><b>홈페이지 스튜디오 데이터베이스가 아직 준비되지 않았습니다.</b><br><br>Supabase → SQL Editor 에서 <code>hp_studio.sql</code> 내용을 붙여넣고 [Run]을 한 번 실행해 주세요.<br><small>(오류: ${esc(e.message||String(e))})</small></div>`;
     show('list'); return;
   }
-  if (!all.length){ for (const [i,s] of SEED.entries()) await DB.put(newPF(s.theme, s.title, i)); }
+  if (!all.length){ for (const [i,s] of SEED.entries()) await DB.put(newPF(s.theme, s.title, i, s.build && s.build())); }
   else {
     // 새로 추가된 샘플 디자인(예: 06 밸런스 스타일)을 기존 목록에 한 번만 추가
-    for (const s of SEED.filter(x => x.theme === 'balance')){
-      const flag = 'hp_seed_' + s.theme;
+    for (const s of SEED.filter(x => x.once)){
+      const flag = 'hp_seed_' + s.once;
       let done = false; try { done = !!localStorage.getItem(flag); } catch(e){}
-      if (!done && !all.some(p => p.theme === s.theme)){ await DB.put(newPF(s.theme, s.title, all.length)); all.push({theme:s.theme}); }
+      const has = all.some(p => s.build ? (p.content && p.content.site && p.content.site._seed === s.once) || p.title === s.title : p.theme === s.theme && !(p.content && p.content.site && p.content.site._seed));
+      if (!done && !has){ await DB.put(newPF(s.theme, s.title, all.length, s.build && s.build())); all.push({theme:s.theme, title:s.title}); }
       try { localStorage.setItem(flag, '1'); } catch(e){}
     }
   }
