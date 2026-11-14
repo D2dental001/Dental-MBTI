@@ -1764,7 +1764,13 @@ renderSite = function(content, theme, mode, files, opt = {}){
   const showHidden = mode === 'edit' && opt.editUI;
   const body = page.blocks.filter(b => showHidden || !b.hidden).map(b => renderBlockHTML(content, theme, b, mode, files, { ...opt, page: page.id })).join('');
   const ctx = siteCtx(content, theme, mode, page.id, opt);
-  const html = T.chrome(S, body, ctx);
+  let html = T.chrome(S, body, ctx);
+  if (site.logo){
+    const h = Math.max(16, Math.min(160, parseInt(site.logoH, 10) || 44));
+    const tone = site.logoTone === 'white' ? 'filter:brightness(0) invert(1);' : site.logoTone === 'black' ? 'filter:brightness(0);' : '';
+    const img = S.i('logo', 'logo-img', site.name || 'logo').replace(' loading="lazy"', '').replace('<img', `<img style="height:${h}px;${tone}"`);
+    html = html.replace(/(<a [^>]*class="logo"[^>]*>)[\s\S]*?(<\/a>)/, (m, a, b) => a + img + b);
+  }
   const og = firstImage(content);
   const ogSrc = og ? makeR2({ og }, 'og/', rmode, files).src('og') : '';
   const sub = page.id !== 'home';
@@ -1781,7 +1787,7 @@ ${opt.head || ''}
 <meta name="theme-color" content="${esc(site.color)}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 ${th.fonts || ''}
-<style>:root{--pc:${esc(site.color)};--pc2:${esc(site.color2 || site.color)}}${COMMON_CSS}${th.css}${COMMON_BLOCK_CSS}${NAV_CSS}${TREAT_CSS}${PAGE_BLOCK_CSS}.blk{scroll-margin-top:72px}.t-d2 .blk{scroll-margin-top:0}.blk.is-hidden{display:none}</style>
+<style>:root{--pc:${esc(site.color)};--pc2:${esc(site.color2 || site.color)}}${COMMON_CSS}${th.css}${COMMON_BLOCK_CSS}${NAV_CSS}${TREAT_CSS}${PAGE_BLOCK_CSS}.logo-img{display:block;width:auto;max-width:min(300px,52vw);object-fit:contain}.logo:has(.logo-img){gap:0}.blk{scroll-margin-top:72px}.t-d2 .blk{scroll-margin-top:0}.blk.is-hidden{display:none}</style>
 </head><body class="t-${theme}${sub ? ' sub' : ''}">
 ${html}
 ${privacyHTML(site)}
@@ -2408,6 +2414,8 @@ $$('.modal .close').forEach(b=>b.onclick=()=>b.closest('.modal').classList.remov
    편집기
 ===================================================================== */
 const SITE_FIELDS = [
+  F.img('logo','로고 이미지'), F.text('logoH','로고 높이 (px)',{hint:'로고 이미지를 넣으면 병원명 글자 로고 대신 표시됩니다. 투명 배경 PNG·SVG 권장, 높이 기본 44'}),
+  {key:'logoTone',label:'로고 색 보정',type:'select',options:[['','원본 그대로'],['white','흰색으로 (어두운 헤더용)'],['black','검정으로 (밝은 헤더용)']]},
   F.text('name','병원명'), F.text('nameEn','영문 병원명'), {key:'color',label:'대표 색상',type:'color'},
   F.text('phone','대표 전화'), F.text('address','주소',{hint:'실제 주소를 입력하면 지도가 표시됩니다.'}), F.text('traffic','교통 / 주차 안내'),
   F.area('hours','진료시간',{rows:4}), F.text('email','문의 수신 이메일',{hint:'상담 신청서가 이 주소로 발송됩니다.'}),
@@ -2506,14 +2514,14 @@ editable(document);document.querySelectorAll('.blk').forEach(tools);document.que
   '.hd:hover .ad-mtools,.ad-mtools:hover,.hd.ad-show .ad-mtools{opacity:1;pointer-events:auto}.hd.ad-show nav{outline-color:'+A+'}@media(hover:none){.ad-mtools{opacity:1;pointer-events:auto}}';
   document.head.appendChild(s2);
   var t=document.createElement('div');t.className='ad-mtools';t.contentEditable='false';
-  t.innerHTML='<div class="in"><span class="ad-tag">상단 헤더</span><button type="button" class="ad-tb strong" data-m="site">로고 · 병원 정보</button><button type="button" class="ad-tb strong" data-m="edit">메뉴 편집</button><button type="button" class="ad-tb" data-m="add">＋ 메뉴 추가</button></div>';
-  t.addEventListener('click',function(e){var x=e.target.closest('[data-m]');if(!x)return;e.preventDefault();e.stopPropagation();parent.postMessage(x.dataset.m==='site'?{t:'site'}:{t:'menu',add:x.dataset.m==='add'},'*')});
+  t.innerHTML='<div class="in"><span class="ad-tag">상단 헤더</span><button type="button" class="ad-tb strong" data-m="logo">로고 이미지</button><button type="button" class="ad-tb" data-m="site">병원 정보</button><button type="button" class="ad-tb strong" data-m="edit">메뉴 편집</button><button type="button" class="ad-tb" data-m="add">＋ 메뉴 추가</button></div>';
+  t.addEventListener('click',function(e){var x=e.target.closest('[data-m]');if(!x)return;e.preventDefault();e.stopPropagation();parent.postMessage(x.dataset.m==='site'?{t:'site'}:x.dataset.m==='logo'?{t:'pick',k:'s/logo'}:{t:'menu',add:x.dataset.m==='add'},'*')});
   var R=document.documentElement,tm=0;function on(){clearTimeout(tm);hd.classList.add('ad-show');R.classList.add('ad-hd-on')}function off(){clearTimeout(tm);tm=setTimeout(function(){hd.classList.remove('ad-show');R.classList.remove('ad-hd-on')},900)}hd.addEventListener('mouseenter',on);hd.addEventListener('mouseleave',off);t.addEventListener('mouseenter',on);
   if(getComputedStyle(hd).position==='static')hd.style.position='relative';hd.appendChild(t);
 })();
 document.addEventListener('click',function(e){
   if(e.target.closest('.ad-tools,.ad-insert,.ad-mtools'))return;
-  if(e.target.closest('.hd .logo')&&!e.target.closest('[data-k]')){e.preventDefault();parent.postMessage({t:'site'},'*');return}
+  if(e.target.closest('.hd .logo')&&!e.target.closest('[data-k],[data-img]')){e.preventDefault();parent.postMessage({t:'site'},'*');return}
   var a=e.target.closest('a');
   if(a){e.preventDefault();var h=a.getAttribute('href')||'';
     if(h.indexOf('#pg=')===0&&!e.target.closest('[data-k]')){var q=new URLSearchParams(h.slice(1));document.body.classList.remove('nav-open');parent.postMessage({t:'go',page:q.get('pg'),hash:q.get('h')||''},'*');return}
@@ -2538,7 +2546,7 @@ window.addEventListener('message', e=>{
   const d = e.data||{}; if(!cur || e.source !== $('#pv').contentWindow) return;
   if (d.t==='text'){ setPath(cur.content, d.k, d.v); markDirty(); syncDrawerField(d.k, d.v); }
   if (d.t==='site'){ if (!editOn) setEdit(true); openSiteEditor(); }
-  if (d.t==='pick'){ pickImage(async url=>{ setPath(cur.content, d.k, url); markDirty(); post({t:'img',k:d.k,src:toSrc(url)}); syncDrawerField(d.k, url); }); }
+  if (d.t==='pick'){ pickImage(async url=>{ setPath(cur.content, d.k, url); markDirty(); post({t:'img',k:d.k,src:toSrc(url)}); syncDrawerField(d.k, url); if (d.k.startsWith('s/')) renderPreview(true); }); }
   if (d.t==='blk') blockAction(d.id, d.act);
   if (d.t==='insert') openPicker(d.index);
   if (d.t==='menu') openMenuEditor(!!d.add);
@@ -2858,7 +2866,7 @@ $('#file').addEventListener('change', async ()=>{
   toast('사진을 최적화해서 올리는 중…');
   try {
     const blob = await shrinkBlob(f, 1920, .82);
-    const ext = blob.type==='image/webp' ? 'webp' : 'jpg';
+    const ext = blob.type==='image/webp' ? 'webp' : blob.type==='image/png' ? 'png' : 'jpg';
     const path = `${cur.id}/img-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
     const { error } = await sb.storage.from(HP_BUCKET).upload(path, blob, { contentType: blob.type, cacheControl:'31536000', upsert:false });
     if (error) throw error;
@@ -2872,7 +2880,7 @@ function shrink(file, max, q){
   return new Promise((res,rej)=>{ const img=new Image(); const url=URL.createObjectURL(file);
     img.onload=()=>{ let {width:w,height:h}=img; const s=Math.min(1,max/Math.max(w,h)); w=Math.round(w*s); h=Math.round(h*s);
       const cv=document.createElement('canvas'); cv.width=w; cv.height=h; cv.getContext('2d').drawImage(img,0,0,w,h);
-      let out=cv.toDataURL('image/webp',q); if(!out.startsWith('data:image/webp')) out=cv.toDataURL('image/jpeg',q);
+      let out=cv.toDataURL('image/webp',q); if(!out.startsWith('data:image/webp')) out=/png|svg|gif/.test(file.type)?cv.toDataURL('image/png'):cv.toDataURL('image/jpeg',q);
       URL.revokeObjectURL(url); res(out); };
     img.onerror=rej; img.src=url; });
 }

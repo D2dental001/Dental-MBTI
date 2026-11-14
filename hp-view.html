@@ -1427,7 +1427,13 @@ renderSite = function(content, theme, mode, files, opt = {}){
   const showHidden = mode === 'edit' && opt.editUI;
   const body = page.blocks.filter(b => showHidden || !b.hidden).map(b => renderBlockHTML(content, theme, b, mode, files, { ...opt, page: page.id })).join('');
   const ctx = siteCtx(content, theme, mode, page.id, opt);
-  const html = T.chrome(S, body, ctx);
+  let html = T.chrome(S, body, ctx);
+  if (site.logo){
+    const h = Math.max(16, Math.min(160, parseInt(site.logoH, 10) || 44));
+    const tone = site.logoTone === 'white' ? 'filter:brightness(0) invert(1);' : site.logoTone === 'black' ? 'filter:brightness(0);' : '';
+    const img = S.i('logo', 'logo-img', site.name || 'logo').replace(' loading="lazy"', '').replace('<img', `<img style="height:${h}px;${tone}"`);
+    html = html.replace(/(<a [^>]*class="logo"[^>]*>)[\s\S]*?(<\/a>)/, (m, a, b) => a + img + b);
+  }
   const og = firstImage(content);
   const ogSrc = og ? makeR2({ og }, 'og/', rmode, files).src('og') : '';
   const sub = page.id !== 'home';
@@ -1444,7 +1450,7 @@ ${opt.head || ''}
 <meta name="theme-color" content="${esc(site.color)}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 ${th.fonts || ''}
-<style>:root{--pc:${esc(site.color)};--pc2:${esc(site.color2 || site.color)}}${COMMON_CSS}${th.css}${COMMON_BLOCK_CSS}${NAV_CSS}${TREAT_CSS}${PAGE_BLOCK_CSS}.blk{scroll-margin-top:72px}.t-d2 .blk{scroll-margin-top:0}.blk.is-hidden{display:none}</style>
+<style>:root{--pc:${esc(site.color)};--pc2:${esc(site.color2 || site.color)}}${COMMON_CSS}${th.css}${COMMON_BLOCK_CSS}${NAV_CSS}${TREAT_CSS}${PAGE_BLOCK_CSS}.logo-img{display:block;width:auto;max-width:min(300px,52vw);object-fit:contain}.logo:has(.logo-img){gap:0}.blk{scroll-margin-top:72px}.t-d2 .blk{scroll-margin-top:0}.blk.is-hidden{display:none}</style>
 </head><body class="t-${theme}${sub ? ' sub' : ''}">
 ${html}
 ${privacyHTML(site)}
