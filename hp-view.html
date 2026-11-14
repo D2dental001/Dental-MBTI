@@ -1118,7 +1118,7 @@ const PAGE_BLOCK_CSS = `
 .cb-steps b{display:block;font-size:18px;margin-bottom:6px}.cb-steps li p{opacity:.72;font-size:14px;line-height:1.8}
 .cb-docs .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:28px}
 .cb-docs img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:var(--r)}
-.cb-docs .po{color:var(--pc);font-weight:700;font-size:14px;margin-top:18px}.cb-docs b{display:block;font-size:22px;margin:2px 0 12px}.cb-docs .cr{opacity:.72;font-size:14px;line-height:1.9}
+.cb-docs .po{color:var(--pc);font-weight:700;font-size:14px;margin-top:18px}.cb-docs .grid>.rv:only-child{display:grid;grid-template-columns:minmax(220px,380px) 1fr;column-gap:56px;align-content:center;max-width:1000px;margin:0 auto;width:100%}.cb-docs .grid>.rv:only-child>img{grid-row:1/span 4;align-self:center}.cb-docs .grid>.rv:only-child .po{margin-top:0;align-self:end}.cb-docs .grid>.rv:only-child b{font-size:30px}.cb-docs .grid>.rv:only-child .cr{font-size:15px;align-self:start}@media(max-width:760px){.cb-docs .grid>.rv:only-child{grid-template-columns:1fr}.cb-docs .grid>.rv:only-child>img{grid-row:auto;max-width:360px}.cb-docs .grid>.rv:only-child .po{margin-top:18px}}.cb-docs b{display:block;font-size:22px;margin:2px 0 12px}.cb-docs .cr{opacity:.72;font-size:14px;line-height:1.9}
 .cb-gal .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .cb-gal figure img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--r)}.cb-gal figcaption{font-size:14px;opacity:.7;margin-top:8px}
 .cb-loc .grid{display:grid;grid-template-columns:1fr 1.2fr;gap:50px;align-items:start}
@@ -1775,7 +1775,8 @@ const ES_BA = {
   whiteA:['전문가 치아미백','셰이드 가이드로 확인한 변화','estar/whiteAB','estar/whiteAA'],
   whiteB:['전문가 치아미백','누런 치아를 한 톤 밝게','estar/whiteBB','estar/whiteBA'],
   whiteC:['전문가 치아미백','착색된 치아의 밝기 개선','estar/whiteCB','estar/whiteCA'],
-  gum:['레이저 잇몸미백','검은 잇몸을 분홍빛으로','estar/gumB','estar/gumA']
+  gum:['레이저 잇몸미백','검은 잇몸을 분홍빛으로','estar/gumB','estar/gumA'],
+  oldLami:['라미네이트 · 올세라믹','벌어지고 변색된 앞니 개선','estar/oldLamiB','estar/oldLamiA']
 };
 const esBaItems = keys => keys.map(k => { const [t,d,b,a] = ES_BA[k]; return { t, d, s:d, b:'asset:'+b, a:'asset:'+a }; });
 
@@ -1783,11 +1784,11 @@ const esBaItems = keys => keys.map(k => { const [t,d,b,a] = ES_BA[k]; return { t
 const ES_TX = {
   laminate: { title:'무삭제 라미네이트', en:'NO-PREP LAMINATE', img:'lamiBA', heroImg:'heroLami', desc:'이를 깎지 않고, 하얗고 고른 치열로',
     lead:'멀쩡한 치아,\n깎지 않고 예뻐집니다', d:'무삭제 라미네이트는 치아 표면을 삭제하지 않거나 최소화한 상태에서 얇은 세라믹을 붙여 치아의 색상과 모양을 개선하는 심미치료입니다. 25년차 보존과 원장이 치아·잇몸·교합 상태를 꼼꼼히 확인한 뒤 내 치아에 가장 적합한 방법을 결정합니다.',
-    pts:'자연치아 삭제 최소화 또는 생략\n치아 크기 · 모양 · 배열 개선\n미백으로 어려운 변색까지 개선\n자연스러운 투명감과 색상',
-    points:[['shield','자연치아 보존','무조건 깎지 않는 것보다 내 치아에 맞는 방법을 먼저 찾습니다.'],['sparkle','자연스러운 투명감','주변 치아와 어울리는 색과 투명도로 티 나지 않게 완성합니다.'],['won','연말 이벤트','1치아당 40만원(부가세 별도) 특별가로 진행합니다.']],
+    pts:'깨지거나 떨어져 나간 앞니\n심하게 변색된 누런 치아 · 회색 치아\n앞니 사이 벌어진 틈 (치간 이개)\n돌출 · 회전 · 비뚤어진 1~2개 앞니',
+    points:[['shield','최소 삭제 · 무삭제','기존 치아 제거량을 최소화하고, 가능하면 깎지 않습니다.'],['sparkle','자연치아 같은 색','색상과 모양이 자연 치아와 거의 같고 변색에 강합니다.'],['clock','통증 · 마취 최소화','정밀하게 시술해 통증이 적고 마취가 거의 필요 없습니다.'],['won','경제적인 심미치료','크라운보다 비용과 시간 부담이 적습니다. 연말 이벤트 1치아 40만원(부가세 별도).']],
     steps:[['정밀 상담','치아 형태·색상·잇몸·교합 상태를 확인합니다.'],['디자인','원하는 미소에 맞춰 크기와 모양을 설계합니다.'],['제작','얇은 세라믹을 정밀하게 제작합니다.'],['부착 · 점검','접착 후 교합을 확인하고 정기 점검합니다.']],
     faq:[['모든 치아에 무삭제가 가능한가요?','치아가 돌출되어 있거나 배열이 많이 불규칙하면 일부 삭제가 필요할 수 있어, 진단 후 결정합니다.'],['이벤트 가격은 어떻게 되나요?','연말 이벤트로 1치아당 40만원(부가세 별도)에 진행하고 있습니다.'],['수능 끝난 학생도 가능한가요?','치아 성장이 끝난 경우 가능하며, 상담을 통해 적합 여부를 확인해 드립니다.']],
-    ba:['lamiA','lamiB'] },
+    ba:['lamiA','lamiB','oldLami'] },
   whitening: { title:'전문가 치아미백', en:'PROFESSIONAL WHITENING', img:'whiteFace', heroImg:'heroWhite', desc:'18년, 수만 명의 미백 노하우',
     lead:'한 톤 밝아진 미소,\n첫인상이 달라집니다', d:'치아미백은 치아를 깎거나 코팅하지 않고, 치아 속에 쌓인 색소만 산화 작용으로 분해해 본래의 밝기를 되찾는 치료입니다. e-스타치과는 18년간 수만 명의 미백 시술로 쌓은 노하우와 검증된 미백제(오스템 뷰티스)를 사용합니다.',
     pts:'치아 손상 없는 산화 원리\n검증된 고농도 전문가 미백제\nLED 광조사로 시술 시간 단축\n자가 미백 병행으로 효과 유지',
@@ -1802,6 +1803,12 @@ const ES_TX = {
     steps:[['원인 진단','파노라마·구강검사로 원인을 확인합니다.'],['마취','국소 마취로 통증을 줄입니다.'],['레이저 시술','색소가 침착된 층만 제거합니다.'],['회복 관리','1~2주 경과를 확인하고 관리법을 안내합니다.']],
     faq:[['검은 잇몸은 병인가요?','대부분 생리적 색소침착이지만, 갑자기 생기거나 모양이 변하면 검진이 필요합니다.'],['다시 검어질 수 있나요?','흡연을 계속하거나 개인 특성에 따라 재발할 수 있어 금연과 관리가 중요합니다.']],
     ba:['gum'] },
+  'gum-contour': { title:'잇몸성형술', en:'GUMMY SMILE', img:'smile2', heroImg:'heroGum', desc:'웃을 때 잇몸이 많이 보인다면',
+    lead:'잇몸 라인까지\n아름답게 디자인합니다', d:'웃을 때 잇몸이 너무 많이 보이거나 잇몸 라인이 비대칭이라 치아가 짧아 보이는 경우, 잇몸 성형으로 자연스러운 잇몸 라인을 만듭니다. 잇몸 성형 전문 레이저로 출혈이 거의 없고, 1~2일 정도면 회복되는 비교적 간단한 시술입니다.',
+    pts:'거미 스마일 (잇몸 과다 노출)\n비대칭 잇몸 라인\n짧아 보이는 앞니\n라미네이트 전 잇몸 라인 정리',
+    points:[['sparkle','스마일 디자인','치아 길이와 잇몸 라인의 비율을 함께 설계합니다.'],['shield','레이저 시술','출혈이 거의 없어 편안합니다.'],['clock','빠른 회복','1~2일이면 일상생활이 가능합니다.']],
+    steps:[['스마일 분석','웃는 모습과 잇몸 노출량을 확인합니다.'],['라인 디자인','이상적인 잇몸 라인을 표시합니다.'],['레이저 성형','레이저로 잇몸 라인을 정리합니다.'],['회복 확인','경과를 확인하고 관리법을 안내합니다.']],
+    faq:[['라미네이트와 함께 해도 되나요?','네, 잇몸 라인을 먼저 정리하면 라미네이트 결과가 훨씬 자연스러워집니다.'],['아프지 않나요?','국소 마취 후 레이저로 진행해 통증과 출혈이 적습니다.']] },
   'laminate-repair': { title:'라미네이트 파절 · 재부착', en:'LAMINATE REPAIR', img:'lamiBroken', heroImg:'heroLami', desc:'깨진 라미네이트, 꼭 새로 해야 할까요?',
     lead:'깨진 라미네이트도\n상태에 맞게 다시', d:'라미네이트가 깨지거나 떨어졌다고 모두 새로 만들 필요는 없습니다. 파절 위치와 범위, 보철물과 남은 치아 상태에 따라 재접착·부분 수리·재제작 중 가장 알맞은 방법을 선택합니다.',
     pts:'통째로 떨어진 경우 재접착 검토\n작은 파절은 레진으로 부분 수리\n넓은 파절은 재제작\n이갈이 · 교합 원인까지 관리',
@@ -1809,7 +1816,7 @@ const ES_TX = {
     steps:[['상태 확인','파절 위치·범위와 치아 상태를 봅니다.'],['방법 결정','재접착·수리·재제작 중 선택합니다.'],['치료','선택한 방법으로 회복합니다.'],['예방 관리','습관과 교합을 점검합니다.']],
     faq:[['떨어진 라미네이트를 가져가야 하나요?','네, 깨끗하게 보관해 오시면 재사용 가능 여부를 확인해 드립니다.'],['수리하면 티가 나나요?','작은 범위는 자연스럽지만, 색과 투명도가 완전히 같지 않을 수 있어 상담 후 결정합니다.']] },
   'esthetic-crown': { title:'올세라믹 · 지르코니아', en:'ESTHETIC CROWN', img:'gum', heroImg:'heroLami', desc:'금속 없이 자연치아처럼',
-    lead:'금속 없는 보철로\n잇몸까지 깨끗하게', d:'금속이 들어간 크라운은 잇몸이 내려가면 테두리가 비쳐 잇몸이 검게 보일 수 있습니다. 올세라믹·지르코니아는 자연치아와 비슷한 색과 투명도로 앞니와 어금니 모두 자연스럽게 회복합니다.',
+    lead:'금속 없는 보철로\n잇몸까지 깨끗하게', d:'일반 보철은 속에 금속이 들어가 빛이 투과되지 않아 불투명하고 인공치아 느낌이 나며, 잇몸 쪽이 검게 보이기도 합니다. 고강도 특수 포세린으로 속에 금속이 없는 올세라믹 크라운을 만들면 빛이 투과해 잇몸의 검은 라인이 없는 매우 자연스러운 인공치아가 됩니다.',
     pts:'자연치아 같은 색과 투명도\n잇몸 변색 걱정 없는 무금속\n튼튼한 지르코니아\n오래된 금속 보철 교체',
     points:[['sparkle','자연스러운 색','주변 치아에 맞춰 색을 맞춥니다.'],['shield','무금속','금속 테두리로 인한 잇몸 변색이 없습니다.'],['tooth','튼튼함','강도 높은 지르코니아로 오래 씁니다.']],
     steps:[['상담 · 색 측정','원하는 모양과 색을 확인합니다.'],['치아 준비','필요한 만큼만 다듬습니다.'],['제작','정밀하게 보철물을 제작합니다.'],['장착','교합을 맞춰 장착합니다.']],
@@ -1892,18 +1899,22 @@ function esInfo(slug, title, group){
   const hero = (img, en, d) => blk('c_subhero', { img:ES(img), en, t:title, d, crumb:`HOME  >  ${group}  >  ${title}` });
   const greet = { img:ES('doctor'), lab:'GREETING', t:'내 가족이라 생각하고\n따뜻하고 양심적으로 진료합니다',
     msg:'안녕하세요, 신촌 e-스타치과 대표원장 김소연입니다.\n\n저는 25년차 보존과 전공 치과의사로, 18년째 신촌의 같은 자리에서 환자분들을 만나고 있습니다. 원장 1인이 처음부터 끝까지 책임지고 진료합니다.\n\n여자 원장 특유의 섬세함과 꼼꼼함, 심미안으로 자연치아를 최대한 지키면서 아름다운 미소를 만들어 드리겠습니다.',
-    sign:'신촌 e-스타치과 대표원장 김소연', cr:'치과보존과 전공 · 임상 25년차\n신촌 같은 자리 18년 진료\n1인 원장 책임진료' };
+    sign:'신촌 e-스타치과 대표원장 김소연', cr:'치과보존과 인정의\n부산대학교 치의학과 졸업\n부산대학교 치의학대학원 보존 · 보철학 석사\n대한치과보존학회 · 대한치과근관치료학회 정회원\n대한심미치과학회 정회원' };
   const P = {
     greeting: [hero('heroDoc','GREETING','18년째 같은 자리, 신촌 e-스타치과입니다'), blk('c_greet', greet),
       blk('c_points',{ lab:'PRINCIPLE', t:'e-스타치과의 진료 원칙', items:[['tooth','자연치아 보존','보존과 전공 원장으로 살릴 수 있는 치아는 먼저 살립니다.'],['shield','양심 진료','멈춘 충치는 관찰하고 꼭 필요한 치료만 권합니다.'],['sparkle','섬세한 심미안','여자 원장의 꼼꼼함으로 자연스러운 미소를 디자인합니다.']].map(([icon,t,d])=>({icon,t,d})) })],
     doctors: [hero('heroDoc','DOCTOR','대표원장이 처음부터 끝까지 직접 진료합니다'),
-      blk('c_doctors',{ lab:'DOCTOR', t:'1인 원장 책임진료', items:[{ img:ES('doctor'), p:'치과보존과 전공 · 25년차', n:'대표원장 김소연', c:'신촌 e-스타치과 18년 진료\n신경치료 · 재신경치료\n무삭제 라미네이트 · 치아미백' }] })],
+      blk('c_doctors',{ lab:'DOCTOR', t:'1인 원장 책임진료', items:[{ img:ES('doctor'), p:'치과보존과 인정의 · 25년차', n:'대표원장 김소연', c:'진료분야 : 보존치료(신경치료 · 미백), 심미보철\n부산대학교 치의학과 졸업\n부산대학교 치의학대학원 보존 · 보철학 석사\n대한치과보존학회 · 대한치과근관치료학회 정회원\n대한심미치과학회 정회원\nHanmi Dental Society Prosthodontic Study 수료\n하버드 · 오스템 임플란트 코스 수료' }] })],
     special: [hero('heroWhite','SPECIAL','e-스타치과가 특별한 이유'),
-      blk('c_points',{ lab:'WHY e-STAR', t:'e-스타치과만의 특별함', items:[['cal','18년 같은 자리','신촌역 현대백화점 옆, 18년째 같은 자리를 지키고 있습니다.'],['tooth','25년차 보존과 원장','자연치아를 살리는 신경치료·재신경치료에 강합니다.'],['sparkle','수만 명의 미백 경험','18년간 수만 명의 미백 시술로 쌓은 노하우가 있습니다.'],['shield','1인 책임진료','상담부터 치료, 사후관리까지 원장이 직접 합니다.']].map(([icon,t,d])=>({icon,t,d})) }),
+      blk('c_points',{ lab:'WHY e-STAR', t:'e-스타치과만의 특별함', items:[['cal','18년 같은 자리','신촌역 현대백화점 옆, 18년째 같은 자리를 지키고 있습니다.'],['tooth','25년차 보존과 원장','자연치아를 살리는 신경치료·재신경치료에 강합니다.'],['sparkle','수만 명의 미백 경험','18년간 수만 명의 미백 시술로 쌓은 노하우가 있습니다.'],['shield','1인 전용 진료실','모든 진료실이 독립된 1인 전용 공간이라 편안하게 치료받으실 수 있습니다.']].map(([icon,t,d])=>({icon,t,d})) }),
       blk('c_treat',{ img:ES('lamiBA'), lab:'SIGNATURE', t:'깎지 않는 아름다움, 무삭제 라미네이트', d:'멀쩡한 치아를 삭제하는 것이 부담스러우셨다면, 치아 표면을 깎지 않고 얇은 세라믹을 붙이는 무삭제 라미네이트를 상담해 보세요. 연말 이벤트로 1치아당 40만원(부가세 별도)에 진행합니다.', pts:'자연치아 삭제 최소화\n자연스러운 투명감\n연말 이벤트 1치아 40만원', btn:'라미네이트 상담', side:'right' }),
+      blk('c_gallery',{ lab:'CLINIC', t:'e-스타치과 둘러보기', items:[['tourEntry','입구'],['tourPink1','핑크 1호실'],['tourBlue','블루실']].map(([a,c])=>({img:ES(a),c})) }),
       blk('c_cta',{})],
+    tour: [hero('heroTour','CLINIC TOUR','한 분 한 분 특별하고 편안하게, 1인 전용 진료실'),
+      blk('c_gallery',{ lab:'PRIVATE ROOMS', t:'모든 진료실이 1인 전용입니다', items:[['tourEntry','입구'],['tourConsult','상담실'],['tourPre','예진실'],['tourBlue','블루실 · 1인 전용 진료실'],['tourGreen','그린실 · 1인 전용 진료실'],['tourAntique','엔틱실 · 1인 전용 진료실'],['tourPink1','핑크 1호실 · 1인 전용 진료실'],['tourPink2','핑크 2호실 · 1인 전용 진료실'],['tourHall','복도']].map(([a,c])=>({img:ES(a),c})) }),
+      blk('c_cta',{ t:'편안한 1인 진료실에서 상담받아 보세요', s:'다른 환자 눈치 보지 않고 충분히 이야기 나눌 수 있습니다', btn:'전화 예약하기' })],
     location: [hero('heroGum','LOCATION','신촌역 현대백화점 옆, 신촌로 79 3층'), blk('c_location',{ lab:'LOCATION', t:'진료안내 · 오시는 길' }), blk('c_cta',{ t:'방문 전 예약하시면 대기 없이 진료받으실 수 있습니다', s:'전화 또는 카카오톡으로 편하게 예약하세요', btn:'전화 예약하기' })],
-    cases: [hero('heroLami','BEFORE & AFTER','e-스타치과에서 달라진 미소'), blk('c_ba',{ lab:'CASES', t:'심미치료 전후 사례', s:'무삭제 라미네이트 · 치아미백 · 잇몸미백 실제 사례입니다', items:esBaItems(['lamiA','lamiB','whiteA','whiteB','whiteC','gum']) }), blk('c_cta',{ t:'나도 이렇게 바뀔 수 있을까요?', s:'사진 한 장으로도 상담이 가능합니다', btn:'전화 상담하기' })],
+    cases: [hero('heroLami','BEFORE & AFTER','e-스타치과에서 달라진 미소'), blk('c_ba',{ lab:'CASES', t:'심미치료 전후 사례', s:'무삭제 라미네이트 · 치아미백 · 잇몸미백 실제 사례입니다', items:esBaItems(['lamiA','lamiB','oldLami','whiteA','whiteB','whiteC','gum']) }), blk('c_cta',{ t:'나도 이렇게 바뀔 수 있을까요?', s:'사진 한 장으로도 상담이 가능합니다', btn:'전화 상담하기' })],
     reviews: [hero('heroWhite','REVIEW','e-스타치과를 경험한 분들의 이야기'), blk('c_reviews',{ lab:'REVIEW', t:'환자분들이 남겨주신 이야기', items:[
       ['깎지 않아서 안심','무삭제라 이를 갈아낼 걱정 없이 했는데 앞니가 정말 자연스러워졌어요.','김**님 · 무삭제 라미네이트'],
       ['한 번에 밝아졌어요','커피를 많이 마셔서 누렇던 치아가 확실히 밝아졌습니다.','이**님 · 치아미백'],
@@ -1922,8 +1933,8 @@ function esInfo(slug, title, group){
   return { id:'pg-' + slug, slug, title, blocks: P[slug] || [hero('heroGum','PAGE','')] };
 }
 const ES_MAP = [
-  { label:'병원소개', children:[['greeting','대표원장 인사말'],['doctors','의료진 소개'],['special','e-스타만의 특별함'],['location','진료안내 · 오시는길']] },
-  { label:'심미치료', children:[['laminate','무삭제 라미네이트'],['whitening','전문가 치아미백'],['gum-whitening','레이저 잇몸미백'],['laminate-repair','라미네이트 파절 · 재부착'],['esthetic-crown','올세라믹 · 지르코니아'],['cervical','치경부마모증 치료']] },
+  { label:'병원소개', children:[['greeting','대표원장 인사말'],['doctors','의료진 소개'],['special','e-스타만의 특별함'],['tour','1인 전용 진료실 둘러보기'],['location','진료안내 · 오시는길']] },
+  { label:'심미치료', children:[['laminate','무삭제 라미네이트'],['whitening','전문가 치아미백'],['gum-whitening','레이저 잇몸미백'],['gum-contour','잇몸성형술'],['laminate-repair','라미네이트 파절 · 재부착'],['esthetic-crown','올세라믹 · 지르코니아'],['cervical','치경부마모증 치료']] },
   { label:'자연치아보존', children:[['root-canal','신경치료'],['retreatment','재신경치료'],['cavity','충치 · 인레이']] },
   { label:'임플란트', children:[['implant','임플란트'],['bone-graft','뼈이식 · 상악동 거상술']] },
   { label:'일반진료', children:[['wisdom','사랑니 발치'],['gum','잇몸치료 · 스케일링'],['kids','소아 · 성장기 진료'],['pregnancy','임산부 치과치료']] },
@@ -1933,9 +1944,9 @@ const ES_MAP = [
 function estarContent(){
   const c = defaultContent('balance');
   Object.assign(c.site, { _seed:'estar', name:'신촌 e-스타치과', nameEn:'e-STAR DENTAL CLINIC', bal_mark:'e★', color:'#24408e', color2:'#b8975a',
-    phone:'00-0000-0000', bal_phone2:'00-000-0000', address:'서울 서대문구 신촌로 79, 3층 (신촌역 현대백화점 옆)', traffic:'2호선 신촌역 하차 · 현대백화점 신촌점 옆 건물 3층',
+    _seedVer:2, logo:'asset:estar/logoW', logoH:'40', logoTone:'', phone:'02-333-2028', bal_phone2:'02-333-2028', hours:'평일   AM 09:30 - PM 06:30\n목요일 야간진료   PM 06:30 - PM 08:30\n토요일   AM 09:30 - PM 02:30 (점심시간 없음)\n점심시간   PM 01:00 - PM 02:00\n일요일 · 공휴일   휴진', address:'서울 서대문구 신촌로 79, 3층 (신촌역 현대백화점 옆)', traffic:'2호선 신촌역 1번 출구 · 현대백화점 옆 KFC 건물 3층',
     metaTitle:'신촌 치과 · 무삭제 라미네이트 · 치아미백 · 신경치료', metaDesc:'25년차 보존과 전공 여자 대표원장이 1인 책임진료하는 신촌 e-스타치과. 무삭제 라미네이트, 전문가 치아미백, 잇몸미백, 재신경치료.',
-    biz:'신촌 e-스타치과의원 · 대표원장 김소연 · 서울 서대문구 신촌로 79, 3층 · TEL 00-0000-0000', bal_blog:'https://blog.naver.com/estarclinic', bal_cta:'미백 상담', bal_cta2:'라미네이트 상담' });
+    biz:'신촌 e-스타치과의원 · 대표원장 김소연 · 서울 서대문구 신촌로 79, 3층 · TEL 02-333-2028', bal_blog:'https://blog.naver.com/estarclinic', bal_cta:'미백 상담', bal_cta2:'라미네이트 상담' });
   // 메뉴 · 하위 페이지
   const pages = [], nav = [];
   ES_MAP.forEach(g => {
@@ -1946,12 +1957,12 @@ function estarContent(){
   // 홈 화면
   const home = c.pages[0], by = t => home.blocks.find(b => b.type === t);
   by('hero').data.slides = [
-    ['heroDoc','보존과 전공 25년차 · 여자 대표원장','18년째 같은 자리, 신촌 e-스타치과','원장이 직접, 끝까지 책임집니다','섬세함과 꼼꼼함, 심미안으로 내 가족처럼 진료합니다'],
-    ['heroLami','무삭제 라미네이트 연말 이벤트','멀쩡한 치아, 깎지 않고','하얗고 고른 치열로','1치아당 40만원 (부가세 별도)'],
+    ['heroLami','무삭제 라미네이트 ILLUMINATE','마취없는 최소침습 심미복원','통증 없이 하얀 미소를 돌려 드립니다.','이제 강남까지 가실 필요 없어요 ~'],
     ['heroWhite','전문가 치아미백','18년, 수만 명의 미백 노하우','한 톤 밝아진 첫인상','검증된 미백제로 치아 손상 없이 하얗게'],
-    ['heroGum','레이저 잇몸미백','웃을 때 보이는 검은 잇몸','분홍빛 잇몸으로','레이저로 출혈과 통증을 줄인 잇몸 색소 제거'],
-    ['heroDoc','자연치아 보존','빼야 한다는 치아도','다시 한 번 살려봅니다','보존과 의사의 신경치료 · 재신경치료']
-  ].map(([img,tag,l1,l2,s]) => ({ img:ES(img), tag, l1, l2, s }));
+    ['heroDoc','대한심미치과학회 정회원 · 보존과 인정의','18년째 같은 자리, 신촌 e-스타치과','원장이 직접, 끝까지 책임집니다','섬세함과 꼼꼼함, 심미안으로 내 가족처럼 진료합니다'],
+    ['heroGum','레이저 잇몸미백 · 잇몸성형','웃을 때 보이는 잇몸까지','분홍빛 잇몸 라인으로','레이저로 출혈과 통증을 줄인 잇몸 심미치료'],
+    ['heroTour','1인 전용 진료실','다른 사람 눈치 보지 않고','편안하게 치료받으세요','모든 진료실이 독립된 1인 전용 공간입니다']
+].map(([img,tag,l1,l2,s]) => ({ img:ES(img), tag, l1, l2, s }));
   Object.assign(by('intro').data, { t:'신촌 e-스타치과', en:'e-STAR DENTAL CLINIC', s:'아름다운 미소는 건강한 자연치아에서 시작됩니다. 18년째 신촌의 같은 자리에서 진료합니다.' });
   Object.assign(by('reason').data, { img:ES('heroLami'), sm:'이를 깎지 않는 무삭제 라미네이트\n18년 · 수만 명의 치아미백 노하우', lb:'심미치료는 e-스타!', b1:'보존과 전공 여자 원장의 섬세한 심미안으로', b2:'자연스럽고 하얀 미소를 완성합니다', btn:'심미치료 알아보기', href:'p:pg-laminate' });
   by('tiles').data.items = [
@@ -1967,8 +1978,8 @@ function estarContent(){
   ].map(([img,tone,cap,t1,hl,d,s]) => ({ img:ES(img), tone, cap, t1, hl, d, href:'p:pg-'+s }));
   by('video').hidden = true;
   Object.assign(by('ba').data, { en:'BEFORE & AFTER', t:'심미치료 전후 사진', items:esBaItems(['lamiA','lamiB','whiteA','gum']).map(x => ({ t:x.t, s:x.d, b:x.b, a:x.a })) });
-  Object.assign(by('doctors').data, { en:'e-STAR DENTAL CLINIC', t:'대표원장 1인 책임진료', items:[{ img:ES('doctor'), sp:'치과보존과 전공 · 25년차', n:'김소연', pos:'대표원장' }] });
-  Object.assign(by('about').data, { en:'ABOUT e-STAR', t1:'18년째 같은 자리에서', t2:'내 가족처럼 진료합니다', d:'신촌역 현대백화점 옆, 18년째 같은 자리를 지키고 있습니다.\n여자 원장 특유의 섬세함과 꼼꼼함, 심미안으로 따뜻하고 양심적으로 진료합니다.', btn:'원장 인사말', href:'p:pg-greeting', img:ES('smile') });
+  Object.assign(by('doctors').data, { en:'e-STAR DENTAL CLINIC', t:'대한심미치과학회 정회원 원장의 1인 책임진료', items:[{ img:ES('doctor'), sp:'치과보존과 인정의 · 심미보철', n:'김소연', pos:'대표원장' }] });
+  Object.assign(by('about').data, { en:'ABOUT e-STAR', t1:'한 분 한 분 특별하게,', t2:'모든 진료실이 1인 전용입니다', d:'신촌역 현대백화점 옆, 18년째 같은 자리에서 진료합니다.\n독립된 1인 전용 진료실에서 다른 환자 눈치 보지 않고 편안하게 상담하고 치료받으세요.', btn:'진료실 둘러보기', href:'p:pg-tour', img:ES('tourPink1') });
   Object.assign(by('info').data, { qs:[['답변완료','무삭제 라미네이트 이벤트 문의','2026.11.12'],['답변완료','수능 끝나고 치아미백 하고 싶어요','2026.11.11'],['답변대기','잇몸이 검은데 미백 가능한가요?','2026.11.10'],['답변완료','신경치료 중 임시재료가 빠졌어요','2026.11.03']].map(([st,q,dt])=>({st,q,dt})), kk:'카카오톡 채널 @e스타치과' });
   // 홈 · 심미 시그니처 블록 추가 (이유 있는 선택 배너 다음)
   const sig = blk('c_treat',{ img:ES('lamiAA'), lab:'e-STAR SIGNATURE', t:'무삭제 라미네이트 1치아 40만원', d:'치아 모양이나 색상이 마음에 들지 않지만 멀쩡한 치아를 깎는 것이 부담스러우셨나요? 치아 표면을 깎지 않고 얇은 세라믹을 붙여 하얗고 고른 치열을 만들어 드립니다. 수능이 끝난 수험생과 연말을 준비하는 분들을 위한 특별 이벤트입니다.', pts:'이벤트가 1치아 40만원 (부가세 별도)\n자연치아 보존 우선 치료 계획\n개인별 치아 형태 · 색상 맞춤', btn:'라미네이트 상담 예약', side:'right' });
@@ -1978,7 +1989,7 @@ function estarContent(){
   c.pages = [home, ...pages];
   return c;
 }
-SEED.push({ theme:'balance', title:'07 신촌 e-스타치과 (심미 강조 · 밸런스형)', once:'estar', build: estarContent });
+SEED.push({ theme:'balance', title:'07 신촌 e-스타치과 (심미 강조 · 밸런스형)', once:'estar', ver:2, build: estarContent });
 </script>
 <script>
 (async function(){
