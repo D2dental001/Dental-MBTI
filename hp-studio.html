@@ -2322,7 +2322,14 @@ const toRow = p => ({ id:p.id, title:p.title, theme:p.theme, sort_order:p.order,
 const fromRow = r => ({ id:r.id, title:r.title, theme:r.theme, order:r.sort_order, content:r.content, created:r.created_at, updated:r.updated_at, share_token:r.share_token||null, share_on:!!r.share_on });
 const DB = {
   async all(){ const { data, error } = await sb.from('hp_portfolios').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true}); if (error) throw error; return data.map(fromRow); },
-  async put(p){ const { error } = await sb.from('hp_portfolios').upsert(toRow(p)); if (error) throw error; },
+  async put(p){
+    const row = toRow(p);
+    const up = await sb.from('hp_portfolios').update(row).eq('id', p.id).select('id');
+    if (up.error) throw up.error;
+    if (up.data && up.data.length) return;
+    const ins = await sb.from('hp_portfolios').insert(row);
+    if (ins.error) throw ins.error;
+  },
   async del(id){
     const { error } = await sb.from('hp_portfolios').delete().eq('id', id); if (error) throw error;
     try { const { data } = await sb.storage.from(HP_BUCKET).list(id, {limit:1000}); if (data && data.length) await sb.storage.from(HP_BUCKET).remove(data.map(f=>id+'/'+f.name)); } catch(e){ console.warn('사진 정리 실패', e); }
@@ -2451,8 +2458,8 @@ var st=document.createElement('style');st.textContent=
 '.rv{opacity:1!important;transform:none!important}html{scroll-snap-type:none!important}'+
 '.blk{position:relative;outline:2px dashed transparent;outline-offset:-2px;transition:outline-color .15s}.blk:hover,.blk.ad-editing{outline-color:'+A+'}.blk.ad-editing{outline-style:solid}'+
 '.blk.is-hidden{display:block!important;opacity:.45;background-image:repeating-linear-gradient(45deg,transparent 0 14px,rgba(0,0,0,.05) 14px 28px)}.blk.is-hidden>section{pointer-events:none}'+
-'.ad-tools{position:absolute;z-index:9998;top:12px;right:12px;display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:6px;background:rgba(255,255,255,.97);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.2);font:500 13px/1 Pretendard,sans-serif;color:#222;max-width:calc(100% - 24px);opacity:.0;transition:opacity .15s;top:88px}'+
-'.blk:hover>.ad-tools,.blk.ad-editing>.ad-tools{opacity:1}'+
+'.ad-tools{position:absolute;z-index:9998;top:12px;right:12px;display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:6px;background:rgba(255,255,255,.97);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.2);font:500 13px/1 Pretendard,sans-serif;color:#222;max-width:calc(100% - 24px);opacity:0;pointer-events:none;transition:opacity .15s}'+
+'.blk:hover>.ad-tools,.blk.ad-editing>.ad-tools{opacity:1;pointer-events:auto}html.ad-hd-on .blk>.ad-tools{opacity:0!important;pointer-events:none!important}html.ad-hd-on .blk:hover{outline-color:transparent}'+
 '.ad-tag{font-size:12px;font-weight:800;color:#c2560a;padding:0 6px}.ad-tb{border:1px solid #e3ddd6;background:#fff;color:#222;border-radius:6px;padding:6px 10px;font:600 12px/1 Pretendard,sans-serif;cursor:pointer}.ad-tb:hover{border-color:'+A+'}.ad-tb:disabled{opacity:.35;cursor:not-allowed}.ad-tb.strong{background:'+A+';border-color:'+A+';color:#fff}.ad-tb.danger{color:#c0392b}'+
 '.ad-insert{position:relative;z-index:9997;height:0;display:flex;justify-content:center}.ad-add{transform:translateY(-50%);height:34px;padding:0 16px;border-radius:17px;border:2px solid '+A+';background:#fff;color:#c2560a;font:700 13px/1 Pretendard,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.15);opacity:0;transition:opacity .15s}'+
 '.ad-insert:hover .ad-add,.blk:hover+.ad-insert .ad-add,.ad-insert.last .ad-add{opacity:1}@media(hover:none){.ad-add,.ad-tools{opacity:1}}';
@@ -2477,7 +2484,7 @@ function tools(el){var b=M[el.dataset.block];if(!b||el.querySelector(':scope>.ad
    '<button type="button" class="ad-tb" data-a="dup">복제</button>'+
    '<button type="button" class="ad-tb danger" data-a="del">삭제</button>';
   t.addEventListener('click',function(e){var x=e.target.closest('[data-a]');if(!x)return;e.preventDefault();e.stopPropagation();parent.postMessage({t:'blk',id:b.id,act:x.dataset.a},'*')});
-  el.prepend(t);if(b.hidden)el.classList.add('is-hidden');
+  el.prepend(t);if(b.hidden)el.classList.add('is-hidden');if(window.__place)window.__place(el);
 }
 function inserts(){document.querySelectorAll('.ad-insert').forEach(function(x){x.remove()});
   var bl=[].slice.call(document.querySelectorAll('.blk'));
@@ -2486,19 +2493,27 @@ function inserts(){document.querySelectorAll('.ad-insert').forEach(function(x){x
   if(!bl.length){var m=document.querySelector('main');m&&m.appendChild(mk(0,true));return}
   bl.forEach(function(el,i){el.after(mk(i+1,i===bl.length-1))});
 }
-editable(document);document.querySelectorAll('.blk').forEach(tools);inserts();
+function hdBottom(){var h=document.querySelector('.hd');if(!h)return 0;var p=getComputedStyle(h).position;if(p!=='fixed'&&p!=='sticky')return 0;var r=h.getBoundingClientRect();return r.bottom>0?r.bottom:0}
+window.__place=place;function place(el){var t=el.querySelector(':scope>.ad-tools');if(!t)return;var r=el.getBoundingClientRect();var top=Math.max(12,hdBottom()-r.top+12);top=Math.min(top,Math.max(12,r.height-56));t.style.top=top+'px';var q=document.querySelector('.qbar');var qw=(q&&getComputedStyle(q).display!=='none'&&getComputedStyle(q).position==='fixed')?q.getBoundingClientRect().width:0;t.style.right=(qw?qw+12:12)+'px'}
+document.addEventListener('mouseover',function(e){var b=e.target.closest&&e.target.closest('.blk');if(b)place(b)});
+window.addEventListener('scroll',function(){document.querySelectorAll('.blk:hover,.blk.ad-editing').forEach(place)},{passive:true});document.addEventListener('mousemove',function(e){var b=e.target.closest&&e.target.closest('.blk');if(b)place(b)},{passive:true});
+editable(document);document.querySelectorAll('.blk').forEach(tools);document.querySelectorAll('.blk').forEach(place);inserts();
 (function(){var nav=document.querySelector('.hd nav');var hd=document.querySelector('.hd');if(!nav||!hd)return;
   var s2=document.createElement('style');s2.textContent='.hd nav{outline:2px dashed transparent;outline-offset:6px;border-radius:6px;transition:outline-color .15s}.hd:hover nav,.hd.ad-menu-on nav{outline-color:'+A+'}'+
-  '.ad-mtools{position:absolute;z-index:9999;top:100%;right:16px;display:flex;align-items:center;gap:4px;padding:6px;background:rgba(255,255,255,.98);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.2);font:500 13px/1 Pretendard,sans-serif;opacity:0;pointer-events:none;transition:opacity .15s;white-space:nowrap}'+
-  '.hd:hover .ad-mtools{opacity:1;pointer-events:auto}@media(hover:none){.ad-mtools{opacity:1;pointer-events:auto}}';
+  '.hd .logo{outline:2px dashed transparent;outline-offset:6px;border-radius:6px;cursor:pointer}.hd:hover .logo{outline-color:rgba(255,120,40,.6)}'+
+  '.ad-mtools{position:absolute;z-index:10000;top:100%;left:16px;padding-top:8px;opacity:0;pointer-events:none;transition:opacity .15s}'+
+  '.ad-mtools .in{display:flex;align-items:center;gap:4px;padding:6px;background:#fff;border:2px solid '+A+';border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);font:500 13px/1 Pretendard,sans-serif;white-space:nowrap}'+
+  '.hd:hover .ad-mtools,.ad-mtools:hover,.hd.ad-show .ad-mtools{opacity:1;pointer-events:auto}.hd.ad-show nav{outline-color:'+A+'}@media(hover:none){.ad-mtools{opacity:1;pointer-events:auto}}';
   document.head.appendChild(s2);
   var t=document.createElement('div');t.className='ad-mtools';t.contentEditable='false';
-  t.innerHTML='<span class="ad-tag">상단 메뉴</span><button type="button" class="ad-tb strong" data-m="edit">메뉴 편집</button><button type="button" class="ad-tb" data-m="add">＋ 메뉴 추가</button>';
-  t.addEventListener('click',function(e){var x=e.target.closest('[data-m]');if(!x)return;e.preventDefault();e.stopPropagation();parent.postMessage({t:'menu',add:x.dataset.m==='add'},'*')});
+  t.innerHTML='<div class="in"><span class="ad-tag">상단 헤더</span><button type="button" class="ad-tb strong" data-m="site">로고 · 병원 정보</button><button type="button" class="ad-tb strong" data-m="edit">메뉴 편집</button><button type="button" class="ad-tb" data-m="add">＋ 메뉴 추가</button></div>';
+  t.addEventListener('click',function(e){var x=e.target.closest('[data-m]');if(!x)return;e.preventDefault();e.stopPropagation();parent.postMessage(x.dataset.m==='site'?{t:'site'}:{t:'menu',add:x.dataset.m==='add'},'*')});
+  var R=document.documentElement,tm=0;function on(){clearTimeout(tm);hd.classList.add('ad-show');R.classList.add('ad-hd-on')}function off(){clearTimeout(tm);tm=setTimeout(function(){hd.classList.remove('ad-show');R.classList.remove('ad-hd-on')},900)}hd.addEventListener('mouseenter',on);hd.addEventListener('mouseleave',off);t.addEventListener('mouseenter',on);
   if(getComputedStyle(hd).position==='static')hd.style.position='relative';hd.appendChild(t);
 })();
 document.addEventListener('click',function(e){
   if(e.target.closest('.ad-tools,.ad-insert,.ad-mtools'))return;
+  if(e.target.closest('.hd .logo')&&!e.target.closest('[data-k]')){e.preventDefault();parent.postMessage({t:'site'},'*');return}
   var a=e.target.closest('a');
   if(a){e.preventDefault();var h=a.getAttribute('href')||'';
     if(h.indexOf('#pg=')===0&&!e.target.closest('[data-k]')){var q=new URLSearchParams(h.slice(1));document.body.classList.remove('nav-open');parent.postMessage({t:'go',page:q.get('pg'),hash:q.get('h')||''},'*');return}
@@ -2522,6 +2537,7 @@ window.addEventListener('message',function(e){var d=e.data||{};
 window.addEventListener('message', e=>{
   const d = e.data||{}; if(!cur || e.source !== $('#pv').contentWindow) return;
   if (d.t==='text'){ setPath(cur.content, d.k, d.v); markDirty(); syncDrawerField(d.k, d.v); }
+  if (d.t==='site'){ if (!editOn) setEdit(true); openSiteEditor(); }
   if (d.t==='pick'){ pickImage(async url=>{ setPath(cur.content, d.k, url); markDirty(); post({t:'img',k:d.k,src:toSrc(url)}); syncDrawerField(d.k, url); }); }
   if (d.t==='blk') blockAction(d.id, d.act);
   if (d.t==='insert') openPicker(d.index);
@@ -2864,11 +2880,47 @@ function shrink(file, max, q){
 /* ---------- 저장 ① 포트폴리오에 저장 ---------- */
 function markDirty(){ dirty=true; updDirty(); }
 function updDirty(){ $('#dirty').hidden=!dirty; $('#barSave').classList.toggle('pulse', dirty); }
+/* 저장 전 로그인 상태 확인 + 임시 보관(저장 실패 시 수정 내용이 사라지지 않도록) */
+let ME = null;
+const DRAFT = id => 'hp_draft_' + id;
+function keepDraft(p){ try { localStorage.setItem(DRAFT(p.id), JSON.stringify({ at:now(), pf:p })); } catch(e){} }
+function dropDraft(id){ try { localStorage.removeItem(DRAFT(id)); } catch(e){} }
+async function checkLogin(){
+  let { data:{ session } } = await sb.auth.getSession();
+  if (!session || (ME && session.user.id !== ME.id)){ try { await sb.auth.refreshSession(); } catch(e){} ({ data:{ session } } = await sb.auth.getSession()); }
+  if (!session) return '로그인이 만료되었습니다.';
+  if (ME && session.user.id !== ME.id) return `이 브라우저의 로그인 계정이 바뀌었습니다 (현재: ${session.user.email || '다른 계정'}). 다른 탭에서 다른 계정으로 로그인하면 이 화면의 로그인도 함께 바뀝니다.`;
+  try { const r = await sb.rpc('hp_is_admin'); if (r.data === false) return '현재 로그인한 계정에 관리자 권한이 확인되지 않습니다.'; } catch(e){}
+  return '';
+}
+function loginLost(why){
+  dirty = false; updDirty();
+  if (confirm(`저장하지 못했습니다.\n\n${why}\n\n수정한 내용은 이 브라우저에 임시 보관했습니다. 관리자 계정(${ME && ME.email || ''})으로 다시 로그인한 뒤 스튜디오를 열면 그대로 복구할 수 있습니다.\n\n지금 로그인 화면으로 이동할까요?`)){ location.href = 'index.html'; }
+}
 async function savePF(quiet){
   cur.updated = now();
+  keepDraft(clone(cur));
+  const why = await checkLogin();
+  if (why){ loginLost(why); return false; }
   try { await DB.put(clone(cur)); }
-  catch(e){ toast('저장 실패: '+(e.message||e)); return false; }
+  catch(e){
+    const rls = /row-level security|permission denied|42501|JWT/i.test((e.message||'') + (e.code||''));
+    if (rls){ const w2 = await checkLogin(); loginLost(w2 || '로그인 권한이 확인되지 않아 저장이 거부되었습니다. 다시 로그인해 주세요.'); return false; }
+    toast('저장 실패: '+(e.message||e)+' (수정 내용은 임시 보관됨)'); return false;
+  }
+  dropDraft(cur.id);
   dirty=false; updDirty(); list = await DB.all(); if (!quiet) toast('포트폴리오에 저장했습니다 ✔'); return true;
+}
+async function restoreDrafts(all){
+  for (const p of all){
+    let d = null; try { d = JSON.parse(localStorage.getItem(DRAFT(p.id)) || 'null'); } catch(e){}
+    if (!d || !d.pf) continue;
+    if (new Date(d.at) <= new Date(p.updated)){ dropDraft(p.id); continue; }
+    if (confirm(`[${p.title}] 저장하지 못한 수정 내용이 있습니다 (${fdate(d.at)}).\n지금 복구해서 저장할까요?\n(취소하면 임시 보관본을 지웁니다)`)){
+      d.pf.updated = now();
+      try { await DB.put(d.pf); dropDraft(p.id); toast('수정 내용을 복구해 저장했습니다 ✔'); } catch(e){ toast('복구 저장 실패: '+(e.message||e)); }
+    } else dropDraft(p.id);
+  }
 }
 $('#barSave').onclick = () => savePF();
 
@@ -3021,7 +3073,8 @@ $('#q').addEventListener('input', drawList);
   if (!profile){ location.href='index.html'; return; }
   if (profile.role !== 'admin'){ alert('관리자 전용 화면입니다.'); location.href='index.html'; return; }
   if (!profile.is_active){ alert('관리자에 의해 계정 사용이 정지되었습니다.'); await sb.auth.signOut(); location.href='index.html'; return; }
-  $('#who').textContent = profile.email || '';
+  $('#who').textContent = profile.email || ''; ME = { id:profile.id, email:profile.email };
+  sb.auth.onAuthStateChange((ev, session) => { if (ME && session && session.user.id !== ME.id) toast('⚠ 다른 탭에서 다른 계정으로 로그인되었습니다. 저장하려면 관리자 계정으로 다시 로그인해야 합니다.'); if (ev === 'SIGNED_OUT') toast('⚠ 로그아웃되었습니다. 저장 전에 다시 로그인해 주세요.'); });
   let all;
   try { all = await DB.all(); }
   catch(e){
@@ -3039,7 +3092,7 @@ $('#q').addEventListener('input', drawList);
       try { localStorage.setItem(flag, '1'); } catch(e){}
     }
   }
-  await renderList(); show('list');
+  await restoreDrafts(all.filter(p => p.id)); await renderList(); show('list');
 })();
 </script>
 </body></html>
