@@ -1518,7 +1518,7 @@ const T_BALANCE = {
 .sec{padding:110px 0}.btit{text-align:center;margin-bottom:56px}.btit small{display:block;letter-spacing:.32em;font-size:13px;color:#666;margin-bottom:10px}.btit h2{font-size:clamp(28px,2.8vw,38px);font-weight:800;letter-spacing:-.03em}
 .bb .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.bb .it{text-align:center}
 .bb h3{color:var(--pc);font-size:20px;font-weight:800}.bb .sub2{color:#888;font-size:13px;margin:4px 0 14px;display:block}.bb .ba{aspect-ratio:4/3}
-.bd{background:linear-gradient(160deg,#f6f6f6,#e9e9e9);text-align:center}.bd .emb{color:var(--gold);width:64px;height:64px;margin:0 auto 14px;display:block}
+.bd{background:linear-gradient(160deg,#f6f6f6,#e9e9e9);text-align:center}.bd .emb{color:var(--gold);margin:0 auto 14px;display:block}.bd .emb .bmk,.bd svg.emb{width:64px;height:64px;display:block;margin:0 auto}.bd img.bmk-img{height:56px;width:auto;max-width:280px;object-fit:contain}.ft .fl img.bmk-img{height:40px;width:auto;max-width:160px;object-fit:contain;display:block;margin:0 auto 6px}.bmk-wrap{display:inline-block}
 .bd .en{display:block;letter-spacing:.42em;font-size:13px;color:var(--gold);margin-bottom:12px}.bd h2{font-size:clamp(24px,2.4vw,32px);font-weight:700;margin-bottom:54px}
 .bd .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,230px));gap:16px;justify-content:center}
 .bd .card img{width:100%;aspect-ratio:3/4;object-fit:cover;background:#fff}.bd .sp{display:block;font-size:12px;color:#888;margin-top:16px}
@@ -1554,6 +1554,12 @@ const T_BALANCE = {
 `
 };
 THEMES.balance = T_BALANCE;
+/* 밝은 배경용 로고: [기본 정보]의 '밝은 배경용 로고' → 없으면 헤더 로고(흰색 보정 아닌 경우) → 없으면 마크 */
+function balMark(S, cls){
+  if (S.v('logoLight')) return S.i('logoLight', 'bmk-img ' + (cls||''), S.v('name') || 'logo').replace(' loading="lazy"', '');
+  if (S.v('logo') && S.v('logoTone') !== 'white') return S.i('logo', 'bmk-img ' + (cls||''), S.v('name') || 'logo').replace(' loading="lazy"', '');
+  return `<span class="bmk-wrap ${cls||''}" data-img="s/logoLight" title="클릭해서 로고 이미지 넣기">${balLogo(S.v('bal_mark'))}</span>`;
+}
 DEFAULTS.balance = () => ({ ...baseContent(), color:'#4a3460', color2:'#b8975a', phone:'00-0000-0000', bal_phone2:'00-000-0000',
   hours:'월 / 화 / 목   AM 10:00 - PM 08:00\n수 / 금   AM 10:00 - PM 07:00\n토 · 일요일   AM 10:00 - PM 02:00\n점심시간(토/일 없음)   PM 01:30 - PM 02:30',
   metaTitle:'임플란트 · 턱관절 · 치아교정 · 충치치료', biz:'사업자등록번호 000-00-00000 · 대표자 000 · 디투치과병원 서울시 00구 0000로 0000 · TEL 00-0000-0000 · FAX 00-0000-0000',
@@ -1609,7 +1615,7 @@ BLOCKDEFS.balance = {
     doctors: { label:'의료진', desc:'회색 배경 엠블럼 + 의료진 사진 카드',
       fields:[F.text('en','영문 제목'), F.text('t','제목'), F.list('items','의료진','의료진',3,[F.img('img','사진'),F.text('sp','전문 분야'),F.text('n','이름'),F.text('pos','직함')],{max:12})],
       defaults: () => ({ en:'D2 DENTAL HOSPITAL', t:'분야별 전문의 협진 시스템', items:[['doc2','보철과전문의','홍길동','대표원장'],['doc1','교정과전문의','김철수','원장'],['doc3','보존과전문의','이영희','원장']].map(([a,sp,n,pos])=>({img:'asset:'+a,sp,n,pos})) }),
-      render:(R,d,S)=>`<section class="sec bd"><div class="wrap">${balLogo(S.v('bal_mark')).replace('class="bmk"','class="bmk emb"')}<span class="en">${R.t('en')}</span><h2 class="rv">${R.t('t')}</h2><div class="grid">${(d.items||[]).map((_,n)=>`<div class="card rv">${R.i(`items/${n}/img`)}<span class="sp">${R.t(`items/${n}/sp`)}</span><div class="nm">${R.t(`items/${n}/n`)}<small>${R.t(`items/${n}/pos`)}</small></div></div>`).join('')}</div></div></section>` },
+      render:(R,d,S)=>`<section class="sec bd"><div class="wrap">${balMark(S,'emb')}<span class="en">${R.t('en')}</span><h2 class="rv">${R.t('t')}</h2><div class="grid">${(d.items||[]).map((_,n)=>`<div class="card rv">${R.i(`items/${n}/img`)}<span class="sp">${R.t(`items/${n}/sp`)}</span><div class="nm">${R.t(`items/${n}/n`)}<small>${R.t(`items/${n}/pos`)}</small></div></div>`).join('')}</div></div></section>` },
     about: { label:'ABOUT 배너', desc:'와이드 사진 위 흰 박스 소개',
       fields:[F.text('en','작은 제목'), F.text('t1','제목 1줄'), F.text('t2','제목 2줄 (굵게)'), F.area('d','설명',{rows:3}), F.text('btn','버튼 글자'), F.link('href'), F.img('img','사진')],
       defaults: () => ({ en:'ABOUT D2', t1:'가장 아름다운 미소는', t2:'건강한 밸런스에서 시작됩니다', d:'치아 하나가 아닌 턱관절과 교합, 얼굴의 균형까지 함께 봅니다.\n분야별 전문의가 한 자리에서 함께 진단하고 치료합니다.', btn:'디투치과 소개', href:'p:pg-greeting', img:'asset:lounge' }),
@@ -1634,7 +1640,7 @@ BLOCKDEFS.balance = {
 <a class="q" href="${S.v('bal_blog')||'#'}"><span class="blog">blog</span>블로그</a><a class="q" href="${S.v('youtube')||'#'}">${ic('play')}유튜브</a>
 <a class="tel" href="tel:${S.v('phone')}"><small>문의전화</small><b>${S.t('phone')}</b></a><a class="tel" href="tel:${S.v('bal_phone2')}"><small>문의전화</small><b>${S.t('bal_phone2')}</b></a></aside>
 <main id="top">${body}</main>
-<footer class="ft"><div class="wrap"><div class="fl">${balLogo(S.v('bal_mark'))}<div>${S.t('name')}</div></div><div><p class="lk">이용약관 &nbsp;|&nbsp; <a href="#privacy" class="pv-open">개인정보처리방침</a></p><p>${S.t('biz')}</p><p style="margin-top:8px">COPYRIGHT © ${S.t('nameEn')}. ALL RIGHTS RESERVED.</p></div></div></footer>
+<footer class="ft"><div class="wrap"><div class="fl">${balMark(S,'')}<div>${S.t('name')}</div></div><div><p class="lk">이용약관 &nbsp;|&nbsp; <a href="#privacy" class="pv-open">개인정보처리방침</a></p><p>${S.t('biz')}</p><p style="margin-top:8px">COPYRIGHT © ${S.t('nameEn')}. ALL RIGHTS RESERVED.</p></div></div></footer>
 <div class="mbar2"><a href="tel:${S.v('phone')}">전화상담</a><a href="${ctx.go('sms')}">빠른상담</a><a href="${ctx.link('p:pg-location')}">오시는길</a></div>`
 };
 
@@ -1960,7 +1966,7 @@ const ES_MAP = [
 function estarContent(){
   const c = defaultContent('balance');
   Object.assign(c.site, { _seed:'estar', name:'신촌 e-스타치과', nameEn:'e-STAR DENTAL CLINIC', bal_mark:'e★', color:'#24408e', color2:'#b8975a',
-    _seedVer:3, logo:'asset:estar/logoW', logoH:'40', logoTone:'', phone:'02-333-2028', bal_phone2:'02-333-2028', hours:'평일   AM 09:00 - PM 06:30\n야간진료(목)   AM 09:30 - PM 08:30\n토요일   AM 09:30 - PM 03:00\n일요일 · 공휴일   휴진', address:'서울 서대문구 신촌로 79, 3층 (신촌역 현대백화점 옆)', traffic:'2호선 신촌역 1번 출구 도보 1분 · 현대백화점 옆 KFC 건물 3층',
+    _seedVer:3, logo:'asset:estar/logoW', logoLight:'asset:estar/logoC', logoH:'40', logoTone:'', phone:'02-333-2028', bal_phone2:'02-333-2028', hours:'평일   AM 09:00 - PM 06:30\n야간진료(목)   AM 09:30 - PM 08:30\n토요일   AM 09:30 - PM 03:00\n일요일 · 공휴일   휴진', address:'서울 서대문구 신촌로 79, 3층 (신촌역 현대백화점 옆)', traffic:'2호선 신촌역 1번 출구 도보 1분 · 현대백화점 옆 KFC 건물 3층',
     metaTitle:'신촌 치과 · 무삭제 라미네이트 · 치아미백 · 신경치료', metaDesc:'25년차 보존과 전공 여자 대표원장이 1인 책임진료하는 신촌 e-스타치과. 무삭제 라미네이트, 전문가 치아미백, 잇몸미백, 재신경치료.',
     biz:'신촌 e-스타치과의원 · 대표원장 김소연 · 서울 서대문구 신촌로 79, 3층 · TEL 02-333-2028', bal_blog:'https://blog.naver.com/estarclinic', bal_cta:'미백 상담', bal_cta2:'라미네이트 상담' });
   // 메뉴 · 하위 페이지
