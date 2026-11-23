@@ -2108,6 +2108,202 @@ const EXTRA_INFO = {
 SEED.push({ theme:'balance', title:'06 분과협진 종합형 (밸런스 스타일)', once:'balance' });
 
 /* =====================================================================
+   8. LUXE — 프리미엄 심미형 (구성 참고: 판교밸런스치과 / 디자인: 아이보리 · 미드나잇 네이비 · 샴페인 골드)
+   아치형 사진 프레임 · 세리프 타이포 · 오른쪽 플로팅 퀵바 · PC 하단 빠른상담 바 · 모바일 하단 4버튼
+===================================================================== */
+const LX_FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+KR:wght@300;400;600&display=swap" rel="stylesheet">`;
+const LX_KAKAO = `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" stroke="none" d="M12 3.5c-5 0-9 3.1-9 7 0 2.5 1.7 4.7 4.2 6l-.9 3.4c-.1.3.3.6.6.4l4-2.7c.4 0 .7.1 1.1.1 5 0 9-3.1 9-7s-4-7.2-9-7.2z"/></svg>`;
+const LX_NAVER = `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4" fill="currentColor" stroke="none"/><path d="M8.5 7.5v9h2.6v-4.6l3 4.6h2.4v-9h-2.6v4.6l-3-4.6z" fill="#1c2b55" stroke="none"/></svg>`;
+const T_LUXE = {
+  label:'프리미엄 심미형', ref:'판교밸런스치과 구성 · 고급 심미 디자인', ogKey:'img_hero', fonts: LX_FONTS,
+  css:`
+:root{--ink:#1d2233;--bg:#faf7f2;--line:#e7e0d4;--field:#fff;--r:14px;--gold:#b89565;--gold2:#d8c19a;--navy:#141f40;--ivory:#faf7f2;--muted:#6f6a62}
+.t-luxe{background:var(--ivory)}.t-luxe .wrap{width:min(1240px,100% - 220px)}@media(max-width:1400px){.t-luxe .wrap{width:min(1240px,100% - 48px)}}
+.sf{font-family:'Noto Serif KR',serif}.en{font-family:'Cormorant Garamond',serif}
+/* header */
+.hd{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(18,27,56,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:#f3efe8;border-bottom:1px solid rgba(216,193,154,.25)}
+.hd .wrap{display:flex;align-items:center;justify-content:space-between;height:84px;width:min(1440px,100% - 48px)}
+.logo{display:flex;align-items:center;gap:10px;color:var(--gold2)}.logo b{font-family:'Noto Serif KR',serif;font-weight:600;font-size:20px;color:#fff}.logo small{display:block;font-family:'Cormorant Garamond',serif;letter-spacing:.24em;font-size:11px;color:var(--gold2)}
+.hd nav{display:flex;align-items:stretch;height:84px}
+.hd nav>a,.hd nav .mi-a{position:relative;display:flex;align-items:center;height:84px;padding:0 22px;font-size:15px;font-weight:500;color:#efe9df;letter-spacing:-.01em}
+.hd nav>a:after,.hd nav .mi>.mi-a:before{content:'';position:absolute;left:22px;right:22px;bottom:24px;height:1px;background:var(--gold2);transform:scaleX(0);transition:.3s}
+.hd nav>a:hover:after,.hd nav .mi:hover>.mi-a:before,.hd nav .mi.on>.mi-a:before{transform:scaleX(1)}.hd nav .mi.has-sub>.mi-a:after{display:none}
+.hd nav .sub{padding-top:0}.hd nav .sub-in{border-radius:0 0 14px 14px;border-top:2px solid var(--gold);background:#fffdf9}.hd nav .sub a:hover{color:var(--gold)!important}
+.hd .rt{display:flex;align-items:center;gap:18px}.hd .tl{font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:.04em;color:#fff}.hd .tl small{font-family:Pretendard,sans-serif;font-size:11px;color:var(--gold2);margin-right:8px;letter-spacing:.1em}
+.hd .bk{border:1px solid var(--gold2);color:var(--gold2);padding:9px 20px;border-radius:30px;font-size:13px;font-weight:600;transition:.3s}.hd .bk:hover{background:var(--gold2);color:var(--navy)}
+/* floating quick bar (PC) */
+.qbar{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:45;width:78px;padding:14px 0 10px;border-radius:40px;background:rgba(18,27,56,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 18px 40px rgba(20,31,64,.28);text-align:center;color:#efe9df}
+.qbar .qh{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:var(--gold2);margin-bottom:4px}
+.qbar a.q{position:relative;display:grid;justify-items:center;gap:4px;padding:11px 4px;font-size:11px;line-height:1.25;color:#efe9df;transition:.25s}
+.qbar a.q .ic{width:22px;height:22px;color:var(--gold2)}.qbar a.q.kk .ic{color:#fee500}.qbar a.q.nv .ic{color:#03c75a}
+.qbar a.q:hover{background:rgba(216,193,154,.14)}.qbar a.q+a.q{border-top:1px solid rgba(255,255,255,.07)}
+.qbar a.q[data-tip]:hover:after{content:attr(data-tip);position:absolute;right:88px;top:50%;transform:translateY(-50%);white-space:nowrap;background:#fff;color:var(--navy);font-weight:700;font-size:14px;padding:9px 14px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15)}
+.qbar .top{display:grid;place-items:center;width:44px;height:44px;margin:8px auto 0;border-radius:50%;background:var(--gold);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em}
+/* hero */
+.lh{position:relative;height:100vh;min-height:760px;max-height:1080px;background:radial-gradient(circle at 78% 40%,#f1e9dc 0,transparent 55%),linear-gradient(180deg,#fbf8f3,#f4eee5);overflow:hidden}
+.lh .slide{display:flex;align-items:center}.lh .slide .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:60px;align-items:center;padding-top:84px}
+.lh .tag{display:inline-flex;align-items:center;gap:12px;font-size:13px;font-weight:600;letter-spacing:.14em;color:var(--gold)}.lh .tag:before{content:'';width:36px;height:1px;background:var(--gold)}
+.lh .l1{font-family:'Noto Serif KR',serif;font-weight:300;font-size:clamp(26px,2.7vw,40px);line-height:1.4;color:#3d3a36;margin-top:26px;letter-spacing:-.02em}
+.lh .l2{font-family:'Noto Serif KR',serif;font-weight:600;font-size:clamp(32px,3.6vw,56px);line-height:1.3;color:var(--navy);letter-spacing:-.03em;margin-top:6px}
+.lh .s{margin-top:26px;color:var(--muted);font-size:16px;max-width:520px}
+.lh .acts{display:flex;gap:12px;margin-top:42px}.lh .acts a{padding:15px 30px;border-radius:40px;font-size:14px;font-weight:600}.lh .acts .p{background:var(--navy);color:#fff}.lh .acts .g{border:1px solid var(--navy);color:var(--navy)}
+.lh .fr{position:relative;justify-self:end;width:min(500px,36vw);aspect-ratio:5/6.2}
+.lh .fr:before{content:'';position:absolute;inset:-22px 22px 22px -22px;border:1px solid var(--gold);border-radius:999px 999px 26px 26px;opacity:.7}
+.lh .fr .ph{position:absolute;inset:0;border-radius:999px 999px 26px 26px;overflow:hidden;background:#ece5da;box-shadow:0 40px 80px rgba(20,31,64,.18)}.lh .fr .ph img{width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:transform 6s ease}.lh .slide.on .fr .ph img{transform:scale(1)}
+.lh .fr .badge{position:absolute;left:-46px;bottom:56px;background:#fff;border-radius:16px;padding:16px 20px;box-shadow:0 20px 40px rgba(20,31,64,.14);font-size:13px;color:var(--muted);max-width:230px}.lh .fr .badge b{display:block;font-family:'Noto Serif KR',serif;font-size:17px;color:var(--navy);margin-bottom:2px}
+.lh .vt{position:absolute;right:120px;top:50%;writing-mode:vertical-rl;font-family:'Cormorant Garamond',serif;letter-spacing:.4em;font-size:12px;color:var(--gold);transform:translateY(-50%);z-index:2}
+.lh .ctl{position:absolute;z-index:3;left:max(110px,calc((100% - 1240px)/2));bottom:56px;display:flex;align-items:center;gap:16px;color:var(--navy)}
+.lh .prev,.lh .next{width:46px;height:46px;border-radius:50%;border:1px solid rgba(20,31,64,.25);background:transparent;font-size:18px;color:var(--navy);cursor:pointer}.lh .prev:hover,.lh .next:hover{background:var(--navy);color:#fff}
+.lh .dots button{background:var(--navy)}
+/* manifesto */
+.lm{padding:150px 0 130px;text-align:center}.lm .en{display:block;font-style:italic;font-size:22px;color:var(--gold);margin-bottom:22px}
+.lm h2{font-family:'Noto Serif KR',serif;font-weight:300;font-size:clamp(26px,2.6vw,40px);line-height:1.55;letter-spacing:-.02em;color:var(--navy)}.lm h2 b{font-weight:600}
+.lm p{max-width:640px;margin:26px auto 0;color:var(--muted);font-size:16px;line-height:1.9}
+.lm .st{display:grid;grid-template-columns:repeat(3,1fr);max-width:900px;margin:70px auto 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.lm .st>div{padding:34px 10px}.lm .st>div+div{border-left:1px solid var(--line)}.lm .st b{display:block;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:56px;line-height:1;color:var(--gold)}.lm .st b small{font-family:'Noto Serif KR',serif;font-size:18px;margin-left:4px}.lm .st span{display:block;margin-top:12px;font-size:14px;color:var(--ink)}
+/* signature */
+.lsg{background:var(--navy);color:#efe9df;padding:130px 0;position:relative;overflow:hidden}.lsg:before{content:'';position:absolute;width:900px;height:900px;border-radius:50%;border:1px solid rgba(216,193,154,.12);right:-300px;top:-380px}
+.ltit{margin-bottom:64px}.ltit .en{display:block;font-style:italic;font-size:20px;color:var(--gold)}.ltit h2{font-family:'Noto Serif KR',serif;font-weight:400;font-size:clamp(28px,2.6vw,42px);letter-spacing:-.02em;margin-top:8px;line-height:1.4}.ltit p{margin-top:14px;opacity:.7}
+.ltit.c{text-align:center}
+.lsg .grid{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.lsg .card{background:rgba(255,255,255,.04);border:1px solid rgba(216,193,154,.22);border-radius:26px;padding:22px 22px 34px;transition:.4s}.lsg .card:hover{border-color:var(--gold2);transform:translateY(-6px)}
+.lsg .ba{border-radius:18px;aspect-ratio:3/2}.lsg .no{display:flex;justify-content:space-between;align-items:center;margin:30px 12px 0}.lsg .no .en{font-size:15px;letter-spacing:.3em;color:var(--gold2)}
+.lsg h3{font-family:'Noto Serif KR',serif;font-weight:400;font-size:30px;margin:10px 12px 0;color:#fff}.lsg p{margin:14px 12px 0;font-size:15px;line-height:1.85;opacity:.75}
+.lsg .lk{display:inline-flex;gap:10px;align-items:center;margin:26px 12px 0;color:var(--gold2);font-size:14px;font-weight:600;border-bottom:1px solid currentColor;padding-bottom:4px}
+/* before & after (reuse .bb) */
+.t-luxe .bb{background:#fff}.t-luxe .bb .btit small{font-family:'Cormorant Garamond',serif;font-style:italic;letter-spacing:.05em;font-size:20px;color:var(--gold)}.t-luxe .btit h2{font-family:'Noto Serif KR',serif;font-weight:400;color:var(--navy)}
+.t-luxe .bb .grid{gap:26px}.t-luxe .bb h3{font-family:'Noto Serif KR',serif;font-weight:600;color:var(--navy);font-size:19px}.t-luxe .bb .ba{border-radius:16px}
+/* treatment cards (reuse .bt) */
+.t-luxe .bt{padding:130px 0;background:var(--ivory)}.t-luxe .bt .grid{width:min(1240px,100% - 220px);margin:0 auto;gap:30px}.t-luxe .bt .ltit{color:var(--navy)}
+@media(max-width:1400px){.t-luxe .bt .grid{width:min(1240px,100% - 48px)}}
+.t-luxe .bt .tile{display:block;height:auto;color:var(--ink);background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 1px 0 var(--line);transition:.4s}.t-luxe .bt .tile:hover{transform:translateY(-6px);box-shadow:0 26px 50px rgba(20,31,64,.12)}
+.t-luxe .bt .tile:after{display:none}.t-luxe .bt .tile>img{position:static;display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+.t-luxe .bt .tx{position:static;max-width:none;padding:28px 30px 32px}.t-luxe .bt .tx small{color:var(--gold);opacity:1;font-weight:600;letter-spacing:.02em}
+.t-luxe .bt .tx h3{font-family:'Noto Serif KR',serif;font-weight:400;font-size:24px;color:var(--navy)}.t-luxe .bt .tile .tx h3 .hl{color:var(--navy)!important;font-weight:600}
+.t-luxe .bt .tx p{color:var(--muted);opacity:1}.t-luxe .bt .tx em{border:0;padding:0;border-bottom:1px solid var(--gold);border-radius:0;color:var(--gold);font-weight:600}
+.t-luxe .bt .tile.box .tx{background:none;margin:0;padding:28px 30px 32px}
+/* doctor feature */
+.ld{padding:140px 0;background:linear-gradient(180deg,#f4eee5,#faf7f2)}.ld .wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:90px;align-items:center}
+.ld .pf{position:relative;aspect-ratio:4/5}.ld .pf .ph{position:absolute;inset:0;border-radius:999px 999px 30px 30px;overflow:hidden;background:#fff}.ld .pf .ph img{width:100%;height:100%;object-fit:cover;object-position:50% 12%}
+.ld .pf:after{content:'';position:absolute;inset:-24px -24px 24px 24px;border:1px solid var(--gold);border-radius:999px 999px 30px 30px;z-index:-1}
+.ld .chip{display:inline-block;background:var(--navy);color:var(--gold2);font-size:14px;font-weight:600;padding:7px 16px;border-radius:30px}
+.ld .nm{font-family:'Noto Serif KR',serif;font-size:46px;font-weight:600;color:var(--navy);margin-top:20px;letter-spacing:-.02em}.ld .nm small{font-weight:300;font-size:24px;margin-left:10px;color:var(--muted)}
+.ld .hl{margin-top:22px;padding-bottom:30px;border-bottom:1px solid var(--line);font-family:'Noto Serif KR',serif;font-size:20px;line-height:1.7;color:var(--gold)}
+.ld ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:10px 30px;margin-top:30px;font-size:15px;color:#4a4740}.ld li{padding-left:16px;position:relative}.ld li:before{content:'';position:absolute;left:0;top:11px;width:6px;height:1px;background:var(--gold)}
+.ld .sg{margin-top:36px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:var(--navy)}
+/* about (reuse .ba2) */
+.t-luxe .ba2{padding:0 0 130px!important}.t-luxe .ba2 .btit{display:none}.t-luxe .ba2 .box{border-radius:30px;overflow:hidden;min-height:560px}
+.t-luxe .ba2 .in{border-radius:22px;background:rgba(250,247,242,.94);backdrop-filter:blur(8px);padding:54px 50px;margin-left:56px;max-width:470px}.t-luxe .ba2 .in small{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;letter-spacing:.04em}
+.t-luxe .ba2 h3{font-family:'Noto Serif KR',serif;color:var(--navy)}.t-luxe .ba2 .btn{background:var(--navy);border-radius:30px;padding:13px 28px}
+/* info (reuse .bf) */
+.t-luxe .bf{background:#fff}.t-luxe .bf .grid{border:0;gap:24px}.t-luxe .bf .col{background:var(--ivory);border-radius:24px;padding:38px 34px}.t-luxe .bf .col+.col{border-left:0}
+.t-luxe .bf h3{font-family:'Noto Serif KR',serif;font-weight:600;color:var(--navy)}.t-luxe .bf li .st{background:var(--gold);border-radius:4px}.t-luxe .bf .nv,.t-luxe .bf .kk{border-radius:40px}.t-luxe .bf .mapbox{border-radius:16px;overflow:hidden}
+.t-luxe .bf .tel{font-family:'Cormorant Garamond',serif;font-size:34px;color:var(--navy)}
+/* sms (reuse .bs) */
+.t-luxe .bs{background:var(--navy);color:#efe9df;--field:rgba(255,255,255,.06);--line:rgba(216,193,154,.3)}.t-luxe .bs h3{font-family:'Noto Serif KR',serif;color:#fff}.t-luxe .bs h3 b{color:var(--gold2)}.t-luxe .bs>.ic{color:rgba(216,193,154,.08)}
+.t-luxe .bs .cform input,.t-luxe .bs .cform textarea{color:#fff;border-radius:10px}.t-luxe .bs .cform button{background:var(--gold);border-radius:10px;color:#fff}.t-luxe .bs .cform .agree{color:#d9d2c6}
+/* footer */
+.ft{background:#0f1730;color:#9ea3b4;padding:70px 0 120px;font-size:13px}.ft .wrap{display:grid;grid-template-columns:220px 1fr;gap:40px}.ft .fl img{height:42px;width:auto}.ft .fl b{display:block;color:#fff;font-family:'Noto Serif KR',serif;font-size:18px}
+.ft .lk{color:#e5dccd;margin-bottom:14px;font-weight:600}.ft b{color:#e5dccd}
+/* PC bottom quick consult bar */
+.lbar{position:fixed;left:0;right:0;bottom:0;z-index:44;background:rgba(15,23,48,.96);backdrop-filter:blur(10px);color:#efe9df;border-top:1px solid rgba(216,193,154,.3);transition:transform .4s}
+.lbar form{display:flex;align-items:center;gap:12px;height:72px;width:min(1240px,100% - 220px);margin:0 auto}
+.lbar .ttl{font-family:'Noto Serif KR',serif;font-size:18px;color:#fff;white-space:nowrap;margin-right:10px}.lbar .ttl small{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--gold2)}
+.lbar input:not([type=checkbox]),.lbar select{height:42px;padding:0 14px;border-radius:8px;border:1px solid rgba(216,193,154,.3);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-size:14px;min-width:0;flex:1}
+.lbar select option{color:#222}.lbar label{display:flex;align-items:center;gap:6px;font-size:12px;white-space:nowrap;color:#cfc8bb}.lbar label a{text-decoration:underline}
+.lbar button{height:42px;padding:0 26px;border:0;border-radius:8px;background:var(--gold);color:#fff;font-weight:700;white-space:nowrap}
+.lbar .x{position:absolute;right:20px;top:-34px;height:34px;padding:0 16px;border-radius:12px 12px 0 0;background:rgba(15,23,48,.96);color:var(--gold2);font-size:12px;border:1px solid rgba(216,193,154,.3);border-bottom:0}
+body.lbar-off .lbar{transform:translateY(72px)}body.lbar-off .lbar .x:after{content:' 열기'}body:not(.lbar-off) .lbar .x:after{content:' 접기'}
+/* mobile bottom 4 buttons */
+.mb4{display:none}
+/* sub pages */
+.t-luxe .cb-sub{background:var(--navy);min-height:460px}.t-luxe .cb-sub>img{left:45%;width:55%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 40%);mask-image:linear-gradient(90deg,transparent,#000 40%)}
+.t-luxe .cb-sub:after{background:linear-gradient(90deg,var(--navy) 40%,rgba(20,31,64,.25))}.t-luxe .cb-sub .wrap{padding-top:170px}.t-luxe .cb-sub small{color:var(--gold2);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;letter-spacing:.05em}
+.t-luxe .cb-sub h1{font-family:'Noto Serif KR',serif;font-weight:400}
+.t-luxe .cb-tit small{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;letter-spacing:.04em;color:var(--gold)}.t-luxe .cb-tit h2{font-family:'Noto Serif KR',serif;font-weight:400;color:var(--navy)}
+.t-luxe .cb-pts{background:var(--navy);color:#efe9df}.t-luxe .cb-pts .cb-tit h2{color:#fff}.t-luxe .cb-pts .it{border-color:rgba(216,193,154,.25);background:rgba(255,255,255,.04);border-radius:20px}.t-luxe .cb-pts .ic{background:var(--gold)}
+.t-luxe .cb-steps{background:#f4eee5}.t-luxe .cb-cta{background:#0f1730}.t-luxe .cb-cta a{background:var(--gold);color:#fff;border-radius:40px}.t-luxe .cb-ba .ba,.t-luxe .cb-gal img,.t-luxe .cb-treat img{border-radius:18px}
+.t-luxe .cb-treat h2,.t-luxe .cb-treat h3{font-family:'Noto Serif KR',serif;font-weight:400}
+@media(min-width:901px){body.t-luxe{padding-bottom:72px}}
+@media(max-width:1180px){.hd nav>a,.hd nav .mi-a{padding:0 13px;font-size:14px}.hd .tl{display:none}.lbar label{display:none}}
+@media(max-width:900px){
+ .hd .wrap{height:64px}.hd .rt{display:none}.qbar,.lbar{display:none}.t-luxe .wrap{width:calc(100% - 40px)}
+ .lh{height:860px;min-height:0;max-height:none}.lh .slide .wrap{grid-template-columns:1fr;gap:34px;padding-top:96px}
+ .lh .fr{justify-self:center;width:72vw;max-width:340px;order:-1}.lh .fr .badge{left:-14px;bottom:22px;padding:12px 14px}.lh .vt{display:none}.lh .ctl{left:20px;bottom:22px}.lh .acts{margin-top:26px}.lh .acts a{padding:13px 22px}
+ .lm{padding:90px 0}.lm .st b{font-size:40px}.lsg{padding:90px 0}.lsg .grid,.ld .wrap{grid-template-columns:1fr}.ld{padding:90px 0}.ld .wrap{gap:50px}.ld .pf{max-width:360px;margin:0 auto;width:85%}.ld ul{grid-template-columns:1fr}.ld .nm{font-size:36px}
+ .t-luxe .bt{padding:90px 0}.t-luxe .bt .grid{width:calc(100% - 40px);grid-template-columns:1fr 1fr;gap:14px}.t-luxe .bt .tx{padding:18px}.t-luxe .bt .tx h3{font-size:18px}.t-luxe .bt .tx p{display:none}
+ .t-luxe .bf .grid{grid-template-columns:1fr}.t-luxe .ba2 .in{margin:20px;padding:34px 26px}.ft .wrap{grid-template-columns:1fr}.ft{padding-bottom:110px}
+ .mb4{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:60;background:#0f1730;padding-bottom:env(safe-area-inset-bottom);border-top:1px solid rgba(216,193,154,.3)}
+ .mb4 a{display:grid;justify-items:center;gap:4px;padding:11px 0 10px;font-size:12px;color:#efe9df}.mb4 a+a{border-left:1px solid rgba(255,255,255,.07)}.mb4 .ic{width:24px;height:24px;color:var(--gold2)}.mb4 .kk .ic{color:#fee500}.mb4 .nv .ic{color:#03c75a}
+ .t-luxe .cb-sub .wrap{padding-top:120px}
+}
+`
+};
+/* 밸런스형에서 가져온 블록(전후 사진 · 진료 타일 · 영상 · 3단 안내 · SMS)의 기본 레이아웃을 먼저 깔고, 위에서 정의한 고급 스타일로 덮어씀 */
+T_LUXE.css = '.t-luxe .bs{overflow:hidden}.t-luxe .bs .cform{display:grid;grid-template-columns:1fr 1fr;gap:12px}.t-luxe .bs .cform textarea,.t-luxe .bs .cform .agree,.t-luxe .bs .cform button{grid-column:1/-1}\n' + T_BALANCE.css.split('\n').filter(l => /^\.(bt|bv|bb|bf|bs|ba2|sec|btit) /.test(l) || /^\.sec\{/.test(l) || /^\.btit/.test(l)).join('\n')
+  + '\n@media(max-width:900px){.bt .grid,.bv .grid,.bf .grid{grid-template-columns:1fr}.bb .grid{grid-template-columns:1fr 1fr}.bf .col+.col{border-left:0;border-top:1px solid var(--line)}.bs .wrap{grid-template-columns:1fr}.bs .cform{grid-template-columns:1fr}.bs .cform .agree,.bs .cform button{grid-column:auto;grid-row:auto}.sec{padding:70px 0}}\n'
+  + T_LUXE.css;
+T_LUXE.css += '\n.t-luxe .bs>svg.ic{display:none}html:has(body.t-luxe),body.t-luxe{overflow-x:hidden}';
+THEMES.luxe = T_LUXE;
+DEFAULTS.luxe = () => ({ ...baseContent(), color:'#1c2b55', color2:'#b89565', phone:'00-0000-0000', bal_phone2:'00-0000-0000',
+  hours:'평일   AM 09:30 - PM 06:30\n토요일   AM 09:30 - PM 02:00\n일요일 · 공휴일   휴진', bal_blog:'', bal_book:'', bal_cta:'상담 예약', bal_cta2:'' });
+
+const LX_SLIDES = [
+  ['doc1','PREMIUM AESTHETIC','자연스러운 아름다움을','디자인하는 치과','심미치료 전문 의료진이 처음부터 끝까지 함께합니다','심미치료 상담','pg-laminate','1:1 맞춤 스마일 디자인','상담부터 완성까지 한 분의 의료진이'],
+  ['prosth','LAMINATE','깎지 않고, 얇게','빛나는 미소로','0.3mm 세라믹으로 완성하는 자연스러운 라미네이트','라미네이트 보기','pg-laminate','최소 삭제 원칙','자연치아를 지키는 심미치료'],
+  ['lounge','WHITENING','한 톤 밝아진','첫인상','치아 손상 없이 본래의 밝기를 되찾는 전문가 미백','치아미백 보기','pg-whitening','전문가 미백','착색 원인에 맞춘 맞춤 상담']
+];
+BLOCKDEFS.luxe = {
+  siteFields: BLOCKDEFS.balance.siteFields,
+  layout: ['lhero','manifesto','sig','ba','tiles','dfeat','about','info','sms'],
+  blocks: Object.assign({}, BLOCKDEFS.balance.blocks, {
+    tiles: Object.assign({}, BLOCKDEFS.balance.blocks.tiles, { label:'진료 안내 카드', desc:'사진 카드형 진료 바로가기',
+      fields:[F.text('en','영문 소제목'), F.text('t','제목')].concat(BLOCKDEFS.balance.blocks.tiles.fields),
+      defaults: () => Object.assign({ en:'Treatment', t:'진료 안내' }, BLOCKDEFS.balance.blocks.tiles.defaults()),
+      render:(R,d,S,ctx)=>BLOCKDEFS.balance.blocks.tiles.render(R,d,S,ctx).replace('<section class="bt">',`<section class="bt"><div class="ltit c rv"><span class="en">${R.t('en')}</span><h2>${R.t('t')}</h2></div>`) }),
+    lhero: { label:'메인 배너 (아치형 사진)', desc:'왼쪽 세리프 문구 + 오른쪽 아치형 사진 슬라이드',
+      fields:[F.list('slides','슬라이드','슬라이드',3,[F.img('img','사진 (세로형 권장)'),F.text('tag','영문 라벨'),F.text('l1','얇은 문구'),F.text('l2','굵은 문구'),F.text('s','설명'),F.text('btn','버튼 글자'),F.link('href'),F.text('bt','사진 위 카드 제목'),F.text('bd','사진 위 카드 설명')],{max:8})],
+      defaults: () => ({ slides: LX_SLIDES.map(([a,tag,l1,l2,s,btn,p,bt,bd])=>({img:'asset:'+a,tag,l1,l2,s,btn,href:'p:'+p,bt,bd})) }),
+      render:(R,d,S,ctx)=>`<section class="lh slides" data-slides="6500">${(d.slides||[]).map((it,n)=>`<div class="slide"><div class="wrap"><div class="tx"><span class="tag">${R.t(`slides/${n}/tag`)}</span><div class="l1">${R.t(`slides/${n}/l1`)}</div>${n===0?'<h1 class="l2">':'<div class="l2">'}${R.t(`slides/${n}/l2`)}${n===0?'</h1>':'</div>'}<p class="s">${R.t(`slides/${n}/s`)}</p><div class="acts"><a class="p" href="${ctx.link(it.href)}">${R.t(`slides/${n}/btn`)}</a><a class="g" href="tel:${S.v('phone')}">전화 상담</a></div></div>
+<div class="fr"><div class="ph">${R.i(`slides/${n}/img`)}</div>${it.bt?`<div class="badge"><b>${R.t(`slides/${n}/bt`)}</b>${R.t(`slides/${n}/bd`)}</div>`:''}</div></div></div>`).join('')}
+<span class="vt">${S.t('nameEn')}</span><div class="ctl"><button class="prev" type="button" aria-label="이전">←</button><div class="dots"></div><button class="next" type="button" aria-label="다음">→</button></div></section>` },
+    manifesto: { label:'철학 · 핵심 숫자', desc:'가운데 정렬 문구와 숫자 3개',
+      fields:[F.text('en','영문 소제목'), F.text('t1','제목 1줄'), F.text('t2','제목 2줄 (굵게)'), F.area('d','설명',{rows:3}), F.list('st','숫자','숫자',3,[F.text('n','숫자'),F.text('u','단위'),F.text('l','설명')],{max:4})],
+      defaults: () => ({ en:'Our Philosophy', t1:'가장 아름다운 미소는', t2:'가장 건강한 치아에서 시작됩니다', d:'보이는 아름다움만이 아니라 오래 지켜갈 수 있는 건강까지 함께 설계합니다.', st:[['20','년+','임상 경력'],['1',':1','전담 진료'],['100','%','정품 재료 사용']].map(([n,u,l])=>({n,u,l})) }),
+      render:(R,d)=>`<section class="lm"><div class="wrap rv"><span class="en">${R.t('en')}</span><h2>${R.t('t1')}<br><b>${R.t('t2')}</b></h2><p>${R.t('d')}</p><div class="st">${(d.st||[]).map((_,n)=>`<div><b>${R.t(`st/${n}/n`)}<small>${R.t(`st/${n}/u`)}</small></b><span>${R.t(`st/${n}/l`)}</span></div>`).join('')}</div></div></section>` },
+    sig: { label:'시그니처 심미 진료 (전후 비교)', desc:'남색 배경 위 대표 진료 2개 + 전후 비교 슬라이더',
+      fields:[F.text('en','영문 소제목'), F.text('t','제목'), F.text('s','설명'), F.list('items','대표 진료','진료',2,[F.text('no','번호/영문'),F.text('t','진료명'),F.area('d','설명',{rows:3}),F.img('b','치료 전'),F.img('a','치료 후'),F.text('btn','링크 글자'),F.link('href')],{max:4})],
+      defaults: () => ({ en:'Signature Care', t:'심미치료의 기준을 새롭게', s:'좌우로 밀어서 치료 전후를 비교해 보세요', items:[['01  LAMINATE','라미네이트','치아를 최소한으로 다듬고 얇은 세라믹을 붙여 색과 모양, 배열을 함께 개선합니다.','라미네이트 자세히','pg-laminate'],['02  WHITENING','전문가 치아미백','치아 표면을 깎지 않고 착색된 색소만 분해해 본래의 밝기를 되찾습니다.','치아미백 자세히','pg-whitening']].map(([no,t,d,btn,p])=>({no,t,d,btn,href:'p:'+p,b:'asset:baBefore',a:'asset:baAfter'})) }),
+      render:(R,d,S,ctx)=>`<section class="lsg"><div class="wrap"><div class="ltit rv"><span class="en">${R.t('en')}</span><h2>${R.t('t')}</h2><p>${R.t('s')}</p></div><div class="grid">${(d.items||[]).map((it,n)=>`<div class="card rv">${baBlock(R,`items/${n}/b`,`items/${n}/a`)}<div class="no"><span class="en">${R.t(`items/${n}/no`)}</span></div><h3>${R.t(`items/${n}/t`)}</h3><p>${R.t(`items/${n}/d`)}</p><a class="lk" href="${ctx.link(it.href)}">${R.t(`items/${n}/btn`)} →</a></div>`).join('')}</div></div></section>` },
+    dfeat: { label:'대표원장 소개 (크게)', desc:'아치형 프로필 사진 + 전문의 배지 · 약력',
+      fields:[F.img('img','프로필 사진'), F.text('chip','배지 (예: 치과보존과 인정의)'), F.text('n','이름'), F.text('pos','직함'), F.area('hl','강조 약력 (줄바꿈)',{rows:2}), F.area('cr','약력 목록 (줄바꿈)',{rows:6}), F.text('sg','서명 문구')],
+      defaults: () => ({ img:'asset:doc1', chip:'보철과 전문의', n:'홍길동', pos:'대표원장', hl:'00대학교 치의학대학원 박사\n대한심미치과학회 정회원', cr:'00대학교 치과대학 졸업\n00대학교 치과병원 수련\n대한치과보철학회 정회원\n대한심미치과학회 정회원', sg:'With sincere care' }),
+      render:(R,d)=>`<section class="ld"><div class="wrap"><div class="pf rv"><div class="ph">${R.i('img')}</div></div><div class="rv"><span class="chip">${R.t('chip')}</span><div class="nm">${R.t('n')}<small>${R.t('pos')}</small></div><div class="hl">${R.t('hl')}</div><ul>${String(d.cr||'').split('\n').filter(Boolean).map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="sg">${R.t('sg')}</p></div></div></section>` }
+  }),
+  chrome:(S,body,ctx)=>`
+<header class="hd"><div class="wrap"><a href="${ctx.home}" class="logo">${balLogo(S.v('bal_mark'))}<span><b>${S.t('name')}</b><small>${S.t('nameEn')}</small></span></a>
+<nav>${navHTML(ctx)}</nav>
+<div class="rt"><a class="tl" href="tel:${S.v('phone')}"><small>TEL</small>${S.t('phone')}</a><a class="bk" href="${S.v('bal_book')||ctx.go('sms')}">${S.t('bal_cta')}</a></div><button class="nav-tg" aria-label="메뉴">☰</button></div></header>
+<aside class="qbar"><span class="qh">Quick</span>
+<a class="q" href="tel:${S.v('phone')}" data-tip="${S.v('phone')}">${ic('phone')}전화상담</a>
+<a class="q kk" href="${S.v('kakao')||'#'}" target="_blank" rel="noopener">${LX_KAKAO}카카오톡</a>
+<a class="q nv" href="${S.v('bal_book')||'#'}" target="_blank" rel="noopener">${LX_NAVER}네이버<br>예약</a>
+<a class="q" href="${ctx.link('p:pg-location')}">${ic('pin')}오시는길</a>
+<a class="q" href="${S.v('bal_blog')||'#'}" target="_blank" rel="noopener">${ic('chat')}블로그</a>
+<a class="q" href="${ctx.go('sms')}">${ic('cal')}빠른상담</a>
+<a class="top" href="#top">TOP</a></aside>
+<main id="top">${body}</main>
+<footer class="ft"><div class="wrap"><div class="fl">${S.v('logo') ? S.i('logo','','logo') : balMark(S,'')}<b>${S.t('name')}</b></div><div><p class="lk">이용약관 &nbsp;·&nbsp; <a href="#privacy" class="pv-open">개인정보처리방침</a></p><p>${S.t('biz')}</p><p style="margin-top:10px">COPYRIGHT © ${S.t('nameEn')}. ALL RIGHTS RESERVED.</p></div></div></footer>
+<div class="lbar"><button type="button" class="x" onclick="document.body.classList.toggle('lbar-off')">빠른상담</button>
+<form class="cform" action="https://formsubmit.co/${esc(ctx.site.email)}" method="POST" data-mail="${esc(ctx.site.email)}"><input type="hidden" name="_subject" value="[${esc(ctx.site.name)}] 빠른 상담 신청"><input type="hidden" name="_captcha" value="false">
+<span class="ttl">빠른 상담 신청<small>Quick Consultation</small></span><input name="이름" placeholder="이름" required><input name="연락처" placeholder="연락처" required>
+<select name="상담분야"><option>상담 분야 선택</option><option>라미네이트</option><option>치아미백</option><option>잇몸 · 심미</option><option>신경치료 · 자연치아</option><option>턱관절 · 보톡스</option><option>기타</option></select>
+<label><input type="checkbox" required> 개인정보 수집 동의 <a href="#privacy" class="pv-open">보기</a></label><button type="submit">상담 신청</button></form></div>
+<nav class="mb4"><a href="tel:${S.v('phone')}">${ic('phone')}전화하기</a><a class="kk" href="${S.v('kakao')||'#'}">${LX_KAKAO}카카오톡 상담</a><a class="nv" href="${S.v('bal_book')||'#'}">${LX_NAVER}네이버 예약</a><a href="${ctx.link('p:pg-location')}">${ic('pin')}오시는 길</a></nav>`
+};
+Object.assign(BLOCKDEFS.luxe.blocks, COMMON_BLOCKS);
+
+/* =====================================================================
    7. 신촌 e-스타치과 — 밸런스형 디자인 + 심미(라미네이트·미백) 강조 샘플
    사진·글: e-스타치과 공식 블로그(blog.naver.com/estarclinic)에서 발췌·재구성
 ===================================================================== */
@@ -2350,7 +2546,87 @@ function estarContent(){
 }
 /* 가격 · 이벤트 문구 정리 (의료광고 기준) — 저장된 포트폴리오에도 같은 교체를 적용 */
 const ES_PRICE_FIX = [["경제적인 심미치료", "간편한 치료 과정"], ["크라운보다 비용과 시간 부담이 적습니다. 연말 이벤트 1치아 40만원(부가세 별도).", "크라운보다 치아 삭제가 적고 치료 기간이 짧습니다."], ["이벤트 가격은 어떻게 되나요?", "치료 기간은 얼마나 걸리나요?"], ["연말 이벤트로 1치아당 40만원(부가세 별도)에 진행하고 있습니다.", "상담과 스마일 디자인 후 보통 2~3회 내원으로 완성되며, 치아 상태에 따라 달라질 수 있습니다."], ["수능 끝난 학생도 가능한가요?", "학생도 라미네이트를 할 수 있나요?"], ["연말 이벤트 1치아 40만원 (부가세 별도)\n자연치아 보존 우선 치료 계획", "자연치아 보존 우선 치료 계획"], ["연말 이벤트 1치아 40만원 (부가세 별도)", "충분한 상담 후 개인별 맞춤 디자인"], ["진료 예약과 비용 상담이 가능합니다", "진료 예약과 치료 상담이 가능합니다"], [" 연말 이벤트로 1치아당 40만원(부가세 별도)에 진행합니다.", ""], ["연말 이벤트 1치아 40만원", "개인별 맞춤 스마일 디자인"], ["무삭제 라미네이트 1치아 40만원 연말 이벤트 (부가세 별도)", "무삭제 라미네이트 상담 안내"], ["수능 끝! 수험생 치아미백 상담", "치아미백 상담 안내"], ["공지 · 이벤트", "공지사항"], ["1치아당 40만원 연말 이벤트", "0.3mm 초박형 세라믹 디자인"], ["무삭제 라미네이트 이벤트 문의", "무삭제 라미네이트 상담 문의"], ["수능 끝나고 치아미백 하고 싶어요", "치아미백 상담 받고 싶어요"], ["무삭제 라미네이트 1치아 40만원", "이를 깎지 않는 무삭제 라미네이트"], ["수능이 끝난 수험생과 연말을 준비하는 분들을 위한 특별 이벤트입니다.", "충분한 상담으로 내 치아에 맞는 방법부터 찾아드립니다."], ["이벤트가 1치아 40만원 (부가세 별도)\n", "0.3mm 초박형 세라믹 디자인\n"], ["가장 안전하고 경제적인 개수와 위치", "가장 안전하고 꼭 필요한 개수와 위치"], ["보험 재료는 비용 부담이 적고,", "보험 재료는 건강보험이 적용되고,"]];
-SEED.push({ theme:'balance', title:'07 신촌 e-스타치과 (심미 강조 · 밸런스형)', once:'estar', ver:3, note:'메인 1번 블로그 진료사진, 치아미백 사진 교체, 라미네이트 페이지에 디투덴탈 모델·전후 사진 반영, 진료시간 최신화', build: estarContent });
+/* ===== v4: 프리미엄 심미형(luxe) 디자인 + 구글드라이브 '이스타사진' 자료 ===== */
+Object.assign(ES_BA, {
+  L1:['라미네이트','앞니 형태와 색상 개선','estar/lxL1B','estar/lxL1A'],
+  L2:['라미네이트','깨진 앞니와 변색 개선','estar/lxL2B','estar/lxL2A'],
+  L3:['라미네이트','크기와 색이 다른 앞니 정리','estar/lxL3B','estar/lxL3A'],
+  L4:['앞니 심미치료','벌어진 틈과 변색 개선','estar/lxL4B','estar/lxL4A'],
+  L5:['무삭제 라미네이트','누런 앞니를 밝고 고르게','estar/lxL5B','estar/lxL5A'],
+  L6:['앞니 심미보철','배열과 색을 함께 개선','estar/lxL6B','estar/lxL6A'],
+  L7:['깨진 앞니 수복','작게 깨진 앞니 회복','estar/lxL7B','estar/lxL7A'],
+  W1:['전문가 치아미백','착색된 치아 밝기 개선','estar/lxW1B','estar/lxW1A'],
+  W2:['전문가 치아미백','누런 치아를 한 톤 밝게','estar/lxW2B','estar/lxW2A'],
+  W3:['전문가 치아미백','셰이드 가이드로 확인한 변화','estar/lxW3B','estar/lxW3A'],
+  R:['레진 수복','깨진 앞니 모서리 회복','estar/lxRB','estar/lxRA']
+});
+Object.assign(ES_TX.whitening, { img:'lxWhiteDoc', heroImg:'lxSmile', ba:['W3','W1','W2'] });
+Object.assign(ES_TX.cavity, { ba:['R','L7'] });
+Object.assign(ES_TX.retreatment, { img:'lxHands' });
+Object.assign(ES_TX['root-canal'], { img:'lxHands' });
+Object.assign(ES_TX, {
+  'tmj-phl': { title:'턱관절 물리치료', en:'JAW CARE · PHL', img:'lxPhl', heroImg:'lxTmj', desc:'레이저 물리치료 장비로 턱관절 통증 관리를 돕습니다',
+    lead:'턱이 아프고\n소리가 난다면', d:'입을 벌릴 때 나는 소리, 턱 주변 통증과 두통은 턱관절 질환의 신호일 수 있습니다. e-스타치과는 PHL(Perfect Healing Laser) 레이저 물리치료 장비를 갖추고, 정확한 진단을 바탕으로 물리치료와 생활습관 관리를 함께 안내합니다.',
+    pts:'PHL 레이저 물리치료 장비 보유\n통증 · 부종 관리에 도움\n교합 · 이갈이 습관 함께 점검\n편안히 앉아서 받는 비침습 치료',
+    points:[['shield','비침습 치료','편안히 앉아 받는 레이저 물리치료입니다.'],['tooth','원인 확인','교합과 습관까지 함께 살펴봅니다.'],['clock','짧은 치료 시간','바쁜 일정에도 부담 없이 받을 수 있습니다.']],
+    steps:[['상담 · 진단','증상과 턱 움직임을 확인합니다.'],['치료 계획','물리치료 횟수와 주기를 정합니다.'],['PHL 물리치료','레이저로 턱 주변을 관리합니다.'],['경과 관리','습관 개선과 정기 점검을 이어갑니다.']],
+    faq:[['물리치료는 아픈가요?','통증 없이 편안히 앉아서 받는 치료입니다.'],['몇 번 받아야 하나요?','증상에 따라 다르며 진단 후 안내해 드립니다.']] },
+  botox: { title:'이갈이 · 사각턱 보톡스', en:'DENTAL BOTOX', img:'lxBrux', heroImg:'lxTmj', desc:'치아와 턱관절을 보호하는 치과 보톡스',
+    lead:'이갈이 · 이 악물기,\n치아와 턱을 지켜주세요', d:'잠잘 때 이를 갈거나 낮에 이를 악무는 습관은 치아 마모와 파절, 턱관절 통증의 원인이 됩니다. 저작근에 보톡스를 시술해 근육의 과도한 힘을 줄여 치아와 턱관절을 보호합니다.',
+    pts:'이갈이 · 이 악물기 완화\n치아 마모 · 파절 예방\n턱관절 부담 감소\n발달한 저작근(사각턱) 개선',
+    points:[['tooth','치아 보호','과도한 힘으로 인한 마모와 파절을 줄입니다.'],['shield','턱관절 보호','턱 주변 근육의 긴장을 완화합니다.'],['clock','간단한 시술','짧은 시간에 끝나는 시술입니다.']],
+    steps:[['상담','이갈이 · 악물기 습관을 확인합니다.'],['근육 평가','저작근 상태를 살펴봅니다.'],['보톡스 시술','필요한 부위에 정확히 시술합니다.'],['경과 확인','효과와 재시술 시기를 안내합니다.']],
+    faq:[['효과는 얼마나 유지되나요?','개인차가 있지만 보통 수개월 유지되며, 경과를 보고 재시술 시기를 안내합니다.'],['스플린트와 함께 해도 되나요?','네, 증상에 따라 함께 진행하면 도움이 됩니다.']] }
+});
+if (!ES_MAP.some(g => g.label === '턱관절 · 보톡스')) ES_MAP.splice(3, 0, { label:'턱관절 · 보톡스', children:[['tmj-phl','턱관절 물리치료'],['botox','이갈이 · 사각턱 보톡스']] });
+
+function estarLuxe(){
+  const old = estarContent();
+  const c = defaultContent('luxe');
+  c.site = Object.assign({}, c.site, old.site, { color:'#1c2b55', color2:'#b89565', _seedVer:4, bal_cta:'상담 예약', bal_book:'' });
+  const home = c.pages[0], by = t => home.blocks.find(b => b.type === t);
+  by('lhero').data.slides = [
+    ['lxCare','HONEST CARE','과잉진료 없는','정직한 치과','원장이 직접 처음부터 끝까지 진료합니다','진료 철학 보기','pg-special','보존과 인정의 직접 진료','1인 책임진료'],
+    ['lamiModelSq','NO-PREP LAMINATE','깎지 않고, 얇게','자연스러운 미소 라인','치아 삭제를 최소화한 라미네이트로 색과 모양을 함께 디자인합니다','라미네이트 보기','pg-laminate','최소 삭제 원칙','자연치아를 지키는 심미치료'],
+    ['lxWhiteDoc','WHITENING','한 톤 밝아진','맑은 첫인상','치아 착색 원인과 구강 상태를 고려한 맞춤 미백 상담','치아미백 보기','pg-whitening','전문가 치아미백','18년간 이어온 미백 진료'],
+    ['lxDocArch','e-STAR AESTHETIC','18년째 같은 자리,','원장이 직접, 끝까지 책임집니다','치과보존과 인정의 · 대한심미치과학회 정회원 김소연 대표원장의 1인 책임진료','원장 소개','pg-greeting','치과보존과 인정의','대한심미치과학회 정회원'],
+    ['lxBuilding','LOCATION','신촌역 1번 출구 도보 1분','현대백화점 옆, 3층','2호선 신촌역 1번 출구 앞 KFC 건물 3층에 있습니다','오시는 길','pg-location','신촌역 1번 출구','도보 1분 거리']
+  ].map(([a,tag,l1,l2,s2,btn,p,bt,bd]) => ({ img:ES(a), tag, l1, l2, s:s2, btn, href:'p:'+p, bt, bd }));
+  Object.assign(by('manifesto').data, { en:'e-Star Philosophy', t1:'과잉진료 없이, 정직하게', t2:'오래 지켜갈 아름다움을 만듭니다',
+    d:'살릴 수 있는 치아는 먼저 살리고, 꼭 필요한 만큼만 치료합니다. 모든 진료실은 독립된 1인 전용 공간이라 편안하게 상담받으실 수 있습니다.',
+    st:[['25','년차','치과보존과 인정의 임상 경력'],['18','년','신촌 같은 자리에서 진료'],['1','인','전용 진료실']].map(([n,u,l])=>({n,u,l})) });
+  Object.assign(by('sig').data, { en:'Signature Care', t:'e-스타치과의 시그니처 심미치료', s:'실제 치료 사례입니다. 좌우로 밀어서 치료 전후를 비교해 보세요',
+    items:[['01  LAMINATE','무삭제 라미네이트','치아 삭제를 최소화하고 얇은 세라믹으로 색과 모양, 배열을 함께 개선합니다. 웃을 때 자연스럽게 보이는 것을 가장 먼저 생각합니다.','L5','라미네이트 자세히','pg-laminate'],
+           ['02  WHITENING','전문가 치아미백','치아를 깎거나 덮지 않고 착색된 색소만 분해해 본래의 밝기를 되찾습니다. 착색 원인과 구강 상태를 확인한 뒤 맞춤으로 진행합니다.','W3','치아미백 자세히','pg-whitening']]
+      .map(([no,t,d,k,btn,p])=>({ no, t, d, b:'asset:'+ES_BA[k][2], a:'asset:'+ES_BA[k][3], btn, href:'p:'+p })) });
+  Object.assign(by('ba').data, { en:'Before & After', t:'e-스타치과 치료 전후', items:['L1','L2','W1','L3'].map(k=>({ t:ES_BA[k][0], s:ES_BA[k][1], b:'asset:'+ES_BA[k][2], a:'asset:'+ES_BA[k][3] })) });
+  Object.assign(by('tiles').data, { en:'Treatment', t:'e-스타치과 진료 안내', items:[
+    ['lxL1A','깎지 않는 심미치료','무삭제 ','라미네이트','최소 삭제로 완성하는 자연스러운 앞니','laminate'],
+    ['lxSmile','착색 원인에 맞춘 맞춤 상담','전문가 ','치아미백','치아 손상 없이 한 톤 밝게','whitening'],
+    ['gumA','웃을 때 보이는 잇몸까지','잇몸 ','미백 · 성형','레이저로 정리하는 잇몸 라인','gum-whitening'],
+    ['lxL6A','금속 없이 자연치아처럼','올세라믹 ','심미보철','잇몸 변색 걱정 없는 보철','esthetic-crown'],
+    ['lxHands','보존과 인정의 원장의','자연치아 ','신경치료','빼기 전에 살릴 수 있는지 먼저','root-canal'],
+    ['lxPhl','PHL 레이저 장비 보유','턱관절 ','물리치료','턱 통증 · 소리가 난다면','tmj-phl'],
+    ['lxBrux','치아와 턱관절 보호','이갈이 ','보톡스','이 악물기 · 사각턱 관리','botox'],
+    ['lxL7A','과잉진료 없는 정직한 진단','충치 ','· 레진','꼭 필요한 치아만 치료합니다','cavity'],
+    ['wisdom','3D CT로 신경 위치 확인','','사랑니 발치','섬세하고 안전한 발치','wisdom']
+  ].map(([a,cap,t1,hl,d,p]) => ({ img:ES(a), tone:'', cap, t1, hl, d, href:'p:pg-'+p })) });
+  Object.assign(by('dfeat').data, { img:ES('lxDoc'), chip:'치과보존과 인정의', n:'김소연', pos:'대표원장',
+    hl:'부산대학교 치의학대학원 보존 · 보철학 석사\n대한심미치과학회 정회원',
+    cr:'부산대학교 치의학과 졸업\n부산대학교 치의학대학원 보존 · 보철학 석사\n치과보존과 인정의\n대한치과보존학회 정회원\n대한치과근관치료학회 정회원\n대한심미치과학회 정회원\nHanmi Dental Society Prosthodontic Study 수료\n하버드 · 오스템 임플란트 코스 수료', sg:'e-Star Dental Clinic · 신촌' });
+  const oh = old.pages[0], ob = t => oh.blocks.find(b => b.type === t);
+  Object.assign(by('about').data, ob('about').data, { en:'PRIVATE ROOM' });
+  Object.assign(by('info').data, ob('info').data);
+  const pages = old.pages.slice(1);
+  const lami = pages.find(p => p.id === 'pg-laminate'); const lb = lami && lami.blocks.find(b => b.type === 'c_ba');
+  if (lb) lb.data.items = esBaItems(['L5','L1','L2','L3','L6','L4']);
+  const cs = pages.find(p => p.id === 'pg-cases'); const cb = cs && cs.blocks.find(b => b.type === 'c_ba');
+  if (cb) cb.data.items = esBaItems(['L5','L1','L2','L3','L6','L4','L7','W3','W1','W2']);
+  const loc = pages.find(p => p.id === 'pg-location'); const lh = loc && loc.blocks.find(b => b.type === 'c_subhero'); if (lh) lh.data.img = ES('lxBuilding');
+  c.pages = [home, ...pages];
+  return JSON.parse(JSON.stringify(c).split('"asset:estar/doctor"').join('"asset:estar/lxDoc"'));
+}
+SEED.push({ theme:'luxe', title:'07 신촌 e-스타치과 (프리미엄 심미형)', once:'estar', ver:4, note:'프리미엄 심미형 새 디자인, 오른쪽 퀵바 · 하단 빠른상담 · 모바일 하단 4버튼, 구글드라이브 사진(원장 프로필 · 실제 라미네이트 · 미백 케이스 · 턱관절 장비) 반영', build: estarLuxe });
 </script>
 <script>/* ===== 홈페이지 템플릿 스튜디오 v2 — 블록 편집기 (디투덴탈 편집모드 방식) ===== */
 const $ = (s, el=document) => el.querySelector(s);
@@ -3146,7 +3422,7 @@ $('#q').addEventListener('input', drawList);
       try {
         const bak = clone(p); bak.id = uid(); bak.title = p.title + ' (이전 버전)'; bak.share_token = null; bak.share_on = false; bak.order = Math.max(...all.filter(x=>x.id).map(x=>x.order||0)) + 1; bak.created = bak.updated = now(); if (bak.content && bak.content.site) bak.content.site._seed = s.once + '-backup';
         await DB.put(bak);
-        const nw = clone(p); nw.content = s.build(); nw.updated = now(); await DB.put(nw);
+        const nw = clone(p); nw.content = s.build(); if (s.theme) nw.theme = s.theme; if (s.title && (p.title||'').slice(0,10) === s.title.slice(0,10)) nw.title = s.title; nw.updated = now(); await DB.put(nw);
         toast('새 버전을 적용했습니다 ✔ (이전 내용은 복사본으로 보관)');
       } catch(e){ toast('새 버전 적용 실패: '+(e.message||e)); }
     }
