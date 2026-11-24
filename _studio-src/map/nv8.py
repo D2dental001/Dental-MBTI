@@ -324,7 +324,7 @@ L.append('''<g transform="translate(34 822)" filter="url(#sh)"><rect width="540"
 <text x="28" y="50" font-size="26" font-weight="900" fill="#3b2a22">신촌역 1번 출구 → 현대백화점 앞 지나</text>
 <text x="28" y="90" font-size="23" font-weight="800" fill="#5a4436">연세로 건너 KFC 건물 <tspan fill="#a67c2e">3층</tspan></text>
 <text x="28" y="126" font-size="18" fill="#8a7a6e">서울 서대문구 신촌로 79, 3층</text></g>''')
-L.append('<g transform="translate(1548 60)"><circle r="30" fill="#fff" filter="url(#sh)"/><path d="M0-20l9 24H-9z" fill="#3b2a22"/><text y="20" text-anchor="middle" font-size="13" font-weight="800" fill="#555">N</text></g>')
+L.append('<g transform="translate(1548 168)"><circle r="30" fill="#fff" filter="url(#sh)"/><path d="M0-20l9 24H-9z" fill="#3b2a22"/><text y="20" text-anchor="middle" font-size="13" font-weight="800" fill="#555">N</text></g>')
 def soft(t):
     t=re.sub(r'stroke="#fff(?:fff)?" stroke-width="[0-9.]+"','stroke="rgba(90,60,40,.16)" stroke-width="1"',t)
     # 벽면마다 위는 밝고 아래는 어두운 빛 그라데이션
