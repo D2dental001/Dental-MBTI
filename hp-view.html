@@ -2647,6 +2647,8 @@ const ES_COPY4 = [["지르코니아 오버레이 제작 사례", "지르코니�
     if (document.readyState === 'loading') await new Promise(function(r){ document.addEventListener('DOMContentLoaded', r); });
     await new Promise(function(r){ setTimeout(r, 0); });
     document.open(); document.write(html); document.close();
+    try { history.scrollRestoration = 'manual'; } catch(e){}
+    if (!location.hash){ var top = function(){ try { window.scrollTo({top:0,left:0,behavior:'instant'}); } catch(e){ window.scrollTo(0,0); } }; top(); requestAnimationFrame(top); window.addEventListener('load', top); }
   } catch (e) { console.error(e); fail(); }
 })();
 </script>

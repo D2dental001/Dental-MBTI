@@ -3101,7 +3101,7 @@ function previewHTML(){
 function renderPreview(keepScroll, hash){
   const fr = $('#pv'); let y = 0;
   try { y = fr.contentWindow.scrollY; } catch(e){}
-  fr.onload = () => { try { if (hash){ const el = fr.contentDocument.getElementById(hash); if (el) el.scrollIntoView(); } else if (keepScroll) fr.contentWindow.scrollTo(0, y); } catch(e){} if (drawer && drawer.blockId) post({t:'editing', id:drawer.blockId}); };
+  fr.onload = () => { try { if (hash){ const el = fr.contentDocument.getElementById(hash); if (el) el.scrollIntoView(); } else if (keepScroll) fr.contentWindow.scrollTo(0, y); else fr.contentWindow.scrollTo({top:0,left:0,behavior:'instant'}); } catch(e){} if (drawer && drawer.blockId) post({t:'editing', id:drawer.blockId}); };
   fr.srcdoc = previewHTML();
 }
 const post = m => { try { $('#pv').contentWindow.postMessage(m, '*'); } catch(e){} };
@@ -3650,12 +3650,12 @@ $('#pvClose').onclick = closePreview;
 function pvShow(pid, hash){
   pvPage = pid; $('#pvPg').value = pid;
   const fr = $('#pvFrame');
-  fr.onload = () => { if (hash) try { const el = fr.contentDocument.getElementById(hash); el && el.scrollIntoView(); } catch(e){} };
+  fr.onload = () => { try { if (hash){ const el = fr.contentDocument.getElementById(hash); el && el.scrollIntoView(); } else fr.contentWindow.scrollTo({top:0,left:0,behavior:'instant'}); } catch(e){} };
   fr.srcdoc = previewSiteHTML(pvItem.content, pvItem.theme, pid);
 }
 $('#pvPg').onchange = () => pvShow($('#pvPg').value);
 const winHTML = (content, theme, pid) => renderSite(content, theme, 'edit', {}, { page:pid, head:`<base href="${location.href.replace(/[^/]*$/,'')}"><script>window.__EDIT=false<\/script>`, tail:`<script>${PREVIEW_RUNTIME}<\/script>` });
-window.__pvGo = (w, pid, hash) => { const it = w.__pvItem || pvItem; if (!it) return; w.document.open(); w.document.write(winHTML(it.content, it.theme, pid)); w.document.close(); w.__pvItem = it; if (hash) setTimeout(()=>{ const el = w.document.getElementById(hash); el && el.scrollIntoView(); }, 300); };
+window.__pvGo = (w, pid, hash) => { const it = w.__pvItem || pvItem; if (!it) return; w.document.open(); w.document.write(winHTML(it.content, it.theme, pid)); w.document.close(); w.__pvItem = it; try { w.history.scrollRestoration = 'manual'; } catch(e){} const top = () => { try{w.scrollTo({top:0,left:0,behavior:'instant'})}catch(e){} }; top(); w.requestAnimationFrame(top); setTimeout(()=>{ if (hash){ const el = w.document.getElementById(hash); el && el.scrollIntoView(); } else top(); }, 300); };
 $('#pvNew').onclick = ()=>{ if(!pvItem) return; const it = { content: clone(pvItem.content), theme: pvItem.theme };
   const w=window.open('','_blank'); if(!w) return toast('팝업이 차단되었습니다.'); w.__pvItem = it; window.__pvGo(w, pvPage); };
 $('#pvShare').onclick = ()=>{ if(pvItem) openShare(pvItem); };
