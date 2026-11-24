@@ -2631,7 +2631,7 @@ Object.assign(ES_TX, {
 });
 if (!ES_MAP.some(g => g.label === '턱관절 · 보톡스')) ES_MAP.splice(3, 0, { label:'턱관절 · 보톡스', children:[['tmj-phl','턱관절 물리치료'],['botox','이갈이 · 사각턱 보톡스']] });
 
-const ES_VIDEO = () => ({ video:'assets/hp-studio/estar/estar_hero2.mp4', poster:'asset:estar/heroPoster2', en:'The Art of a Natural Smile', t:'18년째 같은 자리에서, 원장이 직접 진료하는 신촌 e-스타치과', btn:'VIEW MORE', href:'p:pg-special' });
+const ES_VIDEO = () => ({ video:'assets/hp-studio/estar/estar_hero3.mp4', poster:'asset:estar/heroPoster2', en:'The Art of a Natural Smile', t:'18년째 같은 자리에서, 원장이 직접 진료하는 신촌 e-스타치과', btn:'VIEW MORE', href:'p:pg-special' });
 function estarLuxe(){
   const old = estarContent();
   const c = defaultContent('luxe');
@@ -3512,10 +3512,10 @@ $('#q').addEventListener('input', drawList);
       p.content.site._qs8 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){}
   }
   // e-스타 07: 메인 영상 1080p 와이드 버전으로 교체 (기본 영상을 쓰는 경우만)
-  for (const p of all.filter(p => p.id && p.content && p.content.pages && !(p.content.site||{})._v1080)){
+  for (const p of all.filter(p => p.id && p.content && p.content.pages && !(p.content.site||{})._v1080b)){
     try { let hit = false;
-      p.content.pages.forEach(pg => (pg.blocks||[]).forEach(b => { if (b.type === 'lvideo' && b.data && b.data.video === 'assets/hp-studio/estar/estar_hero.mp4'){ b.data.video = 'assets/hp-studio/estar/estar_hero2.mp4'; if (b.data.poster === 'asset:estar/heroPoster') b.data.poster = 'asset:estar/heroPoster2'; hit = true; } }));
-      if (hit){ p.content.site._v1080 = 1; p.updated = now(); await DB.put(clone(p)); } } catch(e){}
+      p.content.pages.forEach(pg => (pg.blocks||[]).forEach(b => { if (b.type === 'lvideo' && b.data && /estar\/estar_hero2?\.mp4$/.test(b.data.video||'')){ b.data.video = 'assets/hp-studio/estar/estar_hero3.mp4'; if (b.data.poster === 'asset:estar/heroPoster') b.data.poster = 'asset:estar/heroPoster2'; hit = true; } }));
+      if (hit){ p.content.site._v1080b = 1; p.updated = now(); await DB.put(clone(p)); } } catch(e){}
   }
   await restoreDrafts(all.filter(p => p.id)); await renderList(); show('list');
 })();
