@@ -58,7 +58,8 @@ Skilldb(find-skills), claude-code-setup, frontend-design, Superpowers, playwrigh
 
 ## 2026-11-24 오후 확인 (다음 대화 필독)
 - 플러그인 설치만으로는 Hyper **서버 도구(images_generate)가 연결되지 않음** — 스킬 문서만 있고 `hyperai` CLI도 없음. 커넥터 목록·레지스트리에도 Hyper 없음.
-- 사용자 결정: claude.ai 커넥터에 맞춤 커넥터 `https://app.hyperfx.ai/mcp` 추가·로그인 후 새 대화에서 진행.
+- 사용자 결정: claude.ai 커넥터에 맞춤 커넥터 `https://backend.hyperfx.ai/mcp/` 추가·로그인 후 새 대화에서 진행. (SkillDB도 같은 이유로 미연결 → 맞춤 커넥터 `https://skilldb.dev/api/mcp/catalog`)
+- 원인: 클라우드 대화에서는 플러그인의 스킬만 동기화되고, 플러그인에 선언된 원격(HTTP) MCP 서버(hyperfx, skilldb-catalog)는 로드되지 않음. 로컬 실행형(playwright)은 데스크톱 앱을 통해 정상 연결됨.
 - 새 대화 첫 단계: ToolSearch로 `images_generate` 확인 → 있으면 `hyper-marketing:image-generation` 스킬 읽고 생성. 없으면 사용자에게 연결 상태 재확인 요청(대안: Chrome의 ChatGPT로 생성).
 - 생성 프롬프트(위치 참고 `map/nvm.png` + 스타일 참고 `map/ref/gpt_style_reference.png`):
   > 첨부 1(위치 지도)의 도로·건물 배치를 그대로 유지하고, 첨부 2의 부드러운 아이소메트릭 일러스트 스타일(파스텔 건물, 둥근 나무, 따뜻한 햇살 톤)로 다시 그려줘.
