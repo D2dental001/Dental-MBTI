@@ -416,6 +416,12 @@ Object.values(BLOCKDEFS).forEach(T => { T.blocks.c_treat = COMMON_BLOCKS.c_treat
 const COMMON_JS2 = `
 (function(){var E=window.__EDIT;
 function init(root){
+ /* 전후사진이 원본보다 너무 크게 늘어나 깨지지 않도록: 화면 폭이 원본의 1.4배를 넘으면 카드 폭을 줄여 가운데 정렬 */
+ root.querySelectorAll('.ba').forEach(function(b){var im=b.querySelector('img');if(!im||b.getAttribute('data-cap'))return;b.setAttribute('data-cap','1');
+  function fit(){var nw=im.naturalWidth;if(!nw)return;var card=b.parentElement&&b.parentElement.parentElement&&b.parentElement.parentElement.classList.contains('grid')?b.parentElement:b;
+   card.style.maxWidth='';var max=Math.max(320,Math.round(nw*1.4));if(b.getBoundingClientRect().width>max+2){card.style.maxWidth=max+'px';card.style.width='100%';card.style.marginLeft='auto';card.style.marginRight='auto'}}
+  if(im.complete)fit();else im.addEventListener('load',fit);});
+
  /* 강제 줄바꿈(<br>)이 있는 제목·문단은 줄 단위로 나눠 각 줄에 줄바꿈 균형을 적용 (공개 화면만, 편집 화면은 그대로) */
  if(!E&&document.body&&document.body.classList.contains('t-luxe'))root.querySelectorAll('h1,h2,h3,h4,p,.lead').forEach(function(el){
   if(el.getAttribute('data-seg'))return;var box=el;while(![].some.call(box.childNodes,function(n){return n.nodeName==='BR'})){var ch=[].filter.call(box.childNodes,function(n){return n.nodeType===1||(n.textContent||'').trim()});if(ch.length!==1||ch[0].nodeType!==1)break;box=ch[0]}el.setAttribute('data-seg','1');el=box;var kids=[].slice.call(el.childNodes);if(!kids.some(function(n){return n.nodeName==='BR'}))return;
