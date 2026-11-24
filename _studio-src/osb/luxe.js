@@ -168,7 +168,7 @@ DEFAULTS.luxe = () => ({ ...baseContent(), color:'#3a2f29', color2:'#b89565', ph
 
 const LX_SLIDES = [
   ['doc1','PREMIUM AESTHETIC','자연스러운 아름다움을','디자인하는 치과','심미치료 전문 의료진이 처음부터 끝까지 함께합니다','심미치료 상담','pg-laminate','1:1 맞춤 스마일 디자인','상담부터 완성까지 한 분의 의료진이'],
-  ['prosth','LAMINATE','깎지 않고, 얇게','빛나는 미소로','0.3mm 세라믹으로 완성하는 자연스러운 라미네이트','라미네이트 보기','pg-laminate','최소 삭제 원칙','자연치아를 지키는 심미치료'],
+  ['prosth','LAMINATE','깎지 않고, 얇게','빛나는 미소로','0.1mm 지르코니아로 완성하는 자연스러운 라미네이트','라미네이트 보기','pg-laminate','최소 삭제 원칙','자연치아를 지키는 심미치료'],
   ['lounge','WHITENING','한 톤 밝아진','첫인상','치아 손상 없이 본래의 밝기를 되찾는 전문가 미백','치아미백 보기','pg-whitening','전문가 미백','착색 원인에 맞춘 맞춤 상담']
 ];
 BLOCKDEFS.luxe = {
@@ -198,7 +198,7 @@ BLOCKDEFS.luxe = {
       render:(R,d)=>`<section class="lm"><div class="wrap rv"><span class="en">${R.t('en')}</span><h2>${R.t('t1')}<br><b>${R.t('t2')}</b></h2><p>${R.t('d')}</p><div class="st">${(d.st||[]).map((_,n)=>`<div><b>${R.t(`st/${n}/n`)}<small>${R.t(`st/${n}/u`)}</small></b><span>${R.t(`st/${n}/l`)}</span></div>`).join('')}</div></div></section>` },
     sig: { label:'시그니처 심미 진료 (전후 비교)', desc:'남색 배경 위 대표 진료 2개 + 전후 비교 슬라이더',
       fields:[F.text('en','영문 소제목'), F.text('t','제목'), F.text('s','설명'), F.list('items','대표 진료','진료',2,[F.text('no','번호/영문'),F.text('t','진료명'),F.area('d','설명',{rows:3}),F.img('b','치료 전'),F.img('a','치료 후'),F.text('btn','링크 글자'),F.link('href')],{max:4})],
-      defaults: () => ({ en:'Signature Care', t:'심미치료의 기준을 새롭게', s:'좌우로 밀어서 치료 전후를 비교해 보세요', items:[['01  LAMINATE','라미네이트','치아를 최소한으로 다듬고 얇은 세라믹을 붙여 색과 모양, 배열을 함께 개선합니다.','라미네이트 자세히','pg-laminate'],['02  WHITENING','전문가 치아미백','치아 표면을 깎지 않고 착색된 색소만 분해해 본래의 밝기를 되찾습니다.','치아미백 자세히','pg-whitening']].map(([no,t,d,btn,p])=>({no,t,d,btn,href:'p:'+p,b:'asset:baBefore',a:'asset:baAfter'})) }),
+      defaults: () => ({ en:'Signature Care', t:'심미치료의 기준을 새롭게', s:'좌우로 밀어서 치료 전후를 비교해 보세요', items:[['01  LAMINATE','라미네이트','치아를 깎지 않고 0.1mm 지르코니아를 붙여 색과 모양, 배열을 함께 개선합니다.','라미네이트 자세히','pg-laminate'],['02  WHITENING','전문가 치아미백','치아 표면을 깎지 않고 착색된 색소만 분해해 본래의 밝기를 되찾습니다.','치아미백 자세히','pg-whitening']].map(([no,t,d,btn,p])=>({no,t,d,btn,href:'p:'+p,b:'asset:baBefore',a:'asset:baAfter'})) }),
       render:(R,d,S,ctx)=>`<section class="lsg"><div class="wrap"><div class="ltit rv"><span class="en">${R.t('en')}</span><h2>${R.t('t')}</h2><p>${R.t('s')}</p></div><div class="grid">${(d.items||[]).map((it,n)=>`<div class="card rv">${baBlock(R,`items/${n}/b`,`items/${n}/a`)}<div class="no"><span class="en">${R.t(`items/${n}/no`)}</span></div><h3>${R.t(`items/${n}/t`)}</h3><p>${R.t(`items/${n}/d`)}</p><a class="lk" href="${ctx.link(it.href)}">${R.t(`items/${n}/btn`)} →</a></div>`).join('')}</div></div></section>` },
     dfeat: { label:'대표원장 소개 (크게)', desc:'아치형 프로필 사진 + 전문의 배지 · 약력',
       fields:[F.img('img','프로필 사진'), F.text('chip','배지 (예: 치과보존과 인정의)'), F.text('n','이름'), F.text('pos','직함'), F.area('hl','강조 약력 (줄바꿈)',{rows:2}), F.area('cr','약력 목록 (줄바꿈)',{rows:6}), F.text('sg','서명 문구')],
