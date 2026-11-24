@@ -1733,7 +1733,7 @@ siteCtx = function(content, theme, mode, pageId = 'home', opt = {}){
     return { label:n.label || '', href: link(n.href || (n.children && n.children[0] && n.children[0].href) || ''), ext:ext(n.href), children:kids, on: navTargetPage(n.href) === page.id || kids.some(k => k.on) };
   }).filter(n => n.label);
   return {
-    site: content.site, page, link, nav, home: link('p:home'),
+    site: content.site, page, link, nav, home: link('p:home'), mode,
     all: vis.map(b => ({ href: '#b-' + b.id, label: (T.blocks[b.type] || {}).label || '' })),
     go: type => { const here = vis.find(x => x.type === type); if (here) return '#b-' + here.id;
       for (const p of content.pages){ const b = p.blocks.find(x => x.type === type && !x.hidden); if (b) return link('p:' + p.id + '#b-' + b.id); }
@@ -2167,6 +2167,18 @@ const T_LUXE = {
 .lh .prev,.lh .next{width:46px;height:46px;border-radius:50%;border:1px solid rgba(243,236,226,.3);background:transparent;font-size:17px;color:#f3ece2;cursor:pointer;transition:.3s}.lh .prev:hover,.lh .next:hover{background:#c9a876;border-color:#c9a876;color:#211b18}
 .lh .dots{display:none}
 @media (prefers-reduced-motion:reduce){.lh .stage img,.lh .tx>*{transition:none;transform:none}.lh .slide.on .cnt .bar i{animation:none;transform:scaleX(1)}}
+/* video hero (full-screen film) */
+.lv{position:relative;height:100vh;min-height:640px;max-height:1100px;overflow:hidden;background:#211b18;color:#fbf6ee}
+.lv video,.lv .pst{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lv:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(33,27,24,.45) 0%,rgba(33,27,24,.15) 40%,rgba(33,27,24,.7) 100%)}
+.lv .in{position:absolute;z-index:2;left:0;right:0;bottom:17%;text-align:center;padding:0 24px}
+.lv .en{display:block;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(40px,5.4vw,84px);line-height:1.05;letter-spacing:.01em;color:#fbf6ee}
+.lv h1{font-family:'Noto Serif KR',serif;font-weight:400;font-size:clamp(17px,1.5vw,22px);letter-spacing:.02em;margin-top:22px;color:#efe6d8;word-break:keep-all}
+.lv .more{display:inline-block;margin-top:34px;padding:13px 34px;border:1px solid rgba(251,246,238,.6);border-radius:40px;font-size:13px;letter-spacing:.12em;color:#fbf6ee;transition:.3s}.lv .more:hover{background:#c9a876;border-color:#c9a876;color:#211b18}
+.lv .snd{position:absolute;z-index:3;right:max(120px,4vw);bottom:48px;width:44px;height:44px;border-radius:50%;border:1px solid rgba(251,246,238,.5);background:transparent;color:#fbf6ee;cursor:pointer;font-size:13px}
+.lv .sc{position:absolute;z-index:2;left:50%;bottom:34px;width:1px;height:46px;background:rgba(251,246,238,.35);overflow:hidden}.lv .sc:after{content:'';position:absolute;left:0;top:-46px;width:1px;height:46px;background:#c9a876;animation:lvsc 2.2s ease-in-out infinite}@keyframes lvsc{to{top:46px}}
+@media(max-width:900px){.lv{height:82vh;min-height:520px}.lv .in{bottom:16%}.lv .snd{display:none}}
+@media (prefers-reduced-motion:reduce){.lv .sc:after{animation:none}}
 /* manifesto */
 .lm{padding:150px 0 130px;text-align:center}.lm .en{display:block;font-style:italic;font-size:22px;color:var(--gold);margin-bottom:22px}
 .lm h2{font-family:'Noto Serif KR',serif;font-weight:300;font-size:clamp(26px,2.6vw,40px);line-height:1.55;letter-spacing:-.02em;color:var(--navy)}.lm h2 b{font-weight:600}
@@ -2283,6 +2295,11 @@ BLOCKDEFS.luxe = {
 <div class="tx"><span class="tag">${R.t(`slides/${n}/tag`)}</span><div class="l1">${R.t(`slides/${n}/l1`)}</div>${n===0?'<h1 class="l2">':'<div class="l2">'}${R.t(`slides/${n}/l2`)}${n===0?'</h1>':'</div>'}<p class="s">${R.t(`slides/${n}/s`)}</p><div class="acts"><a class="p" href="${ctx.link(it.href)}">${R.t(`slides/${n}/btn`)}</a><a class="g" href="tel:${S.v('phone')}">전화 상담</a></div></div>
 <div class="cnt">${z(n+1)}<span class="bar"><i></i></span><small>${z(N)}</small></div></div>`).join('')}
 <div class="ctl"><button class="prev" type="button" aria-label="이전 슬라이드">←</button><div class="dots"></div><button class="next" type="button" aria-label="다음 슬라이드">→</button></div></section>`; } },
+    lvideo: { label:'메인 영상 (풀스크린)', desc:'화면 전체에 영상이 반복 재생되고 가운데 아래에 문구가 올라갑니다',
+      fields:[F.text('video','영상 주소 (mp4)'), F.img('poster','영상 첫 화면 사진'), F.text('en','영문 제목'), F.text('t','한글 문구'), F.text('btn','버튼 글자'), F.link('href')],
+      defaults: () => ({ video:'', poster:'asset:lobby', en:'Aesthetic Dental Care', t:'자연스러운 미소를 오래 지켜가는 치과', btn:'VIEW MORE', href:'p:pg-greeting' }),
+      render:(R,d,S,ctx)=>{ let v = d.video || ''; if (v.startsWith('assets/') && ctx.mode === 'export') v = 'https://dentalmbti.co.kr/' + v;
+        return `<section class="lv">${R.i('poster').replace('<img','<img class="pst"')}${v?`<video autoplay muted loop playsinline preload="auto" poster="" src="${esc(v)}"></video>`:''}<div class="in"><span class="en">${R.t('en')}</span><h1>${R.t('t')}</h1><a class="more" href="${ctx.link(d.href)}">${R.t('btn')}</a></div><span class="sc" aria-hidden="true"></span></section>`; } },
     manifesto: { label:'철학 · 핵심 숫자', desc:'가운데 정렬 문구와 숫자 3개',
       fields:[F.text('en','영문 소제목'), F.text('t1','제목 1줄'), F.text('t2','제목 2줄 (굵게)'), F.area('d','설명',{rows:3}), F.list('st','숫자','숫자',3,[F.text('n','숫자'),F.text('u','단위'),F.text('l','설명')],{max:4})],
       defaults: () => ({ en:'Our Philosophy', t1:'가장 아름다운 미소는', t2:'가장 건강한 치아에서 시작됩니다', d:'보이는 아름다움만이 아니라 오래 지켜갈 수 있는 건강까지 함께 설계합니다.', st:[['20','년+','임상 경력'],['1',':1','전담 진료'],['100','%','정품 재료 사용']].map(([n,u,l])=>({n,u,l})) }),
@@ -2603,6 +2620,7 @@ Object.assign(ES_TX, {
 });
 if (!ES_MAP.some(g => g.label === '턱관절 · 보톡스')) ES_MAP.splice(3, 0, { label:'턱관절 · 보톡스', children:[['tmj-phl','턱관절 물리치료'],['botox','이갈이 · 사각턱 보톡스']] });
 
+const ES_VIDEO = () => ({ video:'assets/hp-studio/estar/estar_hero.mp4', poster:'asset:estar/heroPoster', en:'The Art of a Natural Smile', t:'18년째 같은 자리에서, 원장이 직접 진료하는 신촌 e-스타치과', btn:'VIEW MORE', href:'p:pg-special' });
 function estarLuxe(){
   const old = estarContent();
   const c = defaultContent('luxe');
@@ -2646,6 +2664,7 @@ function estarLuxe(){
   const cs = pages.find(p => p.id === 'pg-cases'); const cb = cs && cs.blocks.find(b => b.type === 'c_ba');
   if (cb) cb.data.items = esBaItems(['H0','H1','H2','H3','H4','H5','H6','L5','L1','L2','L3','W3','W1','W2']);
   const loc = pages.find(p => p.id === 'pg-location'); const lh = loc && loc.blocks.find(b => b.type === 'c_subhero'); if (lh) lh.data.img = ES('lxBuilding');
+  home.blocks.unshift(({ id: bid(), type:'lvideo', hidden:false, data: ES_VIDEO() })); by('lhero').hidden = true;
   c.pages = [home, ...pages];
   return JSON.parse(JSON.stringify(c).split('"asset:estar/doctor"').join('"asset:estar/lxDoc"'));
 }
@@ -3469,6 +3488,11 @@ $('#q').addEventListener('input', drawList);
   // e-스타 07: 원본과 같은 모양의 고화질 로고로 교체 (다른 내용은 유지)
   for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && /estar\/(lgW|lgC|logoW|logoC)$/.test((p.content.site.logo||'') + '|' ) === false && ['asset:estar/lgW','asset:estar/logoW'].includes(p.content.site.logo))){
     try { p.content.site.logo = 'asset:estar/eLogoW'; p.content.site.logoLight = 'asset:estar/eLogoC'; p.content.site.logoTone = ''; p.updated = now(); await DB.put(clone(p)); } catch(e){}
+  }
+  // e-스타 07: 메인을 풀스크린 영상으로 (기존 롤링 배너는 숨김으로 보관, 다른 내용 유지)
+  if (typeof ES_VIDEO !== 'undefined') for (const p of all.filter(p => p.id && p.theme === 'luxe' && p.content && p.content.site && p.content.site._seed === 'estar' && !p.content.site._video)){
+    try { const h = p.content.pages[0]; if (!h.blocks.some(b => b.type === 'lvideo')) h.blocks.unshift(({ id: bid(), type:'lvideo', hidden:false, data: ES_VIDEO() }));
+      h.blocks.forEach(b => { if (b.type === 'lhero') b.hidden = true; }); p.content.site._video = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){}
   }
   await restoreDrafts(all.filter(p => p.id)); await renderList(); show('list');
 })();
