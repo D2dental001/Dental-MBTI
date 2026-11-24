@@ -1776,15 +1776,15 @@ SEED.push({ theme:'balance', title:'06 분과협진 종합형 (밸런스 스타�
 ===================================================================== */
 const LX_FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+KR:wght@300;400;600&display=swap" rel="stylesheet">`;
 const LX_KAKAO = `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" stroke="none" d="M12 3.5c-5 0-9 3.1-9 7 0 2.5 1.7 4.7 4.2 6l-.9 3.4c-.1.3.3.6.6.4l4-2.7c.4 0 .7.1 1.1.1 5 0 9-3.1 9-7s-4-7.2-9-7.2z"/></svg>`;
-const LX_NAVER = `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4" fill="currentColor" stroke="none"/><path d="M8.5 7.5v9h2.6v-4.6l3 4.6h2.4v-9h-2.6v4.6l-3-4.6z" fill="#1c2b55" stroke="none"/></svg>`;
+const LX_NAVER = `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4" fill="currentColor" stroke="none"/><path d="M8.5 7.5v9h2.6v-4.6l3 4.6h2.4v-9h-2.6v4.6l-3-4.6z" fill="#3a2f29" stroke="none"/></svg>`;
 const T_LUXE = {
   label:'프리미엄 심미형', ref:'판교밸런스치과 구성 · 고급 심미 디자인', ogKey:'img_hero', fonts: LX_FONTS,
   css:`
-:root{--ink:#1d2233;--bg:#faf7f2;--line:#e7e0d4;--field:#fff;--r:14px;--gold:#b89565;--gold2:#d8c19a;--navy:#141f40;--ivory:#faf7f2;--muted:#6f6a62}
+:root{--ink:#2b2421;--bg:#faf7f2;--line:#e7e0d4;--field:#fff;--r:14px;--gold:#b89565;--gold2:#d8c19a;--navy:#2e2622;--ivory:#faf7f2;--muted:#6f6a62}
 .t-luxe{background:var(--ivory)}.t-luxe .wrap{width:min(1240px,100% - 220px)}@media(max-width:1400px){.t-luxe .wrap{width:min(1240px,100% - 48px)}}
 .sf{font-family:'Noto Serif KR',serif}.en{font-family:'Cormorant Garamond',serif}
 /* header */
-.hd{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(18,27,56,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:#f3efe8;border-bottom:1px solid rgba(216,193,154,.25)}
+.hd{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(33,27,24,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:#f3efe8;border-bottom:1px solid rgba(216,193,154,.25)}
 .hd .wrap{display:flex;align-items:center;justify-content:space-between;height:84px;width:min(1440px,100% - 48px)}
 .logo{display:flex;align-items:center;gap:10px;color:var(--gold2)}.logo b{font-family:'Noto Serif KR',serif;font-weight:600;font-size:20px;color:#fff}.logo small{display:block;font-family:'Cormorant Garamond',serif;letter-spacing:.24em;font-size:11px;color:var(--gold2)}
 .hd nav{display:flex;align-items:stretch;height:84px}
@@ -1795,29 +1795,41 @@ const T_LUXE = {
 .hd .rt{display:flex;align-items:center;gap:18px}.hd .tl{font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:.04em;color:#fff}.hd .tl small{font-family:Pretendard,sans-serif;font-size:11px;color:var(--gold2);margin-right:8px;letter-spacing:.1em}
 .hd .bk{border:1px solid var(--gold2);color:var(--gold2);padding:9px 20px;border-radius:30px;font-size:13px;font-weight:600;transition:.3s}.hd .bk:hover{background:var(--gold2);color:var(--navy)}
 /* floating quick bar (PC) */
-.qbar{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:45;width:78px;padding:14px 0 10px;border-radius:40px;background:rgba(18,27,56,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 18px 40px rgba(20,31,64,.28);text-align:center;color:#efe9df}
+.qbar{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:45;width:78px;padding:14px 0 10px;border-radius:40px;background:rgba(33,27,24,.93);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 18px 40px rgba(43,34,28,.28);text-align:center;color:#efe9df}
 .qbar .qh{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:var(--gold2);margin-bottom:4px}
 .qbar a.q{position:relative;display:grid;justify-items:center;gap:4px;padding:11px 4px;font-size:11px;line-height:1.25;color:#efe9df;transition:.25s}
 .qbar a.q .ic{width:22px;height:22px;color:var(--gold2)}.qbar a.q.kk .ic{color:#fee500}.qbar a.q.nv .ic{color:#03c75a}
 .qbar a.q:hover{background:rgba(216,193,154,.14)}.qbar a.q+a.q{border-top:1px solid rgba(255,255,255,.07)}
 .qbar a.q[data-tip]:hover:after{content:attr(data-tip);position:absolute;right:88px;top:50%;transform:translateY(-50%);white-space:nowrap;background:#fff;color:var(--navy);font-weight:700;font-size:14px;padding:9px 14px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15)}
 .qbar .top{display:grid;place-items:center;width:44px;height:44px;margin:8px auto 0;border-radius:50%;background:var(--gold);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em}
-/* hero */
-.lh{position:relative;height:100vh;min-height:760px;max-height:1080px;background:radial-gradient(circle at 78% 40%,#f1e9dc 0,transparent 55%),linear-gradient(180deg,#fbf8f3,#f4eee5);overflow:hidden}
-.lh .slide{display:flex;align-items:center}.lh .slide .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:60px;align-items:center;padding-top:84px}
-.lh .tag{display:inline-flex;align-items:center;gap:12px;font-size:13px;font-weight:600;letter-spacing:.14em;color:var(--gold)}.lh .tag:before{content:'';width:36px;height:1px;background:var(--gold)}
-.lh .l1{font-family:'Noto Serif KR',serif;font-weight:300;font-size:clamp(26px,2.7vw,40px);line-height:1.4;color:#3d3a36;margin-top:26px;letter-spacing:-.02em}
-.lh .l2{font-family:'Noto Serif KR',serif;font-weight:600;font-size:clamp(32px,3.6vw,56px);line-height:1.3;color:var(--navy);letter-spacing:-.03em;margin-top:6px}
-.lh .s{margin-top:26px;color:var(--muted);font-size:16px;max-width:520px}
-.lh .acts{display:flex;gap:12px;margin-top:42px}.lh .acts a{padding:15px 30px;border-radius:40px;font-size:14px;font-weight:600}.lh .acts .p{background:var(--navy);color:#fff}.lh .acts .g{border:1px solid var(--navy);color:var(--navy)}
-.lh .fr{position:relative;justify-self:end;width:min(500px,36vw);aspect-ratio:5/6.2}
-.lh .fr:before{content:'';position:absolute;inset:-22px 22px 22px -22px;border:1px solid var(--gold);border-radius:999px 999px 26px 26px;opacity:.7}
-.lh .fr .ph{position:absolute;inset:0;border-radius:999px 999px 26px 26px;overflow:hidden;background:#ece5da;box-shadow:0 40px 80px rgba(20,31,64,.18)}.lh .fr .ph img{width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:transform 6s ease}.lh .slide.on .fr .ph img{transform:scale(1)}
-.lh .fr .badge{position:absolute;left:-46px;bottom:56px;background:#fff;border-radius:16px;padding:16px 20px;box-shadow:0 20px 40px rgba(20,31,64,.14);font-size:13px;color:var(--muted);max-width:230px}.lh .fr .badge b{display:block;font-family:'Noto Serif KR',serif;font-size:17px;color:var(--navy);margin-bottom:2px}
-.lh .vt{position:absolute;right:120px;top:50%;writing-mode:vertical-rl;font-family:'Cormorant Garamond',serif;letter-spacing:.4em;font-size:12px;color:var(--gold);transform:translateY(-50%);z-index:2}
-.lh .ctl{position:absolute;z-index:3;left:max(110px,calc((100% - 1240px)/2));bottom:56px;display:flex;align-items:center;gap:16px;color:var(--navy)}
-.lh .prev,.lh .next{width:46px;height:46px;border-radius:50%;border:1px solid rgba(20,31,64,.25);background:transparent;font-size:18px;color:var(--navy);cursor:pointer}.lh .prev:hover,.lh .next:hover{background:var(--navy);color:#fff}
-.lh .dots button{background:var(--navy)}
+/* hero — gallery stage */
+.lh{position:relative;height:100vh;min-height:720px;max-height:1100px;background:#211b18;color:#f3ece2;overflow:hidden}
+.lh .slide{display:block}
+.lh .stage{position:absolute;top:84px;right:0;bottom:0;width:58%;overflow:hidden;background:#2b2421}
+.lh .stage .one,.lh .stage .two>div{position:absolute;inset:0;overflow:hidden}.lh .stage .two>div:first-child{bottom:50%}.lh .stage .two>div:last-child{top:50%}
+.lh .stage img{width:100%;height:100%;object-fit:cover;transform:scale(1.07);transition:transform 7.5s cubic-bezier(.2,.6,.2,1);filter:saturate(1.04) contrast(1.03)}
+.lh .slide.on .stage img{transform:scale(1)}
+.lh .stage .two:after{content:'';position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:#c9a876;z-index:2}
+.lh .stage .lb{position:absolute;z-index:3;right:120px;bottom:22px;font-family:'Noto Serif KR',serif;font-size:14px;letter-spacing:.08em;color:#fff;background:rgba(33,27,24,.55);backdrop-filter:blur(6px);padding:7px 16px;border-radius:30px}
+.lh .stage .two>div:last-child .lb{background:rgba(201,168,118,.9);color:#211b18}
+.lh .stage:before{content:'';position:absolute;inset:0 auto 0 0;width:38%;z-index:2;background:linear-gradient(90deg,#211b18,rgba(33,27,24,0));pointer-events:none}
+.lh .tx{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;justify-content:center;padding:84px 0 0 max(56px,calc((100% - 1320px)/2));width:min(640px,44%)}
+.lh .tag{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:24px;color:#c9a876}
+.lh .l1{font-family:'Noto Serif KR',serif;font-weight:300;font-size:clamp(24px,2.3vw,36px);line-height:1.45;margin-top:22px;color:#e9e0d3;letter-spacing:-.02em}
+.lh .l2{font-family:'Noto Serif KR',serif;font-weight:600;font-size:clamp(30px,3vw,50px);line-height:1.3;word-break:keep-all;margin-top:4px;color:#fbf6ee;letter-spacing:-.035em}
+.lh .s{margin-top:24px;color:#b9ad9f;font-size:16px;line-height:1.8;max-width:440px}
+.lh .acts{display:flex;gap:12px;margin-top:40px;flex-wrap:wrap}.lh .acts a{padding:15px 30px;border-radius:40px;font-size:14px;font-weight:600;transition:.3s}
+.lh .acts .p{background:#c9a876;color:#211b18}.lh .acts .p:hover{background:#dcc092}.lh .acts .g{border:1px solid rgba(243,236,226,.45);color:#f3ece2}.lh .acts .g:hover{border-color:#f3ece2}
+.lh .tx>*{opacity:0;transform:translateY(14px);transition:opacity .8s,transform .8s}.lh .slide.on .tx>*{opacity:1;transform:none}
+.lh .slide.on .tx>*:nth-child(2){transition-delay:.12s}.lh .slide.on .tx>*:nth-child(3){transition-delay:.22s}.lh .slide.on .tx>*:nth-child(4){transition-delay:.32s}.lh .slide.on .tx>*:nth-child(5){transition-delay:.42s}
+.lh .cnt{position:absolute;z-index:4;left:max(56px,calc((100% - 1320px)/2));bottom:122px;display:flex;align-items:center;gap:18px;font-family:'Cormorant Garamond',serif;font-size:20px;color:#e9e0d3}
+.lh .cnt .bar{width:120px;height:1px;background:rgba(243,236,226,.25);position:relative;overflow:hidden}.lh .cnt .bar i{position:absolute;inset:0;background:#c9a876;transform:scaleX(0);transform-origin:left}
+.lh .slide.on .cnt .bar i{animation:lhbar 6.5s linear forwards}@keyframes lhbar{to{transform:scaleX(1)}}
+.lh .cnt small{color:#8f8275;font-size:16px}
+.lh .ctl{position:absolute;z-index:5;left:calc(max(56px,calc((100% - 1320px)/2)) + 230px);bottom:110px;display:flex;align-items:center;gap:10px}
+.lh .prev,.lh .next{width:46px;height:46px;border-radius:50%;border:1px solid rgba(243,236,226,.3);background:transparent;font-size:17px;color:#f3ece2;cursor:pointer;transition:.3s}.lh .prev:hover,.lh .next:hover{background:#c9a876;border-color:#c9a876;color:#211b18}
+.lh .dots{display:none}
+@media (prefers-reduced-motion:reduce){.lh .stage img,.lh .tx>*{transition:none;transform:none}.lh .slide.on .cnt .bar i{animation:none;transform:scaleX(1)}}
 /* manifesto */
 .lm{padding:150px 0 130px;text-align:center}.lm .en{display:block;font-style:italic;font-size:22px;color:var(--gold);margin-bottom:22px}
 .lm h2{font-family:'Noto Serif KR',serif;font-weight:300;font-size:clamp(26px,2.6vw,40px);line-height:1.55;letter-spacing:-.02em;color:var(--navy)}.lm h2 b{font-weight:600}
@@ -1839,7 +1851,7 @@ const T_LUXE = {
 /* treatment cards (reuse .bt) */
 .t-luxe .bt{padding:130px 0;background:var(--ivory)}.t-luxe .bt .grid{width:min(1240px,100% - 220px);margin:0 auto;gap:30px}.t-luxe .bt .ltit{color:var(--navy)}
 @media(max-width:1400px){.t-luxe .bt .grid{width:min(1240px,100% - 48px)}}
-.t-luxe .bt .tile{display:block;height:auto;color:var(--ink);background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 1px 0 var(--line);transition:.4s}.t-luxe .bt .tile:hover{transform:translateY(-6px);box-shadow:0 26px 50px rgba(20,31,64,.12)}
+.t-luxe .bt .tile{display:block;height:auto;color:var(--ink);background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 1px 0 var(--line);transition:.4s}.t-luxe .bt .tile:hover{transform:translateY(-6px);box-shadow:0 26px 50px rgba(43,34,28,.12)}
 .t-luxe .bt .tile:after{display:none}.t-luxe .bt .tile>img{position:static;display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
 .t-luxe .bt .tx{position:static;max-width:none;padding:28px 30px 32px}.t-luxe .bt .tx small{color:var(--gold);opacity:1;font-weight:600;letter-spacing:.02em}
 .t-luxe .bt .tx h3{font-family:'Noto Serif KR',serif;font-weight:400;font-size:24px;color:var(--navy)}.t-luxe .bt .tile .tx h3 .hl{color:var(--navy)!important;font-weight:600}
@@ -1866,37 +1878,39 @@ const T_LUXE = {
 .t-luxe .bs{background:var(--navy);color:#efe9df;--field:rgba(255,255,255,.06);--line:rgba(216,193,154,.3)}.t-luxe .bs h3{font-family:'Noto Serif KR',serif;color:#fff}.t-luxe .bs h3 b{color:var(--gold2)}.t-luxe .bs>.ic{color:rgba(216,193,154,.08)}
 .t-luxe .bs .cform input,.t-luxe .bs .cform textarea{color:#fff;border-radius:10px}.t-luxe .bs .cform button{background:var(--gold);border-radius:10px;color:#fff}.t-luxe .bs .cform .agree{color:#d9d2c6}
 /* footer */
-.ft{background:#0f1730;color:#9ea3b4;padding:70px 0 120px;font-size:13px}.ft .wrap{display:grid;grid-template-columns:220px 1fr;gap:40px}.ft .fl img{height:42px;width:auto}.ft .fl b{display:block;color:#fff;font-family:'Noto Serif KR',serif;font-size:18px}
+.ft{background:#1d1815;color:#b3a798;padding:70px 0 120px;font-size:13px}.ft .wrap{display:grid;grid-template-columns:220px 1fr;gap:40px}.ft .fl img{height:42px;width:auto}.ft .fl b{display:block;color:#fff;font-family:'Noto Serif KR',serif;font-size:18px}
 .ft .lk{color:#e5dccd;margin-bottom:14px;font-weight:600}.ft b{color:#e5dccd}
 /* PC bottom quick consult bar */
-.lbar{position:fixed;left:0;right:0;bottom:0;z-index:44;background:rgba(15,23,48,.96);backdrop-filter:blur(10px);color:#efe9df;border-top:1px solid rgba(216,193,154,.3);transition:transform .4s}
+.lbar{position:fixed;left:0;right:0;bottom:0;z-index:44;background:rgba(33,27,24,.96);backdrop-filter:blur(10px);color:#efe9df;border-top:1px solid rgba(216,193,154,.3);transition:transform .4s}
 .lbar form{display:flex;align-items:center;gap:12px;height:72px;width:min(1240px,100% - 220px);margin:0 auto}
 .lbar .ttl{font-family:'Noto Serif KR',serif;font-size:18px;color:#fff;white-space:nowrap;margin-right:10px}.lbar .ttl small{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--gold2)}
 .lbar input:not([type=checkbox]),.lbar select{height:42px;padding:0 14px;border-radius:8px;border:1px solid rgba(216,193,154,.3);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-size:14px;min-width:0;flex:1}
 .lbar select option{color:#222}.lbar label{display:flex;align-items:center;gap:6px;font-size:12px;white-space:nowrap;color:#cfc8bb}.lbar label a{text-decoration:underline}
 .lbar button{height:42px;padding:0 26px;border:0;border-radius:8px;background:var(--gold);color:#fff;font-weight:700;white-space:nowrap}
-.lbar .x{position:absolute;right:20px;top:-34px;height:34px;padding:0 16px;border-radius:12px 12px 0 0;background:rgba(15,23,48,.96);color:var(--gold2);font-size:12px;border:1px solid rgba(216,193,154,.3);border-bottom:0}
+.lbar .x{position:absolute;right:20px;top:-34px;height:34px;padding:0 16px;border-radius:12px 12px 0 0;background:rgba(33,27,24,.96);color:var(--gold2);font-size:12px;border:1px solid rgba(216,193,154,.3);border-bottom:0}
 body.lbar-off .lbar{transform:translateY(72px)}body.lbar-off .lbar .x:after{content:' 열기'}body:not(.lbar-off) .lbar .x:after{content:' 접기'}
 /* mobile bottom 4 buttons */
 .mb4{display:none}
 /* sub pages */
 .t-luxe .cb-sub{background:var(--navy);min-height:460px}.t-luxe .cb-sub>img{left:45%;width:55%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 40%);mask-image:linear-gradient(90deg,transparent,#000 40%)}
-.t-luxe .cb-sub:after{background:linear-gradient(90deg,var(--navy) 40%,rgba(20,31,64,.25))}.t-luxe .cb-sub .wrap{padding-top:170px}.t-luxe .cb-sub small{color:var(--gold2);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;letter-spacing:.05em}
+.t-luxe .cb-sub:after{background:linear-gradient(90deg,var(--navy) 40%,rgba(43,34,28,.25))}.t-luxe .cb-sub .wrap{padding-top:170px}.t-luxe .cb-sub small{color:var(--gold2);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;letter-spacing:.05em}
 .t-luxe .cb-sub h1{font-family:'Noto Serif KR',serif;font-weight:400}
 .t-luxe .cb-tit small{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;letter-spacing:.04em;color:var(--gold)}.t-luxe .cb-tit h2{font-family:'Noto Serif KR',serif;font-weight:400;color:var(--navy)}
 .t-luxe .cb-pts{background:var(--navy);color:#efe9df}.t-luxe .cb-pts .cb-tit h2{color:#fff}.t-luxe .cb-pts .it{border-color:rgba(216,193,154,.25);background:rgba(255,255,255,.04);border-radius:20px}.t-luxe .cb-pts .ic{background:var(--gold)}
-.t-luxe .cb-steps{background:#f4eee5}.t-luxe .cb-cta{background:#0f1730}.t-luxe .cb-cta a{background:var(--gold);color:#fff;border-radius:40px}.t-luxe .cb-ba .ba,.t-luxe .cb-gal img,.t-luxe .cb-treat img{border-radius:18px}
+.t-luxe .cb-steps{background:#f4eee5}.t-luxe .cb-cta{background:#1d1815}.t-luxe .cb-cta a{background:var(--gold);color:#fff;border-radius:40px}.t-luxe .cb-ba .ba,.t-luxe .cb-gal img,.t-luxe .cb-treat img{border-radius:18px}
 .t-luxe .cb-treat h2,.t-luxe .cb-treat h3{font-family:'Noto Serif KR',serif;font-weight:400}
 @media(min-width:901px){body.t-luxe{padding-bottom:72px}}
 @media(max-width:1180px){.hd nav>a,.hd nav .mi-a{padding:0 13px;font-size:14px}.hd .tl{display:none}.lbar label{display:none}}
 @media(max-width:900px){
  .hd .wrap{height:64px}.hd .rt{display:none}.qbar,.lbar{display:none}.t-luxe .wrap{width:calc(100% - 40px)}
- .lh{height:860px;min-height:0;max-height:none}.lh .slide .wrap{grid-template-columns:1fr;gap:34px;padding-top:96px}
- .lh .fr{justify-self:center;width:72vw;max-width:340px;order:-1}.lh .fr .badge{left:-14px;bottom:22px;padding:12px 14px}.lh .vt{display:none}.lh .ctl{left:20px;bottom:22px}.lh .acts{margin-top:26px}.lh .acts a{padding:13px 22px}
+ .lh{height:auto;min-height:0;max-height:none;padding-bottom:110px}.lh .slide{position:relative!important;display:none}.lh .slide.on{display:block}
+ .lh .stage{position:relative;top:0;width:100%;margin-top:64px;height:62vh;min-height:420px;max-height:560px}.lh .stage:before{inset:auto 0 0 0;width:auto;height:40%;background:linear-gradient(0deg,#211b18,rgba(33,27,24,0))}.lh .stage .lb{left:auto;right:12px;bottom:10px;top:auto;font-size:12px;padding:5px 12px}
+ .lh .tx{width:auto;height:auto;padding:0 22px;margin-top:-40px}.lh .l2{font-size:30px}.lh .s{font-size:15px}.lh .acts{margin-top:26px}.lh .acts a{padding:13px 22px}
+ .lh .cnt{display:none}.lh .ctl{left:auto;right:20px;bottom:30px}
  .lm{padding:90px 0}.lm .st b{font-size:40px}.lsg{padding:90px 0}.lsg .grid,.ld .wrap{grid-template-columns:1fr}.ld{padding:90px 0}.ld .wrap{gap:50px}.ld .pf{max-width:360px;margin:0 auto;width:85%}.ld ul{grid-template-columns:1fr}.ld .nm{font-size:36px}
  .t-luxe .bt{padding:90px 0}.t-luxe .bt .grid{width:calc(100% - 40px);grid-template-columns:1fr 1fr;gap:14px}.t-luxe .bt .tx{padding:18px}.t-luxe .bt .tx h3{font-size:18px}.t-luxe .bt .tx p{display:none}
  .t-luxe .bf .grid{grid-template-columns:1fr}.t-luxe .ba2 .in{margin:20px;padding:34px 26px}.ft .wrap{grid-template-columns:1fr}.ft{padding-bottom:110px}
- .mb4{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:60;background:#0f1730;padding-bottom:env(safe-area-inset-bottom);border-top:1px solid rgba(216,193,154,.3)}
+ .mb4{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:60;background:#1d1815;padding-bottom:env(safe-area-inset-bottom);border-top:1px solid rgba(216,193,154,.3)}
  .mb4 a{display:grid;justify-items:center;gap:4px;padding:11px 0 10px;font-size:12px;color:#efe9df}.mb4 a+a{border-left:1px solid rgba(255,255,255,.07)}.mb4 .ic{width:24px;height:24px;color:var(--gold2)}.mb4 .kk .ic{color:#fee500}.mb4 .nv .ic{color:#03c75a}
  .t-luxe .cb-sub .wrap{padding-top:120px}
 }
@@ -1908,7 +1922,7 @@ T_LUXE.css = '.t-luxe .bs{overflow:hidden}.t-luxe .bs .cform{display:grid;grid-t
   + T_LUXE.css;
 T_LUXE.css += '\n.t-luxe .bs>svg.ic{display:none}html:has(body.t-luxe),body.t-luxe{overflow-x:hidden}';
 THEMES.luxe = T_LUXE;
-DEFAULTS.luxe = () => ({ ...baseContent(), color:'#1c2b55', color2:'#b89565', phone:'00-0000-0000', bal_phone2:'00-0000-0000',
+DEFAULTS.luxe = () => ({ ...baseContent(), color:'#3a2f29', color2:'#b89565', phone:'00-0000-0000', bal_phone2:'00-0000-0000',
   hours:'평일   AM 09:30 - PM 06:30\n토요일   AM 09:30 - PM 02:00\n일요일 · 공휴일   휴진', bal_blog:'', bal_book:'', bal_cta:'상담 예약', bal_cta2:'' });
 
 const LX_SLIDES = [
@@ -1924,12 +1938,14 @@ BLOCKDEFS.luxe = {
       fields:[F.text('en','영문 소제목'), F.text('t','제목')].concat(BLOCKDEFS.balance.blocks.tiles.fields),
       defaults: () => Object.assign({ en:'Treatment', t:'진료 안내' }, BLOCKDEFS.balance.blocks.tiles.defaults()),
       render:(R,d,S,ctx)=>BLOCKDEFS.balance.blocks.tiles.render(R,d,S,ctx).replace('<section class="bt">',`<section class="bt"><div class="ltit c rv"><span class="en">${R.t('en')}</span><h2>${R.t('t')}</h2></div>`) }),
-    lhero: { label:'메인 배너 (아치형 사진)', desc:'왼쪽 세리프 문구 + 오른쪽 아치형 사진 슬라이드',
-      fields:[F.list('slides','슬라이드','슬라이드',3,[F.img('img','사진 (세로형 권장)'),F.text('tag','영문 라벨'),F.text('l1','얇은 문구'),F.text('l2','굵은 문구'),F.text('s','설명'),F.text('btn','버튼 글자'),F.link('href'),F.text('bt','사진 위 카드 제목'),F.text('bd','사진 위 카드 설명')],{max:8})],
-      defaults: () => ({ slides: LX_SLIDES.map(([a,tag,l1,l2,s,btn,p,bt,bd])=>({img:'asset:'+a,tag,l1,l2,s,btn,href:'p:'+p,bt,bd})) }),
-      render:(R,d,S,ctx)=>`<section class="lh slides" data-slides="6500">${(d.slides||[]).map((it,n)=>`<div class="slide"><div class="wrap"><div class="tx"><span class="tag">${R.t(`slides/${n}/tag`)}</span><div class="l1">${R.t(`slides/${n}/l1`)}</div>${n===0?'<h1 class="l2">':'<div class="l2">'}${R.t(`slides/${n}/l2`)}${n===0?'</h1>':'</div>'}<p class="s">${R.t(`slides/${n}/s`)}</p><div class="acts"><a class="p" href="${ctx.link(it.href)}">${R.t(`slides/${n}/btn`)}</a><a class="g" href="tel:${S.v('phone')}">전화 상담</a></div></div>
-<div class="fr"><div class="ph">${R.i(`slides/${n}/img`)}</div>${it.bt?`<div class="badge"><b>${R.t(`slides/${n}/bt`)}</b>${R.t(`slides/${n}/bd`)}</div>`:''}</div></div></div>`).join('')}
-<span class="vt">${S.t('nameEn')}</span><div class="ctl"><button class="prev" type="button" aria-label="이전">←</button><div class="dots"></div><button class="next" type="button" aria-label="다음">→</button></div></section>` },
+    lhero: { label:'메인 배너 (갤러리형 사진)', desc:'왼쪽 문구 + 오른쪽 큰 사진. 두 번째 사진을 넣으면 위(치료 전) · 아래(치료 후) 비교로 보입니다',
+      fields:[F.list('slides','슬라이드','슬라이드',3,[F.img('img','사진 (치료 전 또는 단독 사진)'),F.img('img2','치료 후 사진 (비우면 단독 사진)'),F.text('tag','영문 소제목'),F.text('l1','얇은 문구'),F.text('l2','굵은 문구'),F.text('s','설명'),F.text('btn','버튼 글자'),F.link('href')],{max:8})],
+      defaults: () => ({ slides: LX_SLIDES.map(([a,tag,l1,l2,s,btn,p])=>({img:'asset:'+a,img2:'',tag,l1,l2,s,btn,href:'p:'+p})) }),
+      render:(R,d,S,ctx)=>{ const N=(d.slides||[]).length, z=n=>String(n).padStart(2,'0');
+        return `<section class="lh slides" data-slides="6500">${(d.slides||[]).map((it,n)=>`<div class="slide"><div class="stage">${it.img2?`<div class="two"><div>${R.i(`slides/${n}/img`)}<span class="lb">치료 전</span></div><div>${R.i(`slides/${n}/img2`)}<span class="lb">치료 후</span></div></div>`:`<div class="one">${R.i(`slides/${n}/img`)}</div>`}</div>
+<div class="tx"><span class="tag">${R.t(`slides/${n}/tag`)}</span><div class="l1">${R.t(`slides/${n}/l1`)}</div>${n===0?'<h1 class="l2">':'<div class="l2">'}${R.t(`slides/${n}/l2`)}${n===0?'</h1>':'</div>'}<p class="s">${R.t(`slides/${n}/s`)}</p><div class="acts"><a class="p" href="${ctx.link(it.href)}">${R.t(`slides/${n}/btn`)}</a><a class="g" href="tel:${S.v('phone')}">전화 상담</a></div></div>
+<div class="cnt">${z(n+1)}<span class="bar"><i></i></span><small>${z(N)}</small></div></div>`).join('')}
+<div class="ctl"><button class="prev" type="button" aria-label="이전 슬라이드">←</button><div class="dots"></div><button class="next" type="button" aria-label="다음 슬라이드">→</button></div></section>`; } },
     manifesto: { label:'철학 · 핵심 숫자', desc:'가운데 정렬 문구와 숫자 3개',
       fields:[F.text('en','영문 소제목'), F.text('t1','제목 1줄'), F.text('t2','제목 2줄 (굵게)'), F.area('d','설명',{rows:3}), F.list('st','숫자','숫자',3,[F.text('n','숫자'),F.text('u','단위'),F.text('l','설명')],{max:4})],
       defaults: () => ({ en:'Our Philosophy', t1:'가장 아름다운 미소는', t2:'가장 건강한 치아에서 시작됩니다', d:'보이는 아름다움만이 아니라 오래 지켜갈 수 있는 건강까지 함께 설계합니다.', st:[['20','년+','임상 경력'],['1',':1','전담 진료'],['100','%','정품 재료 사용']].map(([n,u,l])=>({n,u,l})) }),
@@ -2221,7 +2237,14 @@ Object.assign(ES_BA, {
   W1:['전문가 치아미백','착색된 치아 밝기 개선','estar/lxW1B','estar/lxW1A'],
   W2:['전문가 치아미백','누런 치아를 한 톤 밝게','estar/lxW2B','estar/lxW2A'],
   W3:['전문가 치아미백','셰이드 가이드로 확인한 변화','estar/lxW3B','estar/lxW3A'],
-  R:['레진 수복','깨진 앞니 모서리 회복','estar/lxRB','estar/lxRA']
+  R:['레진 수복','깨진 앞니 모서리 회복','estar/lxRB','estar/lxRA'],
+  H0:['라미네이트','옆모습 미소 라인 개선','estar/hxSideB','estar/hxSideA'],
+  H1:['무삭제 라미네이트','앞니 형태와 색을 함께 개선','estar/hxL1b','estar/hxL1a'],
+  H2:['라미네이트','변색된 앞니를 균일한 색으로','estar/hxL2b','estar/hxL2a'],
+  H3:['라미네이트','누런 앞니를 맑고 밝게','estar/hxL3b','estar/hxL3a'],
+  H4:['앞니 심미보철','벌어진 틈과 착색 정리','estar/hxL4b','estar/hxL4a'],
+  H5:['라미네이트','위아래 미소 라인 정리','estar/hxL5b','estar/hxL5a'],
+  H6:['앞니 심미보철','마모되고 짧은 앞니 회복','estar/hxL6b','estar/hxL6a']
 });
 Object.assign(ES_TX.whitening, { img:'lxWhiteDoc', heroImg:'lxSmile', ba:['W3','W1','W2'] });
 Object.assign(ES_TX.cavity, { ba:['R','L7'] });
@@ -2246,23 +2269,23 @@ if (!ES_MAP.some(g => g.label === '턱관절 · 보톡스')) ES_MAP.splice(3, 0,
 function estarLuxe(){
   const old = estarContent();
   const c = defaultContent('luxe');
-  c.site = Object.assign({}, c.site, old.site, { color:'#1c2b55', color2:'#b89565', _seedVer:4, bal_cta:'상담 예약', bal_book:'' });
+  c.site = Object.assign({}, c.site, old.site, { color:'#3a2f29', color2:'#c9a876', _seedVer:5, logo:'asset:estar/lgW', logoLight:'asset:estar/lgC', logoH:'56', logoTone:'', bal_cta:'상담 예약', bal_book:'' });
   const home = c.pages[0], by = t => home.blocks.find(b => b.type === t);
   by('lhero').data.slides = [
-    ['lxCare','HONEST CARE','과잉진료 없는','정직한 치과','원장이 직접 처음부터 끝까지 진료합니다','진료 철학 보기','pg-special','보존과 인정의 직접 진료','1인 책임진료'],
-    ['lamiModelSq','NO-PREP LAMINATE','깎지 않고, 얇게','자연스러운 미소 라인','치아 삭제를 최소화한 라미네이트로 색과 모양을 함께 디자인합니다','라미네이트 보기','pg-laminate','최소 삭제 원칙','자연치아를 지키는 심미치료'],
-    ['lxWhiteDoc','WHITENING','한 톤 밝아진','맑은 첫인상','치아 착색 원인과 구강 상태를 고려한 맞춤 미백 상담','치아미백 보기','pg-whitening','전문가 치아미백','18년간 이어온 미백 진료'],
-    ['lxDocArch','e-STAR AESTHETIC','18년째 같은 자리,','원장이 직접, 끝까지 책임집니다','치과보존과 인정의 · 대한심미치과학회 정회원 김소연 대표원장의 1인 책임진료','원장 소개','pg-greeting','치과보존과 인정의','대한심미치과학회 정회원'],
-    ['lxBuilding','LOCATION','신촌역 1번 출구 도보 1분','현대백화점 옆, 3층','2호선 신촌역 1번 출구 앞 KFC 건물 3층에 있습니다','오시는 길','pg-location','신촌역 1번 출구','도보 1분 거리']
-  ].map(([a,tag,l1,l2,s2,btn,p,bt,bd]) => ({ img:ES(a), tag, l1, l2, s:s2, btn, href:'p:'+p, bt, bd }));
+    ['hxSide','','Smile Design','웃는 순간 가장 먼저 보이는','자연스러운 미소 라인','치아의 길이와 색, 입술 라인까지 함께 보고 디자인합니다','심미치료 보기','pg-laminate'],
+    ['hxL1B','hxL1A','No-prep Laminate','깎지 않고, 얇게','무삭제 라미네이트','치아 삭제를 최소화하고 얇은 세라믹으로 색과 모양을 바로잡습니다','라미네이트 보기','pg-laminate'],
+    ['hxL2B','hxL2A','Shade Matching','변색된 치아도','맑고 균일한 색으로','셰이드 가이드로 색을 맞추고 주변 치아와 어울리게 완성합니다','치료 사례 보기','pg-cases'],
+    ['lxW1B','lxW1A','Whitening','한 톤 밝아진','맑은 첫인상','치아를 깎지 않고 착색된 색소만 분해해 본래의 밝기를 되찾습니다','치아미백 보기','pg-whitening'],
+    ['hxL4B','hxL4A','Front Teeth Care','벌어진 틈과 색까지','한 번에 정리합니다','앞니 사이 틈과 착색, 오래된 보철을 함께 살펴 계획합니다','상담 예약하기','pg-location']
+  ].map(([a,a2,tag,l1,l2,s2,btn,p]) => ({ img:ES(a), img2:a2?ES(a2):'', tag, l1, l2, s:s2, btn, href:'p:'+p }));
   Object.assign(by('manifesto').data, { en:'e-Star Philosophy', t1:'과잉진료 없이, 정직하게', t2:'오래 지켜갈 아름다움을 만듭니다',
     d:'살릴 수 있는 치아는 먼저 살리고, 꼭 필요한 만큼만 치료합니다. 모든 진료실은 독립된 1인 전용 공간이라 편안하게 상담받으실 수 있습니다.',
     st:[['25','년차','치과보존과 인정의 임상 경력'],['18','년','신촌 같은 자리에서 진료'],['1','인','전용 진료실']].map(([n,u,l])=>({n,u,l})) });
   Object.assign(by('sig').data, { en:'Signature Care', t:'e-스타치과의 시그니처 심미치료', s:'실제 치료 사례입니다. 좌우로 밀어서 치료 전후를 비교해 보세요',
-    items:[['01  LAMINATE','무삭제 라미네이트','치아 삭제를 최소화하고 얇은 세라믹으로 색과 모양, 배열을 함께 개선합니다. 웃을 때 자연스럽게 보이는 것을 가장 먼저 생각합니다.','L5','라미네이트 자세히','pg-laminate'],
+    items:[['01  LAMINATE','무삭제 라미네이트','치아 삭제를 최소화하고 얇은 세라믹으로 색과 모양, 배열을 함께 개선합니다. 웃을 때 자연스럽게 보이는 것을 가장 먼저 생각합니다.','H0','라미네이트 자세히','pg-laminate'],
            ['02  WHITENING','전문가 치아미백','치아를 깎거나 덮지 않고 착색된 색소만 분해해 본래의 밝기를 되찾습니다. 착색 원인과 구강 상태를 확인한 뒤 맞춤으로 진행합니다.','W3','치아미백 자세히','pg-whitening']]
       .map(([no,t,d,k,btn,p])=>({ no, t, d, b:'asset:'+ES_BA[k][2], a:'asset:'+ES_BA[k][3], btn, href:'p:'+p })) });
-  Object.assign(by('ba').data, { en:'Before & After', t:'e-스타치과 치료 전후', items:['L1','L2','W1','L3'].map(k=>({ t:ES_BA[k][0], s:ES_BA[k][1], b:'asset:'+ES_BA[k][2], a:'asset:'+ES_BA[k][3] })) });
+  Object.assign(by('ba').data, { en:'Before & After', t:'e-스타치과 치료 전후', items:['H1','H2','H3','H4'].map(k=>({ t:ES_BA[k][0], s:ES_BA[k][1], b:'asset:'+ES_BA[k][2], a:'asset:'+ES_BA[k][3] })) });
   Object.assign(by('tiles').data, { en:'Treatment', t:'e-스타치과 진료 안내', items:[
     ['lxL1A','깎지 않는 심미치료','무삭제 ','라미네이트','최소 삭제로 완성하는 자연스러운 앞니','laminate'],
     ['lxSmile','착색 원인에 맞춘 맞춤 상담','전문가 ','치아미백','치아 손상 없이 한 톤 밝게','whitening'],
@@ -2282,14 +2305,14 @@ function estarLuxe(){
   Object.assign(by('info').data, ob('info').data);
   const pages = old.pages.slice(1);
   const lami = pages.find(p => p.id === 'pg-laminate'); const lb = lami && lami.blocks.find(b => b.type === 'c_ba');
-  if (lb) lb.data.items = esBaItems(['L5','L1','L2','L3','L6','L4']);
+  if (lb) lb.data.items = esBaItems(['H0','H1','H2','H3','H4','H5','H6','L5']);
   const cs = pages.find(p => p.id === 'pg-cases'); const cb = cs && cs.blocks.find(b => b.type === 'c_ba');
-  if (cb) cb.data.items = esBaItems(['L5','L1','L2','L3','L6','L4','L7','W3','W1','W2']);
+  if (cb) cb.data.items = esBaItems(['H0','H1','H2','H3','H4','H5','H6','L5','L1','L2','L3','W3','W1','W2']);
   const loc = pages.find(p => p.id === 'pg-location'); const lh = loc && loc.blocks.find(b => b.type === 'c_subhero'); if (lh) lh.data.img = ES('lxBuilding');
   c.pages = [home, ...pages];
   return JSON.parse(JSON.stringify(c).split('"asset:estar/doctor"').join('"asset:estar/lxDoc"'));
 }
-SEED.push({ theme:'luxe', title:'07 신촌 e-스타치과 (프리미엄 심미형)', once:'estar', ver:4, note:'프리미엄 심미형 새 디자인, 오른쪽 퀵바 · 하단 빠른상담 · 모바일 하단 4버튼, 구글드라이브 사진(원장 프로필 · 실제 라미네이트 · 미백 케이스 · 턱관절 장비) 반영', build: estarLuxe });
+SEED.push({ theme:'luxe', title:'07 신촌 e-스타치과 (프리미엄 심미형)', once:'estar', ver:5, note:'갤러리형 메인 배너(심미 전후 사진), 새 고화질 로고, 웜톤 색상으로 변경', build: estarLuxe });
 </script>
 <script>
 (async function(){
