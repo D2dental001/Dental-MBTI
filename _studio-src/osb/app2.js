@@ -839,6 +839,18 @@ $('#q').addEventListener('input', drawList);
       for (const [a, b] of ES_COPY3) j = j.split(JSON.stringify(a)).join(JSON.stringify(b));
       const c = JSON.parse(j); c.site._copy3 = 1; p.content = c; p.updated = now(); await DB.put(clone(p)); } catch(e){}
   }
+  // e-스타: 지르코니아 오버레이 · 메릴랜드 브릿지 페이지와 메뉴 추가 (없을 때만)
+  if (typeof ES_NEWPAGES !== 'undefined' && typeof esTx === 'function') for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._mo1)){
+    try { const c = p.content, nav = c.site.nav || [];
+      for (const [slug, title, group, after] of ES_NEWPAGES){
+        if (c.pages.some(pg => pg.slug === slug)) continue;
+        const pg = esTx(slug, group); pg.title = title; c.pages.push(pg);
+        const g = nav.find(n => n.label === group); if (!g) continue; g.children = g.children || [];
+        const i = g.children.findIndex(k => k.href === 'p:pg-' + after);
+        g.children.splice(i < 0 ? g.children.length : i + 1, 0, { label:title, href:'p:' + pg.id, children:[] });
+      }
+      c.site._mo1 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){ console.warn(e); }
+  }
   // e-스타 07: 오시는 길 약도
   for (const p of all.filter(p => p.id && p.content && p.content.site && p.content.site._seed === 'estar' && !p.content.site._map1)){
     try { if (!p.content.site.mapImg) p.content.site.mapImg = 'asset:estar/mapIllust4'; p.content.site._map1 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){}
