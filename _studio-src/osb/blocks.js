@@ -416,6 +416,10 @@ Object.values(BLOCKDEFS).forEach(T => { T.blocks.c_treat = COMMON_BLOCKS.c_treat
 const COMMON_JS2 = `
 (function(){var E=window.__EDIT;
 function init(root){
+ /* 'e-스타' 같은 하이픈 이름이 줄 끝에서 끊기지 않게 묶기 (공개 화면만) */
+ if(!E&&root.querySelectorAll){var tw=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),ns=[],n;while(n=tw.nextNode()){if(/[A-Za-z0-9]-[가-힣A-Za-z]/.test(n.nodeValue)&&!(n.parentElement&&n.parentElement.closest('script,style,.nw,textarea')))ns.push(n)}
+  ns.forEach(function(t){var f=document.createDocumentFragment(),parts=t.nodeValue.split(/(\S*[A-Za-z0-9]-[가-힣A-Za-z]\S*)/);parts.forEach(function(x,i){if(!x)return;if(i%2){var s=document.createElement('span');s.className='nw';s.textContent=x;f.appendChild(s)}else f.appendChild(document.createTextNode(x))});t.parentNode.replaceChild(f,t)})}
+
  /* 화면에 보이는 동안만 재생하는 영상 (data-lazyplay) */
  root.querySelectorAll('video[data-lazyplay]:not([data-lp])').forEach(function(v){v.setAttribute('data-lp','1');v.muted=true;
   if(!window.IntersectionObserver){v.preload='auto';v.play&&v.play().catch(function(){});return}

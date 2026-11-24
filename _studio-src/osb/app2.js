@@ -872,6 +872,10 @@ $('#q').addEventListener('input', drawList);
   if (typeof esApplyRoll === 'function') for (const p of all.filter(p => p.id && p.theme === 'luxe' && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._roll1)){
     try { esApplyRoll(p.content); p.updated = now(); await DB.put(clone(p)); } catch(e){ console.warn(e); }
   }
+  // e-스타: 예시 후기 → 상담 고민 카드 (예시 문구일 때만 교체)
+  if (typeof esApplyConsult === 'function') for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._con1)){
+    try { esApplyConsult(p.content); p.updated = now(); await DB.put(clone(p)); } catch(e){ console.warn(e); }
+  }
   // e-스타 07: 오시는 길 약도
   for (const p of all.filter(p => p.id && p.content && p.content.site && p.content.site._seed === 'estar' && !p.content.site._map1)){
     try { if (!p.content.site.mapImg) p.content.site.mapImg = 'asset:estar/mapIllust4'; p.content.site._map1 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){}

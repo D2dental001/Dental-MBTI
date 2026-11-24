@@ -86,3 +86,8 @@ Skilldb(find-skills), claude-code-setup, frontend-design, Superpowers, playwrigh
 ## 그 외 참고
 - 영상 제작 스크립트: `vid/make2.py`(사진→Ken Burns 1080p), `vid/up.py`(EDSR 2배 업스케일). 원본 사진은 이 저장소에 없음(필요시 사용자에게 재요청 또는 `assets/hp-studio/estar/` 자산 사용).
 - 로고 재현 소스: `logo/globe.svg`, `logo/final.html`.
+
+## 2026-11-24 치료후기 → 상담 이야기
+- 지어낸 예시 후기(김**님 등)는 의료광고·허위후기 문제로 제거. `c_consult` 블록(luxe.js)으로 '이런 고민으로 찾아오십니다' 12개(무삭제 라미네이트 7) 교체. 사이트에 이미 있는 사실만 사용.
+- 저장된 사이트는 app2.js 마이그레이션(`_con1`)이 예시 후기일 때만 교체. 메뉴명 '상담 이야기', SEO 제목·설명 갱신, FAQPage JSON-LD에도 포함.
+- 공개 화면에서 'e-스타' 같은 하이픈 단어는 `.nw`로 묶어 줄 끝에서 안 끊김.

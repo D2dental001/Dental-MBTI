@@ -357,6 +357,24 @@ function esApplyRoll(c){
   }
   c.site._roll1 = 1; return c;
 }
+
+/* 2026-11-24 치료후기 → 상담 이야기 (지어낸 후기 대신 상담에서 자주 듣는 고민과 답변) */
+const ES_CONSULT = [["무삭제 라미네이트", "멀쩡한 이를 깎는 게 너무 무서워요", "건강한 치아는 깎지 않는 것이 원칙입니다. 0.1mm 지르코니아를 붙여 마취 없이 진행하고, 배열 때문에 꼭 필요할 때만 표면을 미세하게 다듬습니다.", "p:pg-laminate"], ["무삭제 라미네이트", "앞니 사이가 벌어져서 웃을 때 손으로 가려요", "벌어진 틈은 치아를 깎지 않고 양옆에 얇게 덧붙여 메울 수 있는 경우가 많습니다. 틈의 크기와 잇몸 모양을 보고 방법을 정합니다.", "p:pg-laminate"], ["무삭제 라미네이트", "예전에 한 라미네이트가 누렇게 변하고 경계가 보여요", "변색되지 않는 지르코니아로 다시 만들 수 있습니다. 기존 보철을 조심스럽게 제거한 뒤 남은 치아 상태를 확인하고 교체 계획을 세웁니다.", "p:pg-laminate"], ["무삭제 라미네이트", "너무 하얗고 인공적으로 보일까 봐 걱정돼요", "얼굴과 잇몸 색, 원하는 밝기를 함께 보고 색과 모양을 정합니다. 자연스럽게 밝은 미소를 목표로 디자인합니다.", "p:pg-laminate"], ["무삭제 라미네이트", "앞니 하나만 작아서 신경 쓰여요", "작은 치아(왜소치) 한두 개만 크기와 비율을 맞추는 것도 가능합니다. 주변 치아와의 균형을 먼저 확인합니다.", "p:pg-laminate"], ["무삭제 라미네이트", "앞니 끝이 깨졌는데 크게 깎아야 하나요?", "깨진 범위가 작으면 깎지 않고 얇게 덧붙여 회복할 수 있습니다. 깨진 깊이를 확인한 뒤 레진과 라미네이트 중 맞는 방법을 안내합니다.", "p:pg-laminate"], ["무삭제 라미네이트", "미백을 해도 하얘지지 않는 회색 치아예요", "약물이나 신경치료 등으로 생긴 깊은 변색은 미백만으로는 한계가 있습니다. 이럴 때는 빛 투과가 적은 지르코니아 라미네이트로 색을 가리는 방법을 상담합니다.", "p:pg-laminate"], ["전문가 치아미백", "커피를 많이 마셔서 치아가 누래졌어요", "착색 원인을 먼저 확인하고, 치아를 깎거나 덮지 않는 전문가 미백으로 본래의 밝기를 되찾습니다. 셰이드 가이드로 변화를 함께 확인합니다.", "p:pg-whitening"], ["전문가 치아미백", "미백하면 이가 시리거나 상하지 않을까요?", "미백제는 치아 표면을 깎지 않고 색소만 분해합니다. 일시적으로 시릴 수 있어 치아 상태에 맞게 강도와 횟수를 조절합니다.", "p:pg-whitening"], ["재신경치료", "다른 치과에서 이를 빼야 한다고 했어요", "보존과 인정의 원장이 엑스레이로 뿌리 상태를 확인하고, 재신경치료로 살릴 수 있는지 먼저 봅니다. 살리기 어려운 경우에는 그 이유를 설명해 드립니다.", "p:pg-retreatment"], ["메릴랜드 브릿지", "앞니 하나가 빠졌는데 임플란트 수술이 부담돼요", "옆 치아를 거의 깎지 않고 수술 없이 붙이는 메릴랜드 브릿지를 함께 검토합니다. 교합과 옆 치아 상태를 보고 맞는 방법을 정합니다.", "p:pg-maryland"], ["레이저 잇몸미백", "잇몸이 검어서 웃는 게 신경 쓰여요", "색소가 침착된 층만 레이저로 정리하는 잇몸미백으로 분홍빛 잇몸을 되찾을 수 있습니다. 흡연이나 보철물 같은 원인을 먼저 확인합니다.", "p:pg-gum-whitening"]];
+const esConsultBlk = () => blk('c_consult', { lab:'CONSULTATION', t:'이런 고민으로 찾아오십니다', s:'상담에서 가장 많이 듣는 고민과 e-스타치과의 답변입니다', items:ES_CONSULT.map(([tg,q,a,href]) => ({ tg, q, a, href })) });
+function esApplyConsult(c){
+  const pg = c.pages.find(p => p.slug === 'reviews');
+  if (pg){
+    const i = pg.blocks.findIndex(b => b.type === 'c_reviews' && (b.data.items || []).some(x => /\*\*님/.test(x.n || '')));
+    if (i >= 0) pg.blocks.splice(i, 1, esConsultBlk());
+    if (pg.title === '치료후기') pg.title = '상담 이야기';
+    const h = pg.blocks.find(b => b.type === 'c_subhero');
+    if (h && /치료후기|후기/.test(h.data.t || '')) Object.assign(h.data, { en:'CONSULTATION', t:'상담 이야기', d:'이런 고민으로 e-스타치과를 찾아오십니다', crumb:'HOME  >  커뮤니티  >  상담 이야기' });
+    if (!pg.seoTitle || /치료 후기/.test(pg.seoTitle)) pg.seoTitle = '상담 이야기 | 신촌 무삭제 라미네이트 · 미백 고민 e-스타치과';
+    if (!pg.seoDesc || /후기/.test(pg.seoDesc)) pg.seoDesc = '이를 깎는 게 무섭거나 앞니가 벌어져 고민이라면. 신촌 e-스타치과 상담에서 자주 듣는 무삭제 라미네이트·치아미백 고민과 답변을 모았습니다.';
+    (c.site.nav || []).forEach(g => (g.children || []).forEach(k => { if (k.href === 'p:' + pg.id && k.label === '치료후기') k.label = '상담 이야기'; }));
+  }
+  c.site._con1 = 1; return c;
+}
 const ES_VIDEO = () => ({ video:'assets/hp-studio/estar/estar_hero3.mp4', poster:'asset:estar/heroPoster2', en:'The Art of a Natural Smile', t:'신촌역 도보 1분, 18년째 같은 자리에서 원장이 직접 진료하는 신촌 e-스타치과', btn:'VIEW MORE', href:'p:pg-special' });
 function estarLuxe(){
   const old = estarContent();
@@ -405,6 +423,7 @@ function estarLuxe(){
   c.pages = [home, ...pages];
   esApplySeo(c);
   esApplyRoll(c);
+  esApplyConsult(c);
   return JSON.parse(JSON.stringify(c).split('"asset:estar/doctor"').join('"asset:estar/lxDoc"'));
 }
 SEED.push({ theme:'luxe', title:'07 신촌 e-스타치과 (프리미엄 심미형)', once:'estar', ver:5, note:'갤러리형 메인 배너(심미 전후 사진), 새 고화질 로고, 웜톤 색상으로 변경', build: estarLuxe });

@@ -407,7 +407,7 @@ function seoJsonLd(content, page, o){
   if (page.id !== 'home' && base) g.push({ '@type':'BreadcrumbList', itemListElement:[
     { '@type':'ListItem', position:1, name:'홈', item:home }, { '@type':'ListItem', position:2, name:page.title, item:o.pageUrl } ] });
   const vis = (page.blocks || []).filter(b => !b.hidden);
-  const faqs = []; vis.filter(b => b.type === 'c_faq').forEach(b => (b.data.items || []).forEach(it => { const q = seoPlain(it.q), an = seoPlain(it.a); if (q && an) faqs.push({ '@type':'Question', name:q, acceptedAnswer:{ '@type':'Answer', text:an } }); }));
+  const faqs = []; vis.filter(b => b.type === 'c_faq' || b.type === 'c_consult').forEach(b => (b.data.items || []).forEach(it => { const q = seoPlain(it.q), an = seoPlain(it.a); if (q && an) faqs.push({ '@type':'Question', name:q, acceptedAnswer:{ '@type':'Answer', text:an } }); }));
   if (faqs.length) g.push({ '@type':'FAQPage', '@id':o.pageUrl ? o.pageUrl + '#faq' : undefined, mainEntity:faqs });
   if (page.id !== 'home' && vis.some(b => b.type === 'c_steps')) g.push({ '@type':'Service', name:page.title, serviceType:page.title, description:o.desc,
     provider: base ? { '@id':id('dentist') } : { '@type':'Dentist', name:site.name }, areaServed: areas.length ? areas.map(n => ({ '@type':'Place', name:n })) : undefined, url:o.pageUrl || undefined });
