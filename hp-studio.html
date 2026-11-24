@@ -2606,7 +2606,7 @@ if (!ES_MAP.some(g => g.label === '턱관절 · 보톡스')) ES_MAP.splice(3, 0,
 function estarLuxe(){
   const old = estarContent();
   const c = defaultContent('luxe');
-  c.site = Object.assign({}, c.site, old.site, { color:'#3a2f29', color2:'#c9a876', _seedVer:5, logo:'asset:estar/lgW', logoLight:'asset:estar/lgC', logoH:'56', logoTone:'', bal_cta:'상담 예약', bal_book:'' });
+  c.site = Object.assign({}, c.site, old.site, { color:'#3a2f29', color2:'#c9a876', _seedVer:5, logo:'asset:estar/eLogoW', logoLight:'asset:estar/eLogoC', logoH:'56', logoTone:'', bal_cta:'상담 예약', bal_book:'' });
   const home = c.pages[0], by = t => home.blocks.find(b => b.type === t);
   by('lhero').data.slides = [
     ['hxSide','','Smile Design','웃는 순간 가장 먼저 보이는','자연스러운 미소 라인','치아의 길이와 색, 입술 라인까지 함께 보고 디자인합니다','심미치료 보기','pg-laminate'],
@@ -3465,6 +3465,10 @@ $('#q').addEventListener('input', drawList);
       const left = (j.match(/\d+\s*만\s*원|이벤트|할인|특가/g) || []).length;
       toast(left ? `[${p.title}] 가격·이벤트 문구를 정리했습니다. 직접 쓰신 문구 중 ${left}곳은 확인이 필요합니다.` : `[${p.title}] 가격·이벤트 문구를 정리했습니다 ✔`);
     } catch(e){}
+  }
+  // e-스타 07: 원본과 같은 모양의 고화질 로고로 교체 (다른 내용은 유지)
+  for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && /estar\/(lgW|lgC|logoW|logoC)$/.test((p.content.site.logo||'') + '|' ) === false && ['asset:estar/lgW','asset:estar/logoW'].includes(p.content.site.logo))){
+    try { p.content.site.logo = 'asset:estar/eLogoW'; p.content.site.logoLight = 'asset:estar/eLogoC'; p.content.site.logoTone = ''; p.updated = now(); await DB.put(clone(p)); } catch(e){}
   }
   await restoreDrafts(all.filter(p => p.id)); await renderList(); show('list');
 })();
