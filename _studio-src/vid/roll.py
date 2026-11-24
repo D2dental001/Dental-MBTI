@@ -42,4 +42,4 @@ def build(cases,src,layout,out,hold=2.6,move=0.7,fps=30):
     cards[0].save(out.replace('.mp4','_poster.webp'),'WEBP',quality=82)
     return n
 D=A
-print(build(LAMI,U,'wide',D+'rollLamiW.mp4'),build(WHITE,A,'wide',D+'rollWhiteW.mp4'))
+
