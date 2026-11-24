@@ -872,6 +872,10 @@ $('#q').addEventListener('input', drawList);
   if (typeof esApplyRoll === 'function') for (const p of all.filter(p => p.id && p.theme === 'luxe' && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._roll1)){
     try { esApplyRoll(p.content); p.updated = now(); await DB.put(clone(p)); } catch(e){ console.warn(e); }
   }
+  // e-스타: 소아·성장기 진료 사진 교체 (기존 사진일 때만)
+  for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._kids1)){
+    try { const pg = p.content.pages.find(x => x.slug === 'kids'); if (pg) pg.blocks.forEach(b => { if (b.data && b.data.img === 'asset:estar/smile2') b.data.img = 'asset:estar/kids'; }); p.content.site._kids1 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){ console.warn(e); }
+  }
   // e-스타: 예시 후기 → 상담 고민 카드 (예시 문구일 때만 교체)
   if (typeof esApplyConsult === 'function') for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._con1)){
     try { esApplyConsult(p.content); p.updated = now(); await DB.put(clone(p)); } catch(e){ console.warn(e); }

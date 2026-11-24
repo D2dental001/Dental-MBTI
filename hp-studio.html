@@ -2634,7 +2634,7 @@ const ES_TX = {
     points:[['shield','보험 적용','만 19세 이상 연 1회 보험 스케일링이 가능합니다.'],['tooth','단계별 치료','잇몸 상태에 맞춰 단계적으로 치료합니다.'],['cal','정기 관리','3~6개월 간격으로 점검합니다.']],
     steps:[['검진','잇몸 깊이와 출혈을 확인합니다.'],['스케일링','치석과 세균막을 제거합니다.'],['잇몸치료','깊은 치석까지 정리합니다.'],['유지 관리','정기적으로 점검합니다.']],
     faq:[['스케일링하면 이가 깎이나요?','아닙니다. 초음파 진동으로 치석만 떨어뜨립니다.'],['잇몸치료는 많이 아픈가요?','마취 후 진행해 대부분 크게 불편하지 않습니다.']] },
-  kids: { title:'소아 · 성장기 진료', en:'KIDS', img:'smile2', heroImg:'heroGum', desc:'영구치가 나는 시기부터 바르게',
+  kids: { title:'소아 · 성장기 진료', en:'KIDS', img:'kids', heroImg:'heroGum', desc:'영구치가 나는 시기부터 바르게',
     lead:'아이의 첫 치과,\n즐거운 기억으로', d:'유치가 빠지지 않거나 영구치가 없는 경우, 제1대구치 관리 등 성장기에 꼭 필요한 진료를 친절하게 설명하고 진행합니다.',
     pts:'영구치 결손 진단\n제1대구치 실란트\n불소 도포\n이앓이 · 성장 상담',
     points:[['child','친절한 진료','아이 눈높이에 맞춰 설명합니다.'],['shield','예방 중심','실란트·불소로 충치를 막습니다.'],['cal','성장 관리','영구치가 날 때까지 꾸준히 봅니다.']],
@@ -3839,6 +3839,10 @@ $('#q').addEventListener('input', drawList);
   // e-스타: 특별함 페이지에 라미네이트·미백 롤링 영상 (프리미엄 테마, 없을 때만)
   if (typeof esApplyRoll === 'function') for (const p of all.filter(p => p.id && p.theme === 'luxe' && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._roll1)){
     try { esApplyRoll(p.content); p.updated = now(); await DB.put(clone(p)); } catch(e){ console.warn(e); }
+  }
+  // e-스타: 소아·성장기 진료 사진 교체 (기존 사진일 때만)
+  for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._kids1)){
+    try { const pg = p.content.pages.find(x => x.slug === 'kids'); if (pg) pg.blocks.forEach(b => { if (b.data && b.data.img === 'asset:estar/smile2') b.data.img = 'asset:estar/kids'; }); p.content.site._kids1 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){ console.warn(e); }
   }
   // e-스타: 예시 후기 → 상담 고민 카드 (예시 문구일 때만 교체)
   if (typeof esApplyConsult === 'function') for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._con1)){
