@@ -830,10 +830,10 @@ $('#q').addEventListener('input', drawList);
   }
   // e-스타 07: 오시는 길 약도
   for (const p of all.filter(p => p.id && p.content && p.content.site && p.content.site._seed === 'estar' && !p.content.site._map1)){
-    try { if (!p.content.site.mapImg) p.content.site.mapImg = 'asset:estar/mapIllust3'; p.content.site._map1 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){}
+    try { if (!p.content.site.mapImg) p.content.site.mapImg = 'asset:estar/mapIllust4'; p.content.site._map1 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){}
   }
-  for (const p of all.filter(p => p.id && p.content && p.content.site && /^asset:estar\/mapIllust2?$/.test(p.content.site.mapImg||''))){
-    try { p.content.site.mapImg = 'asset:estar/mapIllust3'; p.updated = now(); await DB.put(clone(p)); } catch(e){}
+  for (const p of all.filter(p => p.id && p.content && p.content.site && /^asset:estar\/mapIllust[23]?$/.test(p.content.site.mapImg||''))){
+    try { p.content.site.mapImg = 'asset:estar/mapIllust4'; p.updated = now(); await DB.put(clone(p)); } catch(e){}
   }
   // e-스타 07: 메인 영상 1080p 와이드 버전으로 교체 (기본 영상을 쓰는 경우만)
   for (const p of all.filter(p => p.id && p.content && p.content.pages && !(p.content.site||{})._v1080b)){

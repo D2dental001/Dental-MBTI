@@ -2663,7 +2663,7 @@ const ES_VIDEO = () => ({ video:'assets/hp-studio/estar/estar_hero3.mp4', poster
 function estarLuxe(){
   const old = estarContent();
   const c = defaultContent('luxe');
-  c.site = Object.assign({}, c.site, old.site, { color:'#3a2f29', color2:'#c9a876', _seedVer:5, logo:'asset:estar/eLogoW', logoLight:'asset:estar/eLogoC', logoH:'56', mapImg:'asset:estar/mapIllust3', _map1:1, logoTone:'', bal_cta:'상담 예약', bal_book:'' });
+  c.site = Object.assign({}, c.site, old.site, { color:'#3a2f29', color2:'#c9a876', _seedVer:5, logo:'asset:estar/eLogoW', logoLight:'asset:estar/eLogoC', logoH:'56', mapImg:'asset:estar/mapIllust4', _map1:1, logoTone:'', bal_cta:'상담 예약', bal_book:'' });
   const home = c.pages[0], by = t => home.blocks.find(b => b.type === t);
   by('lhero').data.slides = [
     ['hxSide','','Smile Design','웃는 순간 가장 먼저 보이는','자연스러운 미소 라인','치아의 길이와 색, 입술 라인까지 함께 보고 디자인합니다','심미치료 보기','pg-laminate'],
@@ -3541,10 +3541,10 @@ $('#q').addEventListener('input', drawList);
   }
   // e-스타 07: 오시는 길 약도
   for (const p of all.filter(p => p.id && p.content && p.content.site && p.content.site._seed === 'estar' && !p.content.site._map1)){
-    try { if (!p.content.site.mapImg) p.content.site.mapImg = 'asset:estar/mapIllust3'; p.content.site._map1 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){}
+    try { if (!p.content.site.mapImg) p.content.site.mapImg = 'asset:estar/mapIllust4'; p.content.site._map1 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){}
   }
-  for (const p of all.filter(p => p.id && p.content && p.content.site && /^asset:estar\/mapIllust2?$/.test(p.content.site.mapImg||''))){
-    try { p.content.site.mapImg = 'asset:estar/mapIllust3'; p.updated = now(); await DB.put(clone(p)); } catch(e){}
+  for (const p of all.filter(p => p.id && p.content && p.content.site && /^asset:estar\/mapIllust[23]?$/.test(p.content.site.mapImg||''))){
+    try { p.content.site.mapImg = 'asset:estar/mapIllust4'; p.updated = now(); await DB.put(clone(p)); } catch(e){}
   }
   // e-스타 07: 메인 영상 1080p 와이드 버전으로 교체 (기본 영상을 쓰는 경우만)
   for (const p of all.filter(p => p.id && p.content && p.content.pages && !(p.content.site||{})._v1080b)){
