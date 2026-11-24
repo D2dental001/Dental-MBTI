@@ -293,7 +293,7 @@ function formHTML(c, R, opt={}){
 }
 
 function baBlock(R, b, a, cls=''){
-  return `<div class="ba ${cls}" style="--p:50%">${R.i(a,'ba-a','치료 후')}<div class="ba-b">${R.i(b,'','치료 전')}</div><span class="ba-l">BEFORE</span><span class="ba-r">AFTER</span><input type="range" min="0" max="100" value="50" aria-label="전후 비교"><i class="ba-h"></i></div>`;
+  return `<div class="ba ${cls}" style="--p:50%">${R.i(a,'ba-a','치료 후')}<div class="ba-b">${R.i(b,'','치료 전')}</div><span class="ba-l">BEFORE</span><span class="ba-r">AFTER</span><input type="range" min="0" max="100" value="50" aria-label="전후 비교"><i class="ba-h"></i><span class="ba-tip">좌우로 밀어서 전후 비교</span></div>`;
 }
 
 const COMMON_CSS = `
@@ -308,7 +308,7 @@ img{display:block;max-width:100%}a{color:inherit;text-decoration:none}button{fon
 .ba-b{position:absolute;inset:0;clip-path:inset(0 calc(100% - var(--p)) 0 0)}
 .ba input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;z-index:3}
 .ba-h{position:absolute;top:0;bottom:0;left:var(--p);width:2px;background:#fff;z-index:2;pointer-events:none;box-shadow:0 0 8px rgba(0,0,0,.3)}
-.ba-h:after{content:'◀ ▶';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;color:#333;font-size:11px;padding:8px 9px;border-radius:30px;white-space:nowrap}
+.ba-h:after{content:'';position:absolute;top:50%;left:50%;width:46px;height:46px;transform:translate(-50%,-50%);border-radius:50%;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 46' fill='none' stroke='%232e2622' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 16l-7 7 7 7M28 16l7 7-7 7'/%3E%3C/svg%3E") center/46px no-repeat;box-shadow:0 4px 16px rgba(0,0,0,.3)}.ba-h:before{content:'';position:absolute;top:50%;left:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:2px solid #fff;opacity:0;animation:bapulse 2.2s ease-out infinite}.ba.used .ba-h:before{animation:none}@keyframes bapulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.7);opacity:0}}.ba-tip{position:absolute;top:calc(50% + 34px);left:var(--p);transform:translateX(-50%);z-index:2;pointer-events:none;white-space:nowrap;font-size:12px;font-weight:600;letter-spacing:-.01em;color:#fff;background:rgba(20,16,14,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:6px 12px;border-radius:20px;transition:opacity .4s}.ba.used .ba-tip{opacity:0}.ba input:focus-visible~.ba-h:after{outline:3px solid #fff;outline-offset:3px}@media (prefers-reduced-motion:reduce){.ba-h:before{animation:none}}
 .ba-l,.ba-r{position:absolute;top:14px;z-index:2;font-size:12px;letter-spacing:.15em;color:#fff;background:rgba(0,0,0,.45);padding:4px 10px;pointer-events:none}.ba-l{left:14px}.ba-r{right:14px}
 .mapbox{width:100%;aspect-ratio:16/10;background:#e9ecef;overflow:hidden}.mapbox iframe{width:100%;height:100%;border:0}
 .mapbox.ill{aspect-ratio:auto!important;height:auto;position:relative;background:#f4eee5}.mapbox.ill img{display:block;width:100%;height:auto;object-fit:contain}.mapbox.ill .mapgo{position:absolute;right:12px;bottom:12px;background:rgba(46,38,34,.88);color:#f1e4cc;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;text-decoration:none}.mapbox.ill .mapgo:hover{background:#2e2622}
@@ -1359,7 +1359,7 @@ Object.values(BLOCKDEFS).forEach(T => { T.blocks.c_treat = COMMON_BLOCKS.c_treat
 const COMMON_JS2 = `
 (function(){var E=window.__EDIT;
 function init(root){
- root.querySelectorAll('.ba:not([data-i])').forEach(function(b){b.setAttribute('data-i','1');var r=b.querySelector('input');if(E){r.style.pointerEvents='none';return}r.addEventListener('input',function(){b.style.setProperty('--p',r.value+'%')})});
+ root.querySelectorAll('.ba:not([data-i])').forEach(function(b){b.setAttribute('data-i','1');var r=b.querySelector('input');if(E){r.style.pointerEvents='none';return}var u=0;function set(v){b.style.setProperty('--p',v+'%')}r.addEventListener('input',function(){u=1;b.classList.add('used');set(r.value)});if(window.IntersectionObserver&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){var io=new IntersectionObserver(function(es){if(!es[0].isIntersecting)return;io.disconnect();setTimeout(function(){var t0=0;function f(ts){if(u)return;if(!t0)t0=ts;var k=Math.min(1,(ts-t0)/1800),v=50+16*Math.sin(k*Math.PI*2)*(1-k*.3);if(k>=1)v=50;set(v);r.value=v;if(k<1)requestAnimationFrame(f)}requestAnimationFrame(f)},500)},{threshold:.6});io.observe(b)}});
  root.querySelectorAll('[data-slides]:not([data-i])').forEach(function(w){w.setAttribute('data-i','1');var s=w.querySelectorAll('.slide'),d=w.querySelector('.dots'),i=0,t;if(!s.length)return;
   function go(n){s[i].classList.remove('on');d&&d.children[i]&&d.children[i].classList.remove('on');i=(n+s.length)%s.length;s[i].classList.add('on');d&&d.children[i]&&d.children[i].classList.add('on')}
   if(d){d.innerHTML='';s.forEach(function(_,n){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label',(n+1)+'번 슬라이드');b.onclick=function(){go(n);rs()};d.appendChild(b)});d.children[0].classList.add('on')}
@@ -2363,6 +2363,17 @@ T_LUXE.css += '\n.dd-w{position:relative;flex:1;min-width:0;display:flex}.dd-w .
  + '.dd-l li{padding:10px 14px;border-radius:8px;color:#efe6d6;font-size:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}'
  + '.dd-l li:hover,.dd-l li:focus{background:rgba(201,168,118,.22);color:#fff;outline:none}.dd-l li[aria-selected=true]{color:#e3c995;font-weight:600}.dd-l li[aria-selected=true]:after{content:"";width:5px;height:10px;border-right:2px solid #e3c995;border-bottom:2px solid #e3c995;transform:rotate(45deg) translateY(-2px)}'
  + '@media (prefers-reduced-motion:reduce){.dd-l,.lbar .dd-b:after{transition:none}}';
+
+T_LUXE.css += '\n.t-luxe .hd nav>a.on,.t-luxe .hd nav .mi.on>.mi-a{color:var(--gold2)!important}.t-luxe .hd nav>a:hover,.t-luxe .hd nav .mi:hover>.mi-a{color:#fff}'
+ + '@media(min-width:901px){.t-luxe .hd nav .sub{display:block;padding-top:0;opacity:0;visibility:hidden;transform:translate(-50%,8px);transition:opacity .22s,transform .22s,visibility .22s}'
+ + '.t-luxe .hd nav .mi:hover .sub,.t-luxe .hd nav .mi:focus-within .sub{opacity:1;visibility:visible;transform:translate(-50%,0)}'
+ + '.t-luxe .hd nav .sub-in{min-width:210px;padding:10px;border-radius:0 0 14px 14px;background:rgba(33,27,24,.9);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);border:1px solid rgba(216,193,154,.2);border-top:2px solid var(--gold);box-shadow:0 22px 44px rgba(0,0,0,.35)}'
+ + '.t-luxe .hd nav .sub a{position:relative;padding:12px 16px 12px 30px;border-radius:8px;color:#e9e1d3!important;font-size:14.5px;transition:background .2s,color .2s}'
+ + '.t-luxe .hd nav .sub a:before{content:"";position:absolute;left:14px;top:50%;width:4px;height:4px;margin-top:-2px;border-radius:50%;background:rgba(216,193,154,.45);transition:.2s}'
+ + '.t-luxe .hd nav .sub a:hover{background:rgba(201,168,118,.14);color:#fff!important}.t-luxe .hd nav .sub a:hover:before{width:9px;border-radius:2px;background:var(--gold2)}'
+ + '.t-luxe .hd nav .sub a.on{color:var(--gold2)!important;font-weight:600}.t-luxe .hd nav .sub a.on:before{width:9px;border-radius:2px;background:var(--gold2)}'
+ + '.t-luxe .hd nav .sub a+a{margin-top:2px}}'
+ + '@media (prefers-reduced-motion:reduce){.t-luxe .hd nav .sub{transition:none}}';
 
 /* =====================================================================
    7. 신촌 e-스타치과 — 밸런스형 디자인 + 심미(라미네이트·미백) 강조 샘플
