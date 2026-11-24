@@ -416,6 +416,13 @@ Object.values(BLOCKDEFS).forEach(T => { T.blocks.c_treat = COMMON_BLOCKS.c_treat
 const COMMON_JS2 = `
 (function(){var E=window.__EDIT;
 function init(root){
+ /* 강제 줄바꿈(<br>)이 있는 제목·문단은 줄 단위로 나눠 각 줄에 줄바꿈 균형을 적용 (공개 화면만, 편집 화면은 그대로) */
+ if(!E&&document.body&&document.body.classList.contains('t-luxe'))root.querySelectorAll('h1,h2,h3,h4,p,.lead').forEach(function(el){
+  if(el.getAttribute('data-seg'))return;var box=el;while(![].some.call(box.childNodes,function(n){return n.nodeName==='BR'})){var ch=[].filter.call(box.childNodes,function(n){return n.nodeType===1||(n.textContent||'').trim()});if(ch.length!==1||ch[0].nodeType!==1)break;box=ch[0]}el.setAttribute('data-seg','1');el=box;var kids=[].slice.call(el.childNodes);if(!kids.some(function(n){return n.nodeName==='BR'}))return;
+  el.setAttribute('data-seg','1');var segs=[[]];kids.forEach(function(n){if(n.nodeName==='BR')segs.push([]);else segs[segs.length-1].push(n)});
+  while(el.firstChild)el.removeChild(el.firstChild);
+  segs.forEach(function(g){var sp=document.createElement('span');sp.className='seg';if(!g.length||!g.some(function(n){return (n.textContent||'').trim()}))sp.className='seg seg-gap';g.forEach(function(n){sp.appendChild(n)});el.appendChild(sp)})});
+
  root.querySelectorAll('.ba:not([data-i])').forEach(function(b){b.setAttribute('data-i','1');var r=b.querySelector('input');if(E){r.style.pointerEvents='none';return}var u=0;function set(v){b.style.setProperty('--p',v+'%')}r.addEventListener('input',function(){u=1;b.classList.add('used');set(r.value)});if(window.IntersectionObserver&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){var io=new IntersectionObserver(function(es){if(!es[0].isIntersecting)return;io.disconnect();setTimeout(function(){var t0=0;function f(ts){if(u)return;if(!t0)t0=ts;var k=Math.min(1,(ts-t0)/1800),v=50+16*Math.sin(k*Math.PI*2)*(1-k*.3);if(k>=1)v=50;set(v);r.value=v;if(k<1)requestAnimationFrame(f)}requestAnimationFrame(f)},500)},{threshold:.6});io.observe(b)}});
  root.querySelectorAll('[data-slides]:not([data-i])').forEach(function(w){w.setAttribute('data-i','1');var s=w.querySelectorAll('.slide'),d=w.querySelector('.dots'),i=0,t;if(!s.length)return;
   function go(n){s[i].classList.remove('on');d&&d.children[i]&&d.children[i].classList.remove('on');i=(n+s.length)%s.length;s[i].classList.add('on');d&&d.children[i]&&d.children[i].classList.add('on')}

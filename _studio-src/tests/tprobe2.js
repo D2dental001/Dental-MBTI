@@ -1,0 +1,11 @@
+const { chromium } = require('playwright');const {setup}=require('./t2.js');
+(async()=>{const b=await chromium.launch();const ctx=await setup(b);const p=await ctx.newPage({viewport:{width:1800,height:1000}});p.on('dialog',d=>d.accept());
+await p.goto('http://hp.local/hp-studio.html');await p.waitForSelector('.card .thumb');
+const id=await p.$$eval('.card',cs=>cs.find(c=>{const b=c.querySelector('.meta b');return b&&b.innerText.startsWith('07')}).querySelector('.acts .pri').dataset.edit);
+await p.click(`.acts [data-edit="${id}"]`);await p.waitForTimeout(2500);await p.getByText('편집 모드',{exact:true}).click();await p.waitForTimeout(1200);
+const W=+process.argv[2]||1280, SEL=process.argv[3]||'.lm .st';
+await p.evaluate(w=>{const f=document.querySelector('#pv');f.style.width=w+'px';f.style.minWidth=w+'px';f.style.maxWidth='none';f.style.transform='none'},W);await p.waitForTimeout(900);
+const fr=p.frames().find(x=>x!==p.mainFrame());
+console.log(await fr.evaluate(s=>{const e=document.querySelector(s);const c=getComputedStyle(e);return [c.gridTemplateColumns,c.columnGap,e.getBoundingClientRect().width,e.parentElement.getBoundingClientRect().width,[...e.children].map(li=>Math.round(li.scrollWidth)+"/"+Math.round(li.getBoundingClientRect().width)).join(" ")]},SEL));
+await fr.evaluate(s=>{document.documentElement.style.scrollBehavior='auto';document.querySelectorAll('.rv').forEach(x=>x.classList.add('in'));const e=document.querySelector(s);window.scrollTo(0,e.getBoundingClientRect().top+scrollY-120)},SEL);await p.waitForTimeout(700);
+await p.locator('#pv').screenshot({path:`shots/probe.png`});await b.close()})();

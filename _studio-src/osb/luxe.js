@@ -203,7 +203,7 @@ BLOCKDEFS.luxe = {
     dfeat: { label:'대표원장 소개 (크게)', desc:'아치형 프로필 사진 + 전문의 배지 · 약력',
       fields:[F.img('img','프로필 사진'), F.text('chip','배지 (예: 치과보존과 인정의)'), F.text('n','이름'), F.text('pos','직함'), F.area('hl','강조 약력 (줄바꿈)',{rows:2}), F.area('cr','약력 목록 (줄바꿈)',{rows:6}), F.text('sg','서명 문구')],
       defaults: () => ({ img:'asset:doc1', chip:'보철과 전문의', n:'홍길동', pos:'대표원장', hl:'00대학교 치의학대학원 박사\n대한심미치과학회 정회원', cr:'00대학교 치과대학 졸업\n00대학교 치과병원 수련\n대한치과보철학회 정회원\n대한심미치과학회 정회원', sg:'With sincere care' }),
-      render:(R,d)=>`<section class="ld"><div class="wrap"><div class="pf rv"><div class="ph">${R.i('img')}</div></div><div class="rv"><span class="chip">${R.t('chip')}</span><div class="nm">${R.t('n')}<small>${R.t('pos')}</small></div><div class="hl">${R.t('hl')}</div><ul>${String(d.cr||'').split('\n').filter(Boolean).map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="sg">${R.t('sg')}</p></div></div></section>` }
+      render:(R,d)=>`<section class="ld"><div class="wrap"><div class="pf rv"><div class="ph">${R.i('img')}</div></div><div class="rv"><span class="chip">${R.t('chip')}</span><div class="nm">${R.t('n')}<small>${R.t('pos')}</small></div><div class="hl">${R.t('hl')}</div>${(()=>{const cr=String(d.cr||'').split('\n').filter(Boolean);return `<ul style="--rows:${Math.ceil(cr.length/2)}">${cr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`})()}<p class="sg">${R.t('sg')}</p></div></div></section>` }
   }),
   chrome:(S,body,ctx)=>`
 <header class="hd"><div class="wrap"><a href="${ctx.home}" class="logo">${balLogo(S.v('bal_mark'))}<span><b>${S.t('name')}</b><small>${S.t('nameEn')}</small></span></a>
@@ -264,3 +264,17 @@ T_LUXE.css += '\n.t-luxe .ba .ba-l,.t-luxe .ba .ba-r{top:10px;font-size:10.5px;l
  + '}'
  + '.t-luxe .ba2 .in{background:rgba(250,247,242,.74);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}'
  + '@media(max-width:900px){.t-luxe .ba2 .in{background:rgba(250,247,242,.68)}}';
+
+/* 2026-11-24 줄바꿈 정리: 제목은 줄 길이 균형, 문단은 마지막 줄 외톨이 방지, 숫자·단위·전화·버튼은 한 줄 */
+T_LUXE.css += '\n.t-luxe{word-break:keep-all;overflow-wrap:break-word}'
+ + '.t-luxe h1,.t-luxe h2,.t-luxe h3,.t-luxe h4,.t-luxe .l2,.t-luxe .big,.t-luxe .lead{text-wrap:balance}'
+ + '.t-luxe p,.t-luxe li,.t-luxe small,.t-luxe dd,.t-luxe figcaption,.t-luxe .lm .st span{text-wrap:pretty}'
+ + '.t-luxe .lm .st span{text-wrap:balance}'
+ + '.t-luxe .lm .st b,.t-luxe .hd .tl,.t-luxe .hd .bk,.t-luxe .btn,.t-luxe a.bk{white-space:nowrap}'
+ + '@media(max-width:1366px){.t-luxe .hd .tl{display:none}}'
+ /* 대표원장 이력: 두 열 간격을 넓히고, 넓은 화면에서는 열 폭을 내용에 맞춰 한 줄로 */
+ + '.t-luxe .ld ul{column-gap:56px}'
+ + '@media(min-width:901px){.t-luxe .ld ul{grid-auto-flow:column;grid-template-rows:repeat(var(--rows,4),auto);grid-template-columns:auto auto;justify-content:start;column-gap:48px}}' + '@media(min-width:901px) and (max-width:1300px){.t-luxe .ld ul{font-size:14px;column-gap:36px}}'
+ + '.t-luxe .bf .addr,.t-luxe .cb-loc small{text-wrap:balance}';
+T_LUXE.css += '.t-luxe .seg{display:block}.t-luxe .seg-gap{height:1em}'
+ + '.t-luxe .cb-pts b,.t-luxe .ld ul li,.t-luxe .cb-sub p{text-wrap:balance}.t-luxe .cb-loc small{display:inline-block;text-wrap:balance}';

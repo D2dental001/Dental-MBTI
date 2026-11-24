@@ -71,6 +71,11 @@ Skilldb(find-skills), claude-code-setup, frontend-design, Superpowers, playwrigh
   > - 주소·번지수 글자 금지, 가격·이벤트 문구 금지. 16:10 가로, 고해상도
 - 생성 결과는 네이버 지도(`map/ref/naver_map.png`) 기준으로 위치 대조 후 사용자 승인 → mapIllust4.webp 적용·배포.
 
+## 줄바꿈 검사 (2026-11-24 추가 — 제작 시 필수)
+- 사용자 지시: 줄바꿈이 어색하거나 열 간격 때문에 불필요하게 줄이 바뀌는 부분은 Claude가 스스로 판단해 처리할 것.
+- 검사: `node twrap.js <임의번호> 1280,1180` / `node twrap.js <임의번호> 390,360` → `wrap_<번호>.json` (편집용 `x-t` 태그 안 글자까지 검사, 미리보기 iframe 폭을 직접 바꿔서 검사). `lm b`(숫자+단위 글자크기 차이)·공지 목록 날짜 줄·`단어중간`만 있는 강제줄바꿈 경계는 오탐.
+- 규칙(luxe.js 끝): 제목 `text-wrap:balance`, 문단 `pretty`, `word-break:keep-all`, 숫자·전화·버튼 nowrap, 강제 `<br>`이 있는 제목·문단은 공개 화면에서 `.seg` 단위로 나눠 균형 적용(blocks.js init, 편집 화면 제외). 대표원장 이력은 위→아래 채움(`--rows`), 왼쪽 학력·자격 / 오른쪽 학회·연수.
+
 ## 그 외 참고
 - 영상 제작 스크립트: `vid/make2.py`(사진→Ken Burns 1080p), `vid/up.py`(EDSR 2배 업스케일). 원본 사진은 이 저장소에 없음(필요시 사용자에게 재요청 또는 `assets/hp-studio/estar/` 자산 사용).
 - 로고 재현 소스: `logo/globe.svg`, `logo/final.html`.

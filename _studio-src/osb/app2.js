@@ -834,6 +834,11 @@ $('#q').addEventListener('input', drawList);
       for (const [a, b] of ES_COPY2) j = j.split(JSON.stringify(a)).join(JSON.stringify(b));
       const c = JSON.parse(j); c.site._copy2 = 1; p.content = c; p.updated = now(); await DB.put(clone(p)); } catch(e){}
   }
+  if (typeof ES_COPY3 !== 'undefined') for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._copy3)){
+    try { let j = JSON.stringify(p.content);
+      for (const [a, b] of ES_COPY3) j = j.split(JSON.stringify(a)).join(JSON.stringify(b));
+      const c = JSON.parse(j); c.site._copy3 = 1; p.content = c; p.updated = now(); await DB.put(clone(p)); } catch(e){}
+  }
   // e-스타 07: 오시는 길 약도
   for (const p of all.filter(p => p.id && p.content && p.content.site && p.content.site._seed === 'estar' && !p.content.site._map1)){
     try { if (!p.content.site.mapImg) p.content.site.mapImg = 'asset:estar/mapIllust4'; p.content.site._map1 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){}
