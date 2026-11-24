@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>홈페이지 미리보기</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-init.js"></script>
+<style>body{margin:0;font-family:Pretendard,'Malgun Gothic',sans-serif;background:#f6f3ef;color:#2b2622;display:grid;place-items:center;min-height:100vh;text-align:center;word-break:keep-all}
+.ld{display:grid;gap:14px;justify-items:center;padding:24px}.sp{width:34px;height:34px;border:3px solid #e2d9cf;border-top-color:#b08d57;border-radius:50%;animation:r 1s linear infinite}@keyframes r{to{transform:rotate(360deg)}}
+.ld b{font-size:18px}.ld small{color:#8a8178;line-height:1.7}</style>
+</head><body><div class="ld" id="ld"><div class="sp"></div><small>홈페이지를 불러오는 중입니다…</small></div>
+<script>/*THEMES*/</script>
+<script>/*BLOCKS*/</script>
+<script>
+(async function(){
+  function fail(msg){ document.getElementById('ld').innerHTML = '<b>미리보기를 열 수 없습니다</b><small>' + (msg || '링크가 만료되었거나 공유가 꺼져 있습니다.<br>링크를 보내준 담당자에게 문의해 주세요.') + '</small>'; }
+  try {
+    var tok = new URLSearchParams(location.search).get('p');
+    if (!tok) return fail('미리보기 주소가 올바르지 않습니다.');
+    var res = await sb.rpc('hp_get_shared', { p_token: tok });
+    if (res.error || !res.data || !res.data.length) return fail();
+    var r = res.data[0];
+    var content = migrateContent(r.theme, r.content || {});
+    var slug = new URLSearchParams(location.search).get('pg') || '';
+    var pg = content.pages.find(function(x){ return x.slug === slug; }) || content.pages[0];
+    var html = renderSite(content, r.theme, 'view', {}, { page: pg.id, viewBase: 'hp-view.html?p=' + encodeURIComponent(tok), head: '<meta name="robots" content="noindex,nofollow"><script>window.__EDIT=false<\/script>' });
+    if (document.readyState === 'loading') await new Promise(function(r){ document.addEventListener('DOMContentLoaded', r); });
+    await new Promise(function(r){ setTimeout(r, 0); });
+    document.open(); document.write(html); document.close();
+  } catch (e) { console.error(e); fail(); }
+})();
+</script>
+</body></html>

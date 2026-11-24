@@ -1,0 +1,14 @@
+const { chromium } = require('playwright');const {setup}=require('./t2.js');
+(async()=>{const b=await chromium.launch();const ctx=await setup(b);const p=await ctx.newPage({viewport:{width:1440,height:900}});
+const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('dialog',d=>d.accept());
+await p.goto('http://hp.local/hp-studio.html');await p.waitForSelector('.card .thumb');
+const id=await p.$$eval('.card',cs=>cs.find(c=>{const b=c.querySelector('.meta b');return b&&b.innerText.startsWith('07')}).querySelector('.acts .pri').dataset.edit);
+await p.click(`.acts [data-edit="${id}"]`);await p.waitForTimeout(3000);
+const fr=p.frames().find(x=>x!==p.mainFrame());
+await fr.click('.lbar .dd-b');await p.waitForTimeout(400);await p.screenshot({path:'shots/dd1.png',clip:{x:0,y:480,width:1440,height:420}});
+await fr.click('.dd-l li:nth-child(3)');await p.waitForTimeout(300);
+console.log(await fr.evaluate(()=>[document.querySelector('.lbar select').value,document.querySelector('.lbar .dd-b').textContent,document.querySelector('.dd-w').className]));
+await fr.click('.lbar .dd-b');await p.waitForTimeout(400);await p.screenshot({path:'shots/dd2.png',clip:{x:0,y:480,width:1440,height:420}});
+await fr.click('.lbar .ttl');await p.waitForTimeout(300);console.log(await fr.evaluate(()=>document.querySelector('.dd-w').className));
+const [dl]=await Promise.all([p.waitForEvent('download'),p.click('#barZip')]);await dl.saveAs('shots/dd.zip');
+console.log('errors',errs);await b.close()})();

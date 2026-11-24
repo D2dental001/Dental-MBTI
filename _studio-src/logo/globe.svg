@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300"><defs>
+<radialGradient id="g" cx="40%" cy="55%" r="68%"><stop offset="0" stop-color="#3fa9ec"/><stop offset=".5" stop-color="#1f7fd6"/><stop offset=".82" stop-color="#1157b6"/><stop offset="1" stop-color="#083c8f"/></radialGradient>
+<radialGradient id="bw" cx="45%" cy="55%" r="65%"><stop offset="0" stop-color="#55bdf2"/><stop offset="1" stop-color="#2186da"/></radialGradient>
+<linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe94d"/><stop offset=".6" stop-color="#ffc61a"/><stop offset="1" stop-color="#f5a300"/></linearGradient>
+<clipPath id="c"><circle cx="150" cy="150" r="140"/></clipPath></defs>
+<circle cx="150" cy="150" r="140" fill="url(#g)"/>
+<g clip-path="url(#c)">
+<path d="M34 158 C 40 100, 86 62, 148 56 C 190 52, 210 68, 200 94 C 190 122, 140 146, 80 158 Z" fill="url(#bw)"/>
+<path d="M70 166 C 130 156, 190 136, 214 104" fill="none" stroke="#06307a" stroke-width="5" opacity=".55"/>
+<path d="M8 168 C 10 84, 70 36, 152 28 C 222 22, 238 58, 222 94 C 204 132, 142 156, 72 164 L 36 164 C 126 150, 188 126, 200 96 C 210 70, 192 52, 150 56 C 90 60, 44 98, 30 168 Z" fill="#fff"/>
+<path d="M120 290 C 210 286, 270 236, 290 170" fill="none" stroke="#8fd8ff" stroke-width="7" opacity=".45"/>
+<circle cx="40" cy="190" r="2.6" fill="#fff" opacity=".9"/><circle cx="62" cy="186" r="2.6" fill="#fff" opacity=".9"/><circle cx="88" cy="182" r="3" fill="#fff" opacity=".9"/><circle cx="116" cy="176" r="2.6" fill="#fff" opacity=".9"/><circle cx="196" cy="146" r="2.8" fill="#fff" opacity=".9"/><circle cx="214" cy="143" r="3.2" fill="#ffe58a" opacity=".9"/><circle cx="236" cy="140" r="2.6" fill="#fff" opacity=".9"/><circle cx="260" cy="138" r="2.4" fill="#fff" opacity=".9"/>
+</g>
+<circle cx="150" cy="150" r="139" fill="none" stroke="#062f78" stroke-width="2.5" opacity=".6"/>
+<polygon points="173.3,152.5 189.4,182.3 223.1,179.0 199.7,203.5 213.3,234.5 182.8,219.8 157.5,242.4 162.0,208.8 132.7,191.7 166.1,185.6" fill="url(#s)" stroke="#e39400" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>
