@@ -56,6 +56,20 @@ cd $W && node t8.js   # 회귀 테스트, 'errors []'면 정상
 Skilldb(find-skills), claude-code-setup, frontend-design, Superpowers, playwright, ralph-loop, Hyper Marketing.
 이전 대화에서는 Skilldb 검색 서버·Hyper 서버 도구가 대화 도중 설치라 연결되지 않았음 → 새 대화에서 도구 연결 여부부터 확인.
 
+## 2026-11-24 오후 확인 (다음 대화 필독)
+- 플러그인 설치만으로는 Hyper **서버 도구(images_generate)가 연결되지 않음** — 스킬 문서만 있고 `hyperai` CLI도 없음. 커넥터 목록·레지스트리에도 Hyper 없음.
+- 사용자 결정: claude.ai 커넥터에 맞춤 커넥터 `https://app.hyperfx.ai/mcp` 추가·로그인 후 새 대화에서 진행.
+- 새 대화 첫 단계: ToolSearch로 `images_generate` 확인 → 있으면 `hyper-marketing:image-generation` 스킬 읽고 생성. 없으면 사용자에게 연결 상태 재확인 요청(대안: Chrome의 ChatGPT로 생성).
+- 생성 프롬프트(위치 참고 `map/nvm.png` + 스타일 참고 `map/ref/gpt_style_reference.png`):
+  > 첨부 1(위치 지도)의 도로·건물 배치를 그대로 유지하고, 첨부 2의 부드러운 아이소메트릭 일러스트 스타일(파스텔 건물, 둥근 나무, 따뜻한 햇살 톤)로 다시 그려줘.
+  > - 목적지: 신촌로 북쪽 모서리의 4~5층 건물. 1층에 빨간 'KFC' 글자 간판만(인물 얼굴 로고 금지). 건물 위에 핀과 "e-스타치과 3층" 말풍선(에스프레소 브라운 + 금색 톤)
+  > - KFC 건물과 현대백화점 신촌점 사이에 '연세로' 도로. 현대백화점은 그 오른쪽 큰 건물, 백화점 오른쪽은 좁은 보행로
+  > - 신촌로는 왼쪽 위에서 내려와 신촌역 부근에서 완만히 휘어 오른쪽으로 올라감
+  > - 신촌역(2호선, 초록 표지)은 신촌로 아래쪽. 출구 1·2·4번 도로 북쪽, 5·8번 남쪽, 지하철 출입구 모양
+  > - 1번 출구 → 현대백화점 앞 → 연세로 횡단보도 → KFC 건물 점선 화살표
+  > - 주소·번지수 글자 금지, 가격·이벤트 문구 금지. 16:10 가로, 고해상도
+- 생성 결과는 네이버 지도(`map/ref/naver_map.png`) 기준으로 위치 대조 후 사용자 승인 → mapIllust4.webp 적용·배포.
+
 ## 그 외 참고
 - 영상 제작 스크립트: `vid/make2.py`(사진→Ken Burns 1080p), `vid/up.py`(EDSR 2배 업스케일). 원본 사진은 이 저장소에 없음(필요시 사용자에게 재요청 또는 `assets/hp-studio/estar/` 자산 사용).
 - 로고 재현 소스: `logo/globe.svg`, `logo/final.html`.
