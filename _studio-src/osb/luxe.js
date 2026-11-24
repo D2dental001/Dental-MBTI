@@ -278,3 +278,6 @@ T_LUXE.css += '\n.t-luxe{word-break:keep-all;overflow-wrap:break-word}'
  + '.t-luxe .bf .addr,.t-luxe .cb-loc small{text-wrap:balance}';
 T_LUXE.css += '.t-luxe .seg{display:block}.t-luxe .seg-gap{height:1em}'
  + '.t-luxe .cb-pts b,.t-luxe .ld ul li,.t-luxe .cb-sub p{text-wrap:balance}.t-luxe .cb-loc small{display:inline-block;text-wrap:balance}';
+/* 2026-11-24 오른쪽 빠른 메뉴(약 100px)와 본문이 겹치지 않도록: 901~1400px에서 본문 좌우 여백 확대 (헤더 제외) */
+T_LUXE.css += '@media(min-width:901px) and (max-width:1400px){.t-luxe section .wrap,.t-luxe .bt .grid{width:min(1240px,100% - 220px)}}';
+T_LUXE.css += '@media(min-width:901px) and (max-width:1400px){.t-luxe .ld .wrap{grid-template-columns:.7fr 1.3fr;gap:56px}}@media(min-width:901px) and (max-width:1099px){.t-luxe .ld ul{grid-auto-flow:row;grid-template-rows:none;grid-template-columns:1fr}}';
