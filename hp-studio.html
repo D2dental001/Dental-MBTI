@@ -2375,6 +2375,22 @@ T_LUXE.css += '\n.t-luxe .hd nav>a.on,.t-luxe .hd nav .mi.on>.mi-a{color:var(--g
  + '.t-luxe .hd nav .sub a+a{margin-top:2px}}'
  + '@media (prefers-reduced-motion:reduce){.t-luxe .hd nav .sub{transition:none}}';
 
+/* 2026-11-24 모바일 정리: 전후비교 겹침 줄이기 · 모바일 1열 · 소개 카드 반투명 */
+T_LUXE.css += '\n.t-luxe .ba .ba-l,.t-luxe .ba .ba-r{top:10px;font-size:10.5px;letter-spacing:.12em;padding:3px 8px;border-radius:4px;background:rgba(20,16,14,.3);transition:opacity .35s}.t-luxe .ba .ba-l{left:10px}.t-luxe .ba .ba-r{right:10px}'
+ + '.t-luxe .ba .ba-tip{top:auto;bottom:10px;font-size:11.5px;padding:5px 11px;background:rgba(20,16,14,.45)}'
+ + '.t-luxe .ba .ba-h,.t-luxe .ba .ba-h:after{transition:opacity .35s}'
+ /* 실제로 밀어서 비교하면(또는 누르고 있는 동안) 라벨·손잡이를 흐리게 해서 치아가 잘 보이게 */
+ + '.t-luxe .ba.used .ba-l,.t-luxe .ba.used .ba-r,.t-luxe .ba:active .ba-l,.t-luxe .ba:active .ba-r{opacity:.2}'
+ + '.t-luxe .ba.used .ba-h:after,.t-luxe .ba:active .ba-h:after{opacity:.4}.t-luxe .ba.used .ba-h,.t-luxe .ba:active .ba-h{opacity:.75}'
+ + '@media(max-width:900px){'
+ + '.t-luxe .bb .grid{grid-template-columns:1fr;gap:22px}.t-luxe .bb h3{font-size:19px}.t-luxe .bb .sub2{margin:2px 0 10px}.t-luxe .bb .ba{aspect-ratio:16/10}'
+ + '.t-luxe .ba .ba-h:after{width:38px;height:38px;background-size:38px}.t-luxe .ba .ba-h:before{width:38px;height:38px;margin:-19px 0 0 -19px}'
+ + '.t-luxe .bt .grid{grid-template-columns:1fr;gap:16px}.t-luxe .bt .tile>img{aspect-ratio:2/1}.t-luxe .bt .tx{padding:16px 20px 20px}.t-luxe .bt .tx small{margin-bottom:4px}.t-luxe .bt .tx h3{font-size:21px}.t-luxe .bt .tx em{margin-top:10px}'
+ + '.t-luxe .ba2 .box{min-height:600px;align-items:flex-end}.t-luxe .ba2 .in{margin:230px 14px 14px;padding:26px 22px;background:rgba(250,247,242,.68);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}'
+ + '}'
+ + '.t-luxe .ba2 .in{background:rgba(250,247,242,.74);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}'
+ + '@media(max-width:900px){.t-luxe .ba2 .in{background:rgba(250,247,242,.68)}}';
+
 /* =====================================================================
    7. 신촌 e-스타치과 — 밸런스형 디자인 + 심미(라미네이트·미백) 강조 샘플
    사진·글: e-스타치과 공식 블로그(blog.naver.com/estarclinic)에서 발췌·재구성
