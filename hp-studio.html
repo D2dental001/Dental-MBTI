@@ -1364,6 +1364,8 @@ function init(root){
   if(d){d.innerHTML='';s.forEach(function(_,n){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label',(n+1)+'번 슬라이드');b.onclick=function(){go(n);rs()};d.appendChild(b)});d.children[0].classList.add('on')}
   s[0].classList.add('on');var p=w.querySelector('.prev'),nx=w.querySelector('.next');p&&(p.onclick=function(){go(i-1);rs()});nx&&(nx.onclick=function(){go(i+1);rs()});
   function rs(){clearInterval(t);if(!E&&s.length>1)t=setInterval(function(){go(i+1)},+w.dataset.slides||5000)}rs()});
+ root.querySelectorAll('[data-roll]:not([data-i])').forEach(function(u){u.setAttribute('data-i','1');if(E||u.children.length<3)return;if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  setInterval(function(){if(document.hidden||u.matches(':hover'))return;var l=u.lastElementChild;u.querySelectorAll('li.new').forEach(function(x){x.classList.remove('new')});u.insertBefore(l,u.firstElementChild);void l.offsetWidth;l.classList.add('new')},+u.dataset.roll||3400)});
  root.querySelectorAll('.rv').forEach(function(el){io?io.observe(el):el.classList.add('in')});
  root.querySelectorAll('.pv-open').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var pv=document.querySelector('.pv');pv&&pv.classList.add('on')})});
  root.querySelectorAll('.cform').forEach(function(f){f.addEventListener('submit',function(e){if(E){e.preventDefault();return}if(!f.dataset.mail){e.preventDefault();alert('문의 수신 이메일이 아직 설정되지 않았습니다.')}})});
@@ -1890,6 +1892,14 @@ const T_BALANCE = {
 .mbar2{display:grid;grid-template-columns:repeat(3,1fr);position:fixed;left:0;right:0;bottom:0;z-index:60;background:#1d1c1b;color:#fff;font-size:13px;text-align:center}.mbar2 a{padding:13px 0}.mbar2 a:first-child{background:var(--pc)}.ft{padding-bottom:90px}}
 `
 };
+T_BALANCE.css += `
+.bf ul.roll{position:relative;height:calc(4 * 2.55em);overflow:hidden;gap:0;-webkit-mask-image:linear-gradient(180deg,#000 80%,transparent);mask-image:linear-gradient(180deg,#000 80%,transparent)}
+.bf ul.roll li{height:2.55em;padding:0 8px;margin:0 -8px;border-radius:8px;transition:background 1.2s}
+.bf ul.roll li.new{animation:rollin .7s cubic-bezier(.2,.7,.2,1);background:rgba(201,168,118,.18)}
+.bf ul.roll li.new .q{font-weight:700}
+.bf ul.roll .dt{display:none}
+@keyframes rollin{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.bf ul.roll li.new{animation:none}}`;
 THEMES.balance = T_BALANCE;
 /* 밝은 배경용 로고: [기본 정보]의 '밝은 배경용 로고' → 없으면 헤더 로고(흰색 보정 아닌 경우) → 없으면 마크 */
 function balMark(S, cls){
@@ -1960,7 +1970,7 @@ BLOCKDEFS.balance = {
     info: { label:'온라인상담 · 오시는길 · 진료시간', desc:'3단 안내 (연락처·시간·주소는 [기본 정보]에서 수정)',
       fields:[F.list('qs','온라인 상담 목록 (샘플)','글',4,[F.text('st','상태'),F.text('q','제목'),F.text('dt','날짜')],{max:6}), F.text('nv','초록 버튼 글자'), F.text('kk','노란 버튼 글자')],
       defaults: () => ({ qs:[['답변완료','사랑니 발치하고 싶어요','2026.11.09'],['답변대기','무턱 재교정 치료 문의','2026.11.07'],['답변완료','신경치료 문의 드립니다','2026.11.03'],['답변완료','임플란트 비용 상담','2026.11.01']].map(([st,q,dt])=>({st,q,dt})), nv:'네이버 진료예약 바로가기', kk:'카카오톡 채널 @디투치과' }),
-      render:(R,d,S,ctx)=>`<section class="sec bf"><div class="wrap grid"><div class="col"><h3>온라인 상담</h3><ul>${(d.qs||[]).map((_,n)=>`<li><span class="st">${R.t(`qs/${n}/st`)}</span><span class="q">${R.t(`qs/${n}/q`)}</span><span class="dt">${R.t(`qs/${n}/dt`)}</span></li>`).join('')}</ul><a class="nv" href="${S.v('bal_book')||'#'}">${R.t('nv')} &gt;</a><a class="kk" href="${S.v('kakao')||'#'}">${ic('chat')}${R.t('kk')}</a></div>
+      render:(R,d,S,ctx)=>`<section class="sec bf"><div class="wrap grid"><div class="col"><h3>온라인 상담</h3><ul class="roll" data-roll="3400">${(d.qs||[]).map((_,n)=>`<li><span class="st">${R.t(`qs/${n}/st`)}</span><span class="q">${R.t(`qs/${n}/q`)}</span><span class="dt">${R.t(`qs/${n}/dt`)}</span></li>`).join('')}</ul><a class="nv" href="${S.v('bal_book')||'#'}">${R.t('nv')} &gt;</a><a class="kk" href="${S.v('kakao')||'#'}">${ic('chat')}${R.t('kk')}</a></div>
 <div class="col"><h3>오시는 길</h3>${mapBox(ctx.site)}<p class="addr">${S.t('address')}<br>${S.t('traffic')}</p></div>
 <div class="col"><h3>진료 시간</h3><div class="hrs">${S.t('hours')}</div><h4>상담 전화</h4><a class="tel" href="tel:${S.v('phone')}">${S.t('phone')}</a></div></div></section>` },
     sms: { label:'SMS 빠른상담', desc:'회색 띠 위 한 줄 상담 신청서',
@@ -2269,6 +2279,7 @@ body.lbar-off .lbar{transform:translateY(72px)}body.lbar-off .lbar .x:after{cont
 T_LUXE.css = '.t-luxe .bs{overflow:hidden}.t-luxe .bs .cform{display:grid;grid-template-columns:1fr 1fr;gap:12px}.t-luxe .bs .cform textarea,.t-luxe .bs .cform .agree,.t-luxe .bs .cform button{grid-column:1/-1}\n' + T_BALANCE.css.split('\n').filter(l => /^\.(bt|bv|bb|bf|bs|ba2|sec|btit) /.test(l) || /^\.sec\{/.test(l) || /^\.btit/.test(l)).join('\n')
   + '\n@media(max-width:900px){.bt .grid,.bv .grid,.bf .grid{grid-template-columns:1fr}.bb .grid{grid-template-columns:1fr 1fr}.bf .col+.col{border-left:0;border-top:1px solid var(--line)}.bs .wrap{grid-template-columns:1fr}.bs .cform{grid-template-columns:1fr}.bs .cform .agree,.bs .cform button{grid-column:auto;grid-row:auto}.sec{padding:70px 0}}\n'
   + T_LUXE.css;
+T_LUXE.css += '\n@keyframes rollin{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:none}}@media (prefers-reduced-motion:reduce){.bf ul.roll li.new{animation:none}}';
 T_LUXE.css += '\n.t-luxe .bs>svg.ic{display:none}html:has(body.t-luxe),body.t-luxe{overflow-x:hidden}';
 THEMES.luxe = T_LUXE;
 DEFAULTS.luxe = () => ({ ...baseContent(), color:'#3a2f29', color2:'#b89565', phone:'00-0000-0000', bal_phone2:'00-0000-0000',
@@ -2568,7 +2579,7 @@ function estarContent(){
   Object.assign(by('ba').data, { en:'BEFORE & AFTER', t:'심미치료 전후 사진', items:esBaItems(['lamiA','lamiB','whiteA','gum']).map(x => ({ t:x.t, s:x.d, b:x.b, a:x.a })) });
   Object.assign(by('doctors').data, { en:'e-STAR DENTAL CLINIC', t:'대한심미치과학회 정회원 원장의 1인 책임진료', items:[{ img:ES('doctor'), sp:'치과보존과 인정의 · 심미보철', n:'김소연', pos:'대표원장' }] });
   Object.assign(by('about').data, { en:'ABOUT e-STAR', t1:'한 분 한 분 특별하게,', t2:'모든 진료실이 1인 전용입니다', d:'신촌역 현대백화점 옆, 18년째 같은 자리에서 진료합니다.\n독립된 1인 전용 진료실에서 다른 환자 눈치 보지 않고 편안하게 상담하고 치료받으세요.', btn:'진료실 둘러보기', href:'p:pg-tour', img:ES('tourPink1') });
-  Object.assign(by('info').data, { qs:[['답변완료','무삭제 라미네이트 상담 문의','2026.11.12'],['답변완료','치아미백 상담 받고 싶어요','2026.11.11'],['답변대기','잇몸이 검은데 미백 가능한가요?','2026.11.10'],['답변완료','신경치료 중 임시재료가 빠졌어요','2026.11.03']].map(([st,q,dt])=>({st,q,dt})), kk:'카카오톡 채널 @e스타치과' });
+  Object.assign(by('info').data, { qs:[['답변완료','무삭제 라미네이트 상담 문의','2026.11.12'],['답변완료','치아미백 상담 받고 싶어요','2026.11.11'],['답변대기','잇몸이 검은데 미백 가능한가요?','2026.11.10'],['답변완료','앞니 사이 틈이 벌어졌어요','2026.11.08'],['답변완료','라미네이트 몇 개 해야 하나요?','2026.11.06'],['답변완료','턱에서 딱딱 소리가 나요','2026.11.05'],['답변대기','이갈이 보톡스 문의드려요','2026.11.04'],['답변완료','신경치료 중 임시재료가 빠졌어요','2026.11.03']].map(([st,q,dt])=>({st,q,dt})), kk:'카카오톡 채널 @e스타치과' });
   // 홈 · 심미 시그니처 블록 추가 (이유 있는 선택 배너 다음)
   const sig = blk('c_treat',{ img:ES('lamiAA'), lab:'e-STAR SIGNATURE', t:'이를 깎지 않는 무삭제 라미네이트', d:'치아 모양이나 색상이 마음에 들지 않지만 멀쩡한 치아를 깎는 것이 부담스러우셨나요? 치아 표면을 깎지 않고 얇은 세라믹을 붙여 하얗고 고른 치열을 만들어 드립니다. 충분한 상담으로 내 치아에 맞는 방법부터 찾아드립니다.', pts:'0.3mm 초박형 세라믹 디자인\n자연치아 보존 우선 치료 계획\n개인별 치아 형태 · 색상 맞춤', btn:'라미네이트 상담 예약', side:'right' });
   const w = blk('c_treat',{ img:ES('whiteFace'), lab:'WHITENING', t:'18년, 수만 명의 미백 노하우', d:'치아를 하얗게 만드는 것은 기계가 아니라 미백제입니다. 검증된 전문가 미백제와 정확한 시술로 치아 손상 없이 본래의 밝기를 되찾아 드립니다.', pts:'치아를 깎거나 코팅하지 않는 산화 원리\n20분씩 2~3회 효율적인 시술\n자가 미백 병행으로 오래 유지', btn:'미백 상담 예약', side:'left' });
@@ -2620,7 +2631,7 @@ Object.assign(ES_TX, {
 });
 if (!ES_MAP.some(g => g.label === '턱관절 · 보톡스')) ES_MAP.splice(3, 0, { label:'턱관절 · 보톡스', children:[['tmj-phl','턱관절 물리치료'],['botox','이갈이 · 사각턱 보톡스']] });
 
-const ES_VIDEO = () => ({ video:'assets/hp-studio/estar/estar_hero.mp4', poster:'asset:estar/heroPoster', en:'The Art of a Natural Smile', t:'18년째 같은 자리에서, 원장이 직접 진료하는 신촌 e-스타치과', btn:'VIEW MORE', href:'p:pg-special' });
+const ES_VIDEO = () => ({ video:'assets/hp-studio/estar/estar_hero2.mp4', poster:'asset:estar/heroPoster2', en:'The Art of a Natural Smile', t:'18년째 같은 자리에서, 원장이 직접 진료하는 신촌 e-스타치과', btn:'VIEW MORE', href:'p:pg-special' });
 function estarLuxe(){
   const old = estarContent();
   const c = defaultContent('luxe');
@@ -3493,6 +3504,18 @@ $('#q').addEventListener('input', drawList);
   if (typeof ES_VIDEO !== 'undefined') for (const p of all.filter(p => p.id && p.theme === 'luxe' && p.content && p.content.site && p.content.site._seed === 'estar' && !p.content.site._video)){
     try { const h = p.content.pages[0]; if (!h.blocks.some(b => b.type === 'lvideo')) h.blocks.unshift(({ id: bid(), type:'lvideo', hidden:false, data: ES_VIDEO() }));
       h.blocks.forEach(b => { if (b.type === 'lhero') b.hidden = true; }); p.content.site._video = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){}
+  }
+  // e-스타 07: 온라인 상담 목록을 8개로 (롤링 효과용, 직접 고친 목록은 유지)
+  if (typeof estarLuxe === 'function') for (const p of all.filter(p => p.id && p.theme === 'luxe' && p.content && p.content.site && p.content.site._seed === 'estar' && !p.content.site._qs8)){
+    try { const ib = p.content.pages[0].blocks.find(b => b.type === 'info'); const src = estarLuxe().pages[0].blocks.find(b => b.type === 'info');
+      if (ib && src && (ib.data.qs || []).length <= 4 && (ib.data.qs || [])[0] && ib.data.qs[0].q === '무삭제 라미네이트 상담 문의') ib.data.qs = src.data.qs;
+      p.content.site._qs8 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){}
+  }
+  // e-스타 07: 메인 영상 1080p 와이드 버전으로 교체 (기본 영상을 쓰는 경우만)
+  for (const p of all.filter(p => p.id && p.content && p.content.pages && !(p.content.site||{})._v1080)){
+    try { let hit = false;
+      p.content.pages.forEach(pg => (pg.blocks||[]).forEach(b => { if (b.type === 'lvideo' && b.data && b.data.video === 'assets/hp-studio/estar/estar_hero.mp4'){ b.data.video = 'assets/hp-studio/estar/estar_hero2.mp4'; if (b.data.poster === 'asset:estar/heroPoster') b.data.poster = 'asset:estar/heroPoster2'; hit = true; } }));
+      if (hit){ p.content.site._v1080 = 1; p.updated = now(); await DB.put(clone(p)); } } catch(e){}
   }
   await restoreDrafts(all.filter(p => p.id)); await renderList(); show('list');
 })();
