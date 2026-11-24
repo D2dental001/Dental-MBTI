@@ -310,3 +310,4 @@ COMMON_BLOCKS.c_consult = { label:'상담 고민 카드', desc:'상담에서 자
     + `<section class="cb cb-con"><div class="wrap"><div class="cb-tit"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p>${R.t('s')}</p></div><div class="grid">${(d.items||[]).map((it,n)=>`<div class="it rv${/라미네이트/.test(it.tg||'')?' hl':''}"><span class="tg">${R.t(`items/${n}/tg`)}</span><b class="q">${R.t(`items/${n}/q`)}</b><p>${R.t(`items/${n}/a`)}</p>${it.href && it.href !== '#top' ? `<a class="go" href="${ctx.link(it.href)}">자세히 보기</a>` : ''}</div>`).join('')}</div></div></section>` };
 Object.values(BLOCKDEFS).forEach(T => { T.blocks.c_consult = COMMON_BLOCKS.c_consult; });
 T_LUXE.css += '.nw{white-space:nowrap}';
+T_LUXE.css += '@media(max-width:900px){.cb-sub img[src*="heroKids"]{object-position:66% 50%}}';
