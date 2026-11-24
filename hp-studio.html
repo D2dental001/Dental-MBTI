@@ -311,6 +311,7 @@ img{display:block;max-width:100%}a{color:inherit;text-decoration:none}button{fon
 .ba-h:after{content:'◀ ▶';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;color:#333;font-size:11px;padding:8px 9px;border-radius:30px;white-space:nowrap}
 .ba-l,.ba-r{position:absolute;top:14px;z-index:2;font-size:12px;letter-spacing:.15em;color:#fff;background:rgba(0,0,0,.45);padding:4px 10px;pointer-events:none}.ba-l{left:14px}.ba-r{right:14px}
 .mapbox{width:100%;aspect-ratio:16/10;background:#e9ecef;overflow:hidden}.mapbox iframe{width:100%;height:100%;border:0}
+.mapbox.ill{aspect-ratio:auto!important;height:auto;position:relative;background:#f4eee5}.mapbox.ill img{display:block;width:100%;height:auto;object-fit:contain}.mapbox.ill .mapgo{position:absolute;right:12px;bottom:12px;background:rgba(46,38,34,.88);color:#f1e4cc;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;text-decoration:none}.mapbox.ill .mapgo:hover{background:#2e2622}
 .mapbox.ph{display:grid;place-items:center;text-align:center;color:#888}.mapbox.ph div{display:grid;gap:6px;justify-items:center}.mapbox.ph .ic{width:34px;height:34px}
 .cform{display:grid;gap:10px}.cform input,.cform select,.cform textarea{width:100%;padding:13px 14px;border:1px solid var(--line);background:var(--field);color:inherit;font:inherit;border-radius:var(--r)}
 .cform .agree{display:flex;gap:8px;align-items:center;font-size:13px;opacity:.85}.cform .agree input{width:auto}.cform .agree a{text-decoration:underline}
@@ -1773,6 +1774,11 @@ renderSite = function(content, theme, mode, files, opt = {}){
     const img = S.i('logo', 'logo-img', site.name || 'logo').replace(' loading="lazy"', '').replace('<img', `<img style="height:${h}px;${tone}"`);
     html = html.replace(/(<a [^>]*class="logo"[^>]*>)[\s\S]*?(<\/a>)/, (m, a, b) => a + img + b);
   }
+  if (site.mapImg){
+    const mimg = S.i('mapImg', 'map-img', (site.name || '') + ' 오시는 길 약도');
+    const murl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(site.address || site.name || '');
+    html = html.replace(/<div class="mapbox"><iframe[^>]*><\/iframe><\/div>/g, `<div class="mapbox ill">${mimg}<a class="mapgo" href="${murl}" target="_blank" rel="noopener">지도 앱에서 열기</a></div>`);
+  }
   const og = firstImage(content);
   const ogSrc = og ? makeR2({ og }, 'og/', rmode, files).src('og') : '';
   const sub = page.id !== 'home';
@@ -2635,7 +2641,7 @@ const ES_VIDEO = () => ({ video:'assets/hp-studio/estar/estar_hero3.mp4', poster
 function estarLuxe(){
   const old = estarContent();
   const c = defaultContent('luxe');
-  c.site = Object.assign({}, c.site, old.site, { color:'#3a2f29', color2:'#c9a876', _seedVer:5, logo:'asset:estar/eLogoW', logoLight:'asset:estar/eLogoC', logoH:'56', logoTone:'', bal_cta:'상담 예약', bal_book:'' });
+  c.site = Object.assign({}, c.site, old.site, { color:'#3a2f29', color2:'#c9a876', _seedVer:5, logo:'asset:estar/eLogoW', logoLight:'asset:estar/eLogoC', logoH:'56', mapImg:'asset:estar/mapIllust', _map1:1, logoTone:'', bal_cta:'상담 예약', bal_book:'' });
   const home = c.pages[0], by = t => home.blocks.find(b => b.type === t);
   by('lhero').data.slides = [
     ['hxSide','','Smile Design','웃는 순간 가장 먼저 보이는','자연스러운 미소 라인','치아의 길이와 색, 입술 라인까지 함께 보고 디자인합니다','심미치료 보기','pg-laminate'],
@@ -2782,7 +2788,7 @@ const SITE_FIELDS = [
   F.img('logoLight','밝은 배경용 로고 (하단 · 의료진 구역)'),
   {key:'logoTone',label:'로고 색 보정',type:'select',options:[['','원본 그대로'],['white','흰색으로 (어두운 헤더용)'],['black','검정으로 (밝은 헤더용)']]},
   F.text('name','병원명'), F.text('nameEn','영문 병원명'), {key:'color',label:'대표 색상',type:'color'},
-  F.text('phone','대표 전화'), F.text('address','주소',{hint:'실제 주소를 입력하면 지도가 표시됩니다.'}), F.text('traffic','교통 / 주차 안내'),
+  F.text('phone','대표 전화'), F.text('address','주소',{hint:'실제 주소를 입력하면 지도가 표시됩니다.'}), F.text('traffic','교통 / 주차 안내'), F.img('mapImg','약도 이미지',{hint:'넣으면 구글 지도 대신 약도가 표시되고, [지도 앱에서 열기] 버튼이 붙습니다.'}),
   F.area('hours','진료시간',{rows:4}), F.text('email','문의 수신 이메일',{hint:'상담 신청서가 이 주소로 발송됩니다.'}),
   F.text('kakao','카카오톡 채널 링크'), F.text('youtube','유튜브 채널 링크'), F.text('form_btn','상담 신청 버튼 글자'),
   F.text('metaTitle','검색 노출 제목 (부제)'), F.area('metaDesc','검색 노출 설명',{hint:'네이버·구글 검색 결과에 보이는 문구'}), F.area('biz','하단 사업자 정보')
@@ -3510,6 +3516,10 @@ $('#q').addEventListener('input', drawList);
     try { const ib = p.content.pages[0].blocks.find(b => b.type === 'info'); const src = estarLuxe().pages[0].blocks.find(b => b.type === 'info');
       if (ib && src && (ib.data.qs || []).length <= 4 && (ib.data.qs || [])[0] && ib.data.qs[0].q === '무삭제 라미네이트 상담 문의') ib.data.qs = src.data.qs;
       p.content.site._qs8 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){}
+  }
+  // e-스타 07: 오시는 길 약도
+  for (const p of all.filter(p => p.id && p.content && p.content.site && p.content.site._seed === 'estar' && !p.content.site._map1)){
+    try { if (!p.content.site.mapImg) p.content.site.mapImg = 'asset:estar/mapIllust'; p.content.site._map1 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){}
   }
   // e-스타 07: 메인 영상 1080p 와이드 버전으로 교체 (기본 영상을 쓰는 경우만)
   for (const p of all.filter(p => p.id && p.content && p.content.pages && !(p.content.site||{})._v1080b)){
