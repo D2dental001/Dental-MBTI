@@ -282,3 +282,22 @@ T_LUXE.css += '.t-luxe .seg{display:block}.t-luxe .seg-gap{height:1em}'
 T_LUXE.css += '@media(min-width:901px) and (max-width:1400px){.t-luxe section .wrap,.t-luxe .bt .grid{width:min(1240px,100% - 220px)}}';
 T_LUXE.css += '@media(min-width:901px) and (max-width:1400px){.t-luxe .ld .wrap{grid-template-columns:.7fr 1.3fr;gap:56px}}@media(min-width:901px) and (max-width:1099px){.t-luxe .ld ul{grid-auto-flow:row;grid-template-rows:none;grid-template-columns:1fr}}';
 T_LUXE.css += '.t-luxe .lv .en,.t-luxe .lh .l1,.t-luxe .ltit .en{text-wrap:balance}';
+
+/* 2026-11-24 케이스 롤링 영상 + 강조 문구 (PC 가로 영상 / 휴대폰 세로 영상, 보일 때만 재생) */
+BLOCKDEFS.luxe.blocks.lroll = { label:'케이스 롤링 영상 + 설명', desc:'치료 전후 케이스가 넘어가는 영상과 강조 문구',
+  fields:[F.text('en','영문 소제목'), F.text('t','제목'), F.area('d','설명',{rows:3}), F.area('pts','특징 (한 줄에 하나)',{rows:4}), F.text('btn','버튼 글자'), F.link('href'),
+    F.text('vw','PC용 영상 주소 (mp4)'), F.img('pw','PC용 영상 첫 화면'), F.text('vt','휴대폰용 영상 주소 (mp4)'), F.img('pt','휴대폰용 영상 첫 화면'),
+    {key:'side',label:'영상 위치',type:'select',options:[['left','왼쪽'],['right','오른쪽']]}],
+  defaults: () => ({ en:'Real Cases', t:'실제 치료 사례', d:'', pts:'', btn:'자세히 보기', href:'#top', vw:'', pw:'', vt:'', pt:'', side:'left' }),
+  render:(R,d,S,ctx)=>{ const fix = v => { v = v || ''; return (v.startsWith('assets/') && ctx.mode === 'export') ? 'https://dentalmbti.co.kr/' + v : v; };
+    const vid = (v, p, cls) => v ? `<video class="${cls}" muted loop playsinline preload="none" data-lazyplay poster="${esc(R.src(p))}" src="${esc(fix(v))}" aria-label="${esc(String(R.raw('t')||''))} 치료 전후 사례 영상"></video>` : R.i(p, cls, String(R.raw('t')||''));
+    const pts = String(d.pts || '').split('\n').filter(Boolean).map(x => `<li><span>${esc(x)}</span></li>`).join('');
+    return `<section class="lrl${d.side === 'right' ? ' rt' : ''}"><div class="wrap"><div class="md rv">${vid(d.vw,'pw','vw')}${vid(d.vt,'pt','vt')}</div><div class="tx rv"><span class="en">${R.t('en')}</span><h2>${R.t('t')}</h2><p class="d">${R.t('d')}</p>${pts ? `<ul>${pts}</ul>` : ''}<a class="btn" href="${ctx.link(d.href)}">${R.t('btn')}</a></div></div></section>`; } };
+T_LUXE.css += '.lrl{padding:120px 0;background:var(--ivory)}.lrl+.lrl{padding-top:0}.lrl .wrap{display:grid;grid-template-columns:1.6fr 1fr;gap:56px;align-items:center}.lrl.rt .md{order:2}'
+ + '.lrl .md{position:relative;border-radius:24px;overflow:hidden;background:#231b17;box-shadow:0 30px 60px rgba(43,34,28,.18)}.lrl .md video,.lrl .md img{display:block;width:100%;height:auto}.lrl .md .vt{display:none}'
+ + '.lrl .md .badge{position:absolute;right:16px;bottom:14px;font-size:11px;letter-spacing:.14em;color:#e8d2a8;background:rgba(20,16,14,.55);padding:5px 12px;border-radius:20px}'
+ + '.lrl .en{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:20px;color:var(--gold)}.lrl h2{font-family:"Noto Serif KR",serif;font-weight:400;font-size:clamp(28px,2.6vw,40px);line-height:1.35;color:var(--navy);margin:10px 0 18px;text-wrap:balance}'
+ + '.lrl .d{color:var(--muted);font-size:16px;line-height:1.85;text-wrap:pretty}.lrl ul{list-style:none;margin:24px 0 30px;display:grid;gap:10px}.lrl li{position:relative;padding-left:30px;font-size:15.5px;color:var(--ink)}'
+ + '.lrl li:before{content:"";position:absolute;left:0;top:3px;width:18px;height:18px;border-radius:50%;background:var(--navy) url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 18 18%27 fill=%27none%27 stroke=%27%23e8d2a8%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M5 9.5l2.6 2.5L13 6.5%27/%3E%3C/svg%3E") center/18px no-repeat}'
+ + '.lrl .btn{display:inline-block;background:var(--navy);color:#fff;border-radius:30px;padding:14px 30px;font-size:14px;font-weight:600}'
+ + '@media(max-width:900px){.lrl{padding:80px 0}.lrl .wrap{grid-template-columns:1fr;gap:30px}.lrl.rt .md{order:0}.lrl .md .vw{display:none}.lrl .md .vt{display:block}.lrl .md{border-radius:18px}}';

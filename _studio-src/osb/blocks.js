@@ -416,6 +416,11 @@ Object.values(BLOCKDEFS).forEach(T => { T.blocks.c_treat = COMMON_BLOCKS.c_treat
 const COMMON_JS2 = `
 (function(){var E=window.__EDIT;
 function init(root){
+ /* 화면에 보이는 동안만 재생하는 영상 (data-lazyplay) */
+ root.querySelectorAll('video[data-lazyplay]:not([data-lp])').forEach(function(v){v.setAttribute('data-lp','1');v.muted=true;
+  if(!window.IntersectionObserver){v.preload='auto';v.play&&v.play().catch(function(){});return}
+  new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&v.offsetParent!==null){v.preload='auto';var p=v.play();p&&p.catch&&p.catch(function(){})}else if(!v.paused)v.pause()})},{threshold:.35}).observe(v)});
+
  /* 전후사진이 원본보다 너무 크게 늘어나 깨지지 않도록: 화면 폭이 원본의 1.4배를 넘으면 카드 폭을 줄여 가운데 정렬 */
  root.querySelectorAll('.ba').forEach(function(b){var im=b.querySelector('img');if(!im||b.getAttribute('data-cap'))return;b.setAttribute('data-cap','1');
   function fit(){var nw=im.naturalWidth;if(!nw)return;var card=b.parentElement&&b.parentElement.parentElement&&b.parentElement.parentElement.classList.contains('grid')?b.parentElement:b;

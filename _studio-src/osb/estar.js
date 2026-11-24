@@ -340,6 +340,23 @@ function esApplySeo(c){
   home && home.blocks.forEach(b => { if (b.type === 'lvideo' && b.data.t === '18년째 같은 자리에서, 원장이 직접 진료하는 신촌 e-스타치과') b.data.t = '신촌역 도보 1분, 18년째 같은 자리에서 원장이 직접 진료하는 신촌 e-스타치과'; });
   c.site._seo1 = 1; return c;
 }
+
+/* 2026-11-24 e-스타만의 특별함: 라미네이트 · 미백 케이스 롤링 영상 강조 */
+const ES_ROLL = () => [
+  { id:bid(), type:'lroll', hidden:false, data:{ en:'No-prep Laminate', t:'깎지 않고, 0.1mm로 바꾸는 미소', d:'건강한 치아는 깎지 않고 0.1mm 초박형 고강도 지르코니아를 붙여 색과 모양을 한 번에 바꿉니다. 마취 없이 진행하고, 변색되지 않는 지르코니아라 자연스럽게 밝아진 치아색이 오래 유지됩니다.',
+    pts:'마취 없는 무삭제 · 필요할 때만 미세하게\n0.1mm 초박형 고강도 지르코니아\n반영구적인 미백 효과\n25년차 보존과 원장 1인 책임진료', btn:'무삭제 라미네이트 자세히', href:'p:pg-laminate',
+    vw:'assets/hp-studio/estar/rollLamiW.mp4', pw:'asset:estar/rollLamiW_poster', vt:'assets/hp-studio/estar/rollLamiT.mp4', pt:'asset:estar/rollLamiT_poster', side:'left' } },
+  { id:bid(), type:'lroll', hidden:false, data:{ en:'Professional Whitening', t:'18년, 수만 명의 미백 노하우', d:'치아를 깎거나 덮지 않고 착색된 색소만 분해해 본래의 밝기를 되찾습니다. 착색 원인을 먼저 확인하고, 셰이드 가이드로 변화를 직접 확인하며 한 톤 밝은 미소를 만들어 드립니다.',
+    pts:'치아 손상 없는 전문가 미백\n착색 원인별 맞춤 상담\n셰이드 가이드로 확인하는 변화', btn:'전문가 치아미백 자세히', href:'p:pg-whitening',
+    vw:'assets/hp-studio/estar/rollWhiteW.mp4', pw:'asset:estar/rollWhiteW_poster', vt:'assets/hp-studio/estar/rollWhiteT.mp4', pt:'asset:estar/rollWhiteT_poster', side:'right' } } ];
+function esApplyRoll(c){
+  const sp = c.pages.find(p => p.slug === 'special');
+  if (sp && !sp.blocks.some(b => b.type === 'lroll')){
+    const i = sp.blocks.findIndex(b => b.type === 'c_subhero'); sp.blocks.splice(i + 1, 0, ...ES_ROLL());
+    const old = sp.blocks.find(b => b.type === 'c_treat' && /무삭제 라미네이트/.test(b.data.t || '')); if (old) old.hidden = true;
+  }
+  c.site._roll1 = 1; return c;
+}
 const ES_VIDEO = () => ({ video:'assets/hp-studio/estar/estar_hero3.mp4', poster:'asset:estar/heroPoster2', en:'The Art of a Natural Smile', t:'신촌역 도보 1분, 18년째 같은 자리에서 원장이 직접 진료하는 신촌 e-스타치과', btn:'VIEW MORE', href:'p:pg-special' });
 function estarLuxe(){
   const old = estarContent();
@@ -387,6 +404,7 @@ function estarLuxe(){
   home.blocks.unshift(({ id: bid(), type:'lvideo', hidden:false, data: ES_VIDEO() })); by('lhero').hidden = true;
   c.pages = [home, ...pages];
   esApplySeo(c);
+  esApplyRoll(c);
   return JSON.parse(JSON.stringify(c).split('"asset:estar/doctor"').join('"asset:estar/lxDoc"'));
 }
 SEED.push({ theme:'luxe', title:'07 신촌 e-스타치과 (프리미엄 심미형)', once:'estar', ver:5, note:'갤러리형 메인 배너(심미 전후 사진), 새 고화질 로고, 웜톤 색상으로 변경', build: estarLuxe });
