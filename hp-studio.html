@@ -292,8 +292,9 @@ function formHTML(c, R, opt={}){
   </form>`;
 }
 
-function baBlock(R, b, a, cls=''){
-  return `<div class="ba ${cls}" style="--p:50%">${R.i(a,'ba-a','치료 후')}<div class="ba-b">${R.i(b,'','치료 전')}</div><span class="ba-l">BEFORE</span><span class="ba-r">AFTER</span><input type="range" min="0" max="100" value="50" aria-label="전후 비교"><i class="ba-h"></i><span class="ba-tip">좌우로 밀어서 전후 비교</span></div>`;
+function baBlock(R, b, a, cls='', lb=''){
+  lb = String(lb||'').replace(/\s+/g,' ').trim(); const pre = lb ? lb + ' ' : '';
+  return `<div class="ba ${cls}" style="--p:50%">${R.i(a,'ba-a',pre+'치료 후')}<div class="ba-b">${R.i(b,'',pre+'치료 전')}</div><span class="ba-l">BEFORE</span><span class="ba-r">AFTER</span><input type="range" min="0" max="100" value="50" aria-label="전후 비교"><i class="ba-h"></i><span class="ba-tip">좌우로 밀어서 전후 비교</span></div>`;
 }
 
 const COMMON_CSS = `
@@ -979,7 +980,7 @@ function makeR2(base, prefix, mode, files){
   };
   return {
     t: (k, tag = 'x-t', cls = '') => `<${tag}${cls ? ` class="${cls}"` : ''} data-k="${prefix + k}">${fmt(val(k))}</${tag}>`,
-    i: (k, cls = '', alt = '') => val(k) ? `<img${cls ? ` class="${cls}"` : ''} data-img="${prefix + k}" src="${src(k)}" alt="${esc(alt)}" loading="lazy">` : (mode === 'edit' ? `<img${cls ? ` class="${cls}"` : ''} data-img="${prefix + k}" src="${phSvg('PHOTO')}" alt="">` : ''),
+    i: (k, cls = '', alt = '') => { if (!alt){ const m = /^(.*\/)[^/]+$/.exec(k); if (m){ const f = ['t','hl','c','cap','n','d'].map(x => val(m[1] + x)).find(x => x && String(x).trim()); if (f) alt = [val(m[1] + 't1'), f].filter(Boolean).join(' ').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim(); } } return val(k) ? `<img${cls ? ` class="${cls}"` : ''} data-img="${prefix + k}" src="${src(k)}" alt="${esc(alt)}" loading="lazy">` : (mode === 'edit' ? `<img${cls ? ` class="${cls}"` : ''} data-img="${prefix + k}" src="${phSvg('PHOTO')}" alt="">` : ''); },
     v: k => esc(val(k)), raw: val, src
   };
 }
@@ -1010,13 +1011,13 @@ const COMMON_BLOCK_CSS = `
 const COMMON_BLOCKS = {
   c_ba: { label: '전후사진 비교', desc: '치료 전·후 사진을 좌우로 밀어 비교하는 카드 묶음', fields: [F.menu('전후사진'), F.text('lab','작은 제목'), F.text('t','제목'), F.text('s','설명'), F.list('items','전후사진 케이스','케이스',2,[F.img('b','치료 전 사진'),F.img('a','치료 후 사진'),F.text('t','케이스 제목'),F.text('d','설명')])],
     defaults: () => ({ menu:'전후사진', lab:'BEFORE & AFTER', t:'치료 사례', s:'디투치과에서 달라진 미소를 확인하세요', items:[0,1].map(()=>({b:'asset:baBefore',a:'asset:baAfter',t:'변색치 · 치간 벌어짐 개선',d:'지르코니아 라미네이트 · 상악 10치'}))}),
-    render: (R, d) => `<section class="cb cb-ba"><div class="wrap"><div class="cb-tit"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p>${R.t('s')}</p></div><div class="grid">${(d.items||[]).map((_,n)=>`<div>${baBlock(R,`items/${n}/b`,`items/${n}/a`)}<div class="cap"><b>${R.t(`items/${n}/t`)}</b><span>${R.t(`items/${n}/d`)}</span></div></div>`).join('')}</div></div></section>` },
+    render: (R, d) => `<section class="cb cb-ba"><div class="wrap"><div class="cb-tit"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p>${R.t('s')}</p></div><div class="grid">${(d.items||[]).map((_,n)=>`<div>${baBlock(R,`items/${n}/b`,`items/${n}/a`,'',R.raw(`items/${n}/t`))}<div class="cap"><b>${R.t(`items/${n}/t`)}</b><span>${R.t(`items/${n}/d`)}</span></div></div>`).join('')}</div></div></section>` },
   c_text: { label: '제목 + 글', desc: '가운데 정렬된 제목과 본문 글', fields: [F.menu(''), F.text('t','제목'), F.area('d','본문')],
     defaults: () => ({ menu:'', t:'새로운 소식을 전해드립니다', d:'이곳에 병원 소개, 공지, 진료 철학 등\n원하는 내용을 자유롭게 입력하세요.' }),
     render: R => `<section class="cb cb-text"><div class="wrap"><h2>${R.t('t')}</h2><p>${R.t('d')}</p></div></section>` },
   c_img: { label: '큰 사진', desc: '화면 폭에 맞춘 사진 한 장과 설명', fields: [F.menu(''), F.img('img','사진'), F.text('c','사진 설명')],
     defaults: () => ({ menu:'', img:'asset:lobby', c:'디투치과 라운지' }),
-    render: R => `<section class="cb cb-img"><div class="wrap"><figure>${R.i('img')}<figcaption>${R.t('c')}</figcaption></figure></div></section>` },
+    render: R => `<section class="cb cb-img"><div class="wrap"><figure>${R.i('img','',String(R.raw('c')||'').replace(/\s+/g,' '))}<figcaption>${R.t('c')}</figcaption></figure></div></section>` },
   c_cta: { label: '상담 유도 배너', desc: '대표색 배경에 큰 문구와 전화 버튼', fields: [F.menu(''), F.text('t','큰 문구'), F.text('s','작은 문구'), F.text('btn','버튼 글자')],
     defaults: () => ({ menu:'', t:'지금 바로 무료 상담을 받아보세요', s:'전화 한 통으로 진료 예약과 비용 상담이 가능합니다', btn:'전화 상담하기' }),
     render: (R, d, S, ctx) => `<section class="cb-cta"><div class="wrap"><h2>${R.t('t')}</h2><p>${R.t('s')}</p><a href="tel:${S.v('phone')}">${R.t('btn')}</a></div></section>` },
@@ -1046,7 +1047,7 @@ BLOCKDEFS.grand = {
       fields:[F.menu('전후사진'), F.text('g_ba_t','제목'), F.text('g_ba_s','설명'),
         F.list('items','전후사진 케이스','케이스',3,[F.img('b','치료 전 사진',{from:i=>`ba${i+1}_b`}),F.img('a','치료 후 사진',{from:i=>`ba${i+1}_a`}),F.text('t','케이스 제목',{from:i=>`ba${i+1}_t`}),F.text('d','설명',{from:i=>`ba${i+1}_d`})])],
       render:(R,d)=>`<section class="sec ba-sec"><div class="wrap"><div class="tit rv"><small>BEFORE &amp; AFTER</small><h2>${R.t('g_ba_t')}</h2><p>${R.t('g_ba_s')}</p></div>
-<div class="ba-grid">${(d.items||[]).map((_,n)=>`<div class="ba-card rv">${baBlock(R,`items/${n}/b`,`items/${n}/a`)}<div class="cap"><b>${R.t(`items/${n}/t`)}</b><span>${R.t(`items/${n}/d`)}</span></div></div>`).join('')}</div></div></section>` },
+<div class="ba-grid">${(d.items||[]).map((_,n)=>`<div class="ba-card rv">${baBlock(R,`items/${n}/b`,`items/${n}/a`,'',R.raw(`items/${n}/t`))}<div class="cap"><b>${R.t(`items/${n}/t`)}</b><span>${R.t(`items/${n}/d`)}</span></div></div>`).join('')}</div></div></section>` },
     why: { label:'병원 강점 (사진+글)', desc:'사진과 설명이 좌우로 번갈아 나오는 소개', menu:'병원소개',
       fields:[F.menu('병원소개'), F.text('g_why_lab','작은 제목',{def:'WHY D2 DENTAL CLINIC'}), F.area('g_why_t','제목',{rows:2}),
         F.list('items','강점 항목','항목',4,[F.img('img','사진',{from:i=>`img_w${i+1}`}),F.text('tag','라벨',{from:i=>`w${i+1}_tag`}),F.area('t','제목',{rows:2,from:i=>`w${i+1}_t`}),F.area('d','설명',{from:i=>`w${i+1}_d`})])],
@@ -1343,7 +1344,7 @@ body.nav-open .hd nav .mi.has-sub>.mi-a:after{display:none}}`;
 COMMON_BLOCKS.c_treat = { label:'진료 과목 상세', desc:'사진·설명·특징 목록으로 한 가지 진료를 자세히 소개 (진료과목 소메뉴 연결용)',
   fields:[F.menu(''), F.img('img','사진'), F.text('lab','작은 제목'), F.text('t','진료 이름'), F.area('d','설명',{rows:4}), F.area('pts','특징 (한 줄에 하나씩)',{rows:4}), F.text('btn','버튼 글자'), F.text('side','사진 위치 (left / right)')],
   defaults: () => ({ menu:'', img:'asset:implant', lab:'TREATMENT', t:'임플란트', d:'정밀한 3D 진단과 네비게이션 가이드로\n안전하고 오래 쓰는 임플란트를 식립합니다.', pts:'3D CT 정밀 진단\n가이드 수술로 최소 절개\n분야별 전문의 협진\n체계적인 사후관리', btn:'상담 예약하기', side:'left' }),
-  render: (R, d, S) => `<section class="cb cb-treat${d.side === 'right' ? ' rt' : ''}"><div class="wrap"><div class="ph">${R.i('img')}</div><div class="tx"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p>${R.t('d')}</p><ul>${String(d.pts || '').split('\n').filter(x => x.trim()).map(x => `<li>${esc(x)}</li>`).join('')}</ul><a href="tel:${S.v('phone')}">${R.t('btn')}</a></div></div></section>` };
+  render: (R, d, S) => `<section class="cb cb-treat${d.side === 'right' ? ' rt' : ''}"><div class="wrap"><div class="ph">${R.i('img','',String(R.raw('t')||'').replace(/\s+/g,' '))}</div><div class="tx"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p>${R.t('d')}</p><ul>${String(d.pts || '').split('\n').filter(x => x.trim()).map(x => `<li>${esc(x)}</li>`).join('')}</ul><a href="tel:${S.v('phone')}">${R.t('btn')}</a></div></div></section>` };
 const TREAT_CSS = `
 .cb-treat .wrap{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center}.cb-treat.rt .ph{order:2}
 .cb-treat .ph img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--r)}
@@ -1498,7 +1499,7 @@ const PAGE_BLOCK_CSS = `
 Object.assign(COMMON_BLOCKS, {
   c_subhero: { label:'페이지 상단 배너', desc:'서브 페이지 맨 위 큰 사진과 페이지 제목', fields:[F.img('img','배경 사진'), F.text('en','작은 영문 제목'), F.text('t','페이지 제목'), F.area('d','설명',{rows:2}), F.text('crumb','위치 표시 (예: HOME > 임플란트)')],
     defaults: () => ({ img:'asset:floor', en:'TREATMENT', t:'페이지 제목', d:'페이지 설명을 입력하세요.', crumb:'HOME > 메뉴' }),
-    render: R => `<section class="cb-sub">${R.i('img')}<div class="wrap"><small>${R.t('en')}</small><h1>${R.t('t')}</h1><p>${R.t('d')}</p><div class="crumb">${R.t('crumb')}</div></div></section>` },
+    render: R => `<section class="cb-sub">${R.i('img','',String(R.raw('t')||'').replace(/\s+/g,' '))}<div class="wrap"><small>${R.t('en')}</small><h1>${R.t('t')}</h1><p>${R.t('d')}</p><div class="crumb">${R.t('crumb')}</div></div></section>` },
   c_points: { label:'특징 카드', desc:'아이콘과 함께 보여주는 장점·특징 카드', fields:[F.text('lab','작은 제목'), F.text('t','제목'), F.text('s','설명'), F.list('items','특징','특징',3,[F.icon('icon','아이콘'),F.text('t','제목'),F.area('d','설명')],{max:8})],
     defaults: () => ({ lab:'POINT', t:'디투치과만의 특별함', s:'', items:[['shield','안전한 진료','철저한 멸균과 정밀 진단으로 안전하게 치료합니다.'],['sparkle','자연스러운 결과','개인의 얼굴과 치아에 맞춘 맞춤 설계를 합니다.'],['clock','체계적인 관리','치료 후에도 정기 검진으로 오래 관리합니다.']].map(([icon,t,d])=>({icon,t,d})) }),
     render: (R,d) => `<section class="cb cb-pts"><div class="wrap"><div class="cb-tit"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2>${d.s?`<p>${R.t('s')}</p>`:''}</div><div class="grid">${(d.items||[]).map((it,n)=>`<div class="it rv">${ic(it.icon||'tooth')}<b>${R.t(`items/${n}/t`)}</b><p>${R.t(`items/${n}/d`)}</p></div>`).join('')}</div></div></section>` },
@@ -1522,7 +1523,7 @@ Object.assign(COMMON_BLOCKS, {
 <div class="row">${ic('pin')}<div><b>주소</b>${S.t('address')}<br><small>${S.t('traffic')}</small></div></div></div><div>${mapBox(ctx.site)}</div></div></div></section>` },
   c_greet: { label:'대표원장 인사말', desc:'원장 사진과 인사말, 약력', fields:[F.img('img','사진'), F.text('lab','작은 제목'), F.area('t','제목',{rows:2}), F.area('msg','인사말',{rows:6}), F.text('sign','서명'), F.area('cr','약력',{rows:4})],
     defaults: () => ({ img:'asset:doc2', lab:'GREETING', t:'내 가족을 치료한다는 마음으로\n진료하겠습니다', msg:'안녕하세요, 디투치과 대표원장입니다.\n\n치과는 누구에게나 조금은 두려운 곳입니다. 저희는 그 마음을 먼저 이해하고, 꼭 필요한 치료만 정직하게 권해드리겠습니다.\n\n정밀한 진단과 꼼꼼한 사후관리로 오래도록 건강한 미소를 지켜드리겠습니다.', sign:'디투치과 대표원장 홍길동', cr:'00대학교 치의학대학원 졸업\n00대학교 치과병원 보철과 수련\n대한치과보철학회 정회원' }),
-    render: R => `<section class="cb cb-greet"><div class="wrap grid"><div class="rv">${R.i('img')}</div><div class="rv"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p class="msg">${R.t('msg')}</p><p class="sign">${R.t('sign')}</p><p class="cr">${R.t('cr')}</p></div></div></section>` },
+    render: R => `<section class="cb cb-greet"><div class="wrap grid"><div class="rv">${R.i('img','',String(R.raw('t')||'').replace(/\s+/g,' '))}</div><div class="rv"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p class="msg">${R.t('msg')}</p><p class="sign">${R.t('sign')}</p><p class="cr">${R.t('cr')}</p></div></div></section>` },
   c_quick: { label:'진료 바로가기', desc:'진료 페이지로 이동하는 아이콘 카드', fields:[F.text('lab','작은 제목'), F.text('t','제목'), F.list('items','바로가기','바로가기',6,[F.icon('icon','아이콘'),F.text('t','진료명'),F.text('d','짧은 설명'),F.link('href')],{max:12})],
     defaults: () => ({ lab:'TREATMENT', t:'진료 과목 바로가기', items:[] }),
     render: (R,d,S,ctx) => `<section class="cb cb-quick"><div class="wrap"><div class="cb-tit"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2></div><div class="grid">${(d.items||[]).map((it,n)=>`<a class="rv" href="${ctx.link(it.href)}">${ic(it.icon||'tooth')}<b>${R.t(`items/${n}/t`)}</b><span>${R.t(`items/${n}/d`)}</span></a>`).join('')}</div></div></section>` }
@@ -1782,6 +1783,7 @@ renderSite = function(content, theme, mode, files, opt = {}){
   const body = page.blocks.filter(b => showHidden || !b.hidden).map(b => renderBlockHTML(content, theme, b, mode, files, { ...opt, page: page.id })).join('');
   const ctx = siteCtx(content, theme, mode, page.id, opt);
   let html = T.chrome(S, body, ctx);
+  if (mode === 'export') html = html.replace(/src="https:\/\/dentalmbti\.co\.kr\/(assets\/[^"]+\.mp4)"/g, (m, p) => { const nm = 'video/' + p.split('/').pop(); files[nm] = { url: 'https://dentalmbti.co.kr/' + p }; return `src="${nm}"`; });
   if (site.logo){
     const h = Math.max(16, Math.min(160, parseInt(site.logoH, 10) || 44));
     const tone = site.logoTone === 'white' ? 'filter:brightness(0) invert(1);' : site.logoTone === 'black' ? 'filter:brightness(0);' : '';
@@ -1796,16 +1798,29 @@ renderSite = function(content, theme, mode, files, opt = {}){
   const og = firstImage(content);
   const ogSrc = og ? makeR2({ og }, 'og/', rmode, files).src('og') : '';
   const sub = page.id !== 'home';
-  const title = sub ? `${page.title} | ${site.name}` : `${site.name}${site.metaTitle ? ' | ' + site.metaTitle : ''}`;
+  const title = page.seoTitle || (sub ? `${page.title} | ${site.name}` : `${site.name}${site.metaTitle ? ' | ' + site.metaTitle : ''}`);
+  const desc = page.seoDesc || site.metaDesc || '';
+  const base = String(site.siteUrl || '').trim().replace(/\/+$/, '');
+  const pageUrl = base ? base + '/' + (sub ? page.slug + '.html' : '') : '';
+  let ogAbs = ogSrc; if (ogAbs && !/^(https?:|data:)/.test(ogAbs)) ogAbs = base ? base + '/' + ogAbs.replace(/^\.?\//, '') : '';
+  const exp = mode === 'export';
+  const headExtra = (exp && pageUrl ? `<link rel="canonical" href="${esc(pageUrl)}"><meta property="og:url" content="${esc(pageUrl)}">` : '')
+    + `<meta property="og:site_name" content="${esc(site.name)}"><meta property="og:locale" content="ko_KR">`
+    + `<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(desc)}">${ogAbs ? `<meta name="twitter:image" content="${esc(ogAbs)}">` : ''}`
+    + (exp ? '<meta name="robots" content="index,follow">' : '')
+    + (site.naverVerify ? `<meta name="naver-site-verification" content="${esc(site.naverVerify)}">` : '')
+    + (site.googleVerify ? `<meta name="google-site-verification" content="${esc(site.googleVerify)}">` : '')
+    + (exp ? seoJsonLd(content, page, { base, pageUrl, title, desc, og: ogAbs }) : '');
   return `<!DOCTYPE html>
 <html lang="ko"${sub ? ' class="sub"' : ''}><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>window.__PAGE=${JSON.stringify(page.id)}<\/script>
 ${opt.head || ''}
 <title>${esc(title)}</title>
-<meta name="description" content="${esc(site.metaDesc)}">
+<meta name="description" content="${esc(desc)}">
 <meta property="og:type" content="website"><meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(site.metaDesc)}">${ogSrc ? `<meta property="og:image" content="${ogSrc}">` : ''}
+<meta property="og:description" content="${esc(desc)}">${ogAbs ? `<meta property="og:image" content="${esc(ogAbs)}">` : ''}
+${headExtra}
 <meta name="theme-color" content="${esc(site.color)}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 ${th.fonts || ''}
@@ -1817,6 +1832,61 @@ ${privacyHTML(site)}
 ${opt.tail || ''}
 </body></html>`;
 };
+
+/* ---------- 검색엔진 · AI용 구조화 데이터 (JSON-LD) ---------- */
+function seoPlain(v){ return String(v == null ? '' : v).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(); }
+function seoJsonLd(content, page, o){
+  const site = content.site, base = o.base, home = base ? base + '/' : '';
+  const id = k => base ? base + '/#' + k : undefined;
+  const list = v => String(v || '').split(/[,\n]/).map(x => x.trim()).filter(Boolean);
+  const biz = { '@type':'Dentist', '@id':id('dentist'), name:site.name, alternateName:list(site.altNames), url:home || undefined, telephone:site.phone || undefined,
+    image:o.og || undefined, description:site.metaDesc || undefined, medicalSpecialty:'Dentistry', isAcceptingNewPatients:true };
+  const a = site.ldAddr || null;
+  biz.address = a ? { '@type':'PostalAddress', addressCountry:'KR', ...a } : (site.address ? { '@type':'PostalAddress', addressCountry:'KR', streetAddress:site.address } : undefined);
+  if (site.address) biz.hasMap = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(site.address);
+  if (Array.isArray(site.ldHours) && site.ldHours.length) biz.openingHoursSpecification = site.ldHours.map(h => ({ '@type':'OpeningHoursSpecification', dayOfWeek:h.days, opens:h.opens, closes:h.closes }));
+  const areas = list(site.areaServed); if (areas.length) biz.areaServed = areas.map(n => ({ '@type':'Place', name:n }));
+  if (site.ldDoctor) biz.employee = { '@type':'Person', name:site.ldDoctor.name, jobTitle:site.ldDoctor.job, description:site.ldDoctor.desc || undefined };
+  const same = list(site.sameAs || site.bal_blog); if (same.length) biz.sameAs = same;
+  const g = [biz,
+    { '@type':'WebSite', '@id':id('website'), url:home || undefined, name:site.name, inLanguage:'ko-KR', publisher: base ? { '@id':id('dentist') } : undefined },
+    { '@type':'WebPage', '@id':o.pageUrl ? o.pageUrl + '#webpage' : undefined, url:o.pageUrl || undefined, name:o.title, description:o.desc, inLanguage:'ko-KR',
+      isPartOf: base ? { '@id':id('website') } : undefined, about: base ? { '@id':id('dentist') } : undefined }];
+  if (page.id !== 'home' && base) g.push({ '@type':'BreadcrumbList', itemListElement:[
+    { '@type':'ListItem', position:1, name:'홈', item:home }, { '@type':'ListItem', position:2, name:page.title, item:o.pageUrl } ] });
+  const vis = (page.blocks || []).filter(b => !b.hidden);
+  const faqs = []; vis.filter(b => b.type === 'c_faq').forEach(b => (b.data.items || []).forEach(it => { const q = seoPlain(it.q), an = seoPlain(it.a); if (q && an) faqs.push({ '@type':'Question', name:q, acceptedAnswer:{ '@type':'Answer', text:an } }); }));
+  if (faqs.length) g.push({ '@type':'FAQPage', '@id':o.pageUrl ? o.pageUrl + '#faq' : undefined, mainEntity:faqs });
+  if (page.id !== 'home' && vis.some(b => b.type === 'c_steps')) g.push({ '@type':'Service', name:page.title, serviceType:page.title, description:o.desc,
+    provider: base ? { '@id':id('dentist') } : { '@type':'Dentist', name:site.name }, areaServed: areas.length ? areas.map(n => ({ '@type':'Place', name:n })) : undefined, url:o.pageUrl || undefined });
+  const json = JSON.stringify({ '@context':'https://schema.org', '@graph':g }, (k, v) => (v === undefined || (Array.isArray(v) && !v.length)) ? undefined : v);
+  return `<script type="application/ld+json">${json.replace(/</g, '\\u003c')}<\/script>`;
+}
+/* ---------- 내보내기용 robots.txt · sitemap.xml · llms.txt ---------- */
+function seoFiles(content){
+  const site = content.site, base = String(site.siteUrl || '').trim().replace(/\/+$/, ''), out = {};
+  const url = pg => base + '/' + (pg.id === 'home' ? '' : pg.slug + '.html');
+  out['robots.txt'] = 'User-agent: *\nAllow: /\n' + (base ? `\nSitemap: ${base}/sitemap.xml\n` : '');
+  if (base){
+    const d = new Date().toISOString().slice(0, 10);
+    out['sitemap.xml'] = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+      + content.pages.map(pg => `  <url><loc>${url(pg)}</loc><lastmod>${d}</lastmod><priority>${pg.id === 'home' ? '1.0' : '0.7'}</priority></url>`).join('\n') + '\n</urlset>\n';
+  }
+  const L = [`# ${site.name}`, '', `> ${site.metaDesc || ''}`, ''];
+  L.push('## 기본 정보');
+  if (site.address) L.push(`- 주소: ${site.address}`);
+  if (site.phone) L.push(`- 전화: ${site.phone}`);
+  if (site.hours) L.push('- 진료시간: ' + String(site.hours).split('\n').map(x => x.replace(/\s+/g, ' ').trim()).filter(Boolean).join(' / '));
+  if (site.ldDoctor) L.push(`- 대표원장: ${site.ldDoctor.name} (${site.ldDoctor.job}${site.ldDoctor.desc ? ', ' + site.ldDoctor.desc : ''})`);
+  if (site.areaServed) L.push(`- 가까운 지역: ${String(site.areaServed).replace(/\n/g, ', ')}`);
+  if (site.bal_blog) L.push(`- 블로그: ${site.bal_blog}`);
+  L.push('', '## 페이지');
+  content.pages.forEach(pg => L.push(`- [${pg.title}](${base ? url(pg) : (pg.id === 'home' ? 'index.html' : pg.slug + '.html')}): ${pg.seoDesc || ''}`.trim()));
+  const fq = []; content.pages.forEach(pg => (pg.blocks || []).filter(b => b.type === 'c_faq' && !b.hidden).forEach(b => (b.data.items || []).forEach(it => { const q = seoPlain(it.q), a = seoPlain(it.a); if (q && a && fq.length < 12 && !fq.some(x => x[0] === q)) fq.push([q, a]); })));
+  if (fq.length){ L.push('', '## 자주 묻는 질문'); fq.forEach(([q, a]) => L.push(`- Q. ${q}`, `  A. ${a}`)); }
+  out['llms.txt'] = L.join('\n') + '\n';
+  return out;
+}
 
 /* =====================================================================
    6. BALANCE — 분과협진 종합형 (참고: 판교밸런스치과병원 스타일)
@@ -1978,7 +2048,7 @@ BLOCKDEFS.balance = {
     ba: { label:'치료 전후 사진', desc:'분야별 4칸 전후 비교 (좌우로 밀어서 비교)',
       fields:[F.text('en','작은 영문 제목'), F.text('t','제목'), F.list('items','케이스','케이스',4,[F.text('t','치료명'),F.text('s','한 줄 설명'),F.img('b','치료 전'),F.img('a','치료 후')],{max:8})],
       defaults: () => ({ en:'BEFORE & AFTER', t:'치료 전후 사진', items:[['턱관절 질환 치료','수술 없이 치료'],['비발치 치아교정','뽑지 않고 완성'],['임플란트','적은 통증, 빠른 회복'],['심미(라미네이트) 치료','하루(1 DAY) 완성']].map(([t,s])=>({t,s,b:'asset:baBefore',a:'asset:baAfter'})) }),
-      render:(R,d)=>`<section class="sec bb"><div class="wrap"><div class="btit rv"><small>${R.t('en')}</small><h2>${R.t('t')}</h2></div><div class="grid">${(d.items||[]).map((_,n)=>`<div class="it rv"><h3>${R.t(`items/${n}/t`)}</h3><span class="sub2">${R.t(`items/${n}/s`)}</span>${baBlock(R,`items/${n}/b`,`items/${n}/a`)}</div>`).join('')}</div></div></section>` },
+      render:(R,d)=>`<section class="sec bb"><div class="wrap"><div class="btit rv"><small>${R.t('en')}</small><h2>${R.t('t')}</h2></div><div class="grid">${(d.items||[]).map((_,n)=>`<div class="it rv"><h3>${R.t(`items/${n}/t`)}</h3><span class="sub2">${R.t(`items/${n}/s`)}</span>${baBlock(R,`items/${n}/b`,`items/${n}/a`,'',R.raw(`items/${n}/t`))}</div>`).join('')}</div></div></section>` },
     doctors: { label:'의료진', desc:'회색 배경 엠블럼 + 의료진 사진 카드',
       fields:[F.text('en','영문 제목'), F.text('t','제목'), F.list('items','의료진','의료진',3,[F.img('img','사진'),F.text('sp','전문 분야'),F.text('n','이름'),F.text('pos','직함')],{max:12})],
       defaults: () => ({ en:'D2 DENTAL HOSPITAL', t:'분야별 전문의 협진 시스템', items:[['doc2','보철과전문의','홍길동','대표원장'],['doc1','교정과전문의','김철수','원장'],['doc3','보존과전문의','이영희','원장']].map(([a,sp,n,pos])=>({img:'asset:'+a,sp,n,pos})) }),
@@ -2330,7 +2400,7 @@ BLOCKDEFS.luxe = {
       fields:[F.text('video','영상 주소 (mp4)'), F.img('poster','영상 첫 화면 사진'), F.text('en','영문 제목'), F.text('t','한글 문구'), F.text('btn','버튼 글자'), F.link('href')],
       defaults: () => ({ video:'', poster:'asset:lobby', en:'Aesthetic Dental Care', t:'자연스러운 미소를 오래 지켜가는 치과', btn:'VIEW MORE', href:'p:pg-greeting' }),
       render:(R,d,S,ctx)=>{ let v = d.video || ''; if (v.startsWith('assets/') && ctx.mode === 'export') v = 'https://dentalmbti.co.kr/' + v;
-        return `<section class="lv">${R.i('poster').replace('<img','<img class="pst"')}${v?`<video autoplay muted loop playsinline preload="auto" poster="" src="${esc(v)}"></video>`:''}<div class="in"><span class="en">${R.t('en')}</span><h1>${R.t('t')}</h1><a class="more" href="${ctx.link(d.href)}">${R.t('btn')}</a></div><span class="sc" aria-hidden="true"></span></section>`; } },
+        return `<section class="lv">${R.i('poster','',String(R.raw('t')||'')).replace(' loading="lazy"',' fetchpriority="high"').replace('<img','<img class="pst"')}${v?`<video autoplay muted loop playsinline preload="metadata" poster="${esc(R.src('poster'))}" src="${esc(v)}"></video>`:''}<div class="in"><span class="en">${R.t('en')}</span><h1>${R.t('t')}</h1><a class="more" href="${ctx.link(d.href)}">${R.t('btn')}</a></div><span class="sc" aria-hidden="true"></span></section>`; } },
     manifesto: { label:'철학 · 핵심 숫자', desc:'가운데 정렬 문구와 숫자 3개',
       fields:[F.text('en','영문 소제목'), F.text('t1','제목 1줄'), F.text('t2','제목 2줄 (굵게)'), F.area('d','설명',{rows:3}), F.list('st','숫자','숫자',3,[F.text('n','숫자'),F.text('u','단위'),F.text('l','설명')],{max:4})],
       defaults: () => ({ en:'Our Philosophy', t1:'가장 아름다운 미소는', t2:'가장 건강한 치아에서 시작됩니다', d:'보이는 아름다움만이 아니라 오래 지켜갈 수 있는 건강까지 함께 설계합니다.', st:[['20','년+','임상 경력'],['1',':1','전담 진료'],['100','%','정품 재료 사용']].map(([n,u,l])=>({n,u,l})) }),
@@ -2338,11 +2408,11 @@ BLOCKDEFS.luxe = {
     sig: { label:'시그니처 심미 진료 (전후 비교)', desc:'남색 배경 위 대표 진료 2개 + 전후 비교 슬라이더',
       fields:[F.text('en','영문 소제목'), F.text('t','제목'), F.text('s','설명'), F.list('items','대표 진료','진료',2,[F.text('no','번호/영문'),F.text('t','진료명'),F.area('d','설명',{rows:3}),F.img('b','치료 전'),F.img('a','치료 후'),F.text('btn','링크 글자'),F.link('href')],{max:4})],
       defaults: () => ({ en:'Signature Care', t:'심미치료의 기준을 새롭게', s:'좌우로 밀어서 치료 전후를 비교해 보세요', items:[['01  LAMINATE','라미네이트','치아를 깎지 않고 0.1mm 지르코니아를 붙여 색과 모양, 배열을 함께 개선합니다.','라미네이트 자세히','pg-laminate'],['02  WHITENING','전문가 치아미백','치아 표면을 깎지 않고 착색된 색소만 분해해 본래의 밝기를 되찾습니다.','치아미백 자세히','pg-whitening']].map(([no,t,d,btn,p])=>({no,t,d,btn,href:'p:'+p,b:'asset:baBefore',a:'asset:baAfter'})) }),
-      render:(R,d,S,ctx)=>`<section class="lsg"><div class="wrap"><div class="ltit rv"><span class="en">${R.t('en')}</span><h2>${R.t('t')}</h2><p>${R.t('s')}</p></div><div class="grid">${(d.items||[]).map((it,n)=>`<div class="card rv">${baBlock(R,`items/${n}/b`,`items/${n}/a`)}<div class="no"><span class="en">${R.t(`items/${n}/no`)}</span></div><h3>${R.t(`items/${n}/t`)}</h3><p>${R.t(`items/${n}/d`)}</p><a class="lk" href="${ctx.link(it.href)}">${R.t(`items/${n}/btn`)} →</a></div>`).join('')}</div></div></section>` },
+      render:(R,d,S,ctx)=>`<section class="lsg"><div class="wrap"><div class="ltit rv"><span class="en">${R.t('en')}</span><h2>${R.t('t')}</h2><p>${R.t('s')}</p></div><div class="grid">${(d.items||[]).map((it,n)=>`<div class="card rv">${baBlock(R,`items/${n}/b`,`items/${n}/a`,'',R.raw(`items/${n}/t`))}<div class="no"><span class="en">${R.t(`items/${n}/no`)}</span></div><h3>${R.t(`items/${n}/t`)}</h3><p>${R.t(`items/${n}/d`)}</p><a class="lk" href="${ctx.link(it.href)}">${R.t(`items/${n}/btn`)} →</a></div>`).join('')}</div></div></section>` },
     dfeat: { label:'대표원장 소개 (크게)', desc:'아치형 프로필 사진 + 전문의 배지 · 약력',
       fields:[F.img('img','프로필 사진'), F.text('chip','배지 (예: 치과보존과 인정의)'), F.text('n','이름'), F.text('pos','직함'), F.area('hl','강조 약력 (줄바꿈)',{rows:2}), F.area('cr','약력 목록 (줄바꿈)',{rows:6}), F.text('sg','서명 문구')],
       defaults: () => ({ img:'asset:doc1', chip:'보철과 전문의', n:'홍길동', pos:'대표원장', hl:'00대학교 치의학대학원 박사\n대한심미치과학회 정회원', cr:'00대학교 치과대학 졸업\n00대학교 치과병원 수련\n대한치과보철학회 정회원\n대한심미치과학회 정회원', sg:'With sincere care' }),
-      render:(R,d)=>`<section class="ld"><div class="wrap"><div class="pf rv"><div class="ph">${R.i('img')}</div></div><div class="rv"><span class="chip">${R.t('chip')}</span><div class="nm">${R.t('n')}<small>${R.t('pos')}</small></div><div class="hl">${R.t('hl')}</div>${(()=>{const cr=String(d.cr||'').split('\n').filter(Boolean);return `<ul style="--rows:${Math.ceil(cr.length/2)}">${cr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`})()}<p class="sg">${R.t('sg')}</p></div></div></section>` }
+      render:(R,d)=>`<section class="ld"><div class="wrap"><div class="pf rv"><div class="ph">${R.i('img','',(String(R.raw('n')||'')+' '+String(R.raw('pos')||'')).trim())}</div></div><div class="rv"><span class="chip">${R.t('chip')}</span><div class="nm">${R.t('n')}<small>${R.t('pos')}</small></div><div class="hl">${R.t('hl')}</div>${(()=>{const cr=String(d.cr||'').split('\n').filter(Boolean);return `<ul style="--rows:${Math.ceil(cr.length/2)}">${cr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`})()}<p class="sg">${R.t('sg')}</p></div></div></section>` }
   }),
   chrome:(S,body,ctx)=>`
 <header class="hd"><div class="wrap"><a href="${ctx.home}" class="logo">${balLogo(S.v('bal_mark'))}<span><b>${S.t('name')}</b><small>${S.t('nameEn')}</small></span></a>
@@ -2357,7 +2427,7 @@ BLOCKDEFS.luxe = {
 <a class="q" href="${ctx.go('sms')}">${ic('cal')}빠른상담</a>
 <a class="top" href="#top">TOP</a></aside>
 <main id="top">${body}</main>
-<footer class="ft"><div class="wrap"><div class="fl">${S.v('logo') ? S.i('logo','','logo') : balMark(S,'')}<b>${S.t('name')}</b></div><div><p class="lk">이용약관 &nbsp;·&nbsp; <a href="#privacy" class="pv-open">개인정보처리방침</a></p><p>${S.t('biz')}</p><p style="margin-top:10px">COPYRIGHT © ${S.t('nameEn')}. ALL RIGHTS RESERVED.</p></div></div></footer>
+<footer class="ft"><div class="wrap"><div class="fl">${S.v('logo') ? S.i('logo','',S.raw('name')||'logo') : balMark(S,'')}<b>${S.t('name')}</b></div><div><p class="lk">이용약관 &nbsp;·&nbsp; <a href="#privacy" class="pv-open">개인정보처리방침</a></p><p>${S.t('biz')}</p><p style="margin-top:10px">COPYRIGHT © ${S.t('nameEn')}. ALL RIGHTS RESERVED.</p></div></div></footer>
 <div class="lbar"><button type="button" class="x" onclick="document.body.classList.toggle('lbar-off')">빠른상담</button>
 <form class="cform" action="https://formsubmit.co/${esc(ctx.site.email)}" method="POST" data-mail="${esc(ctx.site.email)}"><input type="hidden" name="_subject" value="[${esc(ctx.site.name)}] 빠른 상담 신청"><input type="hidden" name="_captcha" value="false">
 <span class="ttl">빠른 상담 신청<small>Quick Consultation</small></span><input name="이름" placeholder="이름" required><input name="연락처" placeholder="연락처" required>
@@ -2420,6 +2490,7 @@ T_LUXE.css += '.t-luxe .seg{display:block}.t-luxe .seg-gap{height:1em}'
 /* 2026-11-24 오른쪽 빠른 메뉴(약 100px)와 본문이 겹치지 않도록: 901~1400px에서 본문 좌우 여백 확대 (헤더 제외) */
 T_LUXE.css += '@media(min-width:901px) and (max-width:1400px){.t-luxe section .wrap,.t-luxe .bt .grid{width:min(1240px,100% - 220px)}}';
 T_LUXE.css += '@media(min-width:901px) and (max-width:1400px){.t-luxe .ld .wrap{grid-template-columns:.7fr 1.3fr;gap:56px}}@media(min-width:901px) and (max-width:1099px){.t-luxe .ld ul{grid-auto-flow:row;grid-template-rows:none;grid-template-columns:1fr}}';
+T_LUXE.css += '.t-luxe .lv .en,.t-luxe .lh .l1,.t-luxe .ltit .en{text-wrap:balance}';
 
 /* =====================================================================
    7. 신촌 e-스타치과 — 밸런스형 디자인 + 심미(라미네이트·미백) 강조 샘플
@@ -2742,7 +2813,28 @@ Object.assign(ES_TX, {
 const ES_NEWPAGES = [['overlay','지르코니아 오버레이','자연치아보존','cavity'],['maryland','메릴랜드 브릿지','임플란트','implant']];
 if (!ES_MAP.some(g => g.label === '턱관절 · 보톡스')) ES_MAP.splice(3, 0, { label:'턱관절 · 보톡스', children:[['tmj-phl','턱관절 물리치료'],['botox','이갈이 · 사각턱 보톡스']] });
 
-const ES_VIDEO = () => ({ video:'assets/hp-studio/estar/estar_hero3.mp4', poster:'asset:estar/heroPoster2', en:'The Art of a Natural Smile', t:'18년째 같은 자리에서, 원장이 직접 진료하는 신촌 e-스타치과', btn:'VIEW MORE', href:'p:pg-special' });
+
+/* 2026-11-24 SEO·AEO·GEO: 페이지별 검색 제목·설명, 구조화 데이터용 정보, 지역 안내, FAQ */
+const ES_SEO = {"home": ["신촌역 치과 e-스타치과 | 무삭제 라미네이트 · 치아미백 · 신경치료", "신촌역 1번 출구 도보 1분, 치과보존과 인정의 대표원장이 1인 책임진료하는 신촌 e-스타치과. 무삭제 라미네이트, 전문가 치아미백, 신경치료·재신경치료. 홍대·이대·연세대에서도 가깝습니다."], "greeting": ["대표원장 인사말 | 신촌 e-스타치과 김소연 원장", "25년차 치과보존과 인정의, 대한심미치과학회 정회원 김소연 대표원장이 신촌역 같은 자리에서 18년째 직접 진료합니다."], "doctors": ["의료진 소개 | 신촌 e-스타치과 보존과 인정의 원장", "치과보존과 인정의 김소연 대표원장의 학력·학회 활동과 진료 분야를 소개합니다. 신촌역 1번 출구 e-스타치과."], "special": ["e-스타만의 특별함 | 신촌 1인 진료실 치과", "모든 진료실이 1인 전용인 신촌 e-스타치과. 원장 1인 책임진료와 과잉진료 없는 치료 원칙을 소개합니다."], "tour": ["1인 전용 진료실 둘러보기 | 신촌 e-스타치과", "다른 환자 눈치 보지 않고 상담받는 1인 전용 진료실. 신촌역 현대백화점 옆 e-스타치과 내부를 미리 둘러보세요."], "location": ["진료시간 · 오시는 길 | 신촌역 1번 출구 도보 1분 e-스타치과", "서울 서대문구 신촌로 79, 3층(창천동). 2호선 신촌역 1번 출구 도보 1분, 현대백화점 신촌점 옆 KFC 건물. 홍대입구역·이대역에서 한 정거장, 목요일 야간진료."], "laminate": ["신촌 무삭제 라미네이트 | 신촌역 라미네이트 e-스타치과", "0.1mm 지르코니아로 치아를 깎지 않고 마취 없이 하는 신촌 무삭제 라미네이트. 신촌역 1번 출구 e-스타치과, 25년차 보존과 원장이 직접 진료합니다."], "whitening": ["신촌 치아미백 | 신촌역 미백치과 e-스타치과", "18년, 수만 명의 미백 노하우. 치아 손상 없이 한 톤 밝게 하는 신촌 전문가 치아미백. 신촌역 1번 출구 도보 1분 e-스타치과."], "gum-whitening": ["신촌 레이저 잇몸미백 | e-스타치과", "검게 변한 잇몸을 레이저로 분홍빛으로. 출혈과 통증을 줄인 신촌 레이저 잇몸미백, 신촌역 e-스타치과."], "gum-contour": ["신촌 잇몸성형 · 거미스마일 | e-스타치과", "웃을 때 잇몸이 많이 보인다면 잇몸 라인을 정리하는 신촌 잇몸성형술. 신촌역 1번 출구 e-스타치과."], "laminate-repair": ["라미네이트 파절 · 재부착 | 신촌 e-스타치과", "깨지거나 떨어진 라미네이트를 상태에 맞게 다시 붙이거나 새로 만듭니다. 신촌역 e-스타치과 라미네이트 수리."], "esthetic-crown": ["신촌 올세라믹 · 지르코니아 크라운 | e-스타치과", "금속 없는 보철로 잇몸 변색 걱정 없이. 신촌 올세라믹·지르코니아 심미보철, 신촌역 e-스타치과."], "cervical": ["신촌 치경부마모증 치료 | 시린 이 · 패인 치아 목 e-스타치과", "패인 치아 목과 시린 이를 보험·비보험 재료로 치료합니다. 신촌역 e-스타치과 보존과 원장 진료."], "root-canal": ["신촌 신경치료 | 신촌 보존치과 e-스타치과", "뽑기 전에 살릴 수 있는지 먼저. 치과보존과 인정의 원장이 러버댐으로 직접 하는 신촌 신경치료, 신촌역 e-스타치과."], "retreatment": ["신촌 재신경치료 | 자연치아 살리는 신촌 보존치과 e-스타치과", "뿌리 끝 염증으로 빼야 한다는 치아도 다시 한 번. 보존과 인정의 원장의 신촌 재신경치료, 신촌역 e-스타치과."], "cavity": ["신촌 충치치료 · 인레이 | e-스타치과", "꼭 필요한 만큼만 치료하는 신촌 충치치료와 인레이. 멈춘 충치는 관찰합니다. 신촌역 e-스타치과."], "overlay": ["신촌 지르코니아 오버레이 | 자연치아 보존 e-스타치과", "크라운 대신 필요한 부분만 덮어 자연치아를 지키는 지르코니아 오버레이. 신촌역 e-스타치과 보존과 원장 진료."], "implant": ["신촌 임플란트 | 신촌역 e-스타치과", "빠진 개수보다 꼭 필요한 만큼만. 25년 경력 원장이 직접 계획하는 신촌 임플란트, 신촌역 1번 출구 e-스타치과."], "maryland": ["신촌 메릴랜드 브릿지 | 앞니 하나 빠졌을 때 e-스타치과", "옆 치아를 깎지 않고 수술 없이 빠진 앞니 하나를 채우는 지르코니아 메릴랜드 브릿지. 신촌역 1번 출구 e-스타치과."], "bone-graft": ["신촌 뼈이식 · 상악동 거상술 | e-스타치과", "부족한 잇몸뼈를 채워 안전하게 임플란트를 심습니다. 신촌역 e-스타치과."], "tmj-phl": ["신촌 턱관절 물리치료 | 턱 통증 e-스타치과", "턱 통증이나 소리가 난다면 레이저 물리치료로 관리합니다. 신촌역 e-스타치과 턱관절 진료."], "botox": ["신촌 이갈이 · 사각턱 보톡스 | e-스타치과", "이갈이·이 악물기로 아픈 턱과 치아를 보톡스로 지킵니다. 신촌역 e-스타치과."], "wisdom": ["신촌 사랑니 발치 | 신촌역 e-스타치과", "3D CT로 신경 위치를 확인하고 섬세하게 뽑는 신촌 사랑니 발치. 신촌역 1번 출구 e-스타치과."], "gum": ["신촌 잇몸치료 · 스케일링 | e-스타치과", "건강한 잇몸이 미소의 시작. 보험 스케일링과 잇몸치료, 신촌역 e-스타치과."], "kids": ["신촌 소아 · 성장기 치과 진료 | e-스타치과", "아이의 첫 치과를 즐거운 기억으로. 신촌역 e-스타치과 소아·성장기 진료."], "pregnancy": ["신촌 임산부 치과치료 | e-스타치과", "임신 중기에는 대부분의 치과치료가 가능합니다. 엄마와 아기 모두 안전한 신촌역 e-스타치과 임산부 진료."], "cases": ["치료 전후 사례 | 신촌 라미네이트 · 미백 e-스타치과", "신촌 e-스타치과에서 실제 치료한 무삭제 라미네이트·치아미백·잇몸미백 전후 사진입니다."], "reviews": ["치료 후기 | 신촌 e-스타치과", "신촌 e-스타치과에서 치료받은 분들의 후기입니다."], "notice": ["공지사항 | 신촌 e-스타치과", "진료 일정과 휴진 안내 등 신촌 e-스타치과 공지사항입니다."], "faq": ["자주 묻는 질문 | 신촌역 치과 e-스타치과", "진료시간, 오시는 길, 라미네이트·미백·신경치료 등 신촌 e-스타치과에 자주 묻는 질문을 모았습니다."]};
+const ES_SITE_SEO = {"siteUrl": "https://star-dental.kr", "altNames": "e-스타치과, 이스타치과, e스타치과의원, 신촌 이스타치과", "areaServed": "신촌, 신촌역, 홍대, 이대, 연세대, 이화여대, 서대문구, 마포구", "ldAddr": {"streetAddress": "신촌로 79, 3층", "addressLocality": "서대문구", "addressRegion": "서울특별시"}, "ldHours": [{"days": ["Monday", "Tuesday", "Wednesday", "Friday"], "opens": "09:00", "closes": "18:30"}, {"days": ["Thursday"], "opens": "09:30", "closes": "20:30"}, {"days": ["Saturday"], "opens": "09:30", "closes": "15:00"}], "ldDoctor": {"name": "김소연", "job": "대표원장", "desc": "치과보존과 인정의, 대한심미치과학회 정회원"}};
+const ES_FAQ_HOME = [["e-스타치과는 신촌역 몇 번 출구에서 가까운가요?", "2호선 신촌역 1번 출구에서 도보 1분, 현대백화점 신촌점 옆 KFC 건물 3층(서울 서대문구 신촌로 79)에 있습니다."], ["홍대 · 이대 · 연세대에서도 가까운가요?", "2호선 홍대입구역과 이대역에서 한 정거장이면 신촌역입니다. 연세대 신촌캠퍼스 정문에서는 연세로를 따라 걸어서 오실 수 있습니다."], ["진료시간과 야간진료는 언제인가요?", "평일 오전 9시부터 오후 6시 30분까지, 목요일은 오후 8시 30분까지 야간진료를 합니다. 토요일은 오전 9시 30분부터 오후 3시까지이며 일요일·공휴일은 휴진합니다."], ["어떤 진료를 주로 하나요?", "치과보존과 인정의 대표원장이 무삭제 라미네이트, 전문가 치아미백, 신경치료·재신경치료처럼 자연치아를 지키는 치료와 심미치료를 1인 책임진료합니다."]];
+const ES_FAQ_LOC = [["e-스타치과는 신촌역 몇 번 출구에서 가까운가요?", "2호선 신촌역 1번 출구에서 도보 1분, 현대백화점 신촌점 옆 KFC 건물 3층(서울 서대문구 신촌로 79)에 있습니다."], ["홍대 · 이대 · 연세대에서도 가까운가요?", "2호선 홍대입구역과 이대역에서 한 정거장이면 신촌역입니다. 연세대 신촌캠퍼스 정문에서는 연세로를 따라 걸어서 오실 수 있습니다."], ["진료시간과 야간진료는 언제인가요?", "평일 오전 9시부터 오후 6시 30분까지, 목요일은 오후 8시 30분까지 야간진료를 합니다. 토요일은 오전 9시 30분부터 오후 3시까지이며 일요일·공휴일은 휴진합니다."]];
+const ES_NEAR = [["clock", "신촌역 1번 출구 도보 1분", "2호선 신촌역 1번 출구로 나와 현대백화점 신촌점 앞을 지나 연세로를 건너면 KFC 건물 3층입니다."], ["sparkle", "홍대입구역 · 이대역에서 한 정거장", "2호선 홍대입구역이나 이대역에서 한 정거장이면 신촌역에 도착합니다."], ["tooth", "연세대 · 이화여대에서 가까운 치과", "연세대 신촌캠퍼스 정문에서 연세로를 따라 내려오면 신촌역 앞입니다. 이화여대에서도 2호선 한 정거장입니다."], ["shield", "서울 서대문구 창천동", "도로명 주소는 서울 서대문구 신촌로 79, 3층(창천동)입니다. 마포구 홍대·서교동에서도 가깝습니다."]];
+const esFaqBlk = (t, arr) => blk('c_faq', { lab:'FAQ', t, items:arr.map(([q,a])=>({q,a})) });
+const esNearBlk = () => blk('c_points', { lab:'NEARBY', t:'홍대 · 이대 · 연세대에서도 가까운 신촌역 치과', s:'서울 서대문구 신촌로 79, 3층 · 2호선 신촌역 1번 출구 도보 1분', items:ES_NEAR.map(([icon,t,d])=>({icon,t,d})) });
+function esApplySeo(c){
+  Object.keys(ES_SITE_SEO).forEach(k => { if (c.site[k] == null || c.site[k] === '') c.site[k] = JSON.parse(JSON.stringify(ES_SITE_SEO[k])); });
+  c.pages.forEach(pg => { const k = pg.id === 'home' ? 'home' : pg.slug; const v = ES_SEO[k]; if (v){ if (!pg.seoTitle) pg.seoTitle = v[0]; if (!pg.seoDesc) pg.seoDesc = v[1]; } });
+  const loc = c.pages.find(p => p.slug === 'location');
+  if (loc && !loc.blocks.some(b => b.type === 'c_faq')){ const i = loc.blocks.findIndex(b => b.type === 'c_location'); loc.blocks.splice(i + 1, 0, esNearBlk(), esFaqBlk('오시는 길 자주 묻는 질문', ES_FAQ_LOC)); }
+  const home = c.pages[0];
+  if (home && !home.blocks.some(b => b.type === 'c_faq')){ const i = home.blocks.findIndex(b => b.type === 'info'); home.blocks.splice(i < 0 ? home.blocks.length : i, 0, esFaqBlk('신촌 e-스타치과 자주 묻는 질문', ES_FAQ_HOME)); }
+  c.pages.forEach(pg => { if (pg.id === 'home') return; const h = pg.blocks.find(b => b.type === 'c_subhero'); const treat = ES_TX[pg.slug] || pg.slug === 'laminate';
+    if (h && treat && h.data.t && !/^신촌/.test(h.data.t)) h.data.t = '신촌 ' + h.data.t; });
+  home && home.blocks.forEach(b => { if (b.type === 'lvideo' && b.data.t === '18년째 같은 자리에서, 원장이 직접 진료하는 신촌 e-스타치과') b.data.t = '신촌역 도보 1분, 18년째 같은 자리에서 원장이 직접 진료하는 신촌 e-스타치과'; });
+  c.site._seo1 = 1; return c;
+}
+const ES_VIDEO = () => ({ video:'assets/hp-studio/estar/estar_hero3.mp4', poster:'asset:estar/heroPoster2', en:'The Art of a Natural Smile', t:'신촌역 도보 1분, 18년째 같은 자리에서 원장이 직접 진료하는 신촌 e-스타치과', btn:'VIEW MORE', href:'p:pg-special' });
 function estarLuxe(){
   const old = estarContent();
   const c = defaultContent('luxe');
@@ -2788,6 +2880,7 @@ function estarLuxe(){
   const loc = pages.find(p => p.id === 'pg-location'); const lh = loc && loc.blocks.find(b => b.type === 'c_subhero'); if (lh) lh.data.img = ES('lxBuilding');
   home.blocks.unshift(({ id: bid(), type:'lvideo', hidden:false, data: ES_VIDEO() })); by('lhero').hidden = true;
   c.pages = [home, ...pages];
+  esApplySeo(c);
   return JSON.parse(JSON.stringify(c).split('"asset:estar/doctor"').join('"asset:estar/lxDoc"'));
 }
 SEED.push({ theme:'luxe', title:'07 신촌 e-스타치과 (프리미엄 심미형)', once:'estar', ver:5, note:'갤러리형 메인 배너(심미 전후 사진), 새 고화질 로고, 웜톤 색상으로 변경', build: estarLuxe });
@@ -2903,7 +2996,9 @@ const SITE_FIELDS = [
   F.text('phone','대표 전화'), F.text('address','주소',{hint:'실제 주소를 입력하면 지도가 표시됩니다.'}), F.text('traffic','교통 / 주차 안내'), F.img('mapImg','약도 이미지',{hint:'넣으면 구글 지도 대신 약도가 표시되고, [지도 앱에서 열기] 버튼이 붙습니다.'}),
   F.area('hours','진료시간',{rows:4}), F.text('email','문의 수신 이메일',{hint:'상담 신청서가 이 주소로 발송됩니다.'}),
   F.text('kakao','카카오톡 채널 링크'), F.text('youtube','유튜브 채널 링크'), F.text('form_btn','상담 신청 버튼 글자'),
-  F.text('metaTitle','검색 노출 제목 (부제)'), F.area('metaDesc','검색 노출 설명',{hint:'네이버·구글 검색 결과에 보이는 문구'}), F.area('biz','하단 사업자 정보')
+  F.text('metaTitle','검색 노출 제목 (부제)'), F.area('metaDesc','검색 노출 설명',{hint:'네이버·구글 검색 결과에 보이는 문구 (페이지마다 따로 쓰려면 [페이지 관리] → 검색 노출 설정)'}), F.area('biz','하단 사업자 정보'),
+  F.text('siteUrl','홈페이지 주소 (https://…)',{hint:'실제로 올릴 도메인. 검색용 주소 태그·sitemap.xml에 쓰입니다.'}), F.text('altNames','다른 이름 (쉼표로 구분)',{hint:'예) 이스타치과, e스타치과의원'}), F.text('areaServed','가까운 지역 (쉼표로 구분)',{hint:'예) 신촌, 홍대, 이대, 연세대, 서대문구'}),
+  F.text('naverVerify','네이버 서치어드바이저 확인 코드',{hint:'HTML 태그 방식의 content 값만 붙여넣으세요.'}), F.text('googleVerify','구글 서치콘솔 확인 코드')
 ];
 
 function openEditor(id){
@@ -3190,6 +3285,10 @@ function openPageManager(){
         }
         markDirty(); drawPageSel(); renderPreview(a!=='del'); draw();
       });
+      const seo = hEl(`<details class="pg-seo"><summary>검색 노출 설정${pg.seoTitle ? ' ✓' : ''}</summary><div class="dr-field"><label>검색 제목</label><input type="text" class="pg-st" value="${esc(pg.seoTitle||'')}" placeholder="비우면 '${esc(pg.title)} | 병원명'"></div><div class="dr-field"><label>검색 설명</label><textarea class="pg-sd" rows="3" placeholder="비우면 기본 정보의 검색 노출 설명">${esc(pg.seoDesc||'')}</textarea><small>네이버·구글 검색 결과에 보이는 문구입니다. 80~120자 권장.</small></div></details>`);
+      seo.querySelector('.pg-st').oninput = e => { pg.seoTitle = e.target.value; markDirty(); };
+      seo.querySelector('.pg-sd').oninput = e => { pg.seoDesc = e.target.value; markDirty(); };
+      row.appendChild(seo);
       lst.appendChild(row);
     });
     body.appendChild(lst);
@@ -3435,6 +3534,8 @@ async function exportZip(){
       else { const r = await fetch(data.url); if(!r.ok) throw new Error(name+' 사진을 불러오지 못했습니다'); root.file(name, await r.arrayBuffer()); }
     }
   } catch(e){ return toast('다운로드 실패: '+e.message); }
+  if (typeof seoFiles === 'function') Object.entries(seoFiles(cur.content)).forEach(([n, t]) => root.file(n, t));
+  if (!site.siteUrl) toast('홈페이지 주소가 비어 있어 sitemap.xml과 검색용 주소 태그는 빠졌습니다. [기본 정보]에서 입력하세요.');
   root.file('deploy-guide.html', guidePage(site));
   root.file('README.txt', '\ufeff'+readme(site));
   root.file('portfolio-backup.json', JSON.stringify(cur));
@@ -3656,6 +3757,10 @@ $('#q').addEventListener('input', drawList);
     try { let j = JSON.stringify(p.content);
       for (const [a, b] of ES_COPY4) j = j.split(JSON.stringify(a)).join(JSON.stringify(b));
       const c = JSON.parse(j); c.site._copy4 = 1; p.content = c; p.updated = now(); await DB.put(clone(p)); } catch(e){}
+  }
+  // e-스타: 검색 노출(SEO·AEO·GEO) 정보 · FAQ · 지역 안내 · H1 지역어 (없을 때만 채움)
+  if (typeof esApplySeo === 'function') for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._seo1)){
+    try { esApplySeo(p.content); p.updated = now(); await DB.put(clone(p)); } catch(e){ console.warn(e); }
   }
   // e-스타 07: 오시는 길 약도
   for (const p of all.filter(p => p.id && p.content && p.content.site && p.content.site._seed === 'estar' && !p.content.site._map1)){

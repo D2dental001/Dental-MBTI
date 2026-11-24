@@ -158,7 +158,7 @@ BLOCKDEFS.balance = {
     ba: { label:'치료 전후 사진', desc:'분야별 4칸 전후 비교 (좌우로 밀어서 비교)',
       fields:[F.text('en','작은 영문 제목'), F.text('t','제목'), F.list('items','케이스','케이스',4,[F.text('t','치료명'),F.text('s','한 줄 설명'),F.img('b','치료 전'),F.img('a','치료 후')],{max:8})],
       defaults: () => ({ en:'BEFORE & AFTER', t:'치료 전후 사진', items:[['턱관절 질환 치료','수술 없이 치료'],['비발치 치아교정','뽑지 않고 완성'],['임플란트','적은 통증, 빠른 회복'],['심미(라미네이트) 치료','하루(1 DAY) 완성']].map(([t,s])=>({t,s,b:'asset:baBefore',a:'asset:baAfter'})) }),
-      render:(R,d)=>`<section class="sec bb"><div class="wrap"><div class="btit rv"><small>${R.t('en')}</small><h2>${R.t('t')}</h2></div><div class="grid">${(d.items||[]).map((_,n)=>`<div class="it rv"><h3>${R.t(`items/${n}/t`)}</h3><span class="sub2">${R.t(`items/${n}/s`)}</span>${baBlock(R,`items/${n}/b`,`items/${n}/a`)}</div>`).join('')}</div></div></section>` },
+      render:(R,d)=>`<section class="sec bb"><div class="wrap"><div class="btit rv"><small>${R.t('en')}</small><h2>${R.t('t')}</h2></div><div class="grid">${(d.items||[]).map((_,n)=>`<div class="it rv"><h3>${R.t(`items/${n}/t`)}</h3><span class="sub2">${R.t(`items/${n}/s`)}</span>${baBlock(R,`items/${n}/b`,`items/${n}/a`,'',R.raw(`items/${n}/t`))}</div>`).join('')}</div></div></section>` },
     doctors: { label:'의료진', desc:'회색 배경 엠블럼 + 의료진 사진 카드',
       fields:[F.text('en','영문 제목'), F.text('t','제목'), F.list('items','의료진','의료진',3,[F.img('img','사진'),F.text('sp','전문 분야'),F.text('n','이름'),F.text('pos','직함')],{max:12})],
       defaults: () => ({ en:'D2 DENTAL HOSPITAL', t:'분야별 전문의 협진 시스템', items:[['doc2','보철과전문의','홍길동','대표원장'],['doc1','교정과전문의','김철수','원장'],['doc3','보존과전문의','이영희','원장']].map(([a,sp,n,pos])=>({img:'asset:'+a,sp,n,pos})) }),

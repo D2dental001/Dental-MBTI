@@ -1,0 +1,11 @@
+const { chromium } = require('playwright');const {setup}=require('./t2.js');
+(async()=>{const b=await chromium.launch();const ctx=await setup(b);const p=await ctx.newPage({viewport:{width:1600,height:1000}});const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('dialog',d=>d.accept());
+await p.goto('http://hp.local/hp-studio.html');await p.waitForSelector('.card .thumb');
+await p.evaluate(()=>{const d=JSON.parse(localStorage.getItem('__mockdb'));const e=d.find(x=>x.content.site._seed==='estar');const c=e.content;
+ delete c.site._seo1;['siteUrl','ldAddr','ldHours','ldDoctor','altNames','areaServed'].forEach(k=>delete c.site[k]);
+ c.pages.forEach(pg=>{delete pg.seoTitle;delete pg.seoDesc;pg.blocks=pg.blocks.filter(b=>!(b.type==='c_faq'&&(pg.id==='home'||pg.slug==='location'))&&!(b.type==='c_points'&&b.data.lab==='NEARBY'));const h=pg.blocks.find(b=>b.type==='c_subhero');if(h)h.data.t=h.data.t.replace(/^신촌 /,'')});
+ localStorage.setItem('__mockdb',JSON.stringify(d))});
+await p.reload();await p.waitForSelector('.card .thumb');await p.waitForTimeout(1000);
+console.log(await p.evaluate(()=>{const d=JSON.parse(localStorage.getItem('__mockdb'));const c=d.find(x=>x.content.site._seed==='estar').content;const home=c.pages[0],loc=c.pages.find(p=>p.slug==='location'),lam=c.pages.find(p=>p.slug==='laminate');
+ return {seo1:c.site._seo1,siteUrl:c.site.siteUrl,seoPages:c.pages.filter(p=>p.seoTitle).length,homeFaq:home.blocks.some(b=>b.type==='c_faq'),locFaq:loc.blocks.some(b=>b.type==='c_faq'),near:loc.blocks.some(b=>b.data&&b.data.lab==='NEARBY'),lamH1:lam.blocks.find(b=>b.type==='c_subhero').data.t}}));
+console.log('errors',errs);await b.close()})();

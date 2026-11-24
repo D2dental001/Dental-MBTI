@@ -51,7 +51,7 @@ const PAGE_BLOCK_CSS = `
 Object.assign(COMMON_BLOCKS, {
   c_subhero: { label:'페이지 상단 배너', desc:'서브 페이지 맨 위 큰 사진과 페이지 제목', fields:[F.img('img','배경 사진'), F.text('en','작은 영문 제목'), F.text('t','페이지 제목'), F.area('d','설명',{rows:2}), F.text('crumb','위치 표시 (예: HOME > 임플란트)')],
     defaults: () => ({ img:'asset:floor', en:'TREATMENT', t:'페이지 제목', d:'페이지 설명을 입력하세요.', crumb:'HOME > 메뉴' }),
-    render: R => `<section class="cb-sub">${R.i('img')}<div class="wrap"><small>${R.t('en')}</small><h1>${R.t('t')}</h1><p>${R.t('d')}</p><div class="crumb">${R.t('crumb')}</div></div></section>` },
+    render: R => `<section class="cb-sub">${R.i('img','',String(R.raw('t')||'').replace(/\s+/g,' '))}<div class="wrap"><small>${R.t('en')}</small><h1>${R.t('t')}</h1><p>${R.t('d')}</p><div class="crumb">${R.t('crumb')}</div></div></section>` },
   c_points: { label:'특징 카드', desc:'아이콘과 함께 보여주는 장점·특징 카드', fields:[F.text('lab','작은 제목'), F.text('t','제목'), F.text('s','설명'), F.list('items','특징','특징',3,[F.icon('icon','아이콘'),F.text('t','제목'),F.area('d','설명')],{max:8})],
     defaults: () => ({ lab:'POINT', t:'디투치과만의 특별함', s:'', items:[['shield','안전한 진료','철저한 멸균과 정밀 진단으로 안전하게 치료합니다.'],['sparkle','자연스러운 결과','개인의 얼굴과 치아에 맞춘 맞춤 설계를 합니다.'],['clock','체계적인 관리','치료 후에도 정기 검진으로 오래 관리합니다.']].map(([icon,t,d])=>({icon,t,d})) }),
     render: (R,d) => `<section class="cb cb-pts"><div class="wrap"><div class="cb-tit"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2>${d.s?`<p>${R.t('s')}</p>`:''}</div><div class="grid">${(d.items||[]).map((it,n)=>`<div class="it rv">${ic(it.icon||'tooth')}<b>${R.t(`items/${n}/t`)}</b><p>${R.t(`items/${n}/d`)}</p></div>`).join('')}</div></div></section>` },
@@ -75,7 +75,7 @@ Object.assign(COMMON_BLOCKS, {
 <div class="row">${ic('pin')}<div><b>주소</b>${S.t('address')}<br><small>${S.t('traffic')}</small></div></div></div><div>${mapBox(ctx.site)}</div></div></div></section>` },
   c_greet: { label:'대표원장 인사말', desc:'원장 사진과 인사말, 약력', fields:[F.img('img','사진'), F.text('lab','작은 제목'), F.area('t','제목',{rows:2}), F.area('msg','인사말',{rows:6}), F.text('sign','서명'), F.area('cr','약력',{rows:4})],
     defaults: () => ({ img:'asset:doc2', lab:'GREETING', t:'내 가족을 치료한다는 마음으로\n진료하겠습니다', msg:'안녕하세요, 디투치과 대표원장입니다.\n\n치과는 누구에게나 조금은 두려운 곳입니다. 저희는 그 마음을 먼저 이해하고, 꼭 필요한 치료만 정직하게 권해드리겠습니다.\n\n정밀한 진단과 꼼꼼한 사후관리로 오래도록 건강한 미소를 지켜드리겠습니다.', sign:'디투치과 대표원장 홍길동', cr:'00대학교 치의학대학원 졸업\n00대학교 치과병원 보철과 수련\n대한치과보철학회 정회원' }),
-    render: R => `<section class="cb cb-greet"><div class="wrap grid"><div class="rv">${R.i('img')}</div><div class="rv"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p class="msg">${R.t('msg')}</p><p class="sign">${R.t('sign')}</p><p class="cr">${R.t('cr')}</p></div></div></section>` },
+    render: R => `<section class="cb cb-greet"><div class="wrap grid"><div class="rv">${R.i('img','',String(R.raw('t')||'').replace(/\s+/g,' '))}</div><div class="rv"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p class="msg">${R.t('msg')}</p><p class="sign">${R.t('sign')}</p><p class="cr">${R.t('cr')}</p></div></div></section>` },
   c_quick: { label:'진료 바로가기', desc:'진료 페이지로 이동하는 아이콘 카드', fields:[F.text('lab','작은 제목'), F.text('t','제목'), F.list('items','바로가기','바로가기',6,[F.icon('icon','아이콘'),F.text('t','진료명'),F.text('d','짧은 설명'),F.link('href')],{max:12})],
     defaults: () => ({ lab:'TREATMENT', t:'진료 과목 바로가기', items:[] }),
     render: (R,d,S,ctx) => `<section class="cb cb-quick"><div class="wrap"><div class="cb-tit"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2></div><div class="grid">${(d.items||[]).map((it,n)=>`<a class="rv" href="${ctx.link(it.href)}">${ic(it.icon||'tooth')}<b>${R.t(`items/${n}/t`)}</b><span>${R.t(`items/${n}/d`)}</span></a>`).join('')}</div></div></section>` }
@@ -335,6 +335,7 @@ renderSite = function(content, theme, mode, files, opt = {}){
   const body = page.blocks.filter(b => showHidden || !b.hidden).map(b => renderBlockHTML(content, theme, b, mode, files, { ...opt, page: page.id })).join('');
   const ctx = siteCtx(content, theme, mode, page.id, opt);
   let html = T.chrome(S, body, ctx);
+  if (mode === 'export') html = html.replace(/src="https:\/\/dentalmbti\.co\.kr\/(assets\/[^"]+\.mp4)"/g, (m, p) => { const nm = 'video/' + p.split('/').pop(); files[nm] = { url: 'https://dentalmbti.co.kr/' + p }; return `src="${nm}"`; });
   if (site.logo){
     const h = Math.max(16, Math.min(160, parseInt(site.logoH, 10) || 44));
     const tone = site.logoTone === 'white' ? 'filter:brightness(0) invert(1);' : site.logoTone === 'black' ? 'filter:brightness(0);' : '';
@@ -349,16 +350,29 @@ renderSite = function(content, theme, mode, files, opt = {}){
   const og = firstImage(content);
   const ogSrc = og ? makeR2({ og }, 'og/', rmode, files).src('og') : '';
   const sub = page.id !== 'home';
-  const title = sub ? `${page.title} | ${site.name}` : `${site.name}${site.metaTitle ? ' | ' + site.metaTitle : ''}`;
+  const title = page.seoTitle || (sub ? `${page.title} | ${site.name}` : `${site.name}${site.metaTitle ? ' | ' + site.metaTitle : ''}`);
+  const desc = page.seoDesc || site.metaDesc || '';
+  const base = String(site.siteUrl || '').trim().replace(/\/+$/, '');
+  const pageUrl = base ? base + '/' + (sub ? page.slug + '.html' : '') : '';
+  let ogAbs = ogSrc; if (ogAbs && !/^(https?:|data:)/.test(ogAbs)) ogAbs = base ? base + '/' + ogAbs.replace(/^\.?\//, '') : '';
+  const exp = mode === 'export';
+  const headExtra = (exp && pageUrl ? `<link rel="canonical" href="${esc(pageUrl)}"><meta property="og:url" content="${esc(pageUrl)}">` : '')
+    + `<meta property="og:site_name" content="${esc(site.name)}"><meta property="og:locale" content="ko_KR">`
+    + `<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(desc)}">${ogAbs ? `<meta name="twitter:image" content="${esc(ogAbs)}">` : ''}`
+    + (exp ? '<meta name="robots" content="index,follow">' : '')
+    + (site.naverVerify ? `<meta name="naver-site-verification" content="${esc(site.naverVerify)}">` : '')
+    + (site.googleVerify ? `<meta name="google-site-verification" content="${esc(site.googleVerify)}">` : '')
+    + (exp ? seoJsonLd(content, page, { base, pageUrl, title, desc, og: ogAbs }) : '');
   return `<!DOCTYPE html>
 <html lang="ko"${sub ? ' class="sub"' : ''}><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>window.__PAGE=${JSON.stringify(page.id)}<\/script>
 ${opt.head || ''}
 <title>${esc(title)}</title>
-<meta name="description" content="${esc(site.metaDesc)}">
+<meta name="description" content="${esc(desc)}">
 <meta property="og:type" content="website"><meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(site.metaDesc)}">${ogSrc ? `<meta property="og:image" content="${ogSrc}">` : ''}
+<meta property="og:description" content="${esc(desc)}">${ogAbs ? `<meta property="og:image" content="${esc(ogAbs)}">` : ''}
+${headExtra}
 <meta name="theme-color" content="${esc(site.color)}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 ${th.fonts || ''}
@@ -370,3 +384,58 @@ ${privacyHTML(site)}
 ${opt.tail || ''}
 </body></html>`;
 };
+
+/* ---------- 검색엔진 · AI용 구조화 데이터 (JSON-LD) ---------- */
+function seoPlain(v){ return String(v == null ? '' : v).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(); }
+function seoJsonLd(content, page, o){
+  const site = content.site, base = o.base, home = base ? base + '/' : '';
+  const id = k => base ? base + '/#' + k : undefined;
+  const list = v => String(v || '').split(/[,\n]/).map(x => x.trim()).filter(Boolean);
+  const biz = { '@type':'Dentist', '@id':id('dentist'), name:site.name, alternateName:list(site.altNames), url:home || undefined, telephone:site.phone || undefined,
+    image:o.og || undefined, description:site.metaDesc || undefined, medicalSpecialty:'Dentistry', isAcceptingNewPatients:true };
+  const a = site.ldAddr || null;
+  biz.address = a ? { '@type':'PostalAddress', addressCountry:'KR', ...a } : (site.address ? { '@type':'PostalAddress', addressCountry:'KR', streetAddress:site.address } : undefined);
+  if (site.address) biz.hasMap = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(site.address);
+  if (Array.isArray(site.ldHours) && site.ldHours.length) biz.openingHoursSpecification = site.ldHours.map(h => ({ '@type':'OpeningHoursSpecification', dayOfWeek:h.days, opens:h.opens, closes:h.closes }));
+  const areas = list(site.areaServed); if (areas.length) biz.areaServed = areas.map(n => ({ '@type':'Place', name:n }));
+  if (site.ldDoctor) biz.employee = { '@type':'Person', name:site.ldDoctor.name, jobTitle:site.ldDoctor.job, description:site.ldDoctor.desc || undefined };
+  const same = list(site.sameAs || site.bal_blog); if (same.length) biz.sameAs = same;
+  const g = [biz,
+    { '@type':'WebSite', '@id':id('website'), url:home || undefined, name:site.name, inLanguage:'ko-KR', publisher: base ? { '@id':id('dentist') } : undefined },
+    { '@type':'WebPage', '@id':o.pageUrl ? o.pageUrl + '#webpage' : undefined, url:o.pageUrl || undefined, name:o.title, description:o.desc, inLanguage:'ko-KR',
+      isPartOf: base ? { '@id':id('website') } : undefined, about: base ? { '@id':id('dentist') } : undefined }];
+  if (page.id !== 'home' && base) g.push({ '@type':'BreadcrumbList', itemListElement:[
+    { '@type':'ListItem', position:1, name:'홈', item:home }, { '@type':'ListItem', position:2, name:page.title, item:o.pageUrl } ] });
+  const vis = (page.blocks || []).filter(b => !b.hidden);
+  const faqs = []; vis.filter(b => b.type === 'c_faq').forEach(b => (b.data.items || []).forEach(it => { const q = seoPlain(it.q), an = seoPlain(it.a); if (q && an) faqs.push({ '@type':'Question', name:q, acceptedAnswer:{ '@type':'Answer', text:an } }); }));
+  if (faqs.length) g.push({ '@type':'FAQPage', '@id':o.pageUrl ? o.pageUrl + '#faq' : undefined, mainEntity:faqs });
+  if (page.id !== 'home' && vis.some(b => b.type === 'c_steps')) g.push({ '@type':'Service', name:page.title, serviceType:page.title, description:o.desc,
+    provider: base ? { '@id':id('dentist') } : { '@type':'Dentist', name:site.name }, areaServed: areas.length ? areas.map(n => ({ '@type':'Place', name:n })) : undefined, url:o.pageUrl || undefined });
+  const json = JSON.stringify({ '@context':'https://schema.org', '@graph':g }, (k, v) => (v === undefined || (Array.isArray(v) && !v.length)) ? undefined : v);
+  return `<script type="application/ld+json">${json.replace(/</g, '\\u003c')}<\/script>`;
+}
+/* ---------- 내보내기용 robots.txt · sitemap.xml · llms.txt ---------- */
+function seoFiles(content){
+  const site = content.site, base = String(site.siteUrl || '').trim().replace(/\/+$/, ''), out = {};
+  const url = pg => base + '/' + (pg.id === 'home' ? '' : pg.slug + '.html');
+  out['robots.txt'] = 'User-agent: *\nAllow: /\n' + (base ? `\nSitemap: ${base}/sitemap.xml\n` : '');
+  if (base){
+    const d = new Date().toISOString().slice(0, 10);
+    out['sitemap.xml'] = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+      + content.pages.map(pg => `  <url><loc>${url(pg)}</loc><lastmod>${d}</lastmod><priority>${pg.id === 'home' ? '1.0' : '0.7'}</priority></url>`).join('\n') + '\n</urlset>\n';
+  }
+  const L = [`# ${site.name}`, '', `> ${site.metaDesc || ''}`, ''];
+  L.push('## 기본 정보');
+  if (site.address) L.push(`- 주소: ${site.address}`);
+  if (site.phone) L.push(`- 전화: ${site.phone}`);
+  if (site.hours) L.push('- 진료시간: ' + String(site.hours).split('\n').map(x => x.replace(/\s+/g, ' ').trim()).filter(Boolean).join(' / '));
+  if (site.ldDoctor) L.push(`- 대표원장: ${site.ldDoctor.name} (${site.ldDoctor.job}${site.ldDoctor.desc ? ', ' + site.ldDoctor.desc : ''})`);
+  if (site.areaServed) L.push(`- 가까운 지역: ${String(site.areaServed).replace(/\n/g, ', ')}`);
+  if (site.bal_blog) L.push(`- 블로그: ${site.bal_blog}`);
+  L.push('', '## 페이지');
+  content.pages.forEach(pg => L.push(`- [${pg.title}](${base ? url(pg) : (pg.id === 'home' ? 'index.html' : pg.slug + '.html')}): ${pg.seoDesc || ''}`.trim()));
+  const fq = []; content.pages.forEach(pg => (pg.blocks || []).filter(b => b.type === 'c_faq' && !b.hidden).forEach(b => (b.data.items || []).forEach(it => { const q = seoPlain(it.q), a = seoPlain(it.a); if (q && a && fq.length < 12 && !fq.some(x => x[0] === q)) fq.push([q, a]); })));
+  if (fq.length){ L.push('', '## 자주 묻는 질문'); fq.forEach(([q, a]) => L.push(`- Q. ${q}`, `  A. ${a}`)); }
+  out['llms.txt'] = L.join('\n') + '\n';
+  return out;
+}

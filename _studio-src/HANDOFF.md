@@ -76,6 +76,13 @@ Skilldb(find-skills), claude-code-setup, frontend-design, Superpowers, playwrigh
 - 검사: `node twrap.js <임의번호> 1280,1180` / `node twrap.js <임의번호> 390,360` → `wrap_<번호>.json` (편집용 `x-t` 태그 안 글자까지 검사, 미리보기 iframe 폭을 직접 바꿔서 검사). `lm b`(숫자+단위 글자크기 차이)·공지 목록 날짜 줄·`단어중간`만 있는 강제줄바꿈 경계는 오탐.
 - 규칙(luxe.js 끝): 제목 `text-wrap:balance`, 문단 `pretty`, `word-break:keep-all`, 숫자·전화·버튼 nowrap, 강제 `<br>`이 있는 제목·문단은 공개 화면에서 `.seg` 단위로 나눠 균형 적용(blocks.js init, 편집 화면 제외). 대표원장 이력은 위→아래 채움(`--rows`), 왼쪽 학력·자격 / 오른쪽 학회·연수.
 
+## SEO·AEO·GEO (2026-11-24, 승인 1~9 테스트 환경 적용)
+- 페이지별 `seoTitle`/`seoDesc`(페이지 관리 → 검색 노출 설정), 기본 정보에 `siteUrl`·`altNames`·`areaServed`·네이버/구글 확인 코드.
+- 내보내기: canonical·og:url·절대 og:image·twitter·robots, JSON-LD(@graph: Dentist·WebSite·WebPage·BreadcrumbList·FAQPage·Service) = pages.js `seoJsonLd`, ZIP에 robots.txt·sitemap.xml·llms.txt = `seoFiles`.
+- e-스타 데이터: estar.js `ES_SEO`·`ES_SITE_SEO`(siteUrl은 가정값 https://star-dental.kr — 도메인 확정 시 수정)·`esApplySeo`(저장본 플래그 `_seo1`). 진료시간 JSON-LD는 사이트 표기 기준 — 실제 시간 확정 필요(외부 플랫폼과 불일치).
+- 미적용(사용자 작업): 10 도메인·https·301, 11 진료시간·건물명 통일, 12 문의 이메일, 13 서치콘솔·서치어드바이저, 14 네이버 플레이스.
+- 검증: `node texport.js`(내보내기 파일 → export/), `tseomig.js`(저장본 적용).
+
 ## 그 외 참고
 - 영상 제작 스크립트: `vid/make2.py`(사진→Ken Burns 1080p), `vid/up.py`(EDSR 2배 업스케일). 원본 사진은 이 저장소에 없음(필요시 사용자에게 재요청 또는 `assets/hp-studio/estar/` 자산 사용).
 - 로고 재현 소스: `logo/globe.svg`, `logo/final.html`.

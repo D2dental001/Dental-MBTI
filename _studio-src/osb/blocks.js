@@ -36,7 +36,7 @@ function makeR2(base, prefix, mode, files){
   };
   return {
     t: (k, tag = 'x-t', cls = '') => `<${tag}${cls ? ` class="${cls}"` : ''} data-k="${prefix + k}">${fmt(val(k))}</${tag}>`,
-    i: (k, cls = '', alt = '') => val(k) ? `<img${cls ? ` class="${cls}"` : ''} data-img="${prefix + k}" src="${src(k)}" alt="${esc(alt)}" loading="lazy">` : (mode === 'edit' ? `<img${cls ? ` class="${cls}"` : ''} data-img="${prefix + k}" src="${phSvg('PHOTO')}" alt="">` : ''),
+    i: (k, cls = '', alt = '') => { if (!alt){ const m = /^(.*\/)[^/]+$/.exec(k); if (m){ const f = ['t','hl','c','cap','n','d'].map(x => val(m[1] + x)).find(x => x && String(x).trim()); if (f) alt = [val(m[1] + 't1'), f].filter(Boolean).join(' ').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim(); } } return val(k) ? `<img${cls ? ` class="${cls}"` : ''} data-img="${prefix + k}" src="${src(k)}" alt="${esc(alt)}" loading="lazy">` : (mode === 'edit' ? `<img${cls ? ` class="${cls}"` : ''} data-img="${prefix + k}" src="${phSvg('PHOTO')}" alt="">` : ''); },
     v: k => esc(val(k)), raw: val, src
   };
 }
@@ -67,13 +67,13 @@ const COMMON_BLOCK_CSS = `
 const COMMON_BLOCKS = {
   c_ba: { label: '전후사진 비교', desc: '치료 전·후 사진을 좌우로 밀어 비교하는 카드 묶음', fields: [F.menu('전후사진'), F.text('lab','작은 제목'), F.text('t','제목'), F.text('s','설명'), F.list('items','전후사진 케이스','케이스',2,[F.img('b','치료 전 사진'),F.img('a','치료 후 사진'),F.text('t','케이스 제목'),F.text('d','설명')])],
     defaults: () => ({ menu:'전후사진', lab:'BEFORE & AFTER', t:'치료 사례', s:'디투치과에서 달라진 미소를 확인하세요', items:[0,1].map(()=>({b:'asset:baBefore',a:'asset:baAfter',t:'변색치 · 치간 벌어짐 개선',d:'지르코니아 라미네이트 · 상악 10치'}))}),
-    render: (R, d) => `<section class="cb cb-ba"><div class="wrap"><div class="cb-tit"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p>${R.t('s')}</p></div><div class="grid">${(d.items||[]).map((_,n)=>`<div>${baBlock(R,`items/${n}/b`,`items/${n}/a`)}<div class="cap"><b>${R.t(`items/${n}/t`)}</b><span>${R.t(`items/${n}/d`)}</span></div></div>`).join('')}</div></div></section>` },
+    render: (R, d) => `<section class="cb cb-ba"><div class="wrap"><div class="cb-tit"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p>${R.t('s')}</p></div><div class="grid">${(d.items||[]).map((_,n)=>`<div>${baBlock(R,`items/${n}/b`,`items/${n}/a`,'',R.raw(`items/${n}/t`))}<div class="cap"><b>${R.t(`items/${n}/t`)}</b><span>${R.t(`items/${n}/d`)}</span></div></div>`).join('')}</div></div></section>` },
   c_text: { label: '제목 + 글', desc: '가운데 정렬된 제목과 본문 글', fields: [F.menu(''), F.text('t','제목'), F.area('d','본문')],
     defaults: () => ({ menu:'', t:'새로운 소식을 전해드립니다', d:'이곳에 병원 소개, 공지, 진료 철학 등\n원하는 내용을 자유롭게 입력하세요.' }),
     render: R => `<section class="cb cb-text"><div class="wrap"><h2>${R.t('t')}</h2><p>${R.t('d')}</p></div></section>` },
   c_img: { label: '큰 사진', desc: '화면 폭에 맞춘 사진 한 장과 설명', fields: [F.menu(''), F.img('img','사진'), F.text('c','사진 설명')],
     defaults: () => ({ menu:'', img:'asset:lobby', c:'디투치과 라운지' }),
-    render: R => `<section class="cb cb-img"><div class="wrap"><figure>${R.i('img')}<figcaption>${R.t('c')}</figcaption></figure></div></section>` },
+    render: R => `<section class="cb cb-img"><div class="wrap"><figure>${R.i('img','',String(R.raw('c')||'').replace(/\s+/g,' '))}<figcaption>${R.t('c')}</figcaption></figure></div></section>` },
   c_cta: { label: '상담 유도 배너', desc: '대표색 배경에 큰 문구와 전화 버튼', fields: [F.menu(''), F.text('t','큰 문구'), F.text('s','작은 문구'), F.text('btn','버튼 글자')],
     defaults: () => ({ menu:'', t:'지금 바로 무료 상담을 받아보세요', s:'전화 한 통으로 진료 예약과 비용 상담이 가능합니다', btn:'전화 상담하기' }),
     render: (R, d, S, ctx) => `<section class="cb-cta"><div class="wrap"><h2>${R.t('t')}</h2><p>${R.t('s')}</p><a href="tel:${S.v('phone')}">${R.t('btn')}</a></div></section>` },
@@ -103,7 +103,7 @@ BLOCKDEFS.grand = {
       fields:[F.menu('전후사진'), F.text('g_ba_t','제목'), F.text('g_ba_s','설명'),
         F.list('items','전후사진 케이스','케이스',3,[F.img('b','치료 전 사진',{from:i=>`ba${i+1}_b`}),F.img('a','치료 후 사진',{from:i=>`ba${i+1}_a`}),F.text('t','케이스 제목',{from:i=>`ba${i+1}_t`}),F.text('d','설명',{from:i=>`ba${i+1}_d`})])],
       render:(R,d)=>`<section class="sec ba-sec"><div class="wrap"><div class="tit rv"><small>BEFORE &amp; AFTER</small><h2>${R.t('g_ba_t')}</h2><p>${R.t('g_ba_s')}</p></div>
-<div class="ba-grid">${(d.items||[]).map((_,n)=>`<div class="ba-card rv">${baBlock(R,`items/${n}/b`,`items/${n}/a`)}<div class="cap"><b>${R.t(`items/${n}/t`)}</b><span>${R.t(`items/${n}/d`)}</span></div></div>`).join('')}</div></div></section>` },
+<div class="ba-grid">${(d.items||[]).map((_,n)=>`<div class="ba-card rv">${baBlock(R,`items/${n}/b`,`items/${n}/a`,'',R.raw(`items/${n}/t`))}<div class="cap"><b>${R.t(`items/${n}/t`)}</b><span>${R.t(`items/${n}/d`)}</span></div></div>`).join('')}</div></div></section>` },
     why: { label:'병원 강점 (사진+글)', desc:'사진과 설명이 좌우로 번갈아 나오는 소개', menu:'병원소개',
       fields:[F.menu('병원소개'), F.text('g_why_lab','작은 제목',{def:'WHY D2 DENTAL CLINIC'}), F.area('g_why_t','제목',{rows:2}),
         F.list('items','강점 항목','항목',4,[F.img('img','사진',{from:i=>`img_w${i+1}`}),F.text('tag','라벨',{from:i=>`w${i+1}_tag`}),F.area('t','제목',{rows:2,from:i=>`w${i+1}_t`}),F.area('d','설명',{from:i=>`w${i+1}_d`})])],
@@ -400,7 +400,7 @@ body.nav-open .hd nav .mi.has-sub>.mi-a:after{display:none}}`;
 COMMON_BLOCKS.c_treat = { label:'진료 과목 상세', desc:'사진·설명·특징 목록으로 한 가지 진료를 자세히 소개 (진료과목 소메뉴 연결용)',
   fields:[F.menu(''), F.img('img','사진'), F.text('lab','작은 제목'), F.text('t','진료 이름'), F.area('d','설명',{rows:4}), F.area('pts','특징 (한 줄에 하나씩)',{rows:4}), F.text('btn','버튼 글자'), F.text('side','사진 위치 (left / right)')],
   defaults: () => ({ menu:'', img:'asset:implant', lab:'TREATMENT', t:'임플란트', d:'정밀한 3D 진단과 네비게이션 가이드로\n안전하고 오래 쓰는 임플란트를 식립합니다.', pts:'3D CT 정밀 진단\n가이드 수술로 최소 절개\n분야별 전문의 협진\n체계적인 사후관리', btn:'상담 예약하기', side:'left' }),
-  render: (R, d, S) => `<section class="cb cb-treat${d.side === 'right' ? ' rt' : ''}"><div class="wrap"><div class="ph">${R.i('img')}</div><div class="tx"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p>${R.t('d')}</p><ul>${String(d.pts || '').split('\n').filter(x => x.trim()).map(x => `<li>${esc(x)}</li>`).join('')}</ul><a href="tel:${S.v('phone')}">${R.t('btn')}</a></div></div></section>` };
+  render: (R, d, S) => `<section class="cb cb-treat${d.side === 'right' ? ' rt' : ''}"><div class="wrap"><div class="ph">${R.i('img','',String(R.raw('t')||'').replace(/\s+/g,' '))}</div><div class="tx"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p>${R.t('d')}</p><ul>${String(d.pts || '').split('\n').filter(x => x.trim()).map(x => `<li>${esc(x)}</li>`).join('')}</ul><a href="tel:${S.v('phone')}">${R.t('btn')}</a></div></div></section>` };
 const TREAT_CSS = `
 .cb-treat .wrap{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center}.cb-treat.rt .ph{order:2}
 .cb-treat .ph img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--r)}

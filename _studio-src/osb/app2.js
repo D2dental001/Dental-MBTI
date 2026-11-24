@@ -102,7 +102,9 @@ const SITE_FIELDS = [
   F.text('phone','대표 전화'), F.text('address','주소',{hint:'실제 주소를 입력하면 지도가 표시됩니다.'}), F.text('traffic','교통 / 주차 안내'), F.img('mapImg','약도 이미지',{hint:'넣으면 구글 지도 대신 약도가 표시되고, [지도 앱에서 열기] 버튼이 붙습니다.'}),
   F.area('hours','진료시간',{rows:4}), F.text('email','문의 수신 이메일',{hint:'상담 신청서가 이 주소로 발송됩니다.'}),
   F.text('kakao','카카오톡 채널 링크'), F.text('youtube','유튜브 채널 링크'), F.text('form_btn','상담 신청 버튼 글자'),
-  F.text('metaTitle','검색 노출 제목 (부제)'), F.area('metaDesc','검색 노출 설명',{hint:'네이버·구글 검색 결과에 보이는 문구'}), F.area('biz','하단 사업자 정보')
+  F.text('metaTitle','검색 노출 제목 (부제)'), F.area('metaDesc','검색 노출 설명',{hint:'네이버·구글 검색 결과에 보이는 문구 (페이지마다 따로 쓰려면 [페이지 관리] → 검색 노출 설정)'}), F.area('biz','하단 사업자 정보'),
+  F.text('siteUrl','홈페이지 주소 (https://…)',{hint:'실제로 올릴 도메인. 검색용 주소 태그·sitemap.xml에 쓰입니다.'}), F.text('altNames','다른 이름 (쉼표로 구분)',{hint:'예) 이스타치과, e스타치과의원'}), F.text('areaServed','가까운 지역 (쉼표로 구분)',{hint:'예) 신촌, 홍대, 이대, 연세대, 서대문구'}),
+  F.text('naverVerify','네이버 서치어드바이저 확인 코드',{hint:'HTML 태그 방식의 content 값만 붙여넣으세요.'}), F.text('googleVerify','구글 서치콘솔 확인 코드')
 ];
 
 function openEditor(id){
@@ -389,6 +391,10 @@ function openPageManager(){
         }
         markDirty(); drawPageSel(); renderPreview(a!=='del'); draw();
       });
+      const seo = hEl(`<details class="pg-seo"><summary>검색 노출 설정${pg.seoTitle ? ' ✓' : ''}</summary><div class="dr-field"><label>검색 제목</label><input type="text" class="pg-st" value="${esc(pg.seoTitle||'')}" placeholder="비우면 '${esc(pg.title)} | 병원명'"></div><div class="dr-field"><label>검색 설명</label><textarea class="pg-sd" rows="3" placeholder="비우면 기본 정보의 검색 노출 설명">${esc(pg.seoDesc||'')}</textarea><small>네이버·구글 검색 결과에 보이는 문구입니다. 80~120자 권장.</small></div></details>`);
+      seo.querySelector('.pg-st').oninput = e => { pg.seoTitle = e.target.value; markDirty(); };
+      seo.querySelector('.pg-sd').oninput = e => { pg.seoDesc = e.target.value; markDirty(); };
+      row.appendChild(seo);
       lst.appendChild(row);
     });
     body.appendChild(lst);
@@ -634,6 +640,8 @@ async function exportZip(){
       else { const r = await fetch(data.url); if(!r.ok) throw new Error(name+' 사진을 불러오지 못했습니다'); root.file(name, await r.arrayBuffer()); }
     }
   } catch(e){ return toast('다운로드 실패: '+e.message); }
+  if (typeof seoFiles === 'function') Object.entries(seoFiles(cur.content)).forEach(([n, t]) => root.file(n, t));
+  if (!site.siteUrl) toast('홈페이지 주소가 비어 있어 sitemap.xml과 검색용 주소 태그는 빠졌습니다. [기본 정보]에서 입력하세요.');
   root.file('deploy-guide.html', guidePage(site));
   root.file('README.txt', '\ufeff'+readme(site));
   root.file('portfolio-backup.json', JSON.stringify(cur));
@@ -855,6 +863,10 @@ $('#q').addEventListener('input', drawList);
     try { let j = JSON.stringify(p.content);
       for (const [a, b] of ES_COPY4) j = j.split(JSON.stringify(a)).join(JSON.stringify(b));
       const c = JSON.parse(j); c.site._copy4 = 1; p.content = c; p.updated = now(); await DB.put(clone(p)); } catch(e){}
+  }
+  // e-스타: 검색 노출(SEO·AEO·GEO) 정보 · FAQ · 지역 안내 · H1 지역어 (없을 때만 채움)
+  if (typeof esApplySeo === 'function') for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._seo1)){
+    try { esApplySeo(p.content); p.updated = now(); await DB.put(clone(p)); } catch(e){ console.warn(e); }
   }
   // e-스타 07: 오시는 길 약도
   for (const p of all.filter(p => p.id && p.content && p.content.site && p.content.site._seed === 'estar' && !p.content.site._map1)){

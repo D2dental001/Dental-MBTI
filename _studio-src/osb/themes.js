@@ -73,8 +73,9 @@ function formHTML(c, R, opt={}){
   </form>`;
 }
 
-function baBlock(R, b, a, cls=''){
-  return `<div class="ba ${cls}" style="--p:50%">${R.i(a,'ba-a','치료 후')}<div class="ba-b">${R.i(b,'','치료 전')}</div><span class="ba-l">BEFORE</span><span class="ba-r">AFTER</span><input type="range" min="0" max="100" value="50" aria-label="전후 비교"><i class="ba-h"></i><span class="ba-tip">좌우로 밀어서 전후 비교</span></div>`;
+function baBlock(R, b, a, cls='', lb=''){
+  lb = String(lb||'').replace(/\s+/g,' ').trim(); const pre = lb ? lb + ' ' : '';
+  return `<div class="ba ${cls}" style="--p:50%">${R.i(a,'ba-a',pre+'치료 후')}<div class="ba-b">${R.i(b,'',pre+'치료 전')}</div><span class="ba-l">BEFORE</span><span class="ba-r">AFTER</span><input type="range" min="0" max="100" value="50" aria-label="전후 비교"><i class="ba-h"></i><span class="ba-tip">좌우로 밀어서 전후 비교</span></div>`;
 }
 
 const COMMON_CSS = `
