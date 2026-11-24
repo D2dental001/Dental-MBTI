@@ -876,6 +876,10 @@ $('#q').addEventListener('input', drawList);
   for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._kids2)){
     try { const pg = p.content.pages.find(x => x.slug === 'kids'); if (pg) pg.blocks.forEach(b => { if (!b.data) return; if (b.data.img === 'asset:estar/smile2') b.data.img = 'asset:estar/kids'; for (const k in b.data) if (b.data[k] === 'asset:estar/heroGum') b.data[k] = 'asset:estar/heroKids'; }); p.content.site._kids1 = 1; p.content.site._kids2 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){ console.warn(e); }
   }
+  // e-스타: 잇몸미백·잇몸성형술 상단 사진과 잇몸성형술 본문 사진 교체 (기존 사진일 때만)
+  for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._gum1)){
+    try { p.content.pages.filter(x => x.slug === 'gum-whitening' || x.slug === 'gum-contour').forEach(pg => pg.blocks.forEach(b => { if (!b.data) return; for (const k in b.data){ if (b.data[k] === 'asset:estar/heroGum') b.data[k] = 'asset:estar/heroGum2'; if (pg.slug === 'gum-contour' && b.data[k] === 'asset:estar/smile2') b.data[k] = 'asset:estar/gumSmile'; } })); p.content.site._gum1 = 1; p.updated = now(); await DB.put(clone(p)); } catch(e){ console.warn(e); }
+  }
   // e-스타: 예시 후기 → 상담 고민 카드 (예시 문구일 때만 교체)
   if (typeof esApplyConsult === 'function') for (const p of all.filter(p => p.id && p.content && p.content.site && /^estar/.test(p.content.site._seed || '') && !p.content.site._con1)){
     try { esApplyConsult(p.content); p.updated = now(); await DB.put(clone(p)); } catch(e){ console.warn(e); }

@@ -311,3 +311,4 @@ COMMON_BLOCKS.c_consult = { label:'상담 고민 카드', desc:'상담에서 자
 Object.values(BLOCKDEFS).forEach(T => { T.blocks.c_consult = COMMON_BLOCKS.c_consult; });
 T_LUXE.css += '.nw{white-space:nowrap}';
 T_LUXE.css += '@media(max-width:900px){.cb-sub img[src*="heroKids"]{object-position:66% 50%}}';
+T_LUXE.css += '@media(max-width:900px){.cb-sub img[src*="heroGum2"]{object-position:64% 50%}}';
