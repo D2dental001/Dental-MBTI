@@ -2410,6 +2410,129 @@ function computePayeeKey(desc, account, payeeName){
 //   - 신한은행(헤더 있음) + 분류 없음: [No,전체선택,거래일시,적요,입금액,출금액,내용,잔액,거래점명,입금인코드,메모]  (앞의 빈칸 2개가 없음)
 // 즉 "분류를 적었는지"는 열 개수만으로는 알 수 없고, 실제 데이터(날짜가 어디서
 // 나오는지 / 헤더 앞칸이 비어 있는지)를 보고 그때그때 판단해야 합니다.
+
+/* ---------- 열 구성 자동 인식 (파일 양식이 바뀌어도 내용으로 판단) ----------
+   1) 머리글 행이 있으면 머리글 이름(거래일시/출금액/입금액/잔액/내용/계좌/대분류/항목 …)으로 열을 찾고
+   2) 머리글이 없거나 맞지 않으면 "내용"을 보고 판단합니다:
+      · 날짜 열   : 날짜로 읽히는 값이 가장 많은 열 (앞쪽에 남는 칸 = 대분류/항목)
+      · 금액 열   : 날짜 뒤의 숫자 열 3개 → 잔액이 이어지는지(앞 거래 잔액 ± 금액) 계산해서 출금/입금/잔액을 가려냄
+      · 글자 열   : 계좌번호처럼 생긴 열, 은행 이름이 들어 있는 열을 찾고, 나머지는 거래내용·메모·거래방법·예금주로 배정 */
+function __isNumCell(v){ if(v==null||v==='') return false; if(typeof v==='number') return isFinite(v); return /^-?[\d,]+(\.\d+)?$/.test(String(v).trim()); }
+function __toNum(v){ if(v==null||v==='') return 0; if(typeof v==='number') return v; return Number(String(v).replace(/,/g,''))||0; }
+function __isDateStr(v){
+  if(v instanceof Date) return true;
+  if(typeof v!=='string') return false;
+  return /\d{4}\s*[.\-\/년]\s*\d{1,2}\s*[.\-\/월]\s*\d{1,2}/.test(v) || /^\d{8}(\D|$)/.test(v.trim());
+}
+function detectContentColmap(aoa, knownItems, knownMajors){
+  const rows = aoa.filter(r=>r && r.some(c=>c!=null && c!=='')).slice(0,300);
+  if(!rows.length) return null;
+  const ncol = Math.max.apply(null, rows.map(r=>r.length));
+  const col = c => rows.map(r=>r[c]);
+  const nonNull = c => col(c).filter(v=>v!=null && v!=='');
+  // (a) 날짜 열
+  let dateCol = -1, bestRatio = 0;
+  for(let c=0;c<ncol;c++){
+    const vals = nonNull(c); if(!vals.length) continue;
+    const ratio = vals.filter(__isDateStr).length / vals.length;
+    if(ratio>bestRatio+1e-9){ bestRatio = ratio; dateCol = c; }
+  }
+  if(bestRatio<0.6){
+    // 문자 날짜가 없으면 엑셀 날짜(숫자) 칸을 찾습니다
+    for(let c=0;c<ncol;c++){
+      const vals = nonNull(c).filter(v=>typeof v==='number'); if(vals.length<3) continue;
+      const ok = vals.filter(v=>v>=42005 && v<=73050).length / nonNull(c).length;
+      if(ok>=0.9){ dateCol = c; bestRatio = ok; break; }
+    }
+  }
+  if(dateCol<0 || bestRatio<0.6) return null;
+  // (b) 금액 열: 날짜 뒤의 숫자 열 3개
+  const numCols = [];
+  for(let c=dateCol+1;c<ncol && numCols.length<3;c++){
+    const all = col(c); const vals = all.filter(v=>v!=null && v!=='');
+    if(vals.length < rows.length*0.5) continue;
+    if(vals.filter(__isNumCell).length/vals.length >= 0.9) numCols.push(c);
+  }
+  if(numCols.length<2) return null;
+  let outC, inC, balC;
+  if(numCols.length===2){ outC = numCols[0]; balC = numCols[1]; inC = null; }
+  else {
+    const perms = [ [0,1,2], [1,0,2], [0,2,1], [2,0,1], [1,2,0], [2,1,0] ].map(p=>({ o:numCols[p[0]], i:numCols[p[1]], b:numCols[p[2]] }));
+    const data = rows.filter(r=>__isDateStr(r[dateCol]) || typeof r[dateCol]==='number');
+    const score = pm => {
+      let sc = 0;
+      for(let k=0;k+1<data.length;k++){
+        const A = data[k], B = data[k+1];
+        const bA = __toNum(A[pm.b]), bB = __toNum(B[pm.b]);
+        if(bA===0 && bB===0) continue;
+        // 최신순 파일: 이전 거래 잔액 + 입금 − 출금 = 이번 잔액 / 과거순 파일은 반대
+        if(bA === bB + __toNum(A[pm.i]) - __toNum(A[pm.o])) sc++;
+        else if(bB === bA + __toNum(B[pm.i]) - __toNum(B[pm.o])) sc++;
+      }
+      return sc;
+    };
+    let best = perms[0], bestSc = score(perms[0]);
+    perms.slice(1).forEach(pm=>{ const sc = score(pm); if(sc>bestSc){ best = pm; bestSc = sc; } });
+    // 증거가 부족하면 기업은행 기본 순서(출금·입금·잔액)로 둡니다
+    if(bestSc < Math.max(2, Math.floor(data.length*0.2))) best = perms[0];
+    outC = best.o; inC = best.i; balC = best.b;
+  }
+  // (c) 글자 열: 잔액 뒤쪽
+  const after = []; for(let c=Math.max(balC, outC, inC==null?0:inC)+1;c<ncol;c++) after.push(c);
+  const ratioOf = (c, re) => { const v = nonNull(c).map(x=>String(x).trim()); return v.length ? v.filter(x=>re.test(x)).length/v.length : 0; };
+  const acctRe = /^[\d\-]{6,}$/, bankRe = /은행|뱅크|금고|증권|저축|농협|신협|새마을|우체국|카카오|토스|케이뱅크|수협|산림조합/;
+  const isTextCol = c => { const v = nonNull(c); return v.length>0 && v.filter(x=>!__isNumCell(x)).length/v.length>=0.5; };
+  let accountC = after.find(c=>nonNull(c).length && ratioOf(c,acctRe)>=0.4);
+  let bankC = after.find(c=>nonNull(c).length && ratioOf(c,bankRe)>=0.3);
+  const descC = after.find(c=>isTextCol(c) && c!==accountC && c!==bankC);
+  if(accountC==null && bankC==null){ accountC = descC!=null ? (after.find(c=>c>descC && isTextCol(c))) : null; }
+  const rest = after.filter(c=>c!==descC && c!==accountC && c!==bankC && isTextCol(c));
+  const memoC = rest[0], methodC = rest[1];
+  const payeeC = rest.length>=3 ? rest[rest.length-1] : (rest.length===2 && ratioOf(rest[1],bankRe)===0 ? rest[1] : null);
+  // (d) 날짜 앞쪽 칸 = 대분류/항목
+  const lead = []; for(let c=0;c<dateCol;c++) if(nonNull(c).length) lead.push(c);
+  let majorIdx = null, itemIdx = null;
+  if(lead.length>=2){ majorIdx = lead[lead.length-2]; itemIdx = lead[lead.length-1]; }
+  else if(lead.length===1){
+    const v = nonNull(lead[0]).map(x=>String(x).trim());
+    const hitItem = v.filter(x=>knownItems && knownItems.has(x)).length, hitMajor = v.filter(x=>knownMajors && knownMajors.has(x)).length;
+    if(hitMajor>hitItem) majorIdx = lead[0]; else itemIdx = lead[0];
+  }
+  const map = { date:dateCol, amount_out:outC, amount_in:inC, balance:balC, desc:descC!=null?descC:null, account:accountC!=null?accountC:null,
+    bank:bankC!=null?bankC:null, memo:memoC!=null?memoC:null, method:methodC!=null?methodC:null, payee:payeeC!=null?payeeC:null, majorIdx, itemIdx };
+  return map;
+}
+function describeColmap(m){
+  const L = (i,n)=> i==null ? null : `${colLetter(i)}열=${n}`;
+  return [L(m.majorIdx,'대분류'),L(m.itemIdx,'항목'),L(m.date,'거래일시'),L(m.amount_out,'출금액'),L(m.amount_in,'입금액'),L(m.balance,'잔액'),L(m.desc,'거래내용'),L(m.account,'계좌번호'),L(m.payee,'예금주')].filter(Boolean).join(' · ');
+}
+function colLetter(i){ let s='', n=i+1; while(n>0){ const r=(n-1)%26; s=String.fromCharCode(65+r)+s; n=Math.floor((n-1)/26); } return s; }
+// 머리글 방식이 실제 데이터와 맞는지 확인
+function colmapWorks(aoa, map, startRow){
+  if(map.date==null || (map.amount_out==null && map.amount_in==null)) return false;
+  let good = 0, tot = 0;
+  for(let i=startRow;i<Math.min(aoa.length, startRow+200);i++){
+    const r = aoa[i]; if(!r) continue;
+    const dv = r[map.date]; if(dv==null||dv==='') continue;
+    tot++;
+    if(parseTxnDate(dv)) good++;
+  }
+  return tot>0 && good/tot>=0.5;
+}
+// 시트 하나에 대해: 머리글 → (안 맞으면) 내용 기반 순서로 열 구성을 정합니다
+function autoDetectLayout(aoa){
+  const knownItems = new Set(Object.values(PAYEE_MAP).map(v=>v.item_name).filter(Boolean));
+  const knownMajors = new Set(Object.values(PAYEE_MAP).map(v=>v.major_category).filter(Boolean));
+  const hm = detectColumnMap(aoa);
+  if(hm && colmapWorks(aoa, hm, hm.headerRowIndex+1)) return { map:hm, startRow:hm.headerRowIndex+1, mode:'머리글' };
+  const cm = detectContentColmap(aoa, knownItems, knownMajors);
+  if(cm){
+    // 머리글이 있는데 일부 열만 못 찾은 경우, 찾은 열 이름은 우선 반영
+    return { map:cm, startRow:0, mode:'내용 분석' };
+  }
+  return null;
+}
+
 function parseTxnDateProbe(raw){ return parseTxnDate(raw); }
 
 // 헤더가 있는 파일(신한은행 등): 헤더 텍스트로 은행 원본 열 위치를 찾습니다.
@@ -2436,6 +2559,8 @@ function detectColumnMap(aoa){
       else if(map.payee==null && (s.includes('예금주')||s.includes('송금인'))){ map.payee=idx; matched=true; }
       else if(map.branch==null && s.includes('거래점')){ map.branch=idx; matched=true; }
       else if(map.method==null && (s.includes('거래방법')||s.includes('거래구분'))){ map.method=idx; matched=true; }
+      else if(map.majorLbl==null && s.includes('대분류')){ map.majorLbl=idx; matched=true; }
+      else if(map.itemLbl==null && (s==='항목' || s.includes('항목') || s==='소분류' || s==='분류')){ map.itemLbl=idx; matched=true; }
       if(matched){ hits++; if(minHitIdx==null || idx<minHitIdx) minHitIdx = idx; }
     });
     if(hits>=2){
@@ -2449,8 +2574,14 @@ function detectColumnMap(aoa){
       const isBlankCell = v => v==null || v.toString().trim()==='';
       const idx0Blank = isBlankCell(row[0]);
       const idx1Blank = isBlankCell(row[1]);
-      map.majorIdx = idx0Blank ? 0 : null;
-      map.itemIdx = (idx0Blank && idx1Blank) ? 1 : null;
+      if(map.majorLbl!=null || map.itemLbl!=null){
+        // 머리글에 '대분류'/'항목' 이름이 적혀 있으면 그 칸을 그대로 사용합니다.
+        map.majorIdx = map.majorLbl!=null ? map.majorLbl : null;
+        map.itemIdx = map.itemLbl!=null ? map.itemLbl : null;
+      } else {
+        map.majorIdx = idx0Blank ? 0 : null;
+        map.itemIdx = (idx0Blank && idx1Blank) ? 1 : null;
+      }
       return map;
     }
   }
@@ -2505,15 +2636,20 @@ function parseTxnDate(raw){
     const d = XLSX.SSF.parse_date_code(raw);
     // 엑셀 일련번호가 아닌 단순 순번("No" 열 등)을 날짜로 잘못 인식하지 않도록,
     // 너무 오래된(1971년 이전) 날짜로 해석되면 무시합니다.
-    if(d && d.y > 1970) return new Date(d.y, d.m-1, d.d, d.H||0, d.M||0, d.S||0);
+    if(d && d.y >= 2000 && d.y <= 2100) return new Date(d.y, d.m-1, d.d, d.H||0, d.M||0, d.S||0);
     return null;
   }
+  if(typeof raw === 'number') return null;
   const s = (raw==null ? '' : raw.toString()).trim();
   // "2026-08-31 18:00:29" 및 "2026.08.31 16:38:49" 형식을 모두 지원합니다.
   let m = s.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})[ T](\d{1,2}):(\d{2}):(\d{2})/);
   if(m) return new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]);
   m = s.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
   if(m) return new Date(+m[1], +m[2]-1, +m[3]);
+  m = s.match(/(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일/);
+  if(m) return new Date(+m[1], +m[2]-1, +m[3]);
+  m = s.match(/^(\d{4})(\d{2})(\d{2})(?:\D|$)/);
+  if(m && +m[2]>=1 && +m[2]<=12 && +m[3]>=1 && +m[3]<=31) return new Date(+m[1], +m[2]-1, +m[3]);
   return null;
 }
 // 한 행을 분류합니다: 엑셀에 이미 항목이 적혀 있으면 그대로 사용(+학습),
@@ -2527,9 +2663,23 @@ function classifyRow(obj){
   if(known){
     return { key, major_category: known.major_category, item_name: known.item_name, learned:false, needsInput:false };
   }
-  return { key, major_category:'', item_name:'', learned:false, needsInput:true };
+  // 엑셀에 '항목'만 적혀 있으면, 이전에 같은 항목으로 분류한 대분류를 찾아 채웁니다
+  if(obj.item_name && !obj.major_category){
+    const mj = lookupMajorOfItem(obj.item_name);
+    if(mj) return { key, major_category: mj, item_name: obj.item_name, learned:true, needsInput:false };
+  }
+  if(obj.major_category && !obj.item_name){
+    return { key, major_category: obj.major_category, item_name:'', learned:false, needsInput:true };
+  }
+  return { key, major_category:'', item_name: obj.item_name||'', learned:false, needsInput:true };
 }
 
+function lookupMajorOfItem(item){
+  const cnt = {};
+  Object.values(PAYEE_MAP).forEach(v=>{ if(v.item_name===item && v.major_category){ cnt[v.major_category]=(cnt[v.major_category]||0)+1; } });
+  const k = Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]);
+  return k.length ? k[0] : '';
+}
 function fmtWon2(n){ return Number(n||0).toLocaleString('ko-KR')+'원'; }
 
 function populateExpenseMonthSelects(){
@@ -2606,21 +2756,40 @@ async function handleExpenseFile(file){
     await loadPayeeMap();
     const buf = await file.arrayBuffer();
     const wb = XLSX.read(buf, { type:'array' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const aoa = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:null });
-
-    // 이 파일의 실제 열 구성을 확인합니다 (은행마다, 그리고 대분류/항목 기재 여부에 따라 다릅니다)
-    const detectedMap = detectColumnMap(aoa);
-    const colmap = detectedMap || detectHeaderlessColmap(aoa);
-    const startRow = detectedMap ? detectedMap.headerRowIndex + 1 : 0;
+    // 여러 시트가 있으면 거래내역이 가장 많이 읽히는 시트를 사용합니다
+    let aoa = null, layout = null, bestN = -1, sheetName = '';
+    wb.SheetNames.forEach(nm=>{
+      const a = XLSX.utils.sheet_to_json(wb.Sheets[nm], { header:1, raw:true, defval:null });
+      const lay = autoDetectLayout(a);
+      if(!lay) return;
+      let n = 0; for(let i=lay.startRow;i<a.length;i++){ const r=a[i]; if(r && parseTxnDate(r[lay.map.date])) n++; }
+      if(n>bestN){ bestN = n; aoa = a; layout = lay; sheetName = nm; }
+    });
+    if(!layout){
+      statusEl.textContent = '거래내역의 열 구성을 인식하지 못했습니다. 거래일시(날짜)·출금액·입금액이 들어 있는 엑셀인지 확인해 주세요.';
+      return;
+    }
+    const colmap = layout.map;
+    const startRow = layout.startRow;
+    let skippedNoDate = 0, monthHint = 0;
+    // 날짜 대신 "9월분"처럼 월만 적힌 줄을 위해, 파일에서 가장 최근 날짜를 기준 연도로 삼습니다
+    let refDate = null;
+    for(let i=startRow;i<aoa.length;i++){ const r=aoa[i]; const d0 = r && parseTxnDate(r[colmap.date]); if(d0 && (!refDate || d0>refDate)) refDate = d0; }
 
     const parsed = [];
     for(let ri = startRow; ri < aoa.length; ri++){
       const arr = aoa[ri];
       if(!arr || arr.length===0) continue;
       const obj = rowToObjByMap(arr, colmap);
-      const dt = parseTxnDate(obj.txn_date_raw);
-      if(!dt) continue; // 날짜를 인식할 수 없는 행(헤더/합계행/빈행 등)은 건너뜁니다
+      let dt = parseTxnDate(obj.txn_date_raw);
+      if(!dt && refDate && (obj.amount_out || obj.amount_in)){
+        const mh = String(obj.txn_date_raw==null?'':obj.txn_date_raw).match(/(\d{1,2})\s*월/);
+        if(mh && +mh[1]>=1 && +mh[1]<=12){
+          const yr = (+mh[1] > refDate.getMonth()+1) ? refDate.getFullYear()-1 : refDate.getFullYear();
+          dt = new Date(yr, +mh[1]-1, 1); monthHint++;
+        }
+      }
+      if(!dt){ const lbl = (obj.desc||'')+String(obj.txn_date_raw==null?'':obj.txn_date_raw)+(obj.major_category||'')+(obj.item_name||'')+(obj.account||''); if((obj.amount_out || obj.amount_in) && lbl.trim() && !/합계|총계|소계|계$/.test(lbl.trim())) skippedNoDate++; continue; }   // 이름 없는 숫자만 있는 줄·합계 줄은 알림 없이 제외 // 날짜를 인식할 수 없는 행(헤더/합계행/빈행 등)은 건너뜁니다
       if(!obj.amount_out && !obj.amount_in) continue;
       obj.txn_date = dt;
       obj.year_month = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
@@ -2636,7 +2805,7 @@ async function handleExpenseFile(file){
     }
 
     if(parsed.length===0){
-      statusEl.textContent = '인식 가능한 거래내역을 찾지 못했습니다. 파일 형식을 확인해 주세요.';
+      statusEl.textContent = '인식 가능한 거래내역을 찾지 못했습니다. 파일 형식을 확인해 주세요. (판단한 열 구성: '+describeColmap(colmap)+')';
       return;
     }
     EXPENSE_PARSED_ROWS = parsed;
@@ -2666,15 +2835,19 @@ async function handleExpenseFile(file){
           <td>${rep.desc||'-'}${rep.payee_name?(' · '+rep.payee_name):''}</td>
           <td>${rep.account||'-'}</td>
           <td>${fmtWon2(rep.amount_out||rep.amount_in)}</td>
-          <td><input type="text" class="expNewMajor" list="expMajorList" placeholder="예: 고정비" style="margin-bottom:0;"></td>
-          <td><input type="text" class="expNewItem" placeholder="예: 통신비" style="margin-bottom:0;"></td>`;
+          <td><input type="text" class="expNewMajor" list="expMajorList" placeholder="예: 고정비" value="${(rep.major_category||'').replace(/"/g,'&quot;')}" style="margin-bottom:0;"></td>
+          <td><input type="text" class="expNewItem" placeholder="예: 통신비" value="${(rep.item_name||'').replace(/"/g,'&quot;')}" style="margin-bottom:0;"></td>`;
         tbody.appendChild(tr);
       });
     } else {
       document.getElementById('expenseNewCount').textContent = '신규 없음';
       tbody.innerHTML = '<tr><td colspan="6" class="small-note">이 파일의 모든 거래처가 이전에 학습된 내용(또는 파일에 이미 적힌 분류)으로 자동 인식되었습니다. 내용을 확인한 뒤 "저장하기"를 눌러 저장을 완료해 주세요.</td></tr>';
     }
-    statusEl.textContent = `${parsed.length}건 인식됨 (자동분류 ${autoCount}건 · 신규 거래처 ${newKeys.length}건) — 아직 저장되지 않았습니다. 내용을 확인한 뒤 "저장하기"를 눌러 주세요.`;
+    statusEl.textContent = `${parsed.length}건 인식됨 (자동분류 ${autoCount}건 · 신규 거래처 ${newKeys.length}건) — 아직 저장되지 않았습니다. 내용을 확인한 뒤 "저장하기"를 눌러 주세요.`
+      + `\n열 구성 자동 인식(${layout.mode}${wb.SheetNames.length>1?' · 시트 "'+sheetName+'"':''}): ` + describeColmap(colmap)
+      + (monthHint>0 ? `\n※ 날짜 대신 "N월분"으로 적힌 ${monthHint}건은 해당 월 1일자로 넣었습니다.` : '')
+      + (skippedNoDate>0 ? `\n※ 날짜를 읽지 못해 제외한 금액 행 ${skippedNoDate}건 — 엑셀을 확인해 주세요.` : '');
+    statusEl.style.whiteSpace = 'pre-line';
   } catch(e){
     statusEl.textContent = '파일을 읽는 중 오류가 발생했습니다: '+e.message;
     console.error(e);
