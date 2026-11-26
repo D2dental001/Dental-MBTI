@@ -98,3 +98,9 @@ Skilldb(find-skills), claude-code-setup, frontend-design, Superpowers, playwrigh
 - 사이트 옵션 추가(모두 기본값은 기존과 동일): ldType(구조화 데이터 종류, 기본 Dentist), qbarHideEmpty·qLoc·qLocLabel·mbAlt·mbAltLabel(퀵바/모바일 하단바), formTopics(상담 분야 목록). about 블록 작은 글씨 'D2 DENTAL' → nameEn.
 - c_steps 6개면 PC에서 3열 2줄.
 - 남은 것: 전화·주소·이메일·사업자 정보·대표 사진·로고(사용자 제공 대기). 상호 '모두의마케팅'은 35류 상표 출원(40-2026-0178947, 주식회사 모두의마케팅) 존재 — 사용자에게 안내함.
+
+### 2026-11-26 08 모두의마케팅 v2 (d2dental 방식)
+- luxeTone 'd2': 고딕(Pretendard) + 크림 바탕 + 청록 포인트 + 밝은 메인 배너. 이미지 재생성 스크립트 mdimg2.py (e-스타 로고 흐림 처리 포함).
+- 홈 순서: 메인 배너 → POINT → 개선 전후 비교 배너(sig, 1개면 넓은 배너형) → 제작 사례 8 → 숫자 → 서비스 → 과정 → FAQ → CTA. 제작 사례 페이지 12개(실제 제작: e-스타 3, D2 Dental 2).
+- 개선 전 화면은 임시 이미지(baBeforePc.webp '개선 전 화면 (준비 중)'). 예전 star-dental.kr이 내려가 있고 web.archive.org는 이 환경에서 막힘 → 사용자 캡처 또는 크롬으로 보관소(20250420) 캡처 후 교체.
+- c_treat 버튼에 href 지원(없으면 기존처럼 전화).

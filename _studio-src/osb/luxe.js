@@ -313,10 +313,29 @@ T_LUXE.css += '.nw{white-space:nowrap}';
 T_LUXE.css += '@media(max-width:900px){.cb-sub img[src*="heroKids"]{object-position:66% 50%}}';
 T_LUXE.css += '@media(max-width:900px){.cb-sub img[src*="heroGum2"]{object-position:64% 50%}}';
 
-/* 사이트별 색 톤 (예: 08 모두의마케팅 = navy). 기본은 원래 에스프레소 · 골드 */
-const LUXE_TONES = { navy: [
-  ['#211b18','#121c30'],['rgba(33,27,24,','rgba(18,28,48,'],['#1d1815','#0f1829'],['#2b2421','#1d2a42'],['#2e2622','#1a2740'],['#3a2f29','#243553'],['#231b17','#111a2c'],['rgba(20,16,14,','rgba(10,16,28,'],
-  ['#c9a876','#4cc2b2'],['#b89565','#2a9e90'],['#d8c19a','#8fdbd0'],['#e3c995','#9fe3d9'],['#b8975a','#2a9e90'],['rgba(216,193,154,','rgba(127,214,201,'],['rgba(201,168,118,','rgba(76,194,178,'],
-  ['#faf7f2','#f6f8fb'],['#fbf6ee','#f4f7fb'],['#f3ece2','#eaf0f6'],['#efe9df','#e6edf4'],['#f4eee5','#edf2f7'],['#e9e0d3','#dde5ee'],['#e5dccd','#d9e2ec'],['#e7e0d4','#dfe6ee'],['#efe6d8','#e3eaf2'],['#e8e1d6','#e0e7ef'],['#fffdf9','#fdfeff'],['#f3efe8','#eef2f7'],['#e9e1d3','#dfe6ee'],['#efe6d6','#e3eaf2'],['#cfc8bb','#c3cdd9']
-] };
-function toneCss(site, css){ const t = site && LUXE_TONES[site.luxeTone]; if (!t) return css; let o = css; t.forEach(([a,b]) => { o = o.split(a).join(b); o = o.split(a.toUpperCase()).join(b); }); return o; }
+/* 사이트별 색 톤 · 글꼴 (예: 08 모두의마케팅 = d2). 기본은 원래 에스프레소 · 골드 · 명조 */
+const LUXE_TONES = {
+  navy: { map: [
+    ['#211b18','#121c30'],['rgba(33,27,24,','rgba(18,28,48,'],['#1d1815','#0f1829'],['#2b2421','#1d2a42'],['#2e2622','#1a2740'],['#3a2f29','#243553'],['#231b17','#111a2c'],['rgba(20,16,14,','rgba(10,16,28,'],
+    ['#c9a876','#4cc2b2'],['#b89565','#2a9e90'],['#d8c19a','#8fdbd0'],['#e3c995','#9fe3d9'],['#b8975a','#2a9e90'],['rgba(216,193,154,','rgba(127,214,201,'],['rgba(201,168,118,','rgba(76,194,178,'],
+    ['#faf7f2','#f6f8fb'],['#fbf6ee','#f4f7fb'],['#f3ece2','#eaf0f6'],['#efe9df','#e6edf4'],['#f4eee5','#edf2f7'],['#e9e0d3','#dde5ee'],['#e5dccd','#d9e2ec'],['#e7e0d4','#dfe6ee'],['#efe6d8','#e3eaf2'],['#e8e1d6','#e0e7ef'],['#fffdf9','#fdfeff'],['#f3efe8','#eef2f7'],['#e9e1d3','#dfe6ee'],['#efe6d6','#e3eaf2'],['#cfc8bb','#c3cdd9']
+  ] },
+  /* d2dental.co.kr 느낌: 에스프레소 헤더 + 밝은 크림 바탕 + 청록 포인트 + 고딕(Pretendard) */
+  d2: { map: [
+    ["'Noto Serif KR',serif","'Pretendard',-apple-system,sans-serif"],["'Cormorant Garamond',serif","'Pretendard',-apple-system,sans-serif"],['font-style:italic','font-style:normal'],
+    ['#c9a876','#1eae9f'],['#b89565','#17968a'],['#d8c19a','#8ad8cf'],['#e3c995','#9fe3d9'],['#b8975a','#17968a'],['rgba(216,193,154,','rgba(138,216,207,'],['rgba(201,168,118,','rgba(30,174,159,']
+  ], css: `
+.t-luxe .lh{background:#f6f3ee;color:#2b2421}.t-luxe .lh .stage{background:#efe9df}
+.t-luxe .lh .tag{font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#17968a}
+.t-luxe .lh .l1{color:#3a322d;font-weight:300}.t-luxe .lh .l2{color:#1f1a17;font-weight:800;letter-spacing:-.04em}.t-luxe .lh .s{color:#6b625a}
+.t-luxe .lh .acts .p{background:#1eae9f;color:#fff}.t-luxe .lh .acts .g{border-color:rgba(43,36,33,.25);color:#2b2421}
+.t-luxe .lh .cnt{color:#3a322d}.t-luxe .lh .cnt small{color:#9a9086}.t-luxe .lh .cnt .bar{background:rgba(43,36,33,.15)}.t-luxe .lh .next{color:#2b2421;border-color:rgba(43,36,33,.25)}
+.t-luxe h2,.t-luxe h3{letter-spacing:-.03em}
+.t-luxe .lh .stage:before{background:linear-gradient(90deg,#f6f3ee,rgba(246,243,238,0))}
+@media(max-width:900px){.t-luxe .lh .stage:before{background:linear-gradient(0deg,#f6f3ee,rgba(246,243,238,0))}}
+` }
+};
+function toneCss(site, css){ const t = site && LUXE_TONES[site.luxeTone]; if (!t) return css; let o = css; (t.map || []).forEach(([a,b]) => { o = o.split(a).join(b); if (a.startsWith('#')) o = o.split(a.toUpperCase()).join(b); }); return o + (t.css || ''); }
+
+/* 전후 비교 카드가 1개일 때: 넓은 배너형 (왼쪽 큰 비교 화면 + 오른쪽 설명) */
+T_LUXE.css += '\n.lsg .grid:has(>.card:only-child){grid-template-columns:1fr}.lsg .card:only-child{display:grid;grid-template-columns:1.55fr 1fr;align-items:center;column-gap:44px;padding:22px}.lsg .card:only-child .ba{grid-row:1/5;aspect-ratio:16/10}.lsg .card:only-child .no{margin-top:0}@media(max-width:900px){.lsg .card:only-child{grid-template-columns:1fr}.lsg .card:only-child .ba{grid-row:auto}.lsg .card:only-child .no{margin-top:26px}}';

@@ -6,39 +6,42 @@ const MD = n => 'asset:modoo/' + n;
 function modooContent(){
   const c = defaultContent('luxe');
   Object.assign(c.site, {
-    _seed:'modoo', _seedVer:1, name:'모두의마케팅', nameEn:'MODOO MARKETING', color:'#16223a', color2:'#35b5a5',
+    _seed:'modoo', _seedVer:2, name:'모두의마케팅', nameEn:'MODOO MARKETING', color:'#2b2421', color2:'#1eae9f',
     phone:'000-0000-0000', email:'', address:'(주소를 입력하세요)', traffic:'', hours:'평일 09:00 - 18:00\n토·일·공휴일 휴무',
     kakao:'', youtube:'', biz:'모두의마케팅 | 대표 (이름) | 사업자등록번호 000-00-00000',
     metaTitle:'모두의마케팅 | 치과 홈페이지 제작·관리 · SEO AEO GEO',
     metaDesc:'치과 경영이사 10년, 치과기공소 경영이사 5년 경력으로 80여 곳 치과 홈페이지를 제작·관리해 왔습니다. 첫 시안 1주일, 착수금 50%, 오픈 후 1년 무상 수정.',
     form_btn:'무료 진단 신청', bal_cta:'무료 진단 신청', bal_cta2:'', bal_book:'', bal_blog:'', logo:'', logoLight:'',
-    ldType:'ProfessionalService', luxeTone:'navy', bal_mark:'M', qbarHideEmpty:1, qLoc:'p:pg-contact', qLocLabel:'상담신청', mbAlt:'p:pg-diagnosis', mbAltLabel:'무료 진단', formTopics:'홈페이지 신규 제작,홈페이지 리뉴얼,SEO · AEO · GEO 관리,무료 진단,기타', altNames:'모두의 마케팅, MODOO MARKETING', areaServed:'', siteUrl:''
+    ldType:'ProfessionalService', luxeTone:'d2', bal_mark:'M', qbarHideEmpty:1, qLoc:'p:pg-contact', qLocLabel:'상담신청', mbAlt:'p:pg-diagnosis', mbAltLabel:'무료 진단', formTopics:'홈페이지 신규 제작,홈페이지 리뉴얼,SEO · AEO · GEO 관리,무료 진단,기타', altNames:'모두의 마케팅, MODOO MARKETING', areaServed:'', siteUrl:''
   });
   const home = c.pages[0], by = t => home.blocks.find(b => b.type === t);
   by('lhero').data.slides = [
-    [MD('hero1'),'DENTAL MARKETING','치과를 운영해 본 사람이','치과 홈페이지를 만듭니다','치과 경영이사 10년, 치과기공소 경영이사 5년. 원장님의 진료 철학을 홈페이지에 그대로 담습니다','무료 진단 신청','pg-diagnosis'],
-    [MD('hero2'),'FAST & CLEAR','첫 시안은 1주일,','수정 확인은 다음 날','착수금 50%만으로 시작하고, 빠르면 1주일 만에 홈페이지를 완성합니다','제작 과정 보기','pg-process'],
-    [MD('hero3'),'SEO · AEO · GEO','네이버·구글은 물론','AI 검색까지 준비합니다','ChatGPT와 AI 검색이 원장님 치과를 정확히 이해하도록 구조부터 설계합니다','검색 관리 보기','pg-seo']
+    [MD('h1'),'Dental Marketing','치과를 운영해 본 사람이','치과 홈페이지를 만듭니다','치과 경영이사 10년, 치과기공소 경영이사 5년. 원장님의 진료 철학을 홈페이지에 그대로 담습니다','무료 진단 신청','pg-diagnosis'],
+    [MD('h2'),'Portfolio','치과마다 다른 이야기,','치과마다 다른 디자인','80여 곳 치과의 홈페이지를 제작하고 관리해 왔습니다','제작 사례 보기','pg-portfolio'],
+    [MD('h3'),'SEO · AEO · GEO','네이버 · 구글은 물론','AI 검색까지 준비합니다','검색엔진과 AI가 원장님 치과를 정확히 이해하도록 구조부터 설계합니다','검색 관리 보기','pg-seo']
   ].map(([img,tag,l1,l2,s,btn,p]) => ({ img, img2:'', tag, l1, l2, s, btn, href:'p:'+p }));
   Object.assign(by('manifesto').data, { en:'Why MODOO', t1:'치과를 운영해 본 사람이', t2:'치과 홈페이지를 만듭니다',
     d:'원장님이 무엇을 고민하는지, 환자가 무엇을 보고 치과를 고르는지 치과 경영 현장에서 직접 겪었습니다. 그 경험으로 80여 곳 치과의 홈페이지를 제작하고 관리해 왔습니다.',
     st:[['80','여 곳','치과 홈페이지 제작 · 관리'],['15','년','치과 · 치과기공소 경영 경력'],['1','주','첫 시안 확인']].map(([n,u,l])=>({n,u,l})) });
   Object.assign(by('tiles').data, { en:'Service', t:'모두의마케팅이 하는 일', items:[
-    ['tWeb','치과 경영 경험으로 설계하는','치과 ','홈페이지 제작','진료 과목마다 개별 페이지로 구성합니다','web'],
-    ['tSeo','검색과 AI 답변까지','SEO · ','AEO · GEO','네이버 · 구글 · AI 검색에 맞춘 구조','seo'],
-    ['tCare','오픈 후에도 부담 없이','1년 ','무상 관리','문구 · 사진 수정은 1년간 무료','care'],
-    ['tProc','착수금 50%로 시작','제작 ','과정 · 계약','첫 시안 1주, 수정 확인은 다음 날','process'],
-    ['tCases','디자인 샘플과 실제 제작','제작 ','사례','완성된 홈페이지를 직접 둘러보세요','portfolio'],
-    ['tDiag','우리 치과 홈페이지는 괜찮을까?','무료 ','진단','검색 · AI 노출 상태를 점검해 드립니다','diagnosis']
+    ['cWeb','치과 경영 경험으로 설계하는','치과 ','홈페이지 제작','진료 과목마다 개별 페이지로 구성합니다','web'],
+    ['cSeo','검색과 AI 답변까지','SEO · ','AEO · GEO','네이버 · 구글 · AI 검색에 맞춘 구조','seo'],
+    ['cCare','오픈 후에도 부담 없이','1년 ','무상 관리','문구 · 사진 수정은 1년간 무료','care'],
+    ['cProc','착수금 50%로 시작','제작 ','과정 · 계약','첫 시안 1주, 수정 확인은 다음 날','process'],
+    ['cCases','실제 제작과 다양한 디자인','제작 ','사례','완성된 홈페이지를 직접 둘러보세요','portfolio'],
+    ['cDiag','우리 치과 홈페이지는 괜찮을까?','무료 ','진단','검색 · AI 노출 상태를 점검해 드립니다','diagnosis']
   ].map(([img,cap,t1,hl,d,p]) => ({ img:MD(img), tone:'', cap, t1, hl, d, href:'p:pg-'+p })) });
-  Object.assign(by('about').data, { en:'ABOUT MODOO', t1:'첫 미팅에서', t2:'전체 그림을 먼저 그립니다',
-    d:'원장님의 진료 철학과 강조하고 싶은 진료, 보유한 사진과 자료를 첫 미팅에서 꼼꼼히 확인합니다.\n그 자리에서 전체 구성을 잡고 포트폴리오를 보여드린 뒤 계약을 진행합니다.', btn:'회사 소개', href:'p:pg-about', img:MD('about') });
-  Object.assign(by('sms').data, { t1:'무료 진단', t2:'신청하기' });
-  ['sig','ba','dfeat','info'].forEach(t => { const b = by(t); if (b) b.hidden = true; });
-  const at = home.blocks.indexOf(by('tiles')) + 1;
-  home.blocks.splice(at, 0, blk('c_steps', { lab:'PROCESS', t:'계약부터 오픈까지', items:MD_STEPS.slice(0,4) }));
-  const si = home.blocks.indexOf(by('sms'));
-  home.blocks.splice(si < 0 ? home.blocks.length : si, 0, blk('c_consult', { lab:'Q&A', t:'원장님들이 가장 많이 물어보십니다', s:'상담에서 자주 듣는 질문과 답변입니다', items:MD_QA.map(([tg,q,a,p]) => ({ tg, q, a, href:'p:pg-'+p })) }));
+  Object.assign(by('sig').data, { en:'Before & After', t:'홈페이지, 이렇게 달라집니다', s:'가운데 막대를 좌우로 밀어 개선 전과 후를 비교해 보세요',
+    items:[{ no:'CASE 01  RENEWAL', t:'신촌 심미 치과 홈페이지 리뉴얼', d:'오래된 홈페이지를 심미치료 중심으로 다시 설계했습니다. 진료 과목별 페이지, 치료 전후 비교, 모바일 하단 바로가기, 검색 · AI 노출 구조까지 함께 갖추었습니다.', btn:'제작 사례 보기', href:'p:pg-portfolio', b:MD('baBeforePc'), a:MD('baAfterPc') }] });
+  const point = blk('c_treat', { img:MD('cPoint'), lab:'POINT', t:'치과를 아는 사람이 만든\n치과 홈페이지', d:'첫 미팅에서 원장님의 니즈와 보유 자료를 정확히 파악하고,\n전체 구성을 잡아 포트폴리오로 보여드린 뒤 계약합니다.', pts:'치과 경영이사 10년 · 치과기공소 경영이사 5년\n80여 곳 치과 홈페이지 제작 · 관리\n첫 시안 1주일, 수정 확인은 다음 날\n착수금 50%, 오픈 후 1년 무상 수정', btn:'회사 소개', side:'right' });
+  point.data.href = 'p:pg-about';
+  const gal = blk('c_gallery', { lab:'PORTFOLIO', t:'제작 사례', items:MD_CASES.slice(0,8).map(([i,cap]) => ({ img:MD(i), c:cap })) });
+  const steps = blk('c_steps', { lab:'PROCESS', t:'계약부터 오픈까지', items:MD_STEPS });
+  const hfaq = blk('c_faq', { lab:'FAQ', t:'원장님들이 자주 묻는 질문', items:MD_FAQ.slice(0,4).map(([q,a]) => ({ q, a })) });
+  const cta = blk('c_cta', { t:'우리 치과 홈페이지, 무료로 진단받아 보세요', s:'검색 · AI 노출 상태와 개선할 점을 정리해 드립니다', btn:'무료 진단 신청' });
+  const order = [by('lhero'), point, by('sig'), gal, by('manifesto'), by('tiles'), steps, hfaq, cta];
+  const rest = home.blocks.filter(b => !order.includes(b)); rest.forEach(b => { b.hidden = true; });
+  home.blocks = [...order, ...rest];
   home.seoTitle = '모두의마케팅 | 치과 홈페이지 제작·관리 · SEO AEO GEO';
   home.seoDesc = c.site.metaDesc;
 
@@ -46,42 +49,42 @@ function modooContent(){
     blocks:[blk('c_subhero', { img:MD(heroImg), en, t:title, d, crumb:`HOME  >  ${group}  >  ${title}` }), ...blocks, blk('c_cta', { t:'우리 치과 홈페이지, 무료로 진단받아 보세요', s:'검색 · AI 노출 상태와 개선할 점을 정리해 드립니다', btn:'무료 진단 신청' })] });
   const pts = (lab, t, items, s) => blk('c_points', { lab, t, s:s||'', items:items.map(([icon,t,d]) => ({ icon, t, d })) });
   const faq = (t, items) => blk('c_faq', { lab:'FAQ', t, items:items.map(([q,a]) => ({ q, a })) });
-  const treat = (img, lab, t, d, p, side) => blk('c_treat', { img:MD(img), lab, t, d, pts:p, btn:'무료 진단 신청', side:side||'left' });
+  const treat = (img, lab, t, d, p, side) => blk('c_treat', { img:MD(img), lab, t, d, pts:p, btn:'무료 진단 신청', href:'p:pg-diagnosis', side:side||'left' });
 
   c.pages = [home,
-    page('about','회사 소개','회사 소개','ABOUT US','치과를 운영해 본 사람이 만드는 치과 홈페이지','hero1', [
+    page('about','회사 소개','회사 소개','ABOUT US','치과를 운영해 본 사람이 만드는 치과 홈페이지','h1', [
       blk('c_text', { t:'치과 경영의 언어로 홈페이지를 만듭니다', d:'모두의마케팅은 치과 경영이사로 10년, 치과기공소 경영이사로 5년을 일한 경험에서 시작했습니다.\n진료실과 데스크, 기공소에서 오가는 이야기를 직접 들어 왔기에 원장님이 강조하고 싶은 진료와 환자가 궁금해하는 내용을 정확히 압니다.\n지금까지 80여 곳 치과의 홈페이지를 처음부터 끝까지 총괄해 제작하고 관리해 왔습니다.' }),
       pts('STRENGTH','모두의마케팅의 강점', [['shield','치과 경영 15년','치과 경영이사 10년, 치과기공소 경영이사 5년의 현장 경험으로 기획합니다.'],['sparkle','80여 곳 제작 · 관리','80여 곳 치과의 홈페이지를 제작하고 관리해 왔습니다.'],['clock','빠른 진행','첫 시안은 1주일 후, 수정 후 확인은 다음 날 가능합니다.']])
     ], '회사 소개 | 모두의마케팅', '치과 경영이사 10년, 치과기공소 경영이사 5년 경력. 80여 곳 치과 홈페이지를 제작·관리해 온 모두의마케팅을 소개합니다.'),
-    page('web','홈페이지 제작','서비스','HOMEPAGE','진료 과목마다 개별 페이지로 구성하는 치과 맞춤 홈페이지','hero1', [
-      treat('tWeb','HOMEPAGE','치과에 맞춘 홈페이지 구성','첫 미팅에서 원장님의 니즈와 보유 자료를 파악하고,\n진료 과목별 페이지와 메인 화면을 함께 설계합니다.','진료 과목별 개별 페이지 구성\n치료 전후 사진 비교 슬라이더\n모바일 하단 바로가기 · 빠른 상담 신청\n오시는 길 약도 일러스트\nPC · 태블릿 · 모바일 화면 최적화'),
+    page('web','홈페이지 제작','서비스','HOMEPAGE','진료 과목마다 개별 페이지로 구성하는 치과 맞춤 홈페이지','h1', [
+      treat('cWeb','HOMEPAGE','치과에 맞춘 홈페이지 구성','첫 미팅에서 원장님의 니즈와 보유 자료를 파악하고,\n진료 과목별 페이지와 메인 화면을 함께 설계합니다.','진료 과목별 개별 페이지 구성\n치료 전후 사진 비교 슬라이더\n모바일 하단 바로가기 · 빠른 상담 신청\n오시는 길 약도 일러스트\nPC · 태블릿 · 모바일 화면 최적화'),
       pts('POINT','치과 홈페이지에 꼭 필요한 것만', [['sparkle','원장님 진료 철학 중심','강조하고 싶은 진료를 메인과 메뉴 구성의 중심에 둡니다.'],['shield','의료광고 표현 점검','가격 · 이벤트, 최상급 표현, 치료 후기처럼 문제가 되기 쉬운 표현을 제작 단계에서 함께 점검합니다.'],['clock','원내 사진 활용','인테리어와 진료실 사진을 확인하고 필요한 촬영 범위를 함께 정합니다.']])
     ], '치과 홈페이지 제작 | 모두의마케팅', '진료 과목별 개별 페이지, 전후 사진 비교, 모바일 최적화까지. 치과 경영 경험으로 설계하는 치과 맞춤 홈페이지 제작.'),
-    page('seo','SEO · AEO · GEO 관리','서비스','SEARCH','네이버 · 구글 검색부터 AI 답변까지 준비하는 홈페이지','hero3', [
-      treat('tSeo','SEO · AEO · GEO','검색엔진과 AI가 이해하는 홈페이지','보기 좋은 화면만큼 중요한 것은 검색엔진과 AI가 읽는 구조입니다.\n페이지마다 검색 제목과 설명, 구조화 데이터를 갖추어 오픈합니다.','페이지별 검색 제목 · 설명 작성\n사이트맵 · robots.txt · llms.txt\n치과 정보 구조화 데이터 (주소 · 진료시간 · 의료진)\n네이버 서치어드바이저 · 구글 서치콘솔 등록','right'),
+    page('seo','SEO · AEO · GEO 관리','서비스','SEARCH','네이버 · 구글 검색부터 AI 답변까지 준비하는 홈페이지','h3', [
+      treat('cSeo','SEO · AEO · GEO','검색엔진과 AI가 이해하는 홈페이지','보기 좋은 화면만큼 중요한 것은 검색엔진과 AI가 읽는 구조입니다.\n페이지마다 검색 제목과 설명, 구조화 데이터를 갖추어 오픈합니다.','페이지별 검색 제목 · 설명 작성\n사이트맵 · robots.txt · llms.txt\n치과 정보 구조화 데이터 (주소 · 진료시간 · 의료진)\n네이버 서치어드바이저 · 구글 서치콘솔 등록','right'),
       pts('3 STEPS','세 가지 검색을 함께 준비합니다', [['sparkle','SEO 검색엔진 최적화','네이버 · 구글 검색 결과에 치과가 정확히 표시되도록 페이지마다 제목과 설명을 정리합니다.'],['shield','AEO 답변 최적화','환자가 자주 묻는 질문과 답을 구조화해 검색 답변 영역에 인용되기 쉽게 만듭니다.'],['clock','GEO AI 검색 최적화','ChatGPT 등 AI 검색이 치과 정보를 정확히 읽도록 구조화 데이터와 llms.txt를 갖추고, 외부 플랫폼 정보와 일치하는지 점검합니다.']]),
       faq('검색 관리, 이것이 궁금합니다', [['검색 1위를 보장하나요?','검색 순위와 AI 답변 노출은 검색엔진이 결정하므로 누구도 보장할 수 없습니다. 모두의마케팅은 노출에 필요한 구조를 빠짐없이 갖추고, 점검 결과를 투명하게 공유합니다.'],['AEO, GEO는 무엇인가요?','AEO는 검색 결과의 답변 영역에, GEO는 ChatGPT 같은 AI 검색의 답변에 치과 정보가 정확히 인용되도록 준비하는 작업입니다.'],['기존 홈페이지 주소를 그대로 쓸 수 있나요?','네. 기존 도메인을 그대로 연결하고, 예전 주소로 들어온 방문자도 새 페이지로 이어지도록 설정합니다.']])
     ], 'SEO · AEO · GEO 관리 | 모두의마케팅', '네이버·구글 검색과 ChatGPT 등 AI 검색까지. 페이지별 검색 정보, 구조화 데이터, llms.txt로 치과 홈페이지 노출 구조를 갖춥니다.'),
-    page('care','1년 무상 관리','서비스','CARE','오픈 후 1년 동안 문구 · 사진 수정은 무료입니다','hero2', [
-      treat('tCare','1 YEAR CARE','오픈 후 1년, 수정 비용 없이','진료시간이 바뀌거나 사진을 새로 찍었을 때\n연락만 주시면 바로 반영합니다.','문구 · 사진 수정 무료 (1년)\n진료시간 · 공지 변경 반영\n검색 노출 점검\n1년 이후에는 작업량에 따라 사전 안내 후 진행'),
+    page('care','1년 무상 관리','서비스','CARE','오픈 후 1년 동안 문구 · 사진 수정은 무료입니다','h2', [
+      treat('cCare','1 YEAR CARE','오픈 후 1년, 수정 비용 없이','진료시간이 바뀌거나 사진을 새로 찍었을 때\n연락만 주시면 바로 반영합니다.','문구 · 사진 수정 무료 (1년)\n진료시간 · 공지 변경 반영\n검색 노출 점검\n1년 이후에는 작업량에 따라 사전 안내 후 진행'),
       pts('SCOPE','무상 관리 범위', [['sparkle','무료로 해 드리는 일','문구 · 사진 교체, 진료시간과 연락처 변경, 기존 페이지 내용 보완'],['shield','별도로 안내드리는 일','새 페이지 추가와 디자인 전면 변경은 무상 범위에서 제외되며, 작업 전에 비용을 먼저 안내드립니다.'],['clock','매년 유지 비용','홈페이지 연장 비용은 매년 5만원이며 도메인 연장이 포함됩니다.']])
     ], '1년 무상 관리 | 모두의마케팅', '오픈 후 1년간 문구·사진 수정 무료. 새 페이지 추가와 디자인 전면 변경만 별도. 홈페이지 연장 비용은 도메인 포함 매년 5만원.'),
-    page('process','제작 과정 · 계약','제작 안내','PROCESS','첫 미팅부터 오픈까지, 빠르면 1주일','hero2', [
+    page('process','제작 과정 · 계약','제작 안내','PROCESS','첫 미팅부터 오픈까지, 빠르면 1주일','h2', [
       blk('c_steps', { lab:'PROCESS', t:'제작 과정', items:MD_STEPS }),
       pts('CONTRACT','계약과 비용', [['shield','착수금 50%','계약 시 총 금액의 50%만 착수금으로 받고 제작을 시작합니다.'],['clock','첫 시안 1주일','계약 후 1주일이면 첫 시안을 확인하실 수 있습니다. 수정 후 확인은 다음 날 가능합니다 (수정 내용에 따라 달라질 수 있습니다).'],['sparkle','연 5만원 유지','홈페이지 연장 비용은 매년 5만원이며 도메인 연장이 포함됩니다.']])
     ], '제작 과정 · 계약 | 모두의마케팅', '첫 미팅에서 니즈와 자료를 파악하고 포트폴리오로 구성한 뒤 계약. 착수금 50%, 첫 시안 1주일, 수정 확인 익일, 빠르면 1주일 완성.'),
-    page('portfolio','제작 사례','제작 안내','PORTFOLIO','실제 제작한 치과 홈페이지와 디자인 샘플','hero1', [
-      blk('c_gallery', { lab:'PORTFOLIO', t:'제작 사례 둘러보기', items:[['pf07','신촌 e-스타치과 (실제 제작)'],['pf06','디자인 샘플 · 분과협진 종합형'],['pf02','디자인 샘플 · 프리미엄 심미형'],['pf03','디자인 샘플 · 풀페이지 브랜드형'],['pf01','디자인 샘플 · 대형병원형'],['pf04','디자인 샘플 · 진료과 중심형'],['pf05','디자인 샘플 · 동네 친근형']].map(([i,cap]) => ({ img:MD(i), c:cap })) })
+    page('portfolio','제작 사례','제작 안내','PORTFOLIO','실제 제작한 치과 홈페이지와 디자인 샘플','h1', [
+      blk('c_gallery', { lab:'PORTFOLIO', t:'제작 사례 둘러보기', items:MD_CASES.map(([i,cap]) => ({ img:MD(i), c:cap })) })
     ], '제작 사례 | 모두의마케팅', '모두의마케팅이 제작한 치과 홈페이지와 디자인 샘플을 소개합니다.'),
-    page('diagnosis','무료 진단','제작 안내','FREE DIAGNOSIS','우리 치과 홈페이지, 지금 상태를 무료로 점검해 드립니다','hero3', [
+    page('diagnosis','무료 진단','제작 안내','FREE DIAGNOSIS','우리 치과 홈페이지, 지금 상태를 무료로 점검해 드립니다','h3', [
       blk('c_text', { t:'이런 점을 점검해 드립니다', d:'검색엔진과 AI가 읽는 원본 화면, 페이지별 검색 정보, 모바일 화면, 상담 신청 동선까지\n실제 홈페이지를 기준으로 확인하고 개선할 점을 정리해 드립니다.' }),
       blk('c_consult', { lab:'SELF CHECK', t:'먼저 스스로 확인해 보세요', s:'두 개 이상 해당된다면 점검이 필요합니다', items:MD_CHECK.map(([tg,q,a]) => ({ tg, q, a, href:'#top' })) })
     ], '치과 홈페이지 무료 진단 | 모두의마케팅', '검색엔진·AI 검색 노출, 페이지별 검색 정보, 모바일 화면, 상담 동선까지 치과 홈페이지를 무료로 진단해 드립니다.'),
-    page('faq','자주 묻는 질문','제작 안내','FAQ','홈페이지 제작 전에 많이 물어보시는 내용','hero2', [
+    page('faq','자주 묻는 질문','제작 안내','FAQ','홈페이지 제작 전에 많이 물어보시는 내용','h2', [
       faq('자주 묻는 질문', MD_FAQ)
     ], '자주 묻는 질문 | 모두의마케팅', '치과 홈페이지 제작 기간, 비용, 착수금, 무상 관리 범위, 도메인 등 자주 묻는 질문을 모았습니다.'),
     { id:'pg-contact', slug:'contact', title:'상담 신청 · 오시는 길', seoTitle:'상담 신청 · 오시는 길 | 모두의마케팅', seoDesc:'모두의마케팅 상담 신청과 연락처, 오시는 길 안내입니다.',
-      blocks:[blk('c_subhero', { img:MD('hero1'), en:'CONTACT', t:'상담 신청 · 오시는 길', d:'원장님 치과로 직접 찾아뵙고 상담합니다', crumb:'HOME  >  상담 신청  >  상담 신청 · 오시는 길' }), blk('c_location', { lab:'CONTACT', t:'상담 신청 · 오시는 길' })] }
+      blocks:[blk('c_subhero', { img:MD('h1'), en:'CONTACT', t:'상담 신청 · 오시는 길', d:'원장님 치과로 직접 찾아뵙고 상담합니다', crumb:'HOME  >  상담 신청  >  상담 신청 · 오시는 길' }), blk('c_location', { lab:'CONTACT', t:'상담 신청 · 오시는 길' })] }
   ];
   c.site.nav = [
     { label:'회사 소개', href:'p:pg-about', children:[] },
@@ -91,6 +94,11 @@ function modooContent(){
   ];
   return c;
 }
+const MD_CASES = [
+  ['g01','실제 제작 · 신촌 심미 치과 메인'],['g02','실제 제작 · 신촌 심미 치과 라미네이트'],['g03','실제 제작 · 신촌 심미 치과 상담 · 특별함'],['g04','실제 제작 · D2 Dental 치과기공소'],
+  ['g05','분과협진 종합형 디자인'],['g06','프리미엄 심미형 디자인'],['g07','풀페이지 브랜드형 디자인'],['g08','대형병원형 디자인'],
+  ['g09','진료과 중심형 디자인'],['g10','동네 친근형 디자인'],['g11','분과협진 종합형 · 진료 페이지'],['g12','실제 제작 · D2 Dental 자주 묻는 질문']
+];
 const MD_STEPS = [
   ['첫 미팅','원장님의 니즈와 강조하고 싶은 진료, 보유한 사진 · 자료를 정확히 파악합니다.'],
   ['구상 · 포트폴리오','전체 구성을 잡고 원장님 치과에 맞춘 포트폴리오로 보여드립니다.'],
@@ -124,4 +132,4 @@ const MD_FAQ = [
   ['사진이 없어도 제작할 수 있나요?','첫 미팅에서 보유 자료를 확인하고, 필요한 원내 사진 촬영 범위를 함께 정합니다.'],
   ['기존 홈페이지 주소를 그대로 쓸 수 있나요?','네. 기존 도메인을 연결하고 예전 주소로 들어온 방문자도 새 페이지로 이어지도록 설정합니다.']
 ];
-SEED.push({ theme:'luxe', title:'08 모두의마케팅 (치과 홈페이지 제작사)', once:'modoo', build: modooContent });
+SEED.push({ theme:'luxe', title:'08 모두의마케팅 (치과 홈페이지 제작사)', once:'modoo', ver:2, note:'d2dental 방식 디자인, 제작 사례 12개, 홈페이지 개선 전후 비교 배너', build: modooContent });

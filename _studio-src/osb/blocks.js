@@ -400,7 +400,7 @@ body.nav-open .hd nav .mi.has-sub>.mi-a:after{display:none}}`;
 COMMON_BLOCKS.c_treat = { label:'진료 과목 상세', desc:'사진·설명·특징 목록으로 한 가지 진료를 자세히 소개 (진료과목 소메뉴 연결용)',
   fields:[F.menu(''), F.img('img','사진'), F.text('lab','작은 제목'), F.text('t','진료 이름'), F.area('d','설명',{rows:4}), F.area('pts','특징 (한 줄에 하나씩)',{rows:4}), F.text('btn','버튼 글자'), F.text('side','사진 위치 (left / right)')],
   defaults: () => ({ menu:'', img:'asset:implant', lab:'TREATMENT', t:'임플란트', d:'정밀한 3D 진단과 네비게이션 가이드로\n안전하고 오래 쓰는 임플란트를 식립합니다.', pts:'3D CT 정밀 진단\n가이드 수술로 최소 절개\n분야별 전문의 협진\n체계적인 사후관리', btn:'상담 예약하기', side:'left' }),
-  render: (R, d, S) => `<section class="cb cb-treat${d.side === 'right' ? ' rt' : ''}"><div class="wrap"><div class="ph">${R.i('img','',String(R.raw('t')||'').replace(/\s+/g,' '))}</div><div class="tx"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p>${R.t('d')}</p><ul>${String(d.pts || '').split('\n').filter(x => x.trim()).map(x => `<li>${esc(x)}</li>`).join('')}</ul><a href="tel:${S.v('phone')}">${R.t('btn')}</a></div></div></section>` };
+  render: (R, d, S, ctx) => `<section class="cb cb-treat${d.side === 'right' ? ' rt' : ''}"><div class="wrap"><div class="ph">${R.i('img','',String(R.raw('t')||'').replace(/\s+/g,' '))}</div><div class="tx"><small>${R.t('lab')}</small><h2>${R.t('t')}</h2><p>${R.t('d')}</p><ul>${String(d.pts || '').split('\n').filter(x => x.trim()).map(x => `<li>${esc(x)}</li>`).join('')}</ul><a href="${d.href && ctx ? ctx.link(d.href) : 'tel:'+S.v('phone')}">${R.t('btn')}</a></div></div></section>` };
 const TREAT_CSS = `
 .cb-treat .wrap{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center}.cb-treat.rt .ph{order:2}
 .cb-treat .ph img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--r)}
