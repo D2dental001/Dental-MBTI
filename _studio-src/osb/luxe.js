@@ -211,10 +211,10 @@ BLOCKDEFS.luxe = {
 <div class="rt"><a class="tl" href="tel:${S.v('phone')}"><small>TEL</small>${S.t('phone')}</a><a class="bk" href="${S.v('bal_book')||ctx.go('sms')}">${S.t('bal_cta')}</a></div><button class="nav-tg" aria-label="메뉴">☰</button></div></header>
 <aside class="qbar"><span class="qh">Quick</span>
 <a class="q" href="tel:${S.v('phone')}" data-tip="${S.v('phone')}">${ic('phone')}전화상담</a>
-<a class="q kk" href="${S.v('kakao')||'#'}" target="_blank" rel="noopener">${LX_KAKAO}카카오톡</a>
-<a class="q nv" href="${S.v('bal_book')||'#'}" target="_blank" rel="noopener">${LX_NAVER}네이버<br>예약</a>
-<a class="q" href="${ctx.link('p:pg-location')}">${ic('pin')}오시는길</a>
-<a class="q" href="${S.v('bal_blog')||'#'}" target="_blank" rel="noopener">${ic('chat')}블로그</a>
+${S.v('qbarHideEmpty') && !S.v('kakao') ? '' : `<a class="q kk" href="${S.v('kakao')||'#'}" target="_blank" rel="noopener">${LX_KAKAO}카카오톡</a>`}
+${S.v('qbarHideEmpty') && !S.v('bal_book') ? '' : `<a class="q nv" href="${S.v('bal_book')||'#'}" target="_blank" rel="noopener">${LX_NAVER}네이버<br>예약</a>`}
+<a class="q" href="${ctx.link(S.v('qLoc')||'p:pg-location')}">${ic('pin')}${S.v('qLocLabel')||'오시는길'}</a>
+${S.v('qbarHideEmpty') && !S.v('bal_blog') ? '' : `<a class="q" href="${S.v('bal_blog')||'#'}" target="_blank" rel="noopener">${ic('chat')}블로그</a>`}
 <a class="q" href="${ctx.go('sms')}">${ic('cal')}빠른상담</a>
 <a class="top" href="#top">TOP</a></aside>
 <main id="top">${body}</main>
@@ -222,9 +222,9 @@ BLOCKDEFS.luxe = {
 <div class="lbar"><button type="button" class="x" onclick="document.body.classList.toggle('lbar-off')">빠른상담</button>
 <form class="cform" action="https://formsubmit.co/${esc(ctx.site.email)}" method="POST" data-mail="${esc(ctx.site.email)}"><input type="hidden" name="_subject" value="[${esc(ctx.site.name)}] 빠른 상담 신청"><input type="hidden" name="_captcha" value="false">
 <span class="ttl">빠른 상담 신청<small>Quick Consultation</small></span><input name="이름" placeholder="이름" required><input name="연락처" placeholder="연락처" required>
-<select name="상담분야" class="dd"><option>상담 분야 선택</option><option>라미네이트</option><option>치아미백</option><option>잇몸 · 심미</option><option>신경치료 · 자연치아</option><option>턱관절 · 보톡스</option><option>기타</option></select>
+<select name="상담분야" class="dd"><option>상담 분야 선택</option>${(S.v('formTopics')||'라미네이트,치아미백,잇몸 · 심미,신경치료 · 자연치아,턱관절 · 보톡스,기타').split(',').map(x=>`<option>${esc(x.trim())}</option>`).join('')}</select>
 <label><input type="checkbox" required> 개인정보 수집 동의 <a href="#privacy" class="pv-open">보기</a></label><button type="submit">상담 신청</button></form></div>
-<nav class="mb4"><a href="tel:${S.v('phone')}">${ic('phone')}전화하기</a><a class="kk" href="${S.v('kakao')||'#'}">${LX_KAKAO}카카오톡 상담</a><a class="nv" href="${S.v('bal_book')||'#'}">${LX_NAVER}네이버 예약</a><a href="${ctx.link('p:pg-location')}">${ic('pin')}오시는 길</a></nav>`
+<nav class="mb4"><a href="tel:${S.v('phone')}">${ic('phone')}전화하기</a>${S.v('qbarHideEmpty') && !S.v('kakao') ? `<a href="${ctx.go('sms')}">${ic('chat')}빠른 상담</a>` : `<a class="kk" href="${S.v('kakao')||'#'}">${LX_KAKAO}카카오톡 상담</a>`}${S.v('qbarHideEmpty') && !S.v('bal_book') ? `<a href="${ctx.link(S.v('mbAlt')||'p:pg-location')}">${ic('cal')}${S.v('mbAltLabel')||'상담 예약'}</a>` : `<a class="nv" href="${S.v('bal_book')||'#'}">${LX_NAVER}네이버 예약</a>`}<a href="${ctx.link(S.v('qLoc')||'p:pg-location')}">${ic('pin')}${S.v('qLoc') ? (S.v('qLocLabel')||'오시는 길') : '오시는 길'}</a></nav>`
 };
 Object.assign(BLOCKDEFS.luxe.blocks, COMMON_BLOCKS);
 
@@ -312,3 +312,11 @@ Object.values(BLOCKDEFS).forEach(T => { T.blocks.c_consult = COMMON_BLOCKS.c_con
 T_LUXE.css += '.nw{white-space:nowrap}';
 T_LUXE.css += '@media(max-width:900px){.cb-sub img[src*="heroKids"]{object-position:66% 50%}}';
 T_LUXE.css += '@media(max-width:900px){.cb-sub img[src*="heroGum2"]{object-position:64% 50%}}';
+
+/* 사이트별 색 톤 (예: 08 모두의마케팅 = navy). 기본은 원래 에스프레소 · 골드 */
+const LUXE_TONES = { navy: [
+  ['#211b18','#121c30'],['rgba(33,27,24,','rgba(18,28,48,'],['#1d1815','#0f1829'],['#2b2421','#1d2a42'],['#2e2622','#1a2740'],['#3a2f29','#243553'],['#231b17','#111a2c'],['rgba(20,16,14,','rgba(10,16,28,'],
+  ['#c9a876','#4cc2b2'],['#b89565','#2a9e90'],['#d8c19a','#8fdbd0'],['#e3c995','#9fe3d9'],['#b8975a','#2a9e90'],['rgba(216,193,154,','rgba(127,214,201,'],['rgba(201,168,118,','rgba(76,194,178,'],
+  ['#faf7f2','#f6f8fb'],['#fbf6ee','#f4f7fb'],['#f3ece2','#eaf0f6'],['#efe9df','#e6edf4'],['#f4eee5','#edf2f7'],['#e9e0d3','#dde5ee'],['#e5dccd','#d9e2ec'],['#e7e0d4','#dfe6ee'],['#efe6d8','#e3eaf2'],['#e8e1d6','#e0e7ef'],['#fffdf9','#fdfeff'],['#f3efe8','#eef2f7'],['#e9e1d3','#dfe6ee'],['#efe6d6','#e3eaf2'],['#cfc8bb','#c3cdd9']
+] };
+function toneCss(site, css){ const t = site && LUXE_TONES[site.luxeTone]; if (!t) return css; let o = css; t.forEach(([a,b]) => { o = o.split(a).join(b); o = o.split(a.toUpperCase()).join(b); }); return o; }

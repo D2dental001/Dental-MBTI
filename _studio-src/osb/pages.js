@@ -19,7 +19,7 @@ const PAGE_BLOCK_CSS = `
 .cb-pts .it{border:1px solid var(--line);border-radius:calc(var(--r) + 8px);padding:34px 30px;background:rgba(127,127,127,.04)}
 .cb-pts .ic{width:46px;height:46px;padding:11px;border-radius:14px;background:var(--pc);color:#fff;margin-bottom:20px}
 .cb-pts b{display:block;font-size:19px;margin-bottom:8px}.cb-pts .it p{opacity:.72;font-size:15px;line-height:1.8}
-.cb-steps ol{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;counter-reset:st}
+.cb-steps ol{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;counter-reset:st}@media(min-width:901px){.cb-steps ol:has(>li:nth-child(6):last-child){grid-template-columns:repeat(3,1fr)}}
 .cb-steps li{counter-increment:st;position:relative;padding:30px 24px 26px;border-top:3px solid var(--pc);background:rgba(127,127,127,.05);border-radius:0 0 var(--r) var(--r)}
 .cb-steps li:before{content:'STEP 0' counter(st);display:block;font-size:12px;font-weight:800;letter-spacing:.15em;color:var(--pc);margin-bottom:10px}
 .cb-steps b{display:block;font-size:18px;margin-bottom:6px}.cb-steps li p{opacity:.72;font-size:14px;line-height:1.8}
@@ -376,7 +376,7 @@ ${headExtra}
 <meta name="theme-color" content="${esc(site.color)}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 ${th.fonts || ''}
-<style>:root{--pc:${esc(site.color)};--pc2:${esc(site.color2 || site.color)}}${COMMON_CSS}${th.css}${COMMON_BLOCK_CSS}${NAV_CSS}${TREAT_CSS}${PAGE_BLOCK_CSS}.logo-img{display:block;width:auto;max-width:min(300px,52vw);object-fit:contain}.logo:has(.logo-img){gap:0}.blk{scroll-margin-top:72px}.t-d2 .blk{scroll-margin-top:0}.blk.is-hidden{display:none}</style>
+<style>${toneCss(site, `:root{--pc:${esc(site.color)};--pc2:${esc(site.color2 || site.color)}}${COMMON_CSS}${th.css}${COMMON_BLOCK_CSS}${NAV_CSS}${TREAT_CSS}${PAGE_BLOCK_CSS}.logo-img{display:block;width:auto;max-width:min(300px,52vw);object-fit:contain}.logo:has(.logo-img){gap:0}.blk{scroll-margin-top:72px}.t-d2 .blk{scroll-margin-top:0}.blk.is-hidden{display:none}`)}</style>
 </head><body class="t-${theme}${sub ? ' sub' : ''}">
 ${html}
 ${privacyHTML(site)}
@@ -391,8 +391,10 @@ function seoJsonLd(content, page, o){
   const site = content.site, base = o.base, home = base ? base + '/' : '';
   const id = k => base ? base + '/#' + k : undefined;
   const list = v => String(v || '').split(/[,\n]/).map(x => x.trim()).filter(Boolean);
-  const biz = { '@type':'Dentist', '@id':id('dentist'), name:site.name, alternateName:list(site.altNames), url:home || undefined, telephone:site.phone || undefined,
-    image:o.og || undefined, description:site.metaDesc || undefined, medicalSpecialty:'Dentistry', isAcceptingNewPatients:true };
+  const isClinic = !site.ldType || site.ldType === 'Dentist';
+  const biz = { '@type':site.ldType || 'Dentist', '@id':id('dentist'), name:site.name, alternateName:list(site.altNames), url:home || undefined, telephone:site.phone || undefined,
+    image:o.og || undefined, description:site.metaDesc || undefined };
+  if (isClinic) Object.assign(biz, { medicalSpecialty:'Dentistry', isAcceptingNewPatients:true });
   const a = site.ldAddr || null;
   biz.address = a ? { '@type':'PostalAddress', addressCountry:'KR', ...a } : (site.address ? { '@type':'PostalAddress', addressCountry:'KR', streetAddress:site.address } : undefined);
   if (site.address) biz.hasMap = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(site.address);
@@ -410,7 +412,7 @@ function seoJsonLd(content, page, o){
   const faqs = []; vis.filter(b => b.type === 'c_faq' || b.type === 'c_consult').forEach(b => (b.data.items || []).forEach(it => { const q = seoPlain(it.q), an = seoPlain(it.a); if (q && an) faqs.push({ '@type':'Question', name:q, acceptedAnswer:{ '@type':'Answer', text:an } }); }));
   if (faqs.length) g.push({ '@type':'FAQPage', '@id':o.pageUrl ? o.pageUrl + '#faq' : undefined, mainEntity:faqs });
   if (page.id !== 'home' && vis.some(b => b.type === 'c_steps')) g.push({ '@type':'Service', name:page.title, serviceType:page.title, description:o.desc,
-    provider: base ? { '@id':id('dentist') } : { '@type':'Dentist', name:site.name }, areaServed: areas.length ? areas.map(n => ({ '@type':'Place', name:n })) : undefined, url:o.pageUrl || undefined });
+    provider: base ? { '@id':id('dentist') } : { '@type':site.ldType || 'Dentist', name:site.name }, areaServed: areas.length ? areas.map(n => ({ '@type':'Place', name:n })) : undefined, url:o.pageUrl || undefined });
   const json = JSON.stringify({ '@context':'https://schema.org', '@graph':g }, (k, v) => (v === undefined || (Array.isArray(v) && !v.length)) ? undefined : v);
   return `<script type="application/ld+json">${json.replace(/</g, '\\u003c')}<\/script>`;
 }

@@ -91,3 +91,10 @@ Skilldb(find-skills), claude-code-setup, frontend-design, Superpowers, playwrigh
 - 지어낸 예시 후기(김**님 등)는 의료광고·허위후기 문제로 제거. `c_consult` 블록(luxe.js)으로 '이런 고민으로 찾아오십니다' 12개(무삭제 라미네이트 7) 교체. 사이트에 이미 있는 사실만 사용.
 - 저장된 사이트는 app2.js 마이그레이션(`_con1`)이 예시 후기일 때만 교체. 메뉴명 '상담 이야기', SEO 제목·설명 갱신, FAQPage JSON-LD에도 포함.
 - 공개 화면에서 'e-스타' 같은 하이픈 단어는 `.nw`로 묶어 줄 끝에서 안 끊김.
+
+## 2026-11-26 08 모두의마케팅 (치과 홈페이지 제작사 자체 홈페이지)
+- `osb/modoo.js` (assemble2.py에 추가). SEED once:'modoo'. luxe 디자인 + `site.luxeTone:'navy'`(LUXE_TONES/toneCss, luxe.js) 로 네이비·청록 톤.
+- 사진: `assets/hp-studio/modoo/` — e-스타 실제 화면·디자인 샘플 캡처로 만든 목업(`/home/claude/hpwork/mdimg.py`로 재생성).
+- 사이트 옵션 추가(모두 기본값은 기존과 동일): ldType(구조화 데이터 종류, 기본 Dentist), qbarHideEmpty·qLoc·qLocLabel·mbAlt·mbAltLabel(퀵바/모바일 하단바), formTopics(상담 분야 목록). about 블록 작은 글씨 'D2 DENTAL' → nameEn.
+- c_steps 6개면 PC에서 3열 2줄.
+- 남은 것: 전화·주소·이메일·사업자 정보·대표 사진·로고(사용자 제공 대기). 상호 '모두의마케팅'은 35류 상표 출원(40-2026-0178947, 주식회사 모두의마케팅) 존재 — 사용자에게 안내함.

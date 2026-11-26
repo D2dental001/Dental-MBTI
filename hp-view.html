@@ -1139,7 +1139,7 @@ const PAGE_BLOCK_CSS = `
 .cb-pts .it{border:1px solid var(--line);border-radius:calc(var(--r) + 8px);padding:34px 30px;background:rgba(127,127,127,.04)}
 .cb-pts .ic{width:46px;height:46px;padding:11px;border-radius:14px;background:var(--pc);color:#fff;margin-bottom:20px}
 .cb-pts b{display:block;font-size:19px;margin-bottom:8px}.cb-pts .it p{opacity:.72;font-size:15px;line-height:1.8}
-.cb-steps ol{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;counter-reset:st}
+.cb-steps ol{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;counter-reset:st}@media(min-width:901px){.cb-steps ol:has(>li:nth-child(6):last-child){grid-template-columns:repeat(3,1fr)}}
 .cb-steps li{counter-increment:st;position:relative;padding:30px 24px 26px;border-top:3px solid var(--pc);background:rgba(127,127,127,.05);border-radius:0 0 var(--r) var(--r)}
 .cb-steps li:before{content:'STEP 0' counter(st);display:block;font-size:12px;font-weight:800;letter-spacing:.15em;color:var(--pc);margin-bottom:10px}
 .cb-steps b{display:block;font-size:18px;margin-bottom:6px}.cb-steps li p{opacity:.72;font-size:14px;line-height:1.8}
@@ -1496,7 +1496,7 @@ ${headExtra}
 <meta name="theme-color" content="${esc(site.color)}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 ${th.fonts || ''}
-<style>:root{--pc:${esc(site.color)};--pc2:${esc(site.color2 || site.color)}}${COMMON_CSS}${th.css}${COMMON_BLOCK_CSS}${NAV_CSS}${TREAT_CSS}${PAGE_BLOCK_CSS}.logo-img{display:block;width:auto;max-width:min(300px,52vw);object-fit:contain}.logo:has(.logo-img){gap:0}.blk{scroll-margin-top:72px}.t-d2 .blk{scroll-margin-top:0}.blk.is-hidden{display:none}</style>
+<style>${toneCss(site, `:root{--pc:${esc(site.color)};--pc2:${esc(site.color2 || site.color)}}${COMMON_CSS}${th.css}${COMMON_BLOCK_CSS}${NAV_CSS}${TREAT_CSS}${PAGE_BLOCK_CSS}.logo-img{display:block;width:auto;max-width:min(300px,52vw);object-fit:contain}.logo:has(.logo-img){gap:0}.blk{scroll-margin-top:72px}.t-d2 .blk{scroll-margin-top:0}.blk.is-hidden{display:none}`)}</style>
 </head><body class="t-${theme}${sub ? ' sub' : ''}">
 ${html}
 ${privacyHTML(site)}
@@ -1511,8 +1511,10 @@ function seoJsonLd(content, page, o){
   const site = content.site, base = o.base, home = base ? base + '/' : '';
   const id = k => base ? base + '/#' + k : undefined;
   const list = v => String(v || '').split(/[,\n]/).map(x => x.trim()).filter(Boolean);
-  const biz = { '@type':'Dentist', '@id':id('dentist'), name:site.name, alternateName:list(site.altNames), url:home || undefined, telephone:site.phone || undefined,
-    image:o.og || undefined, description:site.metaDesc || undefined, medicalSpecialty:'Dentistry', isAcceptingNewPatients:true };
+  const isClinic = !site.ldType || site.ldType === 'Dentist';
+  const biz = { '@type':site.ldType || 'Dentist', '@id':id('dentist'), name:site.name, alternateName:list(site.altNames), url:home || undefined, telephone:site.phone || undefined,
+    image:o.og || undefined, description:site.metaDesc || undefined };
+  if (isClinic) Object.assign(biz, { medicalSpecialty:'Dentistry', isAcceptingNewPatients:true });
   const a = site.ldAddr || null;
   biz.address = a ? { '@type':'PostalAddress', addressCountry:'KR', ...a } : (site.address ? { '@type':'PostalAddress', addressCountry:'KR', streetAddress:site.address } : undefined);
   if (site.address) biz.hasMap = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(site.address);
@@ -1530,7 +1532,7 @@ function seoJsonLd(content, page, o){
   const faqs = []; vis.filter(b => b.type === 'c_faq' || b.type === 'c_consult').forEach(b => (b.data.items || []).forEach(it => { const q = seoPlain(it.q), an = seoPlain(it.a); if (q && an) faqs.push({ '@type':'Question', name:q, acceptedAnswer:{ '@type':'Answer', text:an } }); }));
   if (faqs.length) g.push({ '@type':'FAQPage', '@id':o.pageUrl ? o.pageUrl + '#faq' : undefined, mainEntity:faqs });
   if (page.id !== 'home' && vis.some(b => b.type === 'c_steps')) g.push({ '@type':'Service', name:page.title, serviceType:page.title, description:o.desc,
-    provider: base ? { '@id':id('dentist') } : { '@type':'Dentist', name:site.name }, areaServed: areas.length ? areas.map(n => ({ '@type':'Place', name:n })) : undefined, url:o.pageUrl || undefined });
+    provider: base ? { '@id':id('dentist') } : { '@type':site.ldType || 'Dentist', name:site.name }, areaServed: areas.length ? areas.map(n => ({ '@type':'Place', name:n })) : undefined, url:o.pageUrl || undefined });
   const json = JSON.stringify({ '@context':'https://schema.org', '@graph':g }, (k, v) => (v === undefined || (Array.isArray(v) && !v.length)) ? undefined : v);
   return `<script type="application/ld+json">${json.replace(/</g, '\\u003c')}<\/script>`;
 }
@@ -1728,7 +1730,7 @@ BLOCKDEFS.balance = {
     about: { label:'ABOUT 배너', desc:'와이드 사진 위 흰 박스 소개',
       fields:[F.text('en','작은 제목'), F.text('t1','제목 1줄'), F.text('t2','제목 2줄 (굵게)'), F.area('d','설명',{rows:3}), F.text('btn','버튼 글자'), F.link('href'), F.img('img','사진')],
       defaults: () => ({ en:'ABOUT D2', t1:'가장 아름다운 미소는', t2:'건강한 밸런스에서 시작됩니다', d:'치아 하나가 아닌 턱관절과 교합, 얼굴의 균형까지 함께 봅니다.\n분야별 전문의가 한 자리에서 함께 진단하고 치료합니다.', btn:'디투치과 소개', href:'p:pg-greeting', img:'asset:lounge' }),
-      render:(R,d,S,ctx)=>`<section class="sec ba2" style="padding-bottom:0"><div class="wrap"><div class="btit rv"><h2 style="font-size:24px;letter-spacing:.06em">${R.t('en')}</h2></div><div class="box">${R.i('img')}<div class="in rv"><small>D2 DENTAL</small><h3>${R.t('t1')}<br><b>${R.t('t2')}</b></h3><p>${R.t('d')}</p><a class="btn" href="${ctx.link(d.href)}">${R.t('btn')}</a></div></div></div></section>` },
+      render:(R,d,S,ctx)=>`<section class="sec ba2" style="padding-bottom:0"><div class="wrap"><div class="btit rv"><h2 style="font-size:24px;letter-spacing:.06em">${R.t('en')}</h2></div><div class="box">${R.i('img')}<div class="in rv"><small>${S.t('nameEn')||'D2 DENTAL'}</small><h3>${R.t('t1')}<br><b>${R.t('t2')}</b></h3><p>${R.t('d')}</p><a class="btn" href="${ctx.link(d.href)}">${R.t('btn')}</a></div></div></div></section>` },
     info: { label:'온라인상담 · 오시는길 · 진료시간', desc:'3단 안내 (연락처·시간·주소는 [기본 정보]에서 수정)',
       fields:[F.list('qs','온라인 상담 목록 (샘플)','글',4,[F.text('st','상태'),F.text('q','제목'),F.text('dt','날짜')],{max:6}), F.text('nv','초록 버튼 글자'), F.text('kk','노란 버튼 글자')],
       defaults: () => ({ qs:[['답변완료','사랑니 발치하고 싶어요','2026.11.09'],['답변대기','무턱 재교정 치료 문의','2026.11.07'],['답변완료','신경치료 문의 드립니다','2026.11.03'],['답변완료','임플란트 비용 상담','2026.11.01']].map(([st,q,dt])=>({st,q,dt})), nv:'네이버 진료예약 바로가기', kk:'카카오톡 채널 @디투치과' }),
@@ -2092,10 +2094,10 @@ BLOCKDEFS.luxe = {
 <div class="rt"><a class="tl" href="tel:${S.v('phone')}"><small>TEL</small>${S.t('phone')}</a><a class="bk" href="${S.v('bal_book')||ctx.go('sms')}">${S.t('bal_cta')}</a></div><button class="nav-tg" aria-label="메뉴">☰</button></div></header>
 <aside class="qbar"><span class="qh">Quick</span>
 <a class="q" href="tel:${S.v('phone')}" data-tip="${S.v('phone')}">${ic('phone')}전화상담</a>
-<a class="q kk" href="${S.v('kakao')||'#'}" target="_blank" rel="noopener">${LX_KAKAO}카카오톡</a>
-<a class="q nv" href="${S.v('bal_book')||'#'}" target="_blank" rel="noopener">${LX_NAVER}네이버<br>예약</a>
-<a class="q" href="${ctx.link('p:pg-location')}">${ic('pin')}오시는길</a>
-<a class="q" href="${S.v('bal_blog')||'#'}" target="_blank" rel="noopener">${ic('chat')}블로그</a>
+${S.v('qbarHideEmpty') && !S.v('kakao') ? '' : `<a class="q kk" href="${S.v('kakao')||'#'}" target="_blank" rel="noopener">${LX_KAKAO}카카오톡</a>`}
+${S.v('qbarHideEmpty') && !S.v('bal_book') ? '' : `<a class="q nv" href="${S.v('bal_book')||'#'}" target="_blank" rel="noopener">${LX_NAVER}네이버<br>예약</a>`}
+<a class="q" href="${ctx.link(S.v('qLoc')||'p:pg-location')}">${ic('pin')}${S.v('qLocLabel')||'오시는길'}</a>
+${S.v('qbarHideEmpty') && !S.v('bal_blog') ? '' : `<a class="q" href="${S.v('bal_blog')||'#'}" target="_blank" rel="noopener">${ic('chat')}블로그</a>`}
 <a class="q" href="${ctx.go('sms')}">${ic('cal')}빠른상담</a>
 <a class="top" href="#top">TOP</a></aside>
 <main id="top">${body}</main>
@@ -2103,9 +2105,9 @@ BLOCKDEFS.luxe = {
 <div class="lbar"><button type="button" class="x" onclick="document.body.classList.toggle('lbar-off')">빠른상담</button>
 <form class="cform" action="https://formsubmit.co/${esc(ctx.site.email)}" method="POST" data-mail="${esc(ctx.site.email)}"><input type="hidden" name="_subject" value="[${esc(ctx.site.name)}] 빠른 상담 신청"><input type="hidden" name="_captcha" value="false">
 <span class="ttl">빠른 상담 신청<small>Quick Consultation</small></span><input name="이름" placeholder="이름" required><input name="연락처" placeholder="연락처" required>
-<select name="상담분야" class="dd"><option>상담 분야 선택</option><option>라미네이트</option><option>치아미백</option><option>잇몸 · 심미</option><option>신경치료 · 자연치아</option><option>턱관절 · 보톡스</option><option>기타</option></select>
+<select name="상담분야" class="dd"><option>상담 분야 선택</option>${(S.v('formTopics')||'라미네이트,치아미백,잇몸 · 심미,신경치료 · 자연치아,턱관절 · 보톡스,기타').split(',').map(x=>`<option>${esc(x.trim())}</option>`).join('')}</select>
 <label><input type="checkbox" required> 개인정보 수집 동의 <a href="#privacy" class="pv-open">보기</a></label><button type="submit">상담 신청</button></form></div>
-<nav class="mb4"><a href="tel:${S.v('phone')}">${ic('phone')}전화하기</a><a class="kk" href="${S.v('kakao')||'#'}">${LX_KAKAO}카카오톡 상담</a><a class="nv" href="${S.v('bal_book')||'#'}">${LX_NAVER}네이버 예약</a><a href="${ctx.link('p:pg-location')}">${ic('pin')}오시는 길</a></nav>`
+<nav class="mb4"><a href="tel:${S.v('phone')}">${ic('phone')}전화하기</a>${S.v('qbarHideEmpty') && !S.v('kakao') ? `<a href="${ctx.go('sms')}">${ic('chat')}빠른 상담</a>` : `<a class="kk" href="${S.v('kakao')||'#'}">${LX_KAKAO}카카오톡 상담</a>`}${S.v('qbarHideEmpty') && !S.v('bal_book') ? `<a href="${ctx.link(S.v('mbAlt')||'p:pg-location')}">${ic('cal')}${S.v('mbAltLabel')||'상담 예약'}</a>` : `<a class="nv" href="${S.v('bal_book')||'#'}">${LX_NAVER}네이버 예약</a>`}<a href="${ctx.link(S.v('qLoc')||'p:pg-location')}">${ic('pin')}${S.v('qLoc') ? (S.v('qLocLabel')||'오시는 길') : '오시는 길'}</a></nav>`
 };
 Object.assign(BLOCKDEFS.luxe.blocks, COMMON_BLOCKS);
 
@@ -2193,6 +2195,14 @@ Object.values(BLOCKDEFS).forEach(T => { T.blocks.c_consult = COMMON_BLOCKS.c_con
 T_LUXE.css += '.nw{white-space:nowrap}';
 T_LUXE.css += '@media(max-width:900px){.cb-sub img[src*="heroKids"]{object-position:66% 50%}}';
 T_LUXE.css += '@media(max-width:900px){.cb-sub img[src*="heroGum2"]{object-position:64% 50%}}';
+
+/* 사이트별 색 톤 (예: 08 모두의마케팅 = navy). 기본은 원래 에스프레소 · 골드 */
+const LUXE_TONES = { navy: [
+  ['#211b18','#121c30'],['rgba(33,27,24,','rgba(18,28,48,'],['#1d1815','#0f1829'],['#2b2421','#1d2a42'],['#2e2622','#1a2740'],['#3a2f29','#243553'],['#231b17','#111a2c'],['rgba(20,16,14,','rgba(10,16,28,'],
+  ['#c9a876','#4cc2b2'],['#b89565','#2a9e90'],['#d8c19a','#8fdbd0'],['#e3c995','#9fe3d9'],['#b8975a','#2a9e90'],['rgba(216,193,154,','rgba(127,214,201,'],['rgba(201,168,118,','rgba(76,194,178,'],
+  ['#faf7f2','#f6f8fb'],['#fbf6ee','#f4f7fb'],['#f3ece2','#eaf0f6'],['#efe9df','#e6edf4'],['#f4eee5','#edf2f7'],['#e9e0d3','#dde5ee'],['#e5dccd','#d9e2ec'],['#e7e0d4','#dfe6ee'],['#efe6d8','#e3eaf2'],['#e8e1d6','#e0e7ef'],['#fffdf9','#fdfeff'],['#f3efe8','#eef2f7'],['#e9e1d3','#dfe6ee'],['#efe6d6','#e3eaf2'],['#cfc8bb','#c3cdd9']
+] };
+function toneCss(site, css){ const t = site && LUXE_TONES[site.luxeTone]; if (!t) return css; let o = css; t.forEach(([a,b]) => { o = o.split(a).join(b); o = o.split(a.toUpperCase()).join(b); }); return o; }
 
 /* =====================================================================
    7. 신촌 e-스타치과 — 밸런스형 디자인 + 심미(라미네이트·미백) 강조 샘플
@@ -2630,6 +2640,134 @@ const ES_COPY2 = [["멀쩡한 치아,\n깎지 않고 예뻐집니다", "소중�
 const ES_COPY3 = [["부산대학교 치의학과 졸업\n부산대학교 치의학대학원 보존 · 보철학 석사\n치과보존과 인정의\n대한치과보존학회 정회원\n대한치과근관치료학회 정회원\n대한심미치과학회 정회원\nHanmi Dental Society Prosthodontic Study 수료\n하버드 · 오스템 임플란트 코스 수료", "부산대학교 치의학과 졸업\n부산대학교 치의학대학원 보존 · 보철학 석사\n치과보존과 인정의\nHanmi Dental Society Prosthodontic Study 수료\n대한치과보존학회 정회원\n대한치과근관치료학회 정회원\n대한심미치과학회 정회원\n하버드 · 오스템 임플란트 코스 수료"]];
 /* 2026-11-24 오버레이·메릴랜드 사례 표기: e-스타치과 실제 치료 사례 */
 const ES_COPY4 = [["지르코니아 오버레이 제작 사례", "지르코니아 오버레이 치료 사례"], ["협력 기공소 디투덴탈의 지르코니아 오버레이 제작 사례입니다", "신촌 e-스타치과에서 실제 치료한 사례입니다"], ["메릴랜드 브릿지 제작 사례", "메릴랜드 브릿지 치료 사례"], ["협력 기공소 디투덴탈의 지르코니아 메릴랜드 브릿지 제작 사례입니다", "신촌 e-스타치과에서 실제 치료한 사례입니다"]];
+
+/* =====================================================================
+   08 모두의마케팅 — 치과 홈페이지 제작·관리 회사 홈페이지 (luxe 디자인 기반)
+   사진: assets/hp-studio/modoo/ (실제 제작한 e-스타치과·디자인 샘플 화면으로 구성)
+   ===================================================================== */
+const MD = n => 'asset:modoo/' + n;
+function modooContent(){
+  const c = defaultContent('luxe');
+  Object.assign(c.site, {
+    _seed:'modoo', _seedVer:1, name:'모두의마케팅', nameEn:'MODOO MARKETING', color:'#16223a', color2:'#35b5a5',
+    phone:'000-0000-0000', email:'', address:'(주소를 입력하세요)', traffic:'', hours:'평일 09:00 - 18:00\n토·일·공휴일 휴무',
+    kakao:'', youtube:'', biz:'모두의마케팅 | 대표 (이름) | 사업자등록번호 000-00-00000',
+    metaTitle:'모두의마케팅 | 치과 홈페이지 제작·관리 · SEO AEO GEO',
+    metaDesc:'치과 경영이사 10년, 치과기공소 경영이사 5년 경력으로 80여 곳 치과 홈페이지를 제작·관리해 왔습니다. 첫 시안 1주일, 착수금 50%, 오픈 후 1년 무상 수정.',
+    form_btn:'무료 진단 신청', bal_cta:'무료 진단 신청', bal_cta2:'', bal_book:'', bal_blog:'', logo:'', logoLight:'',
+    ldType:'ProfessionalService', luxeTone:'navy', bal_mark:'M', qbarHideEmpty:1, qLoc:'p:pg-contact', qLocLabel:'상담신청', mbAlt:'p:pg-diagnosis', mbAltLabel:'무료 진단', formTopics:'홈페이지 신규 제작,홈페이지 리뉴얼,SEO · AEO · GEO 관리,무료 진단,기타', altNames:'모두의 마케팅, MODOO MARKETING', areaServed:'', siteUrl:''
+  });
+  const home = c.pages[0], by = t => home.blocks.find(b => b.type === t);
+  by('lhero').data.slides = [
+    [MD('hero1'),'DENTAL MARKETING','치과를 운영해 본 사람이','치과 홈페이지를 만듭니다','치과 경영이사 10년, 치과기공소 경영이사 5년. 원장님의 진료 철학을 홈페이지에 그대로 담습니다','무료 진단 신청','pg-diagnosis'],
+    [MD('hero2'),'FAST & CLEAR','첫 시안은 1주일,','수정 확인은 다음 날','착수금 50%만으로 시작하고, 빠르면 1주일 만에 홈페이지를 완성합니다','제작 과정 보기','pg-process'],
+    [MD('hero3'),'SEO · AEO · GEO','네이버·구글은 물론','AI 검색까지 준비합니다','ChatGPT와 AI 검색이 원장님 치과를 정확히 이해하도록 구조부터 설계합니다','검색 관리 보기','pg-seo']
+  ].map(([img,tag,l1,l2,s,btn,p]) => ({ img, img2:'', tag, l1, l2, s, btn, href:'p:'+p }));
+  Object.assign(by('manifesto').data, { en:'Why MODOO', t1:'치과를 운영해 본 사람이', t2:'치과 홈페이지를 만듭니다',
+    d:'원장님이 무엇을 고민하는지, 환자가 무엇을 보고 치과를 고르는지 치과 경영 현장에서 직접 겪었습니다. 그 경험으로 80여 곳 치과의 홈페이지를 제작하고 관리해 왔습니다.',
+    st:[['80','여 곳','치과 홈페이지 제작 · 관리'],['15','년','치과 · 치과기공소 경영 경력'],['1','주','첫 시안 확인']].map(([n,u,l])=>({n,u,l})) });
+  Object.assign(by('tiles').data, { en:'Service', t:'모두의마케팅이 하는 일', items:[
+    ['tWeb','치과 경영 경험으로 설계하는','치과 ','홈페이지 제작','진료 과목마다 개별 페이지로 구성합니다','web'],
+    ['tSeo','검색과 AI 답변까지','SEO · ','AEO · GEO','네이버 · 구글 · AI 검색에 맞춘 구조','seo'],
+    ['tCare','오픈 후에도 부담 없이','1년 ','무상 관리','문구 · 사진 수정은 1년간 무료','care'],
+    ['tProc','착수금 50%로 시작','제작 ','과정 · 계약','첫 시안 1주, 수정 확인은 다음 날','process'],
+    ['tCases','디자인 샘플과 실제 제작','제작 ','사례','완성된 홈페이지를 직접 둘러보세요','portfolio'],
+    ['tDiag','우리 치과 홈페이지는 괜찮을까?','무료 ','진단','검색 · AI 노출 상태를 점검해 드립니다','diagnosis']
+  ].map(([img,cap,t1,hl,d,p]) => ({ img:MD(img), tone:'', cap, t1, hl, d, href:'p:pg-'+p })) });
+  Object.assign(by('about').data, { en:'ABOUT MODOO', t1:'첫 미팅에서', t2:'전체 그림을 먼저 그립니다',
+    d:'원장님의 진료 철학과 강조하고 싶은 진료, 보유한 사진과 자료를 첫 미팅에서 꼼꼼히 확인합니다.\n그 자리에서 전체 구성을 잡고 포트폴리오를 보여드린 뒤 계약을 진행합니다.', btn:'회사 소개', href:'p:pg-about', img:MD('about') });
+  Object.assign(by('sms').data, { t1:'무료 진단', t2:'신청하기' });
+  ['sig','ba','dfeat','info'].forEach(t => { const b = by(t); if (b) b.hidden = true; });
+  const at = home.blocks.indexOf(by('tiles')) + 1;
+  home.blocks.splice(at, 0, blk('c_steps', { lab:'PROCESS', t:'계약부터 오픈까지', items:MD_STEPS.slice(0,4) }));
+  const si = home.blocks.indexOf(by('sms'));
+  home.blocks.splice(si < 0 ? home.blocks.length : si, 0, blk('c_consult', { lab:'Q&A', t:'원장님들이 가장 많이 물어보십니다', s:'상담에서 자주 듣는 질문과 답변입니다', items:MD_QA.map(([tg,q,a,p]) => ({ tg, q, a, href:'p:pg-'+p })) }));
+  home.seoTitle = '모두의마케팅 | 치과 홈페이지 제작·관리 · SEO AEO GEO';
+  home.seoDesc = c.site.metaDesc;
+
+  const page = (slug, title, group, en, d, heroImg, blocks, seoTitle, seoDesc) => ({ id:'pg-'+slug, slug, title, seoTitle, seoDesc,
+    blocks:[blk('c_subhero', { img:MD(heroImg), en, t:title, d, crumb:`HOME  >  ${group}  >  ${title}` }), ...blocks, blk('c_cta', { t:'우리 치과 홈페이지, 무료로 진단받아 보세요', s:'검색 · AI 노출 상태와 개선할 점을 정리해 드립니다', btn:'무료 진단 신청' })] });
+  const pts = (lab, t, items, s) => blk('c_points', { lab, t, s:s||'', items:items.map(([icon,t,d]) => ({ icon, t, d })) });
+  const faq = (t, items) => blk('c_faq', { lab:'FAQ', t, items:items.map(([q,a]) => ({ q, a })) });
+  const treat = (img, lab, t, d, p, side) => blk('c_treat', { img:MD(img), lab, t, d, pts:p, btn:'무료 진단 신청', side:side||'left' });
+
+  c.pages = [home,
+    page('about','회사 소개','회사 소개','ABOUT US','치과를 운영해 본 사람이 만드는 치과 홈페이지','hero1', [
+      blk('c_text', { t:'치과 경영의 언어로 홈페이지를 만듭니다', d:'모두의마케팅은 치과 경영이사로 10년, 치과기공소 경영이사로 5년을 일한 경험에서 시작했습니다.\n진료실과 데스크, 기공소에서 오가는 이야기를 직접 들어 왔기에 원장님이 강조하고 싶은 진료와 환자가 궁금해하는 내용을 정확히 압니다.\n지금까지 80여 곳 치과의 홈페이지를 처음부터 끝까지 총괄해 제작하고 관리해 왔습니다.' }),
+      pts('STRENGTH','모두의마케팅의 강점', [['shield','치과 경영 15년','치과 경영이사 10년, 치과기공소 경영이사 5년의 현장 경험으로 기획합니다.'],['sparkle','80여 곳 제작 · 관리','80여 곳 치과의 홈페이지를 제작하고 관리해 왔습니다.'],['clock','빠른 진행','첫 시안은 1주일 후, 수정 후 확인은 다음 날 가능합니다.']])
+    ], '회사 소개 | 모두의마케팅', '치과 경영이사 10년, 치과기공소 경영이사 5년 경력. 80여 곳 치과 홈페이지를 제작·관리해 온 모두의마케팅을 소개합니다.'),
+    page('web','홈페이지 제작','서비스','HOMEPAGE','진료 과목마다 개별 페이지로 구성하는 치과 맞춤 홈페이지','hero1', [
+      treat('tWeb','HOMEPAGE','치과에 맞춘 홈페이지 구성','첫 미팅에서 원장님의 니즈와 보유 자료를 파악하고,\n진료 과목별 페이지와 메인 화면을 함께 설계합니다.','진료 과목별 개별 페이지 구성\n치료 전후 사진 비교 슬라이더\n모바일 하단 바로가기 · 빠른 상담 신청\n오시는 길 약도 일러스트\nPC · 태블릿 · 모바일 화면 최적화'),
+      pts('POINT','치과 홈페이지에 꼭 필요한 것만', [['sparkle','원장님 진료 철학 중심','강조하고 싶은 진료를 메인과 메뉴 구성의 중심에 둡니다.'],['shield','의료광고 표현 점검','가격 · 이벤트, 최상급 표현, 치료 후기처럼 문제가 되기 쉬운 표현을 제작 단계에서 함께 점검합니다.'],['clock','원내 사진 활용','인테리어와 진료실 사진을 확인하고 필요한 촬영 범위를 함께 정합니다.']])
+    ], '치과 홈페이지 제작 | 모두의마케팅', '진료 과목별 개별 페이지, 전후 사진 비교, 모바일 최적화까지. 치과 경영 경험으로 설계하는 치과 맞춤 홈페이지 제작.'),
+    page('seo','SEO · AEO · GEO 관리','서비스','SEARCH','네이버 · 구글 검색부터 AI 답변까지 준비하는 홈페이지','hero3', [
+      treat('tSeo','SEO · AEO · GEO','검색엔진과 AI가 이해하는 홈페이지','보기 좋은 화면만큼 중요한 것은 검색엔진과 AI가 읽는 구조입니다.\n페이지마다 검색 제목과 설명, 구조화 데이터를 갖추어 오픈합니다.','페이지별 검색 제목 · 설명 작성\n사이트맵 · robots.txt · llms.txt\n치과 정보 구조화 데이터 (주소 · 진료시간 · 의료진)\n네이버 서치어드바이저 · 구글 서치콘솔 등록','right'),
+      pts('3 STEPS','세 가지 검색을 함께 준비합니다', [['sparkle','SEO 검색엔진 최적화','네이버 · 구글 검색 결과에 치과가 정확히 표시되도록 페이지마다 제목과 설명을 정리합니다.'],['shield','AEO 답변 최적화','환자가 자주 묻는 질문과 답을 구조화해 검색 답변 영역에 인용되기 쉽게 만듭니다.'],['clock','GEO AI 검색 최적화','ChatGPT 등 AI 검색이 치과 정보를 정확히 읽도록 구조화 데이터와 llms.txt를 갖추고, 외부 플랫폼 정보와 일치하는지 점검합니다.']]),
+      faq('검색 관리, 이것이 궁금합니다', [['검색 1위를 보장하나요?','검색 순위와 AI 답변 노출은 검색엔진이 결정하므로 누구도 보장할 수 없습니다. 모두의마케팅은 노출에 필요한 구조를 빠짐없이 갖추고, 점검 결과를 투명하게 공유합니다.'],['AEO, GEO는 무엇인가요?','AEO는 검색 결과의 답변 영역에, GEO는 ChatGPT 같은 AI 검색의 답변에 치과 정보가 정확히 인용되도록 준비하는 작업입니다.'],['기존 홈페이지 주소를 그대로 쓸 수 있나요?','네. 기존 도메인을 그대로 연결하고, 예전 주소로 들어온 방문자도 새 페이지로 이어지도록 설정합니다.']])
+    ], 'SEO · AEO · GEO 관리 | 모두의마케팅', '네이버·구글 검색과 ChatGPT 등 AI 검색까지. 페이지별 검색 정보, 구조화 데이터, llms.txt로 치과 홈페이지 노출 구조를 갖춥니다.'),
+    page('care','1년 무상 관리','서비스','CARE','오픈 후 1년 동안 문구 · 사진 수정은 무료입니다','hero2', [
+      treat('tCare','1 YEAR CARE','오픈 후 1년, 수정 비용 없이','진료시간이 바뀌거나 사진을 새로 찍었을 때\n연락만 주시면 바로 반영합니다.','문구 · 사진 수정 무료 (1년)\n진료시간 · 공지 변경 반영\n검색 노출 점검\n1년 이후에는 작업량에 따라 사전 안내 후 진행'),
+      pts('SCOPE','무상 관리 범위', [['sparkle','무료로 해 드리는 일','문구 · 사진 교체, 진료시간과 연락처 변경, 기존 페이지 내용 보완'],['shield','별도로 안내드리는 일','새 페이지 추가와 디자인 전면 변경은 무상 범위에서 제외되며, 작업 전에 비용을 먼저 안내드립니다.'],['clock','매년 유지 비용','홈페이지 연장 비용은 매년 5만원이며 도메인 연장이 포함됩니다.']])
+    ], '1년 무상 관리 | 모두의마케팅', '오픈 후 1년간 문구·사진 수정 무료. 새 페이지 추가와 디자인 전면 변경만 별도. 홈페이지 연장 비용은 도메인 포함 매년 5만원.'),
+    page('process','제작 과정 · 계약','제작 안내','PROCESS','첫 미팅부터 오픈까지, 빠르면 1주일','hero2', [
+      blk('c_steps', { lab:'PROCESS', t:'제작 과정', items:MD_STEPS }),
+      pts('CONTRACT','계약과 비용', [['shield','착수금 50%','계약 시 총 금액의 50%만 착수금으로 받고 제작을 시작합니다.'],['clock','첫 시안 1주일','계약 후 1주일이면 첫 시안을 확인하실 수 있습니다. 수정 후 확인은 다음 날 가능합니다 (수정 내용에 따라 달라질 수 있습니다).'],['sparkle','연 5만원 유지','홈페이지 연장 비용은 매년 5만원이며 도메인 연장이 포함됩니다.']])
+    ], '제작 과정 · 계약 | 모두의마케팅', '첫 미팅에서 니즈와 자료를 파악하고 포트폴리오로 구성한 뒤 계약. 착수금 50%, 첫 시안 1주일, 수정 확인 익일, 빠르면 1주일 완성.'),
+    page('portfolio','제작 사례','제작 안내','PORTFOLIO','실제 제작한 치과 홈페이지와 디자인 샘플','hero1', [
+      blk('c_gallery', { lab:'PORTFOLIO', t:'제작 사례 둘러보기', items:[['pf07','신촌 e-스타치과 (실제 제작)'],['pf06','디자인 샘플 · 분과협진 종합형'],['pf02','디자인 샘플 · 프리미엄 심미형'],['pf03','디자인 샘플 · 풀페이지 브랜드형'],['pf01','디자인 샘플 · 대형병원형'],['pf04','디자인 샘플 · 진료과 중심형'],['pf05','디자인 샘플 · 동네 친근형']].map(([i,cap]) => ({ img:MD(i), c:cap })) })
+    ], '제작 사례 | 모두의마케팅', '모두의마케팅이 제작한 치과 홈페이지와 디자인 샘플을 소개합니다.'),
+    page('diagnosis','무료 진단','제작 안내','FREE DIAGNOSIS','우리 치과 홈페이지, 지금 상태를 무료로 점검해 드립니다','hero3', [
+      blk('c_text', { t:'이런 점을 점검해 드립니다', d:'검색엔진과 AI가 읽는 원본 화면, 페이지별 검색 정보, 모바일 화면, 상담 신청 동선까지\n실제 홈페이지를 기준으로 확인하고 개선할 점을 정리해 드립니다.' }),
+      blk('c_consult', { lab:'SELF CHECK', t:'먼저 스스로 확인해 보세요', s:'두 개 이상 해당된다면 점검이 필요합니다', items:MD_CHECK.map(([tg,q,a]) => ({ tg, q, a, href:'#top' })) })
+    ], '치과 홈페이지 무료 진단 | 모두의마케팅', '검색엔진·AI 검색 노출, 페이지별 검색 정보, 모바일 화면, 상담 동선까지 치과 홈페이지를 무료로 진단해 드립니다.'),
+    page('faq','자주 묻는 질문','제작 안내','FAQ','홈페이지 제작 전에 많이 물어보시는 내용','hero2', [
+      faq('자주 묻는 질문', MD_FAQ)
+    ], '자주 묻는 질문 | 모두의마케팅', '치과 홈페이지 제작 기간, 비용, 착수금, 무상 관리 범위, 도메인 등 자주 묻는 질문을 모았습니다.'),
+    { id:'pg-contact', slug:'contact', title:'상담 신청 · 오시는 길', seoTitle:'상담 신청 · 오시는 길 | 모두의마케팅', seoDesc:'모두의마케팅 상담 신청과 연락처, 오시는 길 안내입니다.',
+      blocks:[blk('c_subhero', { img:MD('hero1'), en:'CONTACT', t:'상담 신청 · 오시는 길', d:'원장님 치과로 직접 찾아뵙고 상담합니다', crumb:'HOME  >  상담 신청  >  상담 신청 · 오시는 길' }), blk('c_location', { lab:'CONTACT', t:'상담 신청 · 오시는 길' })] }
+  ];
+  c.site.nav = [
+    { label:'회사 소개', href:'p:pg-about', children:[] },
+    { label:'서비스', href:'p:pg-web', children:[['홈페이지 제작','web'],['SEO · AEO · GEO 관리','seo'],['1년 무상 관리','care']].map(([label,p]) => ({ label, href:'p:pg-'+p, children:[] })) },
+    { label:'제작 안내', href:'p:pg-process', children:[['제작 과정 · 계약','process'],['제작 사례','portfolio'],['무료 진단','diagnosis'],['자주 묻는 질문','faq']].map(([label,p]) => ({ label, href:'p:pg-'+p, children:[] })) },
+    { label:'상담 신청', href:'p:pg-contact', children:[] }
+  ];
+  return c;
+}
+const MD_STEPS = [
+  ['첫 미팅','원장님의 니즈와 강조하고 싶은 진료, 보유한 사진 · 자료를 정확히 파악합니다.'],
+  ['구상 · 포트폴리오','전체 구성을 잡고 원장님 치과에 맞춘 포트폴리오로 보여드립니다.'],
+  ['계약 · 착수금 50%','계약 시 총 금액의 50%만 착수금으로 받고 제작을 시작합니다.'],
+  ['첫 시안 1주일','계약 후 1주일이면 첫 시안을 확인하실 수 있습니다.'],
+  ['수정 · 익일 확인','수정 후 확인은 다음 날 가능합니다 (수정 내용에 따라 달라질 수 있습니다).'],
+  ['오픈 · 1년 관리','도메인을 연결해 오픈하고, 1년 동안 문구 · 사진 수정은 무료입니다.']
+].map(([t,d]) => ({ t, d }));
+const MD_QA = [
+  ['검색','홈페이지는 비쌀수록 검색에 잘 나오나요?','검색 노출은 가격보다 구조가 좌우합니다. 페이지마다 검색 제목 · 설명, 구조화 데이터, 사이트맵을 갖추었는지가 먼저입니다.','seo'],
+  ['제작 기간','홈페이지 하나 만드는 데 몇 달씩 걸리지 않나요?','첫 미팅에서 필요한 자료를 미리 확인하기 때문에 첫 시안은 1주일 후에 보실 수 있습니다. 빠르면 1주일 만에 완성됩니다.','process'],
+  ['AI 검색','요즘 환자들이 AI 검색으로도 치과를 찾던데요?','AI가 읽기 쉬운 구조(자주 묻는 질문, 치과 정보 구조화, llms.txt)로 만들어 답변에 인용될 가능성을 높입니다. 노출을 보장하지는 않지만 준비된 홈페이지와 아닌 홈페이지의 차이는 큽니다.','seo'],
+  ['관리 비용','만들고 나면 수정할 때마다 비용이 들지 않나요?','오픈 후 1년 동안 문구 · 사진 수정은 무료입니다. 새 페이지 추가와 디자인 전면 변경만 별도로 안내드립니다.','care'],
+  ['의료광고','의료광고법 때문에 어디까지 써도 되는지 모르겠어요','가격 · 이벤트, 최상급 표현, 치료 후기처럼 문제가 되기 쉬운 표현을 제작 단계에서 함께 점검합니다.','web'],
+  ['자료','사진이나 자료가 거의 없는데 가능할까요?','첫 미팅에서 보유 자료를 확인하고, 필요한 원내 사진 촬영 범위를 함께 정합니다.','process']
+];
+const MD_CHECK = [
+  ['검색','치과 이름으로 검색하면 블로그나 플랫폼만 보이나요?','홈페이지가 검색엔진에 제대로 등록되지 않았거나 페이지 정보가 비어 있을 수 있습니다.'],
+  ['페이지','진료 과목이 한 페이지에 모두 모여 있나요?','진료 과목마다 개별 페이지가 있어야 각 진료 키워드로 검색될 수 있습니다.'],
+  ['모바일','휴대폰에서 글씨가 작거나 버튼을 누르기 어렵나요?','방문자 대부분은 모바일로 들어옵니다. 모바일 화면이 불편하면 바로 이탈합니다.'],
+  ['정보','진료시간이나 주소가 블로그 · 플랫폼과 다르게 적혀 있나요?','AI 검색은 여러 곳의 정보를 비교합니다. 정보가 다르면 신뢰도가 떨어집니다.'],
+  ['수정','문구 하나 고치는 데 며칠씩 걸리고 비용이 드나요?','관리가 어려운 홈페이지는 금방 오래된 정보로 남게 됩니다.'],
+  ['상담','홈페이지에서 바로 상담을 신청할 수 없나요?','관심이 생긴 순간 연락할 방법이 보여야 상담으로 이어집니다.']
+];
+const MD_FAQ = [
+  ['제작 기간은 얼마나 걸리나요?','계약 후 1주일이면 첫 시안을 확인하실 수 있고, 수정 후 확인은 다음 날 가능합니다. 빠르면 1주일 만에 완성됩니다. 수정 내용에 따라 일정은 달라질 수 있습니다.'],
+  ['착수금은 얼마인가요?','계약 시 총 금액의 50%를 착수금으로 받고 제작을 시작합니다.'],
+  ['1년 무상 관리에는 무엇이 포함되나요?','문구 · 사진 교체, 진료시간과 연락처 변경, 기존 페이지 내용 보완이 포함됩니다. 새 페이지 추가와 디자인 전면 변경은 제외됩니다.'],
+  ['1년이 지나면 수정 비용은 어떻게 되나요?','작업량에 따라 비용이 발생하며, 작업 전에 먼저 안내드린 뒤 진행합니다.'],
+  ['매년 드는 비용이 있나요?','홈페이지 연장 비용으로 매년 5만원이 발생하며, 도메인 연장 비용이 포함되어 있습니다.'],
+  ['사진이 없어도 제작할 수 있나요?','첫 미팅에서 보유 자료를 확인하고, 필요한 원내 사진 촬영 범위를 함께 정합니다.'],
+  ['기존 홈페이지 주소를 그대로 쓸 수 있나요?','네. 기존 도메인을 연결하고 예전 주소로 들어온 방문자도 새 페이지로 이어지도록 설정합니다.']
+];
+SEED.push({ theme:'luxe', title:'08 모두의마케팅 (치과 홈페이지 제작사)', once:'modoo', build: modooContent });
 </script>
 <script>
 (async function(){
